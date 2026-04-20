@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cosmo Club Paris — Site Web
 
-## Getting Started
+Bar à cocktails & barista événementiel à Paris. Site Next.js 15 premium avec système d'administration pour gérer les images.
 
-First, run the development server:
+## 🚀 Démarrage rapide
 
+### Installation locale
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Puis ouvre [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Admin
+**URL** : `http://localhost:3000/admin`  
+**Mot de passe** : `admin2024` (à changer en production)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Structure
 
-## Learn More
+```
+/app
+  /(site)           # Pages publiques
+  /admin            # Interface d'administration
+  /api/admin        # API pour gérer les images
 
-To learn more about Next.js, take a look at the following resources:
+/components         # Composants React
+/public
+  /brand/ai         # Images du site
+  images-config.json # Configuration des images
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+/lib                # Utilitaires et contenu
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ⚙️ Configuration
 
-## Deploy on Vercel
+### Variables d'environnement
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Crée un fichier `.env.local` :
+```env
+NEXT_PUBLIC_ADMIN_PASSWORD=ton_mot_de_passe
+ADMIN_PASSWORD=ton_mot_de_passe
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🖼️ Gestion des images
+
+### Configuration
+Le fichier `/public/images-config.json` contient les métadonnées :
+- **title** : Nom de l'image
+- **path** : Chemin dans `/public`
+- **orientation** : `portrait` / `landscape` / `square`
+- **section** : Catégorie
+
+### Ajouter une image
+1. Dépose le fichier dans `/public/brand/ai/`
+2. Ajoute une entrée dans `images-config.json`
+3. Gère l'orientation depuis `/admin`
+
+## 🛠️ Tech Stack
+
+- **Framework** : Next.js 15
+- **Styling** : Tailwind CSS
+- **Animations** : Framer Motion
+- **UI** : shadcn/ui
+- **Fonts** : Geist, Geist Mono
+
+## 📝 Pages
+
+- `/` — Accueil
+- `/bar-a-cocktails` — Bar à cocktails
+- `/barista` — Barista & lattes
+- `/concept` — Concept & manifeste
+- `/evenements` — Événements & galerie
+- `/contact` — Formulaire de contact
+- `/admin` — Gestion des images
+
+## 🔐 Admin
+
+### Fonctionnalités
+✅ Voir toutes les images par page  
+✅ Modifier l'orientation  
+✅ Prévisualiser en temps réel  
+✅ Sauvegarder les changements  
+
+### Authentification
+- Simple mot de passe
+- Variables d'env sur Vercel
+
+## 🚀 Déployer sur Vercel
+
+### 1. Créer un repo GitHub
+```bash
+git remote add origin https://github.com/[TON_USERNAME]/cosmo-club.git
+git push -u origin main
+```
+
+### 2. Connecter Vercel
+1. Va sur [vercel.com](https://vercel.com)
+2. Clique "Add New..." → "Project"
+3. Sélectionne ton repo GitHub
+4. Vercel détecte automatiquement Next.js
+
+### 3. Ajouter variables d'env
+Dans Vercel → Project Settings → Environment Variables :
+```
+NEXT_PUBLIC_ADMIN_PASSWORD = ton_mot_de_passe
+ADMIN_PASSWORD = ton_mot_de_passe
+```
+
+### 4. Déployer
+- Clique "Deploy"
+- Chaque push sur `main` redéploie automatiquement
+- URL : `https://cosmo-club.vercel.app`
+
+---
+
+**Cosmo Club Paris** — Là où les cocktails deviennent des œuvres liquides.
