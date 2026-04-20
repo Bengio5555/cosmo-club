@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import { join } from "path";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -24,14 +24,12 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    const body = await req.json();
-    await writeFile(CONFIG_PATH, JSON.stringify(body, null, 2));
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to update config" },
-      { status: 500 }
-    );
-  }
+  // On Vercel, filesystem is read-only, so we can't update images-config.json
+  // Images are now stored in Vercel Blob instead
+  return NextResponse.json({
+    success: false,
+    error: "Configuration changes are not persisted on Vercel (read-only filesystem)",
+    message: "Uploaded images are stored in Vercel Blob. To delete images, use the image proxy.",
+    note: "Static images in images-config.json cannot be modified. Only new uploads to Blob can be managed."
+  }, { status: 400 });
 }

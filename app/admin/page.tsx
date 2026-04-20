@@ -216,12 +216,48 @@ export default function AdminPage() {
 
   const deleteImage = async (page: string, key: string) => {
     if (!config || !window.confirm("Supprimer cette image?")) return;
-    const updated = JSON.parse(JSON.stringify(config));
-    delete updated.pages[page][key];
-    setConfig(updated);
-    await saveConfig(updated);
-    setMessage("✅ Image supprimée");
-    setTimeout(() => setMessage(""), 2000);
+
+    const imageData = config.pages[page][key];
+    const isUploadedImage = imageData?.path?.includes("/api/admin/image-proxy");
+
+    if (!isUploadedImage) {
+      setMessage("❌ Les images statiques ne peuvent pas être supprimées (utilisez le site pour les modifier)");
+      return;
+    }
+
+    // Delete uploaded image from Blob
+    try {
+      // Extract blob URL from proxy URL
+      const proxyUrl = imageData.path;
+      const urlParam = new URLSearchParams(proxyUrl.split("?")[1]).get("url");
+
+      if (!urlParam) {
+        setMessage("❌ Impossible de supprimer: URL invalide");
+        return;
+      }
+
+      const deleteRes = await fetch("/api/admin/delete-image", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password,
+        },
+        body: JSON.stringify({ url: urlParam }),
+      });
+
+      if (deleteRes.ok) {
+        const updated = JSON.parse(JSON.stringify(config));
+        delete updated.pages[page][key];
+        setConfig(updated);
+        setMessage("✅ Image supprimée!");
+        setTimeout(() => setMessage(""), 2000);
+      } else {
+        const err = await deleteRes.json();
+        setMessage(`❌ Erreur: ${err.error}`);
+      }
+    } catch (err) {
+      setMessage("❌ Erreur de suppression");
+    }
   };
 
   const saveConfig = async (data: Config) => {
@@ -240,7 +276,9 @@ export default function AdminPage() {
         setMessage("✅ Sauvegardé!");
         setTimeout(() => setMessage(""), 2000);
       } else {
-        setMessage("❌ Erreur de sauvegarde");
+        const errorData = await res.json().catch(() => ({}));
+        const errorMsg = errorData.message || "Erreur de sauvegarde (Vercel filesystem read-only)";
+        setMessage(`❌ ${errorMsg}`);
       }
     } catch (err) {
       setMessage("❌ Erreur réseau");
