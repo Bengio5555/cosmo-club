@@ -1,0 +1,108 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "motion/react";
+import { SplitText } from "@/components/motion/SplitText";
+import heroBarImg from "@/public/brand/ai/hero-bar.png";
+
+export function BarHero() {
+  return (
+    <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
+      {/* backdrop image */}
+      <div aria-hidden className="absolute inset-0 -z-20">
+        <Image
+          src={heroBarImg}
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          className="object-cover object-center"
+        />
+        {/* léger gradient pour readabilité du texte côté gauche */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(237,227,201,0.55) 0%, rgba(237,227,201,0.15) 50%, transparent 100%)",
+          }}
+        />
+      </div>
+
+      <div className="vignette absolute inset-0 -z-10" aria-hidden />
+
+      {/* side labels */}
+      <div className="pointer-events-none absolute inset-y-0 left-6 hidden items-center md:flex">
+        <p className="eyebrow rotate-180 [writing-mode:vertical-rl]">Carte · Shots · Bottles · Bars</p>
+      </div>
+
+      {/* content */}
+      <div className="relative z-10 flex h-full flex-col justify-center px-6 pt-24 md:px-16">
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 1, ease: [0.19, 1, 0.22, 1] }}
+          className="eyebrow mb-8"
+        >
+          <span className="rule" />Offre signature · Bar à cocktails
+        </motion.p>
+
+        <h1 className="font-display text-[13vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[12vw] md:text-[9vw]">
+          <SplitText text="Mixologie" as="span" className="block" delay={0.3} />
+          <span className="block">
+            <SplitText
+              text="événementielle."
+              as="span"
+              className="font-accent italic text-[color:var(--color-grenat)]"
+              delay={0.9}
+            />
+          </span>
+        </h1>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.7, duration: 1, ease: [0.19, 1, 0.22, 1] }}
+          className="mt-10 max-w-2xl"
+        >
+          <p className="text-lg leading-relaxed text-[color:var(--color-espresso)]/80 md:text-xl">
+            Quatre cartes, un seul principe : chaque verre doit valoir le coup d'œil, et mériter qu'on en reparle le lendemain. Classiques exécutés sans compromis, relectures signatures, toppings premium, créations écrites pour vous.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2, duration: 1, ease: [0.19, 1, 0.22, 1] }}
+          className="mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-center"
+        >
+          <Link
+            href="#cartes"
+            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[color:var(--color-grenat)] px-8 py-4 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-bone)] transition-colors duration-500 hover:bg-[color:var(--color-grenat-glow)]"
+          >
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-[color:var(--color-or)]/30 to-transparent transition-transform duration-[1.3s] ease-[var(--ease-silk)] group-hover:translate-x-full" />
+            <span className="relative">Parcourir les cartes</span>
+            <span className="relative h-[1px] w-6 bg-current transition-all duration-500 group-hover:w-10" />
+          </Link>
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-or)]"
+          >
+            <span className="h-[1px] w-6 bg-current" />
+            Demander un devis
+          </Link>
+        </motion.div>
+
+        {/* numeric anchors */}
+        <div className="pointer-events-none absolute bottom-10 right-6 hidden flex-col items-end gap-1 md:flex md:right-10">
+          {["Classico", "Cosmo", "Émotion", "Création"].map((n, i) => (
+            <div key={n} className="flex items-center gap-3 text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/40">
+              <span className="font-display text-[color:var(--color-or)]/70">0{i + 1}</span>
+              <span>{n}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

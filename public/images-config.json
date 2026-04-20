@@ -1,0 +1,108 @@
+{
+  "pages": {
+    "home": {
+      "hero": {
+        "title": "Hero Home",
+        "path": "/brand/ai/hero-home.png",
+        "orientation": "landscape",
+        "section": "Hero"
+      }
+    },
+    "bar-a-cocktails": {
+      "hero": {
+        "title": "Hero Bar",
+        "path": "/brand/ai/hero-bar.png",
+        "orientation": "landscape",
+        "section": "Hero"
+      }
+    },
+    "barista": {
+      "hero": {
+        "title": "Hero Barista",
+        "path": "/brand/ai/hero-barista.png",
+        "orientation": "landscape",
+        "section": "Hero"
+      }
+    },
+    "personnalisation": {
+      "glacons": {
+        "title": "Glaçons",
+        "path": "/brand/ai/glaçons.png",
+        "orientation": "square",
+        "section": "Personnalisation"
+      },
+      "pastilles": {
+        "title": "Pastilles",
+        "path": "/brand/ai/pastilles.png",
+        "orientation": "square",
+        "section": "Personnalisation"
+      }
+    },
+    "products": {
+      "bottle-1L": {
+        "title": "Bouteille 1L",
+        "path": "/brand/ai/bottle-1L.png",
+        "orientation": "portrait",
+        "section": "Produits"
+      },
+      "bottle-20cl": {
+        "title": "Bouteille 20cl",
+        "path": "/brand/ai/bottle-20cl.png",
+        "orientation": "portrait",
+        "section": "Produits"
+      },
+      "bottle-50cl": {
+        "title": "Bouteille 50cl",
+        "path": "/brand/ai/bottle-50cl.png",
+        "orientation": "portrait",
+        "section": "Produits"
+      }
+    },
+    "gallery": {
+      "bento-bar": {
+        "title": "Bento Bar",
+        "path": "/brand/ai/bento-bar.png",
+        "orientation": "portrait",
+        "section": "Galerie"
+      },
+      "bento-barista": {
+        "title": "Bento Barista",
+        "path": "/brand/ai/bento-barista.png",
+        "orientation": "portrait",
+        "section": "Galerie"
+      },
+      "gallery-event": {
+        "title": "Galerie Événement",
+        "path": "/brand/ai/gallery-event.png",
+        "orientation": "portrait",
+        "section": "Galerie"
+      }
+    },
+    "lattes": {
+      "latte-matcha": {
+        "title": "Matcha Latte",
+        "path": "/brand/ai/latte-matcha.png",
+        "orientation": "square",
+        "section": "Lattes"
+      },
+      "latte-ube": {
+        "title": "Ube Latte",
+        "path": "/brand/ai/latte-ube.png",
+        "orientation": "square",
+        "section": "Lattes"
+      },
+      "latte-blue": {
+        "title": "Blue Latte",
+        "path": "/brand/ai/latte-blue.png",
+        "orientation": "square",
+        "section": "Lattes"
+      },
+      "latte-golden": {
+        "title": "Golden Latte",
+        "path": "/brand/ai/latte-golden.png",
+        "orientation": "square",
+        "section": "Lattes"
+      }
+    }
+  }
+}

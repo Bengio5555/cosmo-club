@@ -1,0 +1,125 @@
+import type { Metadata } from "next";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { DevisWizard } from "@/components/form/DevisWizard";
+import { site } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Devis & contact",
+  description:
+    "Demandez un devis pour votre événement — mariage, corporate, soirée privée. Cosmo Club Paris, bar à cocktails et barista événementiel.",
+};
+
+export default function Page() {
+  return (
+    <>
+      <PageHeader
+        eyebrow="Prenons rendez-vous"
+        title="Parlons de votre"
+        italicWord="événement."
+        description="Quatre questions, deux minutes. Nous revenons sous 48h avec une proposition sur-mesure, pensée pour votre moment."
+      />
+
+      <section className="relative bg-[color:var(--color-ink-soft)] pb-32 pt-6 md:pb-48">
+        <div className="mx-auto grid max-w-[1400px] gap-10 px-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:gap-16 md:px-10">
+          <DevisWizard />
+          <aside className="space-y-10 text-[color:var(--color-bone)]/80 md:pl-6">
+            <div>
+              <p className="eyebrow"><span className="rule" />Coordonnées</p>
+              <div className="mt-6 space-y-5">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                    Adresse
+                  </p>
+                  <p className="mt-1 font-display text-xl text-[color:var(--color-cream)]">
+                    {site.address.city}
+                  </p>
+                  <p className="text-sm text-[color:var(--color-bone)]/60">
+                    {site.address.detail}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                    Email
+                  </p>
+                  <a
+                    href={`mailto:${site.email}`}
+                    className="mt-1 block font-display text-lg text-[color:var(--color-cream)] transition-colors hover:text-[color:var(--color-or)]"
+                  >
+                    {site.email}
+                  </a>
+                </div>
+
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                    Téléphone
+                  </p>
+                  <a
+                    href={`tel:${site.phone}`}
+                    className="mt-1 block font-display text-lg text-[color:var(--color-cream)] transition-colors hover:text-[color:var(--color-or)]"
+                  >
+                    {site.phoneDisplay}
+                  </a>
+                </div>
+
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                    Instagram
+                  </p>
+                  <a
+                    href={site.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-flex items-center gap-2 font-display text-lg text-[color:var(--color-cream)] hover:text-[color:var(--color-or)]"
+                  >
+                    {site.instagramHandle} <span aria-hidden>↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="hairline" />
+
+            <div>
+              <p className="eyebrow"><span className="rule" />Horaires</p>
+              <dl className="mt-6 space-y-3 text-sm">
+                <div className="flex items-baseline justify-between gap-4 border-b border-[color:var(--color-ash)]/60 pb-3">
+                  <dt className="text-[color:var(--color-bone)]/60">Lun — Ven</dt>
+                  <dd>10h — 19h</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-4 border-b border-[color:var(--color-ash)]/60 pb-3">
+                  <dt className="text-[color:var(--color-bone)]/60">Événements</dt>
+                  <dd>7j/7</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-4">
+                  <dt className="text-[color:var(--color-bone)]/60">Réponse devis</dt>
+                  <dd>Sous 48h</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="hairline" />
+
+            <div>
+              <p className="eyebrow"><span className="rule" />Ce qu'on propose</p>
+              <ul className="mt-6 space-y-2 text-sm">
+                {[
+                  "Bar à cocktails signature",
+                  "Stands barista & latte art",
+                  "Cocktails en bouteille",
+                  "Juice bar & mocktails",
+                  "Création sur-mesure",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3">
+                    <span className="h-[4px] w-[4px] rounded-full bg-[color:var(--color-or)]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </>
+  );
+}

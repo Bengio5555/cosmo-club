@@ -1,0 +1,167 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { site } from "@/lib/site";
+import heroHomeImg from "@/public/brand/ai/hero-home.png";
+
+export function LiquidHero() {
+  const reduce = useReducedMotion();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const tryPlay = () => {
+      v.play().catch(() => {
+        // autoplay blocked; remain paused, fallback poster is visible
+      });
+    };
+    if (v.readyState >= 3) tryPlay();
+    else v.addEventListener("canplay", tryPlay, { once: true });
+    return () => v.removeEventListener("canplay", tryPlay);
+  }, []);
+
+  return (
+    <section className="relative isolate h-[100svh] min-h-[680px] w-full overflow-hidden bg-[color:var(--color-cream-paper)]">
+      {/* ─── Background video (with photo fallback) ─── */}
+      <div aria-hidden className="absolute inset-0 -z-20">
+        {reduce ? (
+          <Image
+            src={heroHomeImg}
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover object-center"
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            poster={heroHomeImg.src}
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          >
+            <source src="/brand/ai/hero-home.mp4" type="video/mp4" />
+          </video>
+        )}
+      </div>
+
+      {/* Gradient overlay for text readability */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(237,227,201,0.85) 0%, rgba(237,227,201,0.35) 30%, rgba(237,227,201,0.15) 60%, rgba(237,227,201,0.45) 100%)",
+        }}
+      />
+
+      {/* ─── Side eyebrow labels (desktop only) ─── */}
+      <div className="pointer-events-none absolute inset-y-0 left-6 hidden items-center md:flex">
+        <p className="eyebrow rotate-180 [writing-mode:vertical-rl]">
+          Paris&nbsp;8 · Sur&nbsp;rendez-vous
+        </p>
+      </div>
+      <div className="pointer-events-none absolute inset-y-0 right-6 hidden items-center md:flex">
+        <p className="eyebrow [writing-mode:vertical-rl]">Édition&nbsp;MMXXVI</p>
+      </div>
+
+      {/* ─── Content ─── */}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 pt-16 text-center md:px-10">
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 1, ease: [0.19, 1, 0.22, 1] }}
+          className="eyebrow mb-8 md:mb-10"
+        >
+          <span className="rule" />Cocktails · Barista · Événementiel
+        </motion.p>
+
+        {/* Logo wordmark (accessible h1) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 1.1, ease: [0.19, 1, 0.22, 1] }}
+          className="relative"
+        >
+          <h1 className="sr-only">Cosmo Club Paris</h1>
+          <p
+            aria-hidden
+            className="font-display text-[14vw] font-medium leading-[0.9] tracking-[0.02em] text-[color:var(--color-grenat)] sm:text-[12vw] md:text-[9.5vw] lg:text-[8vw]"
+          >
+            Cosmo <span className="font-accent italic text-[color:var(--color-grenat)]/85">Club</span>
+          </p>
+          <div
+            aria-hidden
+            className="mx-auto mt-2 h-px w-40 bg-gradient-to-r from-transparent via-[color:var(--color-or-deep)]/80 to-transparent"
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 1.1, ease: [0.19, 1, 0.22, 1] }}
+          className="mt-8 max-w-xl"
+        >
+          <p className="font-display text-lg italic tracking-wide text-[color:var(--color-grenat)] md:text-xl">
+            « {site.baseline} »
+          </p>
+          <p className="mt-4 text-[13px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
+            {site.tagline}
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.4, duration: 1.1, ease: [0.19, 1, 0.22, 1] }}
+          className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
+        >
+          <Link
+            href="/contact"
+            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[color:var(--color-grenat)] px-8 py-4 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-bone)] transition-colors duration-500 hover:bg-[color:var(--color-grenat-glow)]"
+          >
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-[color:var(--color-or)]/30 to-transparent transition-transform duration-[1.3s] ease-[var(--ease-silk)] group-hover:translate-x-full" />
+            <span className="relative">Demander un devis</span>
+            <span className="relative h-[1px] w-6 bg-current transition-all duration-500 group-hover:w-10" />
+          </Link>
+          <Link
+            href="#univers"
+            className="inline-flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]"
+          >
+            <span className="h-[1px] w-6 bg-current" />
+            Découvrir nos offres
+          </Link>
+        </motion.div>
+      </div>
+
+      {/* ─── Scroll indicator ─── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.2, duration: 1.4 }}
+        className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-center"
+      >
+        <span className="eyebrow block mb-2 text-[color:var(--color-espresso)]/60">
+          Scroll
+        </span>
+        <span className="relative mx-auto block h-10 w-px overflow-hidden bg-[color:var(--color-ash)]/40">
+          <span className="absolute top-0 left-0 block h-4 w-px bg-[color:var(--color-grenat)] [animation:scroll-hint_2.4s_var(--ease-silk)_infinite]" />
+        </span>
+        <style>{`
+          @keyframes scroll-hint {
+            0%   { transform: translateY(-100%); }
+            60%  { transform: translateY(150%); }
+            100% { transform: translateY(150%); }
+          }
+        `}</style>
+      </motion.div>
+    </section>
+  );
+}
