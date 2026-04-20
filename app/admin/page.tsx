@@ -65,7 +65,10 @@ export default function AdminPage() {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("page", selectedPage);
+    formData.append("imagePath", `/brand/ai/${file.name}`);
+    formData.append("title", file.name.replace(/\.[^.]+$/, ""));
+    formData.append("section", selectedPage);
+    formData.append("orientation", "landscape");
 
     try {
       const res = await fetch("/api/admin/upload", {
@@ -76,16 +79,22 @@ export default function AdminPage() {
         body: formData,
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        const data = await res.json();
         setMessage("✅ Image uploadée avec succès!");
         await loadConfig();
         setTimeout(() => setMessage(""), 3000);
       } else {
-        setMessage("❌ Erreur lors de l'upload");
+        // Show detailed error message
+        const errorMsg = data.error || "Erreur lors de l'upload";
+        const details = data.details ? ` - ${data.details}` : "";
+        const tokenInfo = data.tokenExists === false ? " [Token manquant]" : data.tokenExists === true ? " [Token OK]" : "";
+        setMessage(`❌ ${errorMsg}${details}${tokenInfo}`);
       }
     } catch (err) {
-      setMessage("❌ Erreur réseau");
+      const errorMsg = err instanceof Error ? err.message : "Erreur inconnue";
+      setMessage(`❌ Erreur réseau: ${errorMsg}`);
     } finally {
       setUploading(false);
       e.target.value = "";
