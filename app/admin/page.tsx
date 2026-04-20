@@ -317,6 +317,44 @@ export default function AdminPage() {
 
           {/* Main Content */}
           <div>
+            {/* Upload Zone */}
+            <div
+              style={{
+                marginBottom: "2rem",
+                padding: "2rem",
+                background: "rgba(185, 28, 28, 0.1)",
+                border: "2px dashed #b91c1c",
+                borderRadius: "0.75rem",
+                textAlign: "center",
+              }}
+            >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                style={{
+                  display: "none",
+                }}
+                id="file-input"
+              />
+              <label
+                htmlFor="file-input"
+                style={{
+                  display: "block",
+                  cursor: uploading ? "not-allowed" : "pointer",
+                  opacity: uploading ? 0.5 : 1,
+                }}
+              >
+                <p style={{ fontSize: "1.125rem", fontWeight: "bold", color: "white", margin: "0 0 0.5rem 0" }}>
+                  ⬆️ {uploading ? "Upload en cours..." : "Uploader une image"}
+                </p>
+                <p style={{ color: "#999", fontSize: "0.875rem", margin: 0 }}>
+                  {uploading ? "Patiente..." : "Clique ou glisse une image"}
+                </p>
+              </label>
+            </div>
+
             {/* Upload Info */}
             <div
               style={{
