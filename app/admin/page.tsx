@@ -700,9 +700,9 @@ export default function AdminPage() {
                         </div>
 
                         {/* Label Selector */}
-                        <div style={{ marginBottom: "1rem" }}>
-                          <p style={{ fontSize: "0.65rem", color: "#666", margin: "0 0 0.5rem 0", textTransform: "uppercase" }}>
-                            Tag
+                        <div style={{ marginBottom: "1rem", padding: "0.75rem", background: "rgba(185, 28, 28, 0.1)", borderRadius: "0.375rem", border: "1px solid rgba(185, 28, 28, 0.3)" }}>
+                          <p style={{ fontSize: "0.75rem", color: "#fca5a5", margin: "0 0 0.5rem 0", textTransform: "uppercase", fontWeight: "bold" }}>
+                            🏷️ Tag de l'image
                           </p>
                           <select
                             value={image.label || "Événement"}
@@ -710,18 +710,19 @@ export default function AdminPage() {
                             disabled={saving}
                             style={{
                               width: "100%",
-                              padding: "0.5rem",
+                              padding: "0.75rem",
                               borderRadius: "0.375rem",
-                              background: "rgba(255,255,255,0.1)",
-                              color: "white",
-                              border: "1px solid rgba(255,255,255,0.2)",
+                              background: "rgba(185, 28, 28, 0.2)",
+                              color: "#fca5a5",
+                              border: "2px solid rgba(185, 28, 28, 0.5)",
                               fontSize: "0.875rem",
+                              fontWeight: "bold",
                               cursor: saving ? "not-allowed" : "pointer",
                               boxSizing: "border-box",
                             }}
                           >
                             {LABEL_OPTIONS.map((label) => (
-                              <option key={label} value={label} style={{ background: "#1a1a1a", color: "white" }}>
+                              <option key={label} value={label} style={{ background: "#1a1a1a", color: "#fca5a5" }}>
                                 {label}
                               </option>
                             ))}
