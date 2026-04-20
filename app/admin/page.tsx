@@ -85,19 +85,24 @@ export default function AdminPage() {
           if (blobRes.ok) {
             const blobData = await blobRes.json();
 
-            // Add blob images directly to the selected page
-            if (blobData.images && blobData.images.length > 0 && selectedPage && data.pages[selectedPage]) {
+            // Add blob images to evenements page
+            if (blobData.images && blobData.images.length > 0) {
+              // Ensure evenements page exists
+              if (!data.pages.evenements) {
+                data.pages.evenements = {};
+              }
+
               blobData.images.forEach((img: any) => {
                 const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-").toLowerCase();
                 const proxyUrl = `/api/admin/image-proxy?url=${encodeURIComponent(img.url)}`;
 
                 // Only add if not already in config
-                if (!data.pages[selectedPage][key]) {
-                  data.pages[selectedPage][key] = {
+                if (!data.pages.evenements[key]) {
+                  data.pages.evenements[key] = {
                     title: img.filename.replace(/\.[^.]+$/, ""),
                     path: proxyUrl,
                     orientation: "landscape",
-                    section: selectedPage,
+                    section: "evenements",
                     label: "Événement" // Default label
                   };
                 }
