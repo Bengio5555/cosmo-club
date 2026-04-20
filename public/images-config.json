@@ -10,10 +10,16 @@
     },
     "bar-a-cocktails": {
       "hero": {
-        "title": "Hero Bar",
-        "path": "/brand/ai/hero-bar.png",
+        "title": "Hero Bar à Cocktails",
+        "path": "/brand/ai/hero-bar-cocktails.png",
         "orientation": "landscape",
         "section": "Hero"
+      },
+      "bento": {
+        "title": "Bento Bar à Cocktails",
+        "path": "/brand/ai/bento-bar-cocktails.png",
+        "orientation": "portrait",
+        "section": "Bento"
       }
     },
     "barista": {
@@ -22,6 +28,12 @@
         "path": "/brand/ai/hero-barista.png",
         "orientation": "landscape",
         "section": "Hero"
+      },
+      "bento": {
+        "title": "Bento Barista",
+        "path": "/brand/ai/bento-barista.png",
+        "orientation": "portrait",
+        "section": "Bento"
       }
     },
     "personnalisation": {
@@ -58,22 +70,24 @@
         "section": "Produits"
       }
     },
+    "evenements": {
+      "gallery-event": {
+        "title": "Événement Premium",
+        "path": "/brand/ai/gallery-event.png",
+        "orientation": "portrait",
+        "section": "Galerie Événements"
+      }
+    },
     "gallery": {
       "bento-bar": {
         "title": "Bento Bar",
-        "path": "/brand/ai/bento-bar.png",
+        "path": "/brand/ai/bento-bar-cocktails.png",
         "orientation": "portrait",
         "section": "Galerie"
       },
       "bento-barista": {
         "title": "Bento Barista",
         "path": "/brand/ai/bento-barista.png",
-        "orientation": "portrait",
-        "section": "Galerie"
-      },
-      "gallery-event": {
-        "title": "Galerie Événement",
-        "path": "/brand/ai/gallery-event.png",
         "orientation": "portrait",
         "section": "Galerie"
       }
