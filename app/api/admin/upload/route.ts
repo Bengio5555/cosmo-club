@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
-import { readFile, writeFile } from "fs/promises";
-import { join } from "path";
 
 export async function POST(request: NextRequest) {
   try {
@@ -85,57 +83,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update images-config.json
-    try {
-      const configPath = join(process.cwd(), "public", "images-config.json");
-      const configContent = await readFile(configPath, "utf-8");
-      const config = JSON.parse(configContent);
-
-      // Extract page and section from imagePath
-      const pageMatch = imagePath.match(/\/(\w+)\//);
-      const page = pageMatch ? pageMatch[1] : "custom";
-
-      // Initialize page structure if needed
-      if (!config.pages[page]) {
-        config.pages[page] = {};
-      }
-
-      // Add or update image entry
-      const imageKey = file.name.replace(/\.[^.]+$/, "");
-      config.pages[page][imageKey] = {
+    // Return success - Blob stores image, admin will fetch from list API
+    return NextResponse.json({
+      success: true,
+      data: {
+        url: blobUrl,
+        filename: filename,
         title: title || file.name.replace(/\.[^.]+$/, ""),
-        path: `/brand/ai/${filename}`,
-        orientation: orientation,
         section: section || "Custom",
-        blobUrl: blobUrl
-      };
-
-      // Save updated config
-      await writeFile(configPath, JSON.stringify(config, null, 2));
-      console.log("Config updated successfully");
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          url: blobUrl,
-          path: `/brand/ai/${filename}`,
-          title: title || file.name.replace(/\.[^.]+$/, ""),
-          section: section || "Custom",
-          orientation: orientation,
-        }
-      });
-    } catch (configError) {
-      console.error("Config update error:", configError);
-      // Upload succeeded but config update failed
-      return NextResponse.json({
-        success: true,
-        warning: "Image uploaded but config update failed",
-        data: {
-          url: blobUrl,
-          configError: configError instanceof Error ? configError.message : String(configError)
-        }
-      });
-    }
+        orientation: orientation,
+      }
+    });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
