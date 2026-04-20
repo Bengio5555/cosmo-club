@@ -71,6 +71,8 @@ export default function AdminPage() {
     formData.append("orientation", "landscape");
 
     try {
+      console.log("Starting upload...", { file: file.name, page: selectedPage });
+
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: {
@@ -79,9 +81,20 @@ export default function AdminPage() {
         body: formData,
       });
 
-      const data = await res.json();
+      console.log("Upload response:", { status: res.status, ok: res.ok });
+
+      let data;
+      try {
+        data = await res.json();
+        console.log("Response data:", data);
+      } catch (parseErr) {
+        console.error("Failed to parse JSON response:", parseErr);
+        setMessage(`❌ Erreur de réponse API (non-JSON): ${res.status} ${res.statusText}`);
+        return;
+      }
 
       if (res.ok) {
+        console.log("Upload successful!");
         setMessage("✅ Image uploadée avec succès!");
         await loadConfig();
         setTimeout(() => setMessage(""), 3000);
@@ -89,11 +102,14 @@ export default function AdminPage() {
         // Show detailed error message
         const errorMsg = data.error || "Erreur lors de l'upload";
         const details = data.details ? ` - ${data.details}` : "";
-        const tokenInfo = data.tokenExists === false ? " [Token manquant]" : data.tokenExists === true ? " [Token OK]" : "";
-        setMessage(`❌ ${errorMsg}${details}${tokenInfo}`);
+        const tokenInfo = data.tokenExists === false ? " [❌ Token manquant]" : data.tokenExists === true ? " [✅ Token OK]" : "";
+        const fullMsg = `❌ ${errorMsg}${details}${tokenInfo}`;
+        console.error("Upload error:", fullMsg, data);
+        setMessage(fullMsg);
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Erreur inconnue";
+      console.error("Upload catch error:", err);
       setMessage(`❌ Erreur réseau: ${errorMsg}`);
     } finally {
       setUploading(false);
