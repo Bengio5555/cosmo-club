@@ -18,7 +18,7 @@ const defaultTiles = [
   { h: 310, src: heroBarImg, label: "Lancement", object: "left" },
   { h: 540, src: bentoBarImg, label: "Corporate", object: "bottom" },
   { h: 360, src: bentoBaristaImg, label: "Privé", object: "center" },
-] as const;
+];
 
 export function EventsGallery() {
   const [tiles, setTiles] = useState(defaultTiles);
