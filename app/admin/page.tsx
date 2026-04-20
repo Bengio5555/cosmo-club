@@ -159,8 +159,12 @@ export default function AdminPage() {
           justifyContent: "center",
           padding: "1rem",
           fontFamily: "system-ui, -apple-system, sans-serif",
+          cursor: "auto",
         }}
       >
+        <style>{`
+          html, body, div { cursor: auto !important; }
+        `}</style>
         <form
           onSubmit={handleLogin}
           style={{
@@ -239,10 +243,11 @@ export default function AdminPage() {
   return (
     <div style={{ minHeight: "100vh", background: "#000", padding: "2rem", fontFamily: "system-ui, -apple-system, sans-serif", cursor: "auto" }}>
       <style>{`
-        * { cursor: auto !important; }
+        html, body, * { cursor: auto !important; }
         button { cursor: pointer !important; }
         input { cursor: text !important; }
         label { cursor: pointer !important; }
+        a { cursor: pointer !important; }
       `}</style>
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         {/* Header */}
