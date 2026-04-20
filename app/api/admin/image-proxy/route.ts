@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { download } from "@vercel/blob";
 
 /**
  * Proxy endpoint to serve images from private Vercel Blob storage
@@ -18,22 +17,42 @@ export async function GET(request: NextRequest) {
 
     const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
     if (!blobToken) {
+      console.error("BLOB_READ_WRITE_TOKEN not set");
       return NextResponse.json(
         { error: "Blob token not configured" },
         { status: 500 }
       );
     }
 
-    // Download the blob
-    const blob = await download(url, {
-      token: blobToken,
+    console.log("Proxying image:", { url: url.substring(0, 50) + "..." });
+
+    // Fetch the blob directly with auth header
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${blobToken}`,
+      },
     });
 
+    if (!response.ok) {
+      console.error("Blob fetch failed:", response.status, response.statusText);
+      return NextResponse.json(
+        {
+          error: "Failed to fetch from Blob",
+          details: `${response.status} ${response.statusText}`,
+        },
+        { status: response.status }
+      );
+    }
+
+    // Get the response buffer
+    const buffer = await response.arrayBuffer();
+    const contentType = response.headers.get("content-type") || "image/png";
+
     // Return as image with proper headers
-    return new NextResponse(blob, {
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
-        "Content-Type": "image/png", // Adjust based on actual type
+        "Content-Type": contentType,
         "Cache-Control": "public, max-age=3600",
       },
     });
