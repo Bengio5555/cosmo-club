@@ -50,7 +50,8 @@ export const devisSchema = z.object({
     .number({ message: "Un nombre." })
     .int()
     .min(1, "Au moins un invité.")
-    .max(10000, "Impressionnant — contactez-nous directement."),
+    .max(10000, "Impressionnant — contactez-nous directement.")
+    .optional(),
   firstName: z.string().min(1, "Votre prénom."),
   lastName: z.string().min(1, "Votre nom."),
   email: z.string().email("Email invalide."),

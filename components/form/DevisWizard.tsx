@@ -20,14 +20,14 @@ export function DevisWizard() {
   const [direction, setDirection] = useState<1 | -1>(1);
 
   const form = useForm<DevisInput>({
-    resolver: zodResolver(devisSchema),
+    resolver: zodResolver(devisSchema) as any,
     mode: "onTouched",
     defaultValues: {
       eventType: undefined as unknown as DevisInput["eventType"],
       offer: undefined as unknown as DevisInput["offer"],
       date: "",
       location: "",
-      guests: undefined as unknown as number,
+      guests: undefined,
       firstName: "",
       lastName: "",
       email: "",
@@ -39,7 +39,7 @@ export function DevisWizard() {
 
   const goNext = async () => {
     const fields = stepFields[step];
-    const valid = await form.trigger(fields as (keyof DevisInput)[], { shouldFocus: true });
+    const valid = await form.trigger([...fields] as (keyof DevisInput)[], { shouldFocus: true });
     if (!valid) return;
     if (step < TOTAL_STEPS) {
       setDirection(1);
