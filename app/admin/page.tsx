@@ -29,12 +29,26 @@ export default function AdminPage() {
   useEffect(() => {
     const savedLogin = localStorage.getItem("adminLogin") === "true";
     const savedPassword = localStorage.getItem("adminPassword");
+    const savedPage = localStorage.getItem("selectedPage");
+
     if (savedLogin && savedPassword) {
       setIsLoggedIn(true);
       setPassword(savedPassword);
     }
+
+    if (savedPage) {
+      setSelectedPage(savedPage);
+    }
+
     setIsLoading(false);
   }, []);
+
+  // Save selectedPage to localStorage whenever it changes
+  useEffect(() => {
+    if (selectedPage) {
+      localStorage.setItem("selectedPage", selectedPage);
+    }
+  }, [selectedPage]);
 
   useEffect(() => {
     if (isLoggedIn && !config) {
@@ -69,10 +83,47 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/images");
       if (res.ok) {
         const data = await res.json();
+
+        // Also load images from Vercel Blob
+        try {
+          const blobRes = await fetch("/api/admin/blob-images", {
+            headers: { "x-admin-password": password }
+          });
+          if (blobRes.ok) {
+            const blobData = await blobRes.json();
+            // Add blob images to the config (in a "blob-uploads" section)
+            if (blobData.images && blobData.images.length > 0) {
+              if (!data.pages["blob-uploads"]) {
+                data.pages["blob-uploads"] = {};
+              }
+              blobData.images.forEach((img: any, idx: number) => {
+                const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-");
+                // Use proxy endpoint for private blob images
+                const proxyUrl = `/api/admin/image-proxy?url=${encodeURIComponent(img.url)}`;
+                data.pages["blob-uploads"][key] = {
+                  title: img.filename.replace(/\.[^.]+$/, ""),
+                  path: proxyUrl,
+                  orientation: "landscape",
+                  section: "Uploads"
+                };
+              });
+            }
+          }
+        } catch (err) {
+          console.log("Blob images load skipped:", err);
+        }
+
         setConfig(data);
         const pages = Object.keys(data.pages);
-        if (pages.length > 0) {
+
+        // If no page selected yet, choose first one
+        if (!selectedPage && pages.length > 0) {
           setSelectedPage(pages[0]);
+        }
+        // If blob-uploads has new images, switch to it to show uploaded images
+        else if (selectedPage && data.pages["blob-uploads"]?.["uploaded-0"]) {
+          // Optional: auto-switch to blob-uploads if user just uploaded
+          // setSelectedPage("blob-uploads");
         }
       }
     } catch (err) {
