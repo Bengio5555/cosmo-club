@@ -1,37 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-interface ImageConfig {
-  title: string;
-  path: string;
-  orientation: "portrait" | "landscape" | "square";
-  section: string;
-  label?: string;
-}
-
-const LABEL_OPTIONS = [
-  "Mariage",
-  "Corporate",
-  "Défilé",
-  "Privé",
-  "Lancement",
-  "Événement",
-] as const;
-
-interface Config {
-  pages: Record<string, Record<string, ImageConfig>>;
-}
+import { ImageConfig, Config, LABEL_OPTIONS } from "@/types/admin";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { ImageListPanel } from "@/components/admin/ImageListPanel";
+import { ImageDetailPanel } from "@/components/admin/ImageDetailPanel";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [config, setConfig] = useState<Config | null>(null);
   const [selectedPage, setSelectedPage] = useState<string>("");
+  const [selectedImageKey, setSelectedImageKey] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [editingKey, setEditingKey] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
   const [uploading, setUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -204,39 +186,34 @@ export default function AdminPage() {
     }
   };
 
-  const updateImageTitle = async (page: string, key: string, newTitle: string) => {
-    if (!config) return;
+  const handleTitleSave = async (newTitle: string) => {
+    if (!config || !selectedImageKey) return;
     const updated = JSON.parse(JSON.stringify(config));
-    updated.pages[page][key].title = newTitle;
-    setConfig(updated);
-    await saveConfig(updated);
-    setEditingKey(null);
-  };
-
-  const updateOrientation = async (
-    page: string,
-    key: string,
-    orientation: string
-  ) => {
-    if (!config) return;
-    const updated = JSON.parse(JSON.stringify(config));
-    updated.pages[page][key].orientation = orientation;
+    updated.pages[selectedPage][selectedImageKey].title = newTitle;
     setConfig(updated);
     await saveConfig(updated);
   };
 
-  const updateLabel = async (page: string, key: string, label: string) => {
-    if (!config) return;
+  const handleOrientationChange = async (orientation: string) => {
+    if (!config || !selectedImageKey) return;
     const updated = JSON.parse(JSON.stringify(config));
-    updated.pages[page][key].label = label;
+    updated.pages[selectedPage][selectedImageKey].orientation = orientation;
     setConfig(updated);
     await saveConfig(updated);
   };
 
-  const deleteImage = async (page: string, key: string) => {
-    if (!config || !window.confirm("Supprimer cette image?")) return;
+  const handleLabelChange = async (label: string) => {
+    if (!config || !selectedImageKey) return;
+    const updated = JSON.parse(JSON.stringify(config));
+    updated.pages[selectedPage][selectedImageKey].label = label;
+    setConfig(updated);
+    await saveConfig(updated);
+  };
 
-    const imageData = config.pages[page][key];
+  const handleDeleteImage = async () => {
+    if (!config || !selectedImageKey || !window.confirm("Supprimer cette image?")) return;
+
+    const imageData = config.pages[selectedPage][selectedImageKey];
     const isUploadedImage = imageData?.path?.includes("/api/admin/image-proxy");
 
     if (!isUploadedImage) {
@@ -266,8 +243,9 @@ export default function AdminPage() {
 
       if (deleteRes.ok) {
         const updated = JSON.parse(JSON.stringify(config));
-        delete updated.pages[page][key];
+        delete updated.pages[selectedPage][selectedImageKey];
         setConfig(updated);
+        setSelectedImageKey(null); // Deselect after delete
         setMessage("✅ Image supprimée!");
         setTimeout(() => setMessage(""), 2000);
       } else {
@@ -462,30 +440,25 @@ export default function AdminPage() {
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "2rem" }}>
-          {/* Sidebar */}
+        <div className="grid grid-cols-[220px_1fr] gap-6 mb-6">
+          {/* Sidebar - Page Navigation */}
           <div>
-            <h3 style={{ fontSize: "0.875rem", fontWeight: "bold", color: "#999", textTransform: "uppercase", marginBottom: "1rem" }}>
+            <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">
               Pages
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <div className="flex flex-col gap-2">
               {pages.map((page) => (
                 <button
                   key={page}
-                  onClick={() => setSelectedPage(page)}
-                  style={{
-                    textAlign: "left",
-                    padding: "0.75rem 1rem",
-                    borderRadius: "0.5rem",
-                    background: selectedPage === page ? "#b91c1c" : "rgba(255,255,255,0.05)",
-                    color: "white",
-                    border: "1px solid " + (selectedPage === page ? "#b91c1c" : "rgba(255,255,255,0.1)"),
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    fontWeight: selectedPage === page ? "600" : "400",
-                    transition: "all 0.2s",
-                    textTransform: "capitalize",
+                  onClick={() => {
+                    setSelectedPage(page);
+                    setSelectedImageKey(null); // Reset selection when changing pages
                   }}
+                  className={`text-left px-3 py-2 rounded text-sm font-medium transition ${
+                    selectedPage === page
+                      ? "bg-red-600 text-white border border-red-600"
+                      : "bg-gray-800 text-white border border-gray-700 hover:bg-gray-700"
+                  }`}
                 >
                   {page}
                 </button>
@@ -493,265 +466,44 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Main Content */}
+          {/* Main Content - Two Panel Layout */}
           <div>
-            {/* Upload Zone */}
-            <div
-              style={{
-                marginBottom: "2rem",
-                padding: "2rem",
-                background: "rgba(185, 28, 28, 0.1)",
-                border: "2px dashed #b91c1c",
-                borderRadius: "0.75rem",
-                textAlign: "center",
-              }}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                style={{
-                  display: "none",
-                }}
-                id="file-input"
-              />
-              <label
-                htmlFor="file-input"
-                style={{
-                  display: "block",
-                  cursor: uploading ? "not-allowed" : "pointer",
-                  opacity: uploading ? 0.5 : 1,
-                }}
-              >
-                <p style={{ fontSize: "1.125rem", fontWeight: "bold", color: "white", margin: "0 0 0.5rem 0" }}>
-                  ⬆️ {uploading ? "Upload en cours..." : "Uploader une image"}
-                </p>
-                <p style={{ color: "#999", fontSize: "0.875rem", margin: 0 }}>
-                  {uploading ? "Patiente..." : "Clique ou glisse une image"}
-                </p>
-              </label>
-            </div>
-
-            {/* Upload Info */}
-            <div
-              style={{
-                marginBottom: "2rem",
-                padding: "1.5rem",
-                background: "rgba(59, 130, 246, 0.1)",
-                border: "1px solid rgba(59, 130, 246, 0.5)",
-                borderRadius: "0.75rem",
-              }}
-            >
-              <p style={{ fontSize: "0.875rem", color: "#60a5fa", margin: "0 0 0.75rem 0", fontWeight: "bold" }}>
-                💡 Comment ajouter une image :
-              </p>
-              <ol style={{ fontSize: "0.8rem", color: "#999", margin: "0", paddingLeft: "1.25rem", lineHeight: "1.6" }}>
-                <li>Ajoute le fichier image à <code style={{ background: "rgba(0,0,0,0.5)", padding: "0.2rem 0.4rem", borderRadius: "0.25rem" }}>/public/brand/ai/</code></li>
-                <li>Commit et push sur GitHub</li>
-                <li>Vercel redéploie automatiquement</li>
-                <li>L'image apparaît ici - tu peux l'éditer</li>
-              </ol>
-            </div>
-
-            {/* Images Grid */}
-            <div>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", color: "white", marginBottom: "1.5rem", textTransform: "capitalize" }}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-white capitalize">
                 {selectedPage} ({Object.keys(currentPageData).length} images)
               </h2>
-
-              {Object.keys(currentPageData).length === 0 ? (
-                <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>
-                  Aucune image pour cette page
-                </p>
-              ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
-                  {Object.entries(currentPageData).map(([key, image]) => (
-                    <div
-                      key={key}
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "0.75rem",
-                        overflow: "hidden",
-                        transition: "all 0.2s",
-                      }}
-                    >
-                      {/* Image Preview */}
-                      <div
-                        style={{
-                          position: "relative",
-                          width: "100%",
-                          aspectRatio:
-                            image.orientation === "portrait"
-                              ? "3/4"
-                              : image.orientation === "landscape"
-                              ? "16/9"
-                              : "1/1",
-                          background: "#1a1a1a",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <img
-                          src={image.path}
-                          alt={image.title}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      </div>
-
-                      {/* Info & Controls */}
-                      <div style={{ padding: "1.25rem" }}>
-                        {/* Title Edit */}
-                        {editingKey === key ? (
-                          <div style={{ marginBottom: "1rem" }}>
-                            <input
-                              type="text"
-                              value={editingTitle}
-                              onChange={(e) => setEditingTitle(e.target.value)}
-                              style={{
-                                width: "100%",
-                                padding: "0.5rem",
-                                marginBottom: "0.5rem",
-                                borderRadius: "0.375rem",
-                                background: "rgba(255,255,255,0.1)",
-                                color: "white",
-                                border: "1px solid rgba(255,255,255,0.2)",
-                                fontSize: "0.875rem",
-                                boxSizing: "border-box",
-                              }}
-                            />
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                              <button
-                                onClick={() => updateImageTitle(selectedPage, key, editingTitle)}
-                                style={{
-                                  padding: "0.5rem",
-                                  background: "#22c55e",
-                                  color: "white",
-                                  border: "none",
-                                  borderRadius: "0.375rem",
-                                  cursor: "pointer",
-                                  fontSize: "0.75rem",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                ✅ Valider
-                              </button>
-                              <button
-                                onClick={() => setEditingKey(null)}
-                                style={{
-                                  padding: "0.5rem",
-                                  background: "rgba(255,255,255,0.1)",
-                                  color: "white",
-                                  border: "none",
-                                  borderRadius: "0.375rem",
-                                  cursor: "pointer",
-                                  fontSize: "0.75rem",
-                                }}
-                              >
-                                Annuler
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div style={{ marginBottom: "1rem" }}>
-                            <h3 style={{ fontSize: "1rem", fontWeight: "bold", color: "white", margin: "0 0 0.25rem 0", cursor: "pointer" }} onClick={() => { setEditingKey(key); setEditingTitle(image.title); }}>
-                              {image.title} ✏️
-                            </h3>
-                            <p style={{ fontSize: "0.75rem", color: "#999", margin: "0", textTransform: "uppercase" }}>
-                              {image.section}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Orientation Buttons */}
-                        <div style={{ marginBottom: "1rem" }}>
-                          <p style={{ fontSize: "0.65rem", color: "#666", margin: "0 0 0.5rem 0", textTransform: "uppercase" }}>
-                            Format
-                          </p>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.375rem" }}>
-                            {["landscape", "square", "portrait"].map((orient) => (
-                              <button
-                                key={orient}
-                                onClick={() => updateOrientation(selectedPage, key, orient)}
-                                disabled={saving}
-                                style={{
-                                  padding: "0.4rem 0.375rem",
-                                  fontSize: "0.65rem",
-                                  borderRadius: "0.3rem",
-                                  background:
-                                    image.orientation === orient
-                                      ? "#b91c1c"
-                                      : "rgba(255,255,255,0.05)",
-                                  color: "white",
-                                  border: "1px solid " + (image.orientation === orient ? "#b91c1c" : "rgba(255,255,255,0.1)"),
-                                  cursor: saving ? "not-allowed" : "pointer",
-                                  fontWeight: image.orientation === orient ? "600" : "400",
-                                  textTransform: "capitalize",
-                                }}
-                              >
-                                {orient === "landscape" ? "⬅️➡️" : orient === "portrait" ? "⬇️" : "⬜"}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Label Selector */}
-                        <div style={{ marginBottom: "1rem", padding: "0.75rem", background: "rgba(185, 28, 28, 0.1)", borderRadius: "0.375rem", border: "1px solid rgba(185, 28, 28, 0.3)" }}>
-                          <p style={{ fontSize: "0.75rem", color: "#fca5a5", margin: "0 0 0.5rem 0", textTransform: "uppercase", fontWeight: "bold" }}>
-                            🏷️ Tag de l'image
-                          </p>
-                          <select
-                            value={image.label || "Événement"}
-                            onChange={(e) => updateLabel(selectedPage, key, e.target.value)}
-                            disabled={saving}
-                            style={{
-                              width: "100%",
-                              padding: "0.75rem",
-                              borderRadius: "0.375rem",
-                              background: "rgba(185, 28, 28, 0.2)",
-                              color: "#fca5a5",
-                              border: "2px solid rgba(185, 28, 28, 0.5)",
-                              fontSize: "0.875rem",
-                              fontWeight: "bold",
-                              cursor: saving ? "not-allowed" : "pointer",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            {LABEL_OPTIONS.map((label) => (
-                              <option key={label} value={label} style={{ background: "#1a1a1a", color: "#fca5a5" }}>
-                                {label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => deleteImage(selectedPage, key)}
-                          style={{
-                            width: "100%",
-                            padding: "0.5rem",
-                            background: "rgba(239, 68, 68, 0.2)",
-                            color: "#ef4444",
-                            border: "1px solid rgba(239, 68, 68, 0.5)",
-                            borderRadius: "0.375rem",
-                            cursor: "pointer",
-                            fontSize: "0.75rem",
-                            fontWeight: "500",
-                          }}
-                        >
-                          🗑️ Supprimer
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
+
+            <AdminLayout
+              leftPanel={
+                <ImageListPanel
+                  images={currentPageData}
+                  selectedKey={selectedImageKey}
+                  onSelectImage={setSelectedImageKey}
+                  onUpload={handleImageUpload}
+                  uploading={uploading}
+                />
+              }
+              rightPanel={
+                selectedImageKey && currentPageData[selectedImageKey] ? (
+                  <ImageDetailPanel
+                    image={currentPageData[selectedImageKey]}
+                    onTitleSave={handleTitleSave}
+                    onLabelChange={handleLabelChange}
+                    onOrientationChange={handleOrientationChange}
+                    onDelete={handleDeleteImage}
+                    saving={saving}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-gray-400 text-sm mb-2">👈 Sélectionnez une image</p>
+                      <p className="text-gray-600 text-xs">pour voir les détails</p>
+                    </div>
+                  </div>
+                )
+              }
+            />
           </div>
         </div>
       </div>
