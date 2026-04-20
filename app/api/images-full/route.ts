@@ -39,14 +39,15 @@ export async function GET(request: NextRequest) {
 
           // Add to evenements section
           if (!config.pages.evenements[key]) {
-            // Use the blob URL directly with auth header (will be handled by proxy)
-            // The proxy will fetch it with the blob token
-            const proxyUrl = `/api/admin/image-proxy?url=${Buffer.from(blob.url).toString('base64')}`;
+            // Pass blob URL to proxy using base64 encoding
+            const encodedUrl = Buffer.from(blob.url).toString('base64');
+            const proxyUrl = `/api/admin/image-proxy?url=${encodedUrl}`;
             config.pages.evenements[key] = {
               title: filename.replace(/\.[^.]+$/, ""),
               path: proxyUrl,
               orientation: "portrait",
-              section: "Galerie Événements"
+              section: "Galerie Événements",
+              label: "Événement"
             };
           }
         });
