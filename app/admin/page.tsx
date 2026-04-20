@@ -317,42 +317,25 @@ export default function AdminPage() {
 
           {/* Main Content */}
           <div>
-            {/* Upload Zone */}
+            {/* Upload Info */}
             <div
               style={{
                 marginBottom: "2rem",
-                padding: "2rem",
-                background: "rgba(185, 28, 28, 0.1)",
-                border: "2px dashed #b91c1c",
+                padding: "1.5rem",
+                background: "rgba(59, 130, 246, 0.1)",
+                border: "1px solid rgba(59, 130, 246, 0.5)",
                 borderRadius: "0.75rem",
-                textAlign: "center",
               }}
             >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                style={{
-                  display: "none",
-                }}
-                id="file-input"
-              />
-              <label
-                htmlFor="file-input"
-                style={{
-                  display: "block",
-                  cursor: uploading ? "not-allowed" : "pointer",
-                  opacity: uploading ? 0.5 : 1,
-                }}
-              >
-                <p style={{ fontSize: "1.125rem", fontWeight: "bold", color: "white", margin: "0 0 0.5rem 0" }}>
-                  ⬆️ Uploader une image
-                </p>
-                <p style={{ color: "#999", fontSize: "0.875rem", margin: 0 }}>
-                  Clique ou glisse une image ici
-                </p>
-              </label>
+              <p style={{ fontSize: "0.875rem", color: "#60a5fa", margin: "0 0 0.75rem 0", fontWeight: "bold" }}>
+                💡 Comment ajouter une image :
+              </p>
+              <ol style={{ fontSize: "0.8rem", color: "#999", margin: "0", paddingLeft: "1.25rem", lineHeight: "1.6" }}>
+                <li>Ajoute le fichier image à <code style={{ background: "rgba(0,0,0,0.5)", padding: "0.2rem 0.4rem", borderRadius: "0.25rem" }}>/public/brand/ai/</code></li>
+                <li>Commit et push sur GitHub</li>
+                <li>Vercel redéploie automatiquement</li>
+                <li>L'image apparaît ici - tu peux l'éditer</li>
+              </ol>
             </div>
 
             {/* Images Grid */}
