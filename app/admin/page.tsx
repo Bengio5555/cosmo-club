@@ -23,6 +23,18 @@ export default function AdminPage() {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check localStorage on mount
+  useEffect(() => {
+    const savedLogin = localStorage.getItem("adminLogin") === "true";
+    const savedPassword = localStorage.getItem("adminPassword");
+    if (savedLogin && savedPassword) {
+      setIsLoggedIn(true);
+      setPassword(savedPassword);
+    }
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn && !config) {
@@ -35,11 +47,21 @@ export default function AdminPage() {
     const defaultPassword = "admin2024";
     if (password === defaultPassword) {
       setIsLoggedIn(true);
+      localStorage.setItem("adminLogin", "true");
+      localStorage.setItem("adminPassword", password);
       setMessage("");
     } else {
       setMessage("❌ Mot de passe incorrect");
       setPassword("");
     }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setPassword("");
+    setConfig(null);
+    localStorage.removeItem("adminLogin");
+    localStorage.removeItem("adminPassword");
   };
 
   const loadConfig = async () => {
@@ -173,6 +195,26 @@ export default function AdminPage() {
     }
   };
 
+  // Show loading screen while checking localStorage
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          cursor: "auto",
+        }}
+      >
+        <p style={{ color: "#999", fontSize: "0.875rem" }}>Chargement...</p>
+      </div>
+    );
+  }
+
   if (!isLoggedIn) {
     return (
       <div
@@ -286,7 +328,7 @@ export default function AdminPage() {
             </p>
           </div>
           <button
-            onClick={() => setIsLoggedIn(false)}
+            onClick={handleLogout}
             style={{
               background: "#b91c1c",
               color: "white",
