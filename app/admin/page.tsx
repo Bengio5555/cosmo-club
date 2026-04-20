@@ -84,34 +84,34 @@ export default function AdminPage() {
       if (res.ok) {
         const data = await res.json();
 
-        // Also load images from Vercel Blob
-        try {
-          const blobRes = await fetch("/api/admin/blob-images", {
-            headers: { "x-admin-password": password }
-          });
-          if (blobRes.ok) {
-            const blobData = await blobRes.json();
-            // Add blob images to the config (in a "blob-uploads" section)
-            if (blobData.images && blobData.images.length > 0) {
-              if (!data.pages["blob-uploads"]) {
-                data.pages["blob-uploads"] = {};
-              }
-              blobData.images.forEach((img: any, idx: number) => {
-                const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-");
-                // Use proxy endpoint for private blob images
-                const proxyUrl = `/api/admin/image-proxy?url=${encodeURIComponent(img.url)}`;
-                data.pages["blob-uploads"][key] = {
-                  title: img.filename.replace(/\.[^.]+$/, ""),
-                  path: proxyUrl,
-                  orientation: "landscape",
-                  section: "Uploads"
-                };
-              });
-            }
-          }
-        } catch (err) {
-          console.log("Blob images load skipped:", err);
-        }
+        // TODO: Load images from Vercel Blob (temporarily disabled for debugging)
+        // try {
+        //   const blobRes = await fetch("/api/admin/blob-images", {
+        //     headers: { "x-admin-password": password }
+        //   });
+        //   if (blobRes.ok) {
+        //     const blobData = await blobRes.json();
+        //     // Add blob images to the config (in a "blob-uploads" section)
+        //     if (blobData.images && blobData.images.length > 0) {
+        //       if (!data.pages["blob-uploads"]) {
+        //         data.pages["blob-uploads"] = {};
+        //       }
+        //       blobData.images.forEach((img: any, idx: number) => {
+        //         const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-");
+        //         // Use proxy endpoint for private blob images
+        //         const proxyUrl = `/api/admin/image-proxy?url=${encodeURIComponent(img.url)}`;
+        //         data.pages["blob-uploads"][key] = {
+        //           title: img.filename.replace(/\.[^.]+$/, ""),
+        //           path: proxyUrl,
+        //           orientation: "landscape",
+        //           section: "Uploads"
+        //         };
+        //       });
+        //     }
+        //   }
+        // } catch (err) {
+        //   console.log("Blob images load skipped:", err);
+        // }
 
         setConfig(data);
         const pages = Object.keys(data.pages);
