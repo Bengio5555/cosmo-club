@@ -84,41 +84,35 @@ export default function AdminPage() {
       if (res.ok) {
         const data = await res.json();
 
-        // Load images from Vercel Blob
+        // Load images from Vercel Blob and merge into selected page
         try {
-          console.log("Loading blob images with password:", { passwordExists: !!password });
           const blobRes = await fetch("/api/admin/blob-images", {
             headers: { "x-admin-password": password }
           });
-          console.log("Blob response status:", blobRes.status);
 
           if (blobRes.ok) {
             const blobData = await blobRes.json();
-            console.log("Blob data:", blobData);
 
-            // Add blob images to the config (in a "blob-uploads" section)
-            if (blobData.images && blobData.images.length > 0) {
-              if (!data.pages["blob-uploads"]) {
-                data.pages["blob-uploads"] = {};
-              }
-              blobData.images.forEach((img: any, idx: number) => {
-                const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-");
-                // Use proxy endpoint for private blob images
+            // Add blob images directly to the selected page
+            if (blobData.images && blobData.images.length > 0 && selectedPage && data.pages[selectedPage]) {
+              blobData.images.forEach((img: any) => {
+                const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-").toLowerCase();
                 const proxyUrl = `/api/admin/image-proxy?url=${encodeURIComponent(img.url)}`;
-                data.pages["blob-uploads"][key] = {
-                  title: img.filename.replace(/\.[^.]+$/, ""),
-                  path: proxyUrl,
-                  orientation: "landscape",
-                  section: "Uploads"
-                };
+
+                // Only add if not already in config
+                if (!data.pages[selectedPage][key]) {
+                  data.pages[selectedPage][key] = {
+                    title: img.filename.replace(/\.[^.]+$/, ""),
+                    path: proxyUrl,
+                    orientation: "landscape",
+                    section: selectedPage
+                  };
+                }
               });
-              console.log("Added blob images to config:", Object.keys(data.pages["blob-uploads"]));
             }
-          } else {
-            console.log("Blob fetch not ok, status:", blobRes.status);
           }
         } catch (err) {
-          console.log("Blob images load error:", err);
+          console.log("Blob load skipped:", err);
         }
 
         setConfig(data);
