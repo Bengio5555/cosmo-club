@@ -6,13 +6,20 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function GET(request: NextRequest) {
   try {
-    const url = request.nextUrl.searchParams.get("url");
+    let url = request.nextUrl.searchParams.get("url");
 
     if (!url) {
       return NextResponse.json(
         { error: "Missing url parameter" },
         { status: 400 }
       );
+    }
+
+    // Decode if it's base64 encoded
+    try {
+      url = Buffer.from(url, 'base64').toString('utf-8');
+    } catch {
+      // If decoding fails, use the URL as-is (it might be a regular URL)
     }
 
     const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
