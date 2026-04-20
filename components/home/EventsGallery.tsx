@@ -37,7 +37,7 @@ export function EventsGallery() {
             const loadedTiles = Object.values(evenementImages).map((img: any, i: number) => ({
               h: 380 + (i % 3) * 60,
               src: img.path,
-              label: img.title || "Événement",
+              label: img.label || img.title || "Événement",
               object: ["center", "top", "bottom", "left", "right"][i % 5] as any,
             }));
             setTiles(loadedTiles.length > 0 ? loadedTiles : defaultTiles);

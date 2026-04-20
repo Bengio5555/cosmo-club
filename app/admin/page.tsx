@@ -7,7 +7,17 @@ interface ImageConfig {
   path: string;
   orientation: "portrait" | "landscape" | "square";
   section: string;
+  label?: string;
 }
+
+const LABEL_OPTIONS = [
+  "Mariage",
+  "Corporate",
+  "Défilé",
+  "Privé",
+  "Lancement",
+  "Événement",
+] as const;
 
 interface Config {
   pages: Record<string, Record<string, ImageConfig>>;
@@ -105,7 +115,8 @@ export default function AdminPage() {
                     title: img.filename.replace(/\.[^.]+$/, ""),
                     path: proxyUrl,
                     orientation: "landscape",
-                    section: selectedPage
+                    section: selectedPage,
+                    label: "Événement" // Default label
                   };
                 }
               });
@@ -210,6 +221,14 @@ export default function AdminPage() {
     if (!config) return;
     const updated = JSON.parse(JSON.stringify(config));
     updated.pages[page][key].orientation = orientation;
+    setConfig(updated);
+    await saveConfig(updated);
+  };
+
+  const updateLabel = async (page: string, key: string, label: string) => {
+    if (!config) return;
+    const updated = JSON.parse(JSON.stringify(config));
+    updated.pages[page][key].label = label;
     setConfig(updated);
     await saveConfig(updated);
   };
@@ -678,6 +697,35 @@ export default function AdminPage() {
                               </button>
                             ))}
                           </div>
+                        </div>
+
+                        {/* Label Selector */}
+                        <div style={{ marginBottom: "1rem" }}>
+                          <p style={{ fontSize: "0.65rem", color: "#666", margin: "0 0 0.5rem 0", textTransform: "uppercase" }}>
+                            Tag
+                          </p>
+                          <select
+                            value={image.label || "Événement"}
+                            onChange={(e) => updateLabel(selectedPage, key, e.target.value)}
+                            disabled={saving}
+                            style={{
+                              width: "100%",
+                              padding: "0.5rem",
+                              borderRadius: "0.375rem",
+                              background: "rgba(255,255,255,0.1)",
+                              color: "white",
+                              border: "1px solid rgba(255,255,255,0.2)",
+                              fontSize: "0.875rem",
+                              cursor: saving ? "not-allowed" : "pointer",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                            {LABEL_OPTIONS.map((label) => (
+                              <option key={label} value={label} style={{ background: "#1a1a1a", color: "white" }}>
+                                {label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         {/* Delete Button */}
