@@ -91,8 +91,15 @@ export function EventsGallery() {
                 className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.04]"
                 style={{ objectPosition: tile.object }}
               />
-              <figcaption className="absolute inset-x-4 bottom-4 flex items-end justify-between opacity-0 transition-opacity duration-700 group-hover:opacity-100">
-                <span className="eyebrow text-[color:var(--color-grenat)]">{tile.label}</span>
+              {/* Tag visible always */}
+              <div className="absolute inset-x-4 top-4 flex items-start justify-between">
+                <span className="eyebrow text-[color:var(--color-grenat)] bg-[color:var(--color-espresso)]/50 backdrop-blur-sm px-2 py-1 rounded-sm">
+                  {tile.label}
+                </span>
+              </div>
+
+              {/* Counter visible on hover */}
+              <figcaption className="absolute inset-x-4 bottom-4 opacity-0 transition-opacity duration-700 group-hover:opacity-100">
                 <span className="font-display text-xs text-[color:var(--color-espresso)]/70">
                   {String(i + 1).padStart(2, "0")} / {tiles.length}
                 </span>
