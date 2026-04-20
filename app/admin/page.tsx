@@ -136,14 +136,18 @@ export default function AdminPage() {
     if (!file || !config) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("imagePath", `/brand/ai/${file.name}`);
-    formData.append("title", file.name.replace(/\.[^.]+$/, ""));
-    formData.append("section", selectedPage);
-    formData.append("orientation", "landscape");
 
     try {
+      // Read file as blob to avoid "file changed" errors
+      const fileBlob = new Blob([await file.arrayBuffer()], { type: file.type });
+
+      const formData = new FormData();
+      formData.append("file", fileBlob, file.name);
+      formData.append("imagePath", `/brand/ai/${file.name}`);
+      formData.append("title", file.name.replace(/\.[^.]+$/, ""));
+      formData.append("section", selectedPage);
+      formData.append("orientation", "landscape");
+
       console.log("Starting upload...", { file: file.name, page: selectedPage });
 
       const res = await fetch("/api/admin/upload", {
