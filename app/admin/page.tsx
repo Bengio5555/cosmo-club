@@ -237,7 +237,13 @@ export default function AdminPage() {
   const currentPageData = config.pages[selectedPage] || {};
 
   return (
-    <div style={{ minHeight: "100vh", background: "#000", padding: "2rem", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#000", padding: "2rem", fontFamily: "system-ui, -apple-system, sans-serif", cursor: "auto" }}>
+      <style>{`
+        * { cursor: auto !important; }
+        button { cursor: pointer !important; }
+        input { cursor: text !important; }
+        label { cursor: pointer !important; }
+      `}</style>
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
