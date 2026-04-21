@@ -130,7 +130,16 @@ body {
   );
 }
 
-/* ─── Custom cursor (disabled — restored native system cursor) ────── */
+/* ─── Custom cursor ───────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body {
+    cursor: none;
+  }
+  a, button, [role="button"], input, textarea, select, label {
+    cursor: none;
+  }
+}
 
 .cursor-dot {
   position: fixed;
@@ -139,22 +148,23 @@ body {
   width: var(--cursor-size);
   height: var(--cursor-size);
   border-radius: 999px;
-  background: var(--color-cream);
+  background: var(--color-grenat);
   transform: translate3d(-50%, -50%, 0);
   pointer-events: none;
   z-index: 9999;
-  mix-blend-mode: difference;
   transition:
     width 0.35s var(--ease-silk),
     height 0.35s var(--ease-silk),
-    background 0.35s var(--ease-silk);
+    background 0.35s var(--ease-silk),
+    opacity 0.35s var(--ease-silk);
   will-change: transform;
 }
 
 .cursor-dot[data-variant="hover"] {
-  width: 56px;
-  height: 56px;
-  background: var(--color-cream);
+  width: 40px;
+  height: 40px;
+  background: var(--color-grenat);
+  opacity: 0.25;
 }
 
 .cursor-dot[data-variant="text"] {
