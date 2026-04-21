@@ -43,39 +43,39 @@ export function BottlesSection() {
           </p>
         </Reveal>
 
-        <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
+        <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-3">
           {bottles.map((b, i) => (
             <Reveal
               key={b.format}
               delay={i * 140}
-              className="group relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-ash-warm)] bg-[color:var(--color-cream-paper)]"
+              className="group relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--color-ash-warm)] bg-[color:var(--color-cream-paper)]"
             >
               {/* Bottle photo */}
-              <div className="relative aspect-[4/5] w-full overflow-hidden">
+              <div className="relative aspect-square w-full overflow-hidden">
                 <Image
                   key={bottleSrcs[i]}
                   src={bottleSrcs[i]}
                   alt={`Cosmo Club bouteille ${b.format}`}
                   fill
-                  sizes="(min-width: 768px) 320px, 100vw"
+                  sizes="(min-width: 768px) 240px, 100vw"
                   unoptimized={bottleSrcs[i].startsWith("/api/")}
                   className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.03]"
                 />
               </div>
 
               {/* Info panel */}
-              <div className="relative flex flex-col gap-2 p-6 md:p-7">
-                <p className="font-display text-4xl leading-none text-[color:var(--color-grenat)] md:text-5xl">
+              <div className="relative flex flex-col gap-1.5 p-4 md:p-5">
+                <p className="font-display text-2xl leading-none text-[color:var(--color-grenat)] md:text-3xl">
                   {b.format}
                 </p>
-                <h3 className="mt-1 font-display text-xl text-[color:var(--color-ink-text)] md:text-2xl">
+                <h3 className="font-display text-base text-[color:var(--color-ink-text)] md:text-lg">
                   {b.label}
                 </h3>
-                <p className="text-sm leading-relaxed text-[color:var(--color-espresso)]/80">
+                <p className="text-xs leading-relaxed text-[color:var(--color-espresso)]/80">
                   {b.desc}
                 </p>
-                <div className="hairline my-2" />
-                <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-or-deep)]">
+                <div className="hairline my-1.5" />
+                <p className="text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-or-deep)]">
                   {b.tag}
                 </p>
               </div>
