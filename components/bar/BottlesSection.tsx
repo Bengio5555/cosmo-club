@@ -43,7 +43,7 @@ export function BottlesSection() {
           </p>
         </Reveal>
 
-        <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-3">
+        <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-3 lg:max-w-5xl lg:gap-6">
           {bottles.map((b, i) => (
             <Reveal
               key={b.format}
@@ -57,25 +57,25 @@ export function BottlesSection() {
                   src={bottleSrcs[i]}
                   alt={`Cosmo Club bouteille ${b.format}`}
                   fill
-                  sizes="(min-width: 768px) 240px, 100vw"
+                  sizes="(min-width: 1024px) 320px, (min-width: 768px) 240px, 100vw"
                   unoptimized={bottleSrcs[i].startsWith("/api/")}
                   className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.03]"
                 />
               </div>
 
               {/* Info panel */}
-              <div className="relative flex flex-col gap-1.5 p-4 md:p-5">
-                <p className="font-display text-2xl leading-none text-[color:var(--color-grenat)] md:text-3xl">
+              <div className="relative flex flex-col gap-1.5 p-4 md:p-5 lg:p-6 lg:gap-2">
+                <p className="font-display text-2xl leading-none text-[color:var(--color-grenat)] md:text-3xl lg:text-4xl">
                   {b.format}
                 </p>
-                <h3 className="font-display text-base text-[color:var(--color-ink-text)] md:text-lg">
+                <h3 className="font-display text-base text-[color:var(--color-ink-text)] md:text-lg lg:text-xl">
                   {b.label}
                 </h3>
-                <p className="text-xs leading-relaxed text-[color:var(--color-espresso)]/80">
+                <p className="text-xs leading-relaxed text-[color:var(--color-espresso)]/80 lg:text-sm">
                   {b.desc}
                 </p>
-                <div className="hairline my-1.5" />
-                <p className="text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-or-deep)]">
+                <div className="hairline my-1.5 lg:my-2" />
+                <p className="text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-or-deep)] lg:text-[10px] lg:tracking-[0.32em]">
                   {b.tag}
                 </p>
               </div>
