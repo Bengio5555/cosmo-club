@@ -43,7 +43,7 @@ export function BottlesSection() {
           </p>
         </Reveal>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
           {bottles.map((b, i) => (
             <Reveal
               key={b.format}
@@ -51,30 +51,30 @@ export function BottlesSection() {
               className="group relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-ash-warm)] bg-[color:var(--color-cream-paper)]"
             >
               {/* Bottle photo */}
-              <div className="relative aspect-[3/4] w-full overflow-hidden">
+              <div className="relative aspect-[4/5] w-full overflow-hidden">
                 <Image
                   key={bottleSrcs[i]}
                   src={bottleSrcs[i]}
                   alt={`Cosmo Club bouteille ${b.format}`}
                   fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
+                  sizes="(min-width: 768px) 320px, 100vw"
                   unoptimized={bottleSrcs[i].startsWith("/api/")}
                   className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.03]"
                 />
               </div>
 
               {/* Info panel */}
-              <div className="relative flex flex-col gap-3 p-8 md:p-10">
-                <p className="font-display text-6xl leading-none text-[color:var(--color-grenat)] md:text-7xl">
+              <div className="relative flex flex-col gap-2 p-6 md:p-7">
+                <p className="font-display text-4xl leading-none text-[color:var(--color-grenat)] md:text-5xl">
                   {b.format}
                 </p>
-                <h3 className="mt-2 font-display text-3xl text-[color:var(--color-ink-text)]">
+                <h3 className="mt-1 font-display text-xl text-[color:var(--color-ink-text)] md:text-2xl">
                   {b.label}
                 </h3>
-                <p className="text-[15px] leading-relaxed text-[color:var(--color-espresso)]/80">
+                <p className="text-sm leading-relaxed text-[color:var(--color-espresso)]/80">
                   {b.desc}
                 </p>
-                <div className="hairline my-3" />
+                <div className="hairline my-2" />
                 <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-or-deep)]">
                   {b.tag}
                 </p>
