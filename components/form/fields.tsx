@@ -139,7 +139,7 @@ export function OptionCard({
           <span
             className={cn(
               "h-2 w-2 rounded-full transition-colors duration-500",
-              selected ? "bg-[color:var(--color-cream-paper)]" : "bg-transparent",
+              selected ? "bg-[color:var(--color-ink-text)]" : "bg-transparent",
             )}
           />
         </span>
