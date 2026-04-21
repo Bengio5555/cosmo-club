@@ -22,55 +22,55 @@ export default function Page() {
       <section className="relative bg-[color:var(--color-ink-soft)] pb-24 pt-6 md:pb-32">
         <div className="mx-auto grid max-w-[1400px] gap-10 px-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:gap-16 md:px-10">
           <DevisWizard />
-          <aside className="space-y-10 text-[color:var(--color-bone)]/80 md:pl-6">
+          <aside className="space-y-10 text-[color:var(--color-espresso)] md:pl-6">
             <div>
               <p className="eyebrow"><span className="rule" />Coordonnées</p>
               <div className="mt-6 space-y-5">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
                     Adresse
                   </p>
-                  <p className="mt-1 font-display text-xl text-[color:var(--color-cream)]">
+                  <p className="mt-1 font-display text-xl text-[color:var(--color-ink-text)]">
                     {site.address.city}
                   </p>
-                  <p className="text-sm text-[color:var(--color-bone)]/60">
+                  <p className="text-sm text-[color:var(--color-espresso)]/75">
                     {site.address.detail}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
                     Email
                   </p>
                   <a
                     href={`mailto:${site.email}`}
-                    className="mt-1 block font-display text-lg text-[color:var(--color-cream)] transition-colors hover:text-[color:var(--color-or)]"
+                    className="mt-1 block font-display text-lg text-[color:var(--color-ink-text)] transition-colors hover:text-[color:var(--color-grenat)]"
                   >
                     {site.email}
                   </a>
                 </div>
 
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
                     Téléphone
                   </p>
                   <a
                     href={`tel:${site.phone}`}
-                    className="mt-1 block font-display text-lg text-[color:var(--color-cream)] transition-colors hover:text-[color:var(--color-or)]"
+                    className="mt-1 block font-display text-lg text-[color:var(--color-ink-text)] transition-colors hover:text-[color:var(--color-grenat)]"
                   >
                     {site.phoneDisplay}
                   </a>
                 </div>
 
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/50">
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
                     Instagram
                   </p>
                   <a
                     href={site.instagram}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-1 inline-flex items-center gap-2 font-display text-lg text-[color:var(--color-cream)] hover:text-[color:var(--color-or)]"
+                    className="mt-1 inline-flex items-center gap-2 font-display text-lg text-[color:var(--color-ink-text)] hover:text-[color:var(--color-grenat)]"
                   >
                     {site.instagramHandle} <span aria-hidden>↗</span>
                   </a>
@@ -83,17 +83,17 @@ export default function Page() {
             <div>
               <p className="eyebrow"><span className="rule" />Horaires</p>
               <dl className="mt-6 space-y-3 text-sm">
-                <div className="flex items-baseline justify-between gap-4 border-b border-[color:var(--color-ash)]/60 pb-3">
-                  <dt className="text-[color:var(--color-bone)]/60">Lun — Ven</dt>
-                  <dd>10h — 19h</dd>
+                <div className="flex items-baseline justify-between gap-4 border-b border-[color:var(--color-espresso)]/20 pb-3">
+                  <dt className="text-[color:var(--color-espresso)]/75">Lun — Ven</dt>
+                  <dd className="text-[color:var(--color-ink-text)]">10h — 19h</dd>
                 </div>
-                <div className="flex items-baseline justify-between gap-4 border-b border-[color:var(--color-ash)]/60 pb-3">
-                  <dt className="text-[color:var(--color-bone)]/60">Événements</dt>
-                  <dd>7j/7</dd>
+                <div className="flex items-baseline justify-between gap-4 border-b border-[color:var(--color-espresso)]/20 pb-3">
+                  <dt className="text-[color:var(--color-espresso)]/75">Événements</dt>
+                  <dd className="text-[color:var(--color-ink-text)]">7j/7</dd>
                 </div>
                 <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-[color:var(--color-bone)]/60">Réponse devis</dt>
-                  <dd>Sous 48h</dd>
+                  <dt className="text-[color:var(--color-espresso)]/75">Réponse devis</dt>
+                  <dd className="text-[color:var(--color-ink-text)]">Sous 48h</dd>
                 </div>
               </dl>
             </div>
