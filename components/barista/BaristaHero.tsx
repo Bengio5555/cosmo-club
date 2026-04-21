@@ -5,18 +5,25 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { SplitText } from "@/components/motion/SplitText";
 import heroBaristaImg from "@/public/brand/ai/hero-barista.png";
+import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
 export function BaristaHero() {
+  const config = useImageConfig();
+  const heroSrc = pickPath(config, "barista", "hero", heroBaristaImg.src);
+  const heroUnoptimized = heroSrc.startsWith("/api/");
+
   return (
     <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
       {/* editorial backdrop */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
-          src={heroBaristaImg}
+          key={heroSrc}
+          src={heroSrc}
           alt=""
           fill
           sizes="100vw"
           priority
+          unoptimized={heroUnoptimized}
           className="object-cover object-center"
         />
         <div

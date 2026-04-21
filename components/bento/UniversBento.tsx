@@ -2,37 +2,18 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
+import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-// Static fallbacks used on first render / when the API call fails.
 const DEFAULT_BENTO_BAR = "/brand/ai/bento-bar-cocktails.png";
 const DEFAULT_BENTO_BARISTA = "/brand/ai/bento-barista.png";
 
 export function UniversBento() {
-  const [paths, setPaths] = useState<{ bar: string; barista: string }>({
-    bar: DEFAULT_BENTO_BAR,
-    barista: DEFAULT_BENTO_BARISTA,
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/images-full")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((config) => {
-        if (cancelled || !config?.pages) return;
-        setPaths({
-          bar: config.pages["bar-a-cocktails"]?.bento?.path || DEFAULT_BENTO_BAR,
-          barista: config.pages.barista?.bento?.path || DEFAULT_BENTO_BARISTA,
-        });
-      })
-      .catch(() => {
-        /* keep defaults */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const config = useImageConfig();
+  const paths = {
+    bar: pickPath(config, "bar-a-cocktails", "bento", DEFAULT_BENTO_BAR),
+    barista: pickPath(config, "barista", "bento", DEFAULT_BENTO_BARISTA),
+  };
 
   return (
     <section

@@ -6,10 +6,14 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { site } from "@/lib/site";
 import heroHomeImg from "@/public/brand/ai/hero-home.png";
+import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
 export function LiquidHero() {
   const reduce = useReducedMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const config = useImageConfig();
+  const heroSrc = pickPath(config, "home", "hero", heroHomeImg.src);
+  const heroUnoptimized = heroSrc.startsWith("/api/");
 
   useEffect(() => {
     const v = videoRef.current;
@@ -30,11 +34,13 @@ export function LiquidHero() {
       <div aria-hidden className="absolute inset-0 -z-20">
         {reduce ? (
           <Image
-            src={heroHomeImg}
+            key={heroSrc}
+            src={heroSrc}
             alt=""
             fill
             sizes="100vw"
             priority
+            unoptimized={heroUnoptimized}
             className="object-cover object-center"
           />
         ) : (
@@ -44,7 +50,7 @@ export function LiquidHero() {
             muted
             playsInline
             preload="auto"
-            poster={heroHomeImg.src}
+            poster={heroSrc}
             className="absolute inset-0 h-full w-full object-cover object-center"
           >
             <source src="/brand/ai/hero-home.mp4" type="video/mp4" />

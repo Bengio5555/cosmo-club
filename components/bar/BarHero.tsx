@@ -5,18 +5,25 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { SplitText } from "@/components/motion/SplitText";
 import heroBarImg from "@/public/brand/ai/hero-bar.png";
+import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
 export function BarHero() {
+  const config = useImageConfig();
+  const heroSrc = pickPath(config, "bar-a-cocktails", "hero", heroBarImg.src);
+  const heroUnoptimized = heroSrc.startsWith("/api/");
+
   return (
     <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
       {/* backdrop image */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
-          src={heroBarImg}
+          key={heroSrc}
+          src={heroSrc}
           alt=""
           fill
           sizes="100vw"
           priority
+          unoptimized={heroUnoptimized}
           className="object-cover object-center"
         />
         {/* léger gradient pour readabilité du texte côté gauche */}

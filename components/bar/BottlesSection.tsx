@@ -1,13 +1,23 @@
-import Image, { type StaticImageData } from "next/image";
+"use client";
+
+import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
 import { bottles } from "@/lib/content/cocktails";
 import bottle20Img from "@/public/brand/ai/bottle-20cl.png";
 import bottle50Img from "@/public/brand/ai/bottle-50cl.png";
 import bottle1LImg from "@/public/brand/ai/bottle-1L.png";
+import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-const bottleImages: StaticImageData[] = [bottle20Img, bottle50Img, bottle1LImg];
+// Keys must match images-config.json → pages.products.<key>
+const bottleSlotKeys = ["bottle-20cl", "bottle-50cl", "bottle-1L"] as const;
+const bottleFallbacks = [bottle20Img.src, bottle50Img.src, bottle1LImg.src];
 
 export function BottlesSection() {
+  const config = useImageConfig();
+  const bottleSrcs = bottleSlotKeys.map((k, i) =>
+    pickPath(config, "products", k, bottleFallbacks[i]),
+  );
+
   return (
     <section className="relative overflow-hidden bg-[color:var(--color-cream)] py-20 md:py-28">
       <div
@@ -43,10 +53,12 @@ export function BottlesSection() {
               {/* Bottle photo */}
               <div className="relative aspect-[3/4] w-full overflow-hidden">
                 <Image
-                  src={bottleImages[i]}
+                  key={bottleSrcs[i]}
+                  src={bottleSrcs[i]}
                   alt={`Cosmo Club bouteille ${b.format}`}
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
+                  unoptimized={bottleSrcs[i].startsWith("/api/")}
                   className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.03]"
                 />
               </div>

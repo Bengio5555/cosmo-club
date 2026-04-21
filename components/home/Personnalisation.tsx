@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
+import { useImageConfig } from "@/lib/hooks/useImageConfig";
 
 // Each tile is anchored to a stable slot key that matches the admin's
 // `personnalisation` page in images-config.json. Uploading an image in the
@@ -68,34 +68,12 @@ const tuilesDefault: Tuile[] = [
 ];
 
 export function Personnalisation() {
-  const [paths, setPaths] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/images-full")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((config) => {
-        if (cancelled || !config?.pages?.personnalisation) return;
-        const pagePaths: Record<string, string> = {};
-        for (const [k, v] of Object.entries(config.pages.personnalisation)) {
-          const p = (v as { path?: string })?.path;
-          if (p) pagePaths[k] = p;
-        }
-        setPaths(pagePaths);
-      })
-      .catch(() => {
-        /* fall back to defaults */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+  const config = useImageConfig();
+  const perso = config?.pages?.personnalisation;
   const tuiles = tuilesDefault.map((t) => ({
     ...t,
-    backgroundImage: `url(${paths[t.key] || t.defaultImage})`,
+    backgroundImage: `url(${perso?.[t.key]?.path || t.defaultImage})`,
   }));
-
   return _Section(tuiles);
 }
 

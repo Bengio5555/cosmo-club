@@ -3,13 +3,21 @@
 import { Reveal } from "@/components/motion/Reveal";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import galleryEventImg from "@/public/brand/ai/gallery-event.png";
 import heroBarImg from "@/public/brand/ai/hero-bar.png";
 import bentoBarImg from "@/public/brand/ai/bento-bar.png";
 import bentoBaristaImg from "@/public/brand/ai/bento-barista.png";
+import { useImageConfig } from "@/lib/hooks/useImageConfig";
 
-const defaultTiles = [
+type Tile = {
+  h: number;
+  src: string | typeof galleryEventImg;
+  label: string;
+  object: string;
+};
+
+const defaultTiles: Tile[] = [
   { h: 520, src: galleryEventImg, label: "Mariage", object: "center" },
   { h: 340, src: bentoBarImg, label: "Corporate", object: "center" },
   { h: 420, src: heroBarImg, label: "Défilé", object: "right" },
@@ -21,35 +29,21 @@ const defaultTiles = [
 ];
 
 export function EventsGallery() {
-  const [tiles, setTiles] = useState(defaultTiles);
-
-  useEffect(() => {
-    const loadImages = async () => {
-      try {
-        const res = await fetch("/api/images-full");
-        if (res.ok) {
-          const config = await res.json();
-          // Get images from evenements section
-          const evenementImages = config.pages?.evenements || {};
-
-          if (Object.keys(evenementImages).length > 0) {
-            // Convert to tiles array
-            const loadedTiles = Object.values(evenementImages).map((img: any, i: number) => ({
-              h: 380 + (i % 3) * 60,
-              src: img.path,
-              label: img.label || img.title || "Événement",
-              object: ["center", "top", "bottom", "left", "right"][i % 5] as any,
-            }));
-            setTiles(loadedTiles.length > 0 ? loadedTiles : defaultTiles);
-          }
-        }
-      } catch (err) {
-        console.log("Failed to load images, using defaults");
-      }
-    };
-
-    loadImages();
-  }, []);
+  const config = useImageConfig();
+  const tiles = useMemo<Tile[]>(() => {
+    const evenementImages = config?.pages?.evenements || {};
+    const entries = Object.values(evenementImages);
+    if (entries.length === 0) return defaultTiles;
+    const positions = ["center", "top", "bottom", "left", "right"];
+    return entries
+      .filter((img) => typeof img.path === "string")
+      .map((img, i) => ({
+        h: 380 + (i % 3) * 60,
+        src: img.path as string,
+        label: img.label || img.title || "Événement",
+        object: positions[i % positions.length],
+      }));
+  }, [config]);
 
   return (
     <section className="relative bg-[color:var(--color-cream-paper)] py-20 text-[color:var(--color-ink-text)] md:py-28">

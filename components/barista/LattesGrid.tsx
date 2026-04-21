@@ -1,19 +1,36 @@
+"use client";
+
 import { Reveal } from "@/components/motion/Reveal";
-import Image, { type StaticImageData } from "next/image";
+import Image from "next/image";
 import { lattes, type Latte } from "@/lib/content/barista";
 import matchaImg from "@/public/brand/ai/latte-matcha.png";
 import ubeImg from "@/public/brand/ai/latte-ube.png";
 import blueImg from "@/public/brand/ai/latte-blue.png";
 import goldenImg from "@/public/brand/ai/latte-golden.png";
+import { useImageConfig, pickPath, type ImageConfig } from "@/lib/hooks/useImageConfig";
 
-const latteImages: Record<Latte["id"], StaticImageData> = {
-  matcha: matchaImg,
-  ube: ubeImg,
-  blue: blueImg,
-  golden: goldenImg,
+// Latte id → config slot key (must match images-config.json → pages.lattes.*)
+const slotKey: Record<Latte["id"], string> = {
+  matcha: "latte-matcha",
+  ube: "latte-ube",
+  blue: "latte-blue",
+  golden: "latte-golden",
 };
 
+const latteFallbacks: Record<Latte["id"], string> = {
+  matcha: matchaImg.src,
+  ube: ubeImg.src,
+  blue: blueImg.src,
+  golden: goldenImg.src,
+};
+
+function resolveLatteSrc(config: ImageConfig | null, id: Latte["id"]): string {
+  return pickPath(config, "lattes", slotKey[id], latteFallbacks[id]);
+}
+
 export function LattesGrid() {
+  const config = useImageConfig();
+
   return (
     <section id="lattes" className="relative bg-[color:var(--color-cream)] py-20 md:py-28">
       <div
@@ -43,7 +60,12 @@ export function LattesGrid() {
 
         <div className="grid gap-4 sm:grid-cols-2 md:gap-6">
           {lattes.map((l, i) => (
-            <LatteCard key={l.id} latte={l} delay={i * 120} />
+            <LatteCard
+              key={l.id}
+              latte={l}
+              delay={i * 120}
+              src={resolveLatteSrc(config, l.id)}
+            />
           ))}
         </div>
       </div>
@@ -51,7 +73,15 @@ export function LattesGrid() {
   );
 }
 
-function LatteCard({ latte, delay }: { latte: Latte; delay: number }) {
+function LatteCard({
+  latte,
+  delay,
+  src,
+}: {
+  latte: Latte;
+  delay: number;
+  src: string;
+}) {
   return (
     <Reveal
       delay={delay}
@@ -68,10 +98,12 @@ function LatteCard({ latte, delay }: { latte: Latte; delay: number }) {
       <div className="relative mb-6 flex items-center justify-center md:mb-10">
         <div className="relative h-48 w-48 overflow-hidden rounded-full md:h-60 md:w-60">
           <Image
-            src={latteImages[latte.id]}
+            key={src}
+            src={src}
             alt={`Latte ${latte.name}`}
             fill
             sizes="(min-width: 768px) 240px, 192px"
+            unoptimized={src.startsWith("/api/")}
             className="object-cover"
           />
         </div>
