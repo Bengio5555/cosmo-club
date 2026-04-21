@@ -4,7 +4,7 @@ export function ConceptManifesto() {
   return (
     <section
       id="concept"
-      className="relative overflow-hidden bg-[color:var(--color-cream-soft)] py-32 text-[color:var(--color-ink-text)] md:py-48"
+      className="relative overflow-hidden bg-[color:var(--color-cream-soft)] py-24 text-[color:var(--color-ink-text)] md:py-32"
     >
       <div
         aria-hidden

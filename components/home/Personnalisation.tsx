@@ -49,7 +49,7 @@ export function Personnalisation() {
   return (
     <section
       id="personnalisation"
-      className="relative overflow-hidden bg-[color:var(--color-cream-pearl)] py-28 text-[color:var(--color-ink-text)] md:py-40"
+      className="relative overflow-hidden bg-[color:var(--color-cream-pearl)] py-20 text-[color:var(--color-ink-text)] md:py-28"
     >
       <div
         aria-hidden

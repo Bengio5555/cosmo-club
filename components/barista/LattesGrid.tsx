@@ -15,7 +15,7 @@ const latteImages: Record<Latte["id"], StaticImageData> = {
 
 export function LattesGrid() {
   return (
-    <section id="lattes" className="relative bg-[color:var(--color-cream)] py-28 md:py-40">
+    <section id="lattes" className="relative bg-[color:var(--color-cream)] py-20 md:py-28">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-40"

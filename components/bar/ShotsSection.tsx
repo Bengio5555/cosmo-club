@@ -3,7 +3,7 @@ import { shots } from "@/lib/content/cocktails";
 
 export function ShotsSection() {
   return (
-    <section className="relative bg-[color:var(--color-cream-paper)] py-28 md:py-40">
+    <section className="relative bg-[color:var(--color-cream-paper)] py-20 md:py-28">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <Reveal className="mb-16 flex flex-col md:mb-24 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">

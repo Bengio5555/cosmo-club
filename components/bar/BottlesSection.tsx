@@ -9,7 +9,7 @@ const bottleImages: StaticImageData[] = [bottle20Img, bottle50Img, bottle1LImg];
 
 export function BottlesSection() {
   return (
-    <section className="relative overflow-hidden bg-[color:var(--color-cream)] py-28 md:py-40">
+    <section className="relative overflow-hidden bg-[color:var(--color-cream)] py-20 md:py-28">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-40"

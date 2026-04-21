@@ -4,7 +4,7 @@ import { site } from "@/lib/site";
 
 export function CtaDevis() {
   return (
-    <section className="relative overflow-hidden bg-[color:var(--color-cream-paper)] py-36 md:py-56">
+    <section className="relative overflow-hidden bg-[color:var(--color-cream-paper)] py-24 md:py-36">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-80"

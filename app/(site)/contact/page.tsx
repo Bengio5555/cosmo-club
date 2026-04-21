@@ -19,7 +19,7 @@ export default function Page() {
         description="Quatre questions, deux minutes. Nous revenons sous 48h avec une proposition sur-mesure, pensée pour votre moment."
       />
 
-      <section className="relative bg-[color:var(--color-ink-soft)] pb-32 pt-6 md:pb-48">
+      <section className="relative bg-[color:var(--color-ink-soft)] pb-24 pt-6 md:pb-32">
         <div className="mx-auto grid max-w-[1400px] gap-10 px-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:gap-16 md:px-10">
           <DevisWizard />
           <aside className="space-y-10 text-[color:var(--color-bone)]/80 md:pl-6">

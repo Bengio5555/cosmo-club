@@ -8,7 +8,7 @@ export function UniversBento() {
   return (
     <section
       id="univers"
-      className="relative bg-[color:var(--color-cream)] py-28 text-[color:var(--color-ink-text)] md:py-40"
+      className="relative bg-[color:var(--color-cream)] py-20 text-[color:var(--color-ink-text)] md:py-28"
     >
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <Reveal className="mb-14 flex flex-col md:mb-20 md:flex-row md:items-end md:justify-between">

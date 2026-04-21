@@ -2,7 +2,7 @@ import { Reveal } from "@/components/motion/Reveal";
 
 export function InstagrammableSection() {
   return (
-    <section className="relative overflow-hidden bg-[color:var(--color-cream-paper)] py-32 md:py-48">
+    <section className="relative overflow-hidden bg-[color:var(--color-cream-paper)] py-24 md:py-32">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
