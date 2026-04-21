@@ -1,10 +1,39 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
-import bentoBarImg from "@/public/brand/ai/bento-bar.png";
-import bentoBaristaImg from "@/public/brand/ai/bento-barista.png";
+
+// Static fallbacks used on first render / when the API call fails.
+const DEFAULT_BENTO_BAR = "/brand/ai/bento-bar-cocktails.png";
+const DEFAULT_BENTO_BARISTA = "/brand/ai/bento-barista.png";
 
 export function UniversBento() {
+  const [paths, setPaths] = useState<{ bar: string; barista: string }>({
+    bar: DEFAULT_BENTO_BAR,
+    barista: DEFAULT_BENTO_BARISTA,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/images-full")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((config) => {
+        if (cancelled || !config?.pages) return;
+        setPaths({
+          bar: config.pages["bar-a-cocktails"]?.bento?.path || DEFAULT_BENTO_BAR,
+          barista: config.pages.barista?.bento?.path || DEFAULT_BENTO_BARISTA,
+        });
+      })
+      .catch(() => {
+        /* keep defaults */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section
       id="univers"
@@ -38,7 +67,7 @@ export function UniversBento() {
             kicker="Offre signature"
             title="Bar à cocktails"
             description="Cocktails, shots, champagne, bouteilles « in a bottle » et créations sur-mesure signées par nos mixologistes."
-            visual={<CocktailVisual />}
+            visual={<CocktailVisual src={paths.bar} priority />}
           />
 
           {/* Barista */}
@@ -49,7 +78,7 @@ export function UniversBento() {
             kicker="Offre signature"
             title="Barista"
             description="Matcha · Ube · Blue · Golden Latte. Un bar instagrammable, chaud ou glacé."
-            visual={<LatteVisual />}
+            visual={<LatteVisual src={paths.barista} />}
           />
 
           {/* Personnalisation teaser */}
@@ -130,29 +159,37 @@ function BentoCard({
 
 /* ─── Decorative visuals (CSS/SVG — replace with real photos later) ─── */
 
-function CocktailVisual() {
+function CocktailVisual({ src, priority }: { src: string; priority?: boolean }) {
+  // Bypass next/image optimizer for our authed blob proxy URLs; keep
+  // optimization for static /brand/... paths so they still get resized.
+  const bypassOptimizer = src.startsWith("/api/");
   return (
     <div className="relative h-full w-full overflow-hidden">
       <Image
-        src={bentoBarImg}
+        key={src}
+        src={src}
         alt=""
         fill
         sizes="(min-width: 768px) 66vw, 100vw"
+        unoptimized={bypassOptimizer}
         className="object-cover object-center transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.05]"
-        priority
+        priority={priority}
       />
     </div>
   );
 }
 
-function LatteVisual() {
+function LatteVisual({ src }: { src: string }) {
+  const bypassOptimizer = src.startsWith("/api/");
   return (
     <div className="relative h-full w-full overflow-hidden">
       <Image
-        src={bentoBaristaImg}
+        key={src}
+        src={src}
         alt=""
         fill
         sizes="(min-width: 768px) 33vw, 100vw"
+        unoptimized={bypassOptimizer}
         className="object-cover object-center transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.05]"
       />
     </div>
