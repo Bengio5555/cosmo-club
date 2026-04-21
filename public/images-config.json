@@ -48,6 +48,30 @@
         "path": "/brand/ai/pastilles.png",
         "orientation": "square",
         "section": "Personnalisation"
+      },
+      "toppings-fruit": {
+        "title": "Toppings fruit",
+        "path": "/brand/ai/pastilles.png",
+        "orientation": "square",
+        "section": "Personnalisation"
+      },
+      "pochoirs": {
+        "title": "Pochoirs",
+        "path": "/brand/ai/glaçons.png",
+        "orientation": "square",
+        "section": "Personnalisation"
+      },
+      "melangeurs": {
+        "title": "Mélangeurs",
+        "path": "/brand/ai/pastilles.png",
+        "orientation": "square",
+        "section": "Personnalisation"
+      },
+      "dessous-de-verre": {
+        "title": "Dessous de verre",
+        "path": "/brand/ai/glaçons.png",
+        "orientation": "square",
+        "section": "Personnalisation"
       }
     },
     "products": {

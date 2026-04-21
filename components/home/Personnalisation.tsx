@@ -1,51 +1,105 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
 
-const tuiles = [
+// Each tile is anchored to a stable slot key that matches the admin's
+// `personnalisation` page in images-config.json. Uploading an image in the
+// admin while that slot is selected replaces the tile's backgroundImage.
+// The num / symbol / text copy stays hard-coded as positional decoration.
+type Tuile = {
+  key: string;
+  num: string;
+  title: string;
+  text: string;
+  symbol: string;
+  defaultImage: string;
+};
+
+const tuilesDefault: Tuile[] = [
   {
+    key: "glacons",
     num: "01",
     title: "Glaçons",
     text: "Logo, fleurs comestibles, fruits ou or fin — gravés dans la glace.",
     symbol: "◈",
-    backgroundImage: "url(/brand/ai/glaçons.png)",
+    defaultImage: "/brand/ai/glaçons.png",
   },
   {
+    key: "pastilles",
     num: "02",
     title: "Pastilles",
     text: "Des disques comestibles qui flottent à la surface — logo ou motif.",
     symbol: "◉",
-    backgroundImage: "url(/brand/ai/pastilles.png)",
+    defaultImage: "/brand/ai/pastilles.png",
   },
   {
+    key: "toppings-fruit",
     num: "03",
     title: "Toppings fruit",
     text: "Fruits frais sculptés aux initiales ou aux lettres de votre marque.",
     symbol: "✱",
-    backgroundImage: "url(/brand/ai/pastilles.png)",
+    defaultImage: "/brand/ai/pastilles.png",
   },
   {
+    key: "pochoirs",
     num: "04",
     title: "Pochoirs",
     text: "Sur la mousse des lattes, saupoudré au cacao ou au curcuma.",
     symbol: "◇",
-    backgroundImage: "url(/brand/ai/glaçons.png)",
+    defaultImage: "/brand/ai/glaçons.png",
   },
   {
+    key: "melangeurs",
     num: "05",
     title: "Mélangeurs",
     text: "Stirrers personnalisés — bois, cristal, laiton, porte vos lettres.",
     symbol: "│",
-    backgroundImage: "url(/brand/ai/pastilles.png)",
+    defaultImage: "/brand/ai/pastilles.png",
   },
   {
+    key: "dessous-de-verre",
     num: "06",
     title: "Dessous de verre",
     text: "Feutre, liège, marbre — votre motif, votre matière, votre touche.",
     symbol: "◯",
-    backgroundImage: "url(/brand/ai/glaçons.png)",
+    defaultImage: "/brand/ai/glaçons.png",
   },
 ];
 
 export function Personnalisation() {
+  const [paths, setPaths] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/images-full")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((config) => {
+        if (cancelled || !config?.pages?.personnalisation) return;
+        const pagePaths: Record<string, string> = {};
+        for (const [k, v] of Object.entries(config.pages.personnalisation)) {
+          const p = (v as { path?: string })?.path;
+          if (p) pagePaths[k] = p;
+        }
+        setPaths(pagePaths);
+      })
+      .catch(() => {
+        /* fall back to defaults */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const tuiles = tuilesDefault.map((t) => ({
+    ...t,
+    backgroundImage: `url(${paths[t.key] || t.defaultImage})`,
+  }));
+
+  return _Section(tuiles);
+}
+
+function _Section(tuiles: (Tuile & { backgroundImage: string })[]) {
   return (
     <section
       id="personnalisation"

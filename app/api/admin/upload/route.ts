@@ -18,6 +18,8 @@ export async function POST(request: NextRequest) {
     const title = formData.get("title") as string;
     const section = formData.get("section") as string;
     const orientation = formData.get("orientation") as string || "landscape";
+    const targetPage = formData.get("targetPage") as string | null;
+    const targetKey = formData.get("targetKey") as string | null;
 
     if (!file || !imagePath) {
       return NextResponse.json(
@@ -34,10 +36,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get file extension
+    // Build filename. If targetPage and targetKey are provided, prefix the
+    // filename with `{page}__{key}__` so that readers (images-full + admin)
+    // can route the blob to the right slot. We use "__" as the delimiter
+    // since it does not appear in page/key slugs.
     const ext = file.name.split(".").pop() || "png";
     const timestamp = Date.now();
-    const filename = `${imagePath.split("/").pop()?.replace(/\.[^.]+$/, "")}-${timestamp}.${ext}`;
+    const slug = imagePath.split("/").pop()?.replace(/\.[^.]+$/, "") || "image";
+    const base = `${slug}-${timestamp}.${ext}`;
+    const filename = targetPage && targetKey
+      ? `${targetPage}__${targetKey}__${base}`
+      : base;
     const blobPath = `cosmo-club/images/${filename}`;
 
     console.log("Starting upload:", { blobPath, fileSize: file.size, fileType: file.type });

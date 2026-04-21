@@ -42,10 +42,18 @@ export function ImageListPanel({
           }`}
         >
           <p className="text-sm font-bold text-white m-0">
-            {uploading ? "⬆️ Upload..." : "⬆️ Importer"}
+            {uploading
+              ? "⬆️ Upload..."
+              : selectedKey
+              ? "🔄 Remplacer l'image"
+              : "⬆️ Importer"}
           </p>
           <p className="text-xs text-gray-400 m-0">
-            {uploading ? "En cours..." : "Clique ou glisse"}
+            {uploading
+              ? "En cours..."
+              : selectedKey
+              ? `Slot sélectionné : ${selectedKey}`
+              : "Clique ou glisse"}
           </p>
         </label>
       </div>

@@ -85,27 +85,43 @@ export default function AdminPage() {
           if (blobRes.ok) {
             const blobData = await blobRes.json();
 
-            // Add blob images to evenements page
+            // Route blob images: prefixed filenames (`{page}__{key}__...`)
+            // override their target slot; unprefixed fall back to evenements.
             if (blobData.images && blobData.images.length > 0) {
-              // Ensure evenements page exists
               if (!data.pages.evenements) {
                 data.pages.evenements = {};
               }
 
               blobData.images.forEach((img: any) => {
-                const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-").toLowerCase();
-                // Encode blob URL as base64 to match /api/images-full and what image-proxy decodes
+                // Encode blob URL as base64 to match image-proxy expectation
                 const encodedUrl = btoa(img.url);
                 const proxyUrl = `/api/admin/image-proxy?url=${encodedUrl}`;
+                const filename = img.filename as string;
 
-                // Only add if not already in config
+                const prefixMatch = filename.match(/^([^_]+)__([^_]+)__(.+)$/);
+                if (prefixMatch) {
+                  const [, page, key] = prefixMatch;
+                  if (!data.pages[page]) data.pages[page] = {};
+                  const existing = data.pages[page][key] || {};
+                  data.pages[page][key] = {
+                    ...existing,
+                    path: proxyUrl,
+                  };
+                  return;
+                }
+
+                // Unprefixed → evenements gallery
+                const key = filename
+                  .replace(/\.[^.]+$/, "")
+                  .replace(/\W+/g, "-")
+                  .toLowerCase();
                 if (!data.pages.evenements[key]) {
                   data.pages.evenements[key] = {
-                    title: img.filename.replace(/\.[^.]+$/, ""),
+                    title: filename.replace(/\.[^.]+$/, ""),
                     path: proxyUrl,
                     orientation: "landscape",
                     section: "evenements",
-                    label: "Événement" // Default label
+                    label: "Événement",
                   };
                 }
               });
@@ -147,7 +163,19 @@ export default function AdminPage() {
       formData.append("section", selectedPage);
       formData.append("orientation", "landscape");
 
-      console.log("Starting upload...", { file: file.name, page: selectedPage });
+      // If a slot is currently selected in the admin, treat this upload as
+      // a REPLACEMENT for that slot on the current page. The upload API
+      // will prefix the blob filename so readers route it correctly.
+      if (selectedPage && selectedImageKey) {
+        formData.append("targetPage", selectedPage);
+        formData.append("targetKey", selectedImageKey);
+      }
+
+      console.log("Starting upload...", {
+        file: file.name,
+        page: selectedPage,
+        replacingSlot: selectedImageKey || null,
+      });
 
       const res = await fetch("/api/admin/upload", {
         method: "POST",
