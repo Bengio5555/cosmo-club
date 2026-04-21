@@ -130,16 +130,7 @@ body {
   );
 }
 
-/* ─── Custom cursor ───────────────────────────────── */
-@media (hover: hover) and (pointer: fine) {
-  html,
-  body {
-    cursor: none;
-  }
-  a, button, [role="button"], input, textarea, select, label {
-    cursor: none;
-  }
-}
+/* ─── Custom cursor (disabled — restored native system cursor) ────── */
 
 .cursor-dot {
   position: fixed;
