@@ -92,7 +92,15 @@ export default function AdminPage() {
                 data.pages.evenements = {};
               }
 
-              blobData.images.forEach((img: any) => {
+              // Newest blob must win the slot override, so sort ASC by
+              // uploadedAt and let the last iteration take effect.
+              const sortedImages = [...blobData.images].sort((a: any, b: any) => {
+                const ta = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+                const tb = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+                return ta - tb;
+              });
+
+              sortedImages.forEach((img: any) => {
                 // Encode blob URL as base64 to match image-proxy expectation
                 const encodedUrl = btoa(img.url);
                 const proxyUrl = `/api/admin/image-proxy?url=${encodedUrl}`;

@@ -34,7 +34,16 @@ export async function GET(request: NextRequest) {
           config.pages.evenements = {};
         }
 
-        blobs.blobs.forEach((blob) => {
+        // Sort by uploadedAt ASC so the most recent blob is processed last
+        // and therefore wins the slot override (prevents stale replacements
+        // because list() returns blobs in lexicographic pathname order).
+        const sortedBlobs = [...blobs.blobs].sort((a, b) => {
+          const ta = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+          const tb = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+          return ta - tb;
+        });
+
+        sortedBlobs.forEach((blob) => {
           const filename = blob.pathname.split("/").pop() || "";
           const encodedUrl = Buffer.from(blob.url).toString("base64");
           const proxyUrl = `/api/admin/image-proxy?url=${encodedUrl}`;
@@ -44,9 +53,6 @@ export async function GET(request: NextRequest) {
           if (prefixMatch) {
             const [, page, key] = prefixMatch;
             if (!config.pages[page]) config.pages[page] = {};
-            // Override: newest blob wins for this slot (list() is roughly
-            // lexicographic; replacement uploads have a newer timestamp
-            // which sorts last, so this is fine in practice).
             const existing = config.pages[page][key] || {};
             config.pages[page][key] = {
               ...existing,
