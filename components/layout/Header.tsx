@@ -43,10 +43,10 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative text-[12px] uppercase tracking-[0.28em] text-[color:var(--color-espresso)]/80 transition-colors duration-300 hover:text-[color:var(--color-or)]"
+                className="relative text-[12px] uppercase tracking-[0.28em] text-[color:var(--color-espresso)]/80 transition-colors duration-300 hover:text-[color:var(--color-grenat)]"
               >
                 <span>{item.label}</span>
-                <span className="pointer-events-none absolute inset-x-0 -bottom-1 h-px origin-left scale-x-0 bg-[color:var(--color-or)] transition-transform duration-500 ease-[var(--ease-silk)] hover:scale-x-100 group-hover:scale-x-100" />
+                <span className="pointer-events-none absolute inset-x-0 -bottom-1 h-px origin-left scale-x-0 bg-[color:var(--color-grenat)] transition-transform duration-500 ease-[var(--ease-silk)] hover:scale-x-100 group-hover:scale-x-100" />
               </Link>
             ))}
           </nav>
