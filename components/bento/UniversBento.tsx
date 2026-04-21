@@ -116,7 +116,7 @@ function BentoCard({
         <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[color:var(--color-espresso)]/75">
           {description}
         </p>
-        <span className="mt-8 inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-or)] transition-all duration-500 group-hover:gap-5">
+        <span className="mt-8 inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-grenat)] transition-all duration-500 group-hover:gap-5 group-hover:text-[color:var(--color-grenat-glow)]">
           Découvrir
           <span
             aria-hidden
