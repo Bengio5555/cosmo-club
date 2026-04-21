@@ -3,12 +3,13 @@
 import { Reveal } from "@/components/motion/Reveal";
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import galleryEventImg from "@/public/brand/ai/gallery-event.png";
 import heroBarImg from "@/public/brand/ai/hero-bar.png";
 import bentoBarImg from "@/public/brand/ai/bento-bar.png";
 import bentoBaristaImg from "@/public/brand/ai/bento-barista.png";
 import { useImageConfig } from "@/lib/hooks/useImageConfig";
+import { Lightbox } from "@/components/gallery/Lightbox";
 
 type Tile = {
   h: number;
@@ -30,6 +31,7 @@ const defaultTiles: Tile[] = [
 
 export function EventsGallery() {
   const config = useImageConfig();
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const tiles = useMemo<Tile[]>(() => {
     const evenementImages = config?.pages?.evenements || {};
     const entries = Object.values(evenementImages);
@@ -72,10 +74,13 @@ export function EventsGallery() {
 
         <div className="columns-2 gap-4 md:columns-3 lg:columns-4 lg:gap-6">
           {tiles.map((tile, i) => (
-            <figure
+            <button
               key={i}
+              type="button"
+              onClick={() => setLightboxIndex(i)}
+              aria-label={`Ouvrir la photo ${i + 1} — ${tile.label}`}
               style={{ height: `${tile.h}px` }}
-              className="group relative mb-4 break-inside-avoid overflow-hidden rounded-[var(--radius-lg)] shadow-sm transition-shadow duration-500 hover:shadow-md lg:mb-6"
+              className="group relative mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-[var(--radius-lg)] shadow-sm transition-shadow duration-500 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-grenat)] lg:mb-6"
             >
               <Image
                 src={tile.src}
@@ -87,22 +92,29 @@ export function EventsGallery() {
                 style={{ objectPosition: tile.object }}
               />
               {/* Tag visible always */}
-              <div className="absolute inset-x-4 top-4 flex items-start justify-between">
+              <div className="pointer-events-none absolute inset-x-4 top-4 flex items-start justify-between">
                 <span className="eyebrow text-[color:var(--color-grenat)] bg-[color:var(--color-espresso)]/50 backdrop-blur-sm px-2 py-1 rounded-sm">
                   {tile.label}
                 </span>
               </div>
 
               {/* Counter visible on hover */}
-              <figcaption className="absolute inset-x-4 bottom-4 opacity-0 transition-opacity duration-700 group-hover:opacity-100">
-                <span className="font-display text-xs text-[color:var(--color-espresso)]/70">
+              <div className="pointer-events-none absolute inset-x-4 bottom-4 opacity-0 transition-opacity duration-700 group-hover:opacity-100">
+                <span className="font-display text-xs text-[color:var(--color-bone)] bg-[color:var(--color-espresso)]/60 backdrop-blur-sm px-2 py-1 rounded-sm">
                   {String(i + 1).padStart(2, "0")} / {tiles.length}
                 </span>
-              </figcaption>
-            </figure>
+              </div>
+            </button>
           ))}
         </div>
       </div>
+
+      <Lightbox
+        slides={tiles.map((t) => ({ src: t.src, label: t.label }))}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+        onIndexChange={setLightboxIndex}
+      />
     </section>
   );
 }
