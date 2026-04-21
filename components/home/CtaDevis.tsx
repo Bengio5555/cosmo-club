@@ -34,7 +34,7 @@ export function CtaDevis() {
             </Link>
             <a
               href={`tel:${site.phone}`}
-              className="inline-flex items-center gap-3 px-4 py-3 text-[12px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/80 hover:text-[color:var(--color-or)]"
+              className="inline-flex items-center gap-3 px-4 py-3 text-[12px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/80 hover:text-[color:var(--color-grenat)]"
             >
               <span className="h-px w-6 bg-current" />
               {site.phoneDisplay}

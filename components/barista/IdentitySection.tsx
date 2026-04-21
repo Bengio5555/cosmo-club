@@ -45,7 +45,7 @@ export function IdentitySection() {
                   <p className="mt-3 text-[15px] leading-relaxed text-[color:var(--color-espresso)]/80">
                     {item.desc}
                   </p>
-                  <p className="mt-3 text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-or)]">
+                  <p className="mt-3 text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-grenat)]">
                     {item.detail}
                   </p>
                 </div>

@@ -38,7 +38,7 @@ export function ShotsSection() {
                 }}
               />
 
-              <p className="eyebrow text-[color:var(--color-or)]">{col.tag}</p>
+              <p className="eyebrow">{col.tag}</p>
               <h3 className="mt-3 font-display text-3xl text-[color:var(--color-ink-text)] md:text-4xl">
                 {col.title}
               </h3>

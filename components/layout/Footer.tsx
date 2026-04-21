@@ -25,7 +25,7 @@ export function Footer() {
                 <li key={n.href}>
                   <Link
                     href={n.href}
-                    className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-or)]"
+                    className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]"
                   >
                     {n.label}
                   </Link>
@@ -39,12 +39,12 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="text-[color:var(--color-espresso)]/70">{site.address.city} — {site.address.detail}</li>
               <li>
-                <a href={`mailto:${site.email}`} className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-or)]">
+                <a href={`mailto:${site.email}`} className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]">
                   {site.email}
                 </a>
               </li>
               <li>
-                <a href={`tel:${site.phone}`} className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-or)]">
+                <a href={`tel:${site.phone}`} className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]">
                   {site.phoneDisplay}
                 </a>
               </li>
@@ -59,7 +59,7 @@ export function Footer() {
                   href={site.instagram}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 text-[color:var(--color-espresso)] hover:text-[color:var(--color-or)]"
+                  className="inline-flex items-center gap-2 text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]"
                 >
                   Instagram <span aria-hidden>↗</span>
                 </a>
@@ -69,7 +69,7 @@ export function Footer() {
             <div className="hairline" />
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-[color:var(--color-or)] hover:text-[color:var(--color-grenat)]"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-[color:var(--color-grenat)] hover:text-[color:var(--color-grenat-glow)]"
             >
               Demander un devis <span aria-hidden>→</span>
             </Link>

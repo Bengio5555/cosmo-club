@@ -93,7 +93,7 @@ export function StandsSection() {
               </svg>
 
               <div className="flex items-baseline justify-between">
-                <p className="eyebrow text-[color:var(--color-or)]">0{i + 1} · {s.range}</p>
+                <p className="eyebrow">0{i + 1} · {s.range}</p>
                 <span className="font-display text-xs tracking-[0.3em] text-[color:var(--color-espresso)]/40">
                   {i === 2 ? "Signature" : i === 1 ? "Recommandé" : "Essentiel"}
                 </span>

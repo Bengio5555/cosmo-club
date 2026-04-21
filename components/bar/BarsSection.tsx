@@ -41,7 +41,7 @@ export function BarsSection() {
 
               <div className="relative flex items-start justify-between gap-6">
                 <div>
-                  <p className="eyebrow text-[color:var(--color-or)]">
+                  <p className="eyebrow">
                     0{i + 1} · {b.tagline}
                   </p>
                   <h3 className="mt-3 font-display text-4xl text-[color:var(--color-ink-text)] md:text-5xl">
@@ -64,7 +64,7 @@ export function BarsSection() {
                 {b.desc}
               </p>
               <div className="relative mt-6 flex items-center justify-between border-t border-[color:var(--color-ash)]/60 pt-4 text-[10px] uppercase tracking-[0.32em]">
-                <span className="text-[color:var(--color-or)]">{b.capacity}</span>
+                <span className="text-[color:var(--color-grenat)]">{b.capacity}</span>
                 <span className="text-[color:var(--color-espresso)]/40">Sur-mesure</span>
               </div>
             </Reveal>

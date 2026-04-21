@@ -78,7 +78,7 @@ function LatteCard({ latte, delay }: { latte: Latte; delay: number }) {
       </div>
 
       <div className="relative flex items-baseline justify-between">
-        <p className="eyebrow text-[color:var(--color-or)]">{latte.num} · {latte.origin}</p>
+        <p className="eyebrow">{latte.num} · {latte.origin}</p>
         <span
           className="font-display text-xs tracking-[0.3em]"
           style={{ color: latte.hue.soft }}

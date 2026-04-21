@@ -103,7 +103,7 @@ function BentoCard({
       />
 
       <div className="flex items-start justify-between gap-6">
-        <span className="eyebrow text-[color:var(--color-or)]">{kicker}</span>
+        <span className="eyebrow">{kicker}</span>
         <span className="font-display text-xs tracking-[0.3em] text-[color:var(--color-espresso)]/50">
           {index}
         </span>

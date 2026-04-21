@@ -135,7 +135,7 @@ export function DevisWizard() {
             "inline-flex items-center gap-2 px-2 py-2 text-[11px] uppercase tracking-[0.28em] transition-colors",
             step === 1
               ? "cursor-not-allowed text-[color:var(--color-espresso)]/25"
-              : "text-[color:var(--color-espresso)]/70 hover:text-[color:var(--color-or)]",
+              : "text-[color:var(--color-espresso)]/70 hover:text-[color:var(--color-grenat)]",
           )}
         >
           <ArrowLeft className="h-3 w-3" /> Retour
@@ -407,7 +407,7 @@ function SuccessScreen({ firstName }: { firstName: string }) {
           href="https://www.instagram.com/cosmoclubparis"
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-or)] px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-or)] hover:bg-[color:var(--color-or)] hover:text-[color:var(--color-ink-text)] transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-grenat)] px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-grenat)] hover:bg-[color:var(--color-grenat)] hover:text-[color:var(--color-bone)] transition-colors"
         >
           @cosmoclubparis <span aria-hidden>↗</span>
         </a>

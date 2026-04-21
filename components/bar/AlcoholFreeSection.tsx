@@ -31,7 +31,7 @@ export function AlcoholFreeSection() {
           {/* Juice Bar */}
           <Reveal className="relative overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream)] p-8 md:p-12">
             <div className="flex items-baseline justify-between">
-              <p className="eyebrow text-[color:var(--color-or)]">01 Juice bar</p>
+              <p className="eyebrow">01 Juice bar</p>
               <span className="font-display text-xs tracking-[0.3em] text-[color:var(--color-espresso)]/40">
                 Pressé minute
               </span>
@@ -55,7 +55,7 @@ export function AlcoholFreeSection() {
             className="relative overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream)] p-8 md:p-12"
           >
             <div className="flex items-baseline justify-between">
-              <p className="eyebrow text-[color:var(--color-or)]">02 Mocktails</p>
+              <p className="eyebrow">02 Mocktails</p>
               <span className="font-display text-xs tracking-[0.3em] text-[color:var(--color-espresso)]/40">
                 Zero proof
               </span>

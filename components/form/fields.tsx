@@ -124,7 +124,7 @@ export function OptionCard({
         }}
       />
       <div className="relative flex items-start justify-between gap-6">
-        <span className="font-display text-sm tracking-[0.3em] text-[color:var(--color-or)]">
+        <span className="font-display text-sm tracking-[0.3em] text-[color:var(--color-grenat)]">
           {index}
         </span>
         <span
