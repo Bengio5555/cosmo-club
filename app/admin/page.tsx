@@ -94,7 +94,9 @@ export default function AdminPage() {
 
               blobData.images.forEach((img: any) => {
                 const key = img.filename.replace(/\.[^.]+$/, "").replace(/\W+/g, "-").toLowerCase();
-                const proxyUrl = `/api/admin/image-proxy?url=${encodeURIComponent(img.url)}`;
+                // Encode blob URL as base64 to match /api/images-full and what image-proxy decodes
+                const encodedUrl = btoa(img.url);
+                const proxyUrl = `/api/admin/image-proxy?url=${encodedUrl}`;
 
                 // Only add if not already in config
                 if (!data.pages.evenements[key]) {
@@ -228,13 +230,22 @@ export default function AdminPage() {
 
     // Delete uploaded image from Blob
     try {
-      // Extract blob URL from proxy URL
+      // Extract blob URL from proxy URL (decoded from base64)
       const proxyUrl = imageData.path;
-      const urlParam = new URLSearchParams(proxyUrl.split("?")[1]).get("url");
+      const encodedParam = new URLSearchParams(proxyUrl.split("?")[1]).get("url");
 
-      if (!urlParam) {
+      if (!encodedParam) {
         setMessage("❌ Impossible de supprimer: URL invalide");
         return;
+      }
+
+      // Decode base64 to recover the original blob URL
+      let blobUrl: string;
+      try {
+        blobUrl = atob(encodedParam);
+      } catch {
+        // Fallback: treat as already-decoded URL (older uploads)
+        blobUrl = encodedParam;
       }
 
       const deleteRes = await fetch("/api/admin/delete-image", {
@@ -243,7 +254,7 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           "x-admin-password": password,
         },
-        body: JSON.stringify({ url: urlParam }),
+        body: JSON.stringify({ url: blobUrl }),
       });
 
       if (deleteRes.ok) {
