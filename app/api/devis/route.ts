@@ -29,29 +29,77 @@ function toDbEventType(
   return (allowed as string[]).includes(v) ? (v as Database["public"]["Enums"]["event_type"]) : "autre";
 }
 
+// The form accepts a free-form date string ("14 juin 2026", "printemps 2026"…).
+// Postgres DATE is strict so we only populate `event_date` when we can coerce
+// to a valid ISO date — otherwise we keep the raw text inside `raw_payload`
+// and leave the column null. Prevents the whole insert from failing because
+// of a human-friendly date.
+function toDbDate(v: string | null | undefined): string | null {
+  if (!v) return null;
+  const s = v.trim();
+  // Already ISO-like? 2026-04-22 / 2026/04/22
+  if (/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(s)) {
+    const iso = s.replace(/\//g, "-");
+    const d = new Date(iso);
+    if (!Number.isNaN(d.getTime())) return iso;
+  }
+  // DD/MM/YYYY or DD-MM-YYYY
+  const m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+  if (m) {
+    const [, dd, mm, yyyy] = m;
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+  }
+  // Anything else (eg. "14 juin 2026", "printemps 2026") → skip. The original
+  // text is preserved in raw_payload so the owner can read it in the admin.
+  return null;
+}
+
 // Persist the lead into the `leads` table. Non-blocking: failures are logged
 // and swallowed so the user still gets a successful response if the email
 // went through.
 async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return; // Supabase not configured yet — skip silently.
+  const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const hasKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!hasUrl || !hasKey) {
+    console.warn(
+      "[persistLead] skipped — missing env. supabaseUrl=",
+      hasUrl,
+      "serviceRoleKey=",
+      hasKey,
+    );
+    return;
   }
   try {
     const supabase = createAdminClient();
-    await supabase.from("leads").insert({
+    const payload = {
       source: "site",
-      status: "nouveau",
+      status: "nouveau" as const,
       contact_name: `${data.firstName} ${data.lastName}`.trim(),
       contact_email: data.email,
       contact_phone: data.phone,
       event_type: toDbEventType(data.eventType),
-      event_date: data.date || null,
-      guests_count: typeof data.guests === "number" ? data.guests : Number(data.guests) || null,
+      event_date: toDbDate(data.date),
+      guests_count:
+        typeof data.guests === "number"
+          ? data.guests
+          : data.guests != null
+          ? Number(data.guests) || null
+          : null,
       message: data.message || null,
       raw_payload: data as unknown as Database["public"]["Tables"]["leads"]["Insert"]["raw_payload"],
-    });
+    };
+    const { data: inserted, error } = await supabase
+      .from("leads")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (error) {
+      console.error("[persistLead] insert error:", error.message, error.details, error.hint);
+      return;
+    }
+    console.log("[persistLead] ok id=", inserted?.id);
   } catch (err) {
-    console.error("lead_persist_error", err);
+    console.error("[persistLead] thrown:", err);
   }
 }
 
