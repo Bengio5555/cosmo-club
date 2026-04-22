@@ -5,7 +5,6 @@ import {
   Text as _Text,
   View as _View,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 import type { CoursesData } from "./computeCoursesData";
 import { formatDateFR, formatEUR } from "@/lib/format";
@@ -29,33 +28,15 @@ const View = _View as unknown as React.FC<any>;
  * in react-pdf primitives so the output is a real vector PDF — no
  * browser / rasterisation required.
  *
- * Fonts are loaded via Google Fonts to match the editorial brand
- * (Fraunces for display, Inter for body). Both are license-permissive
- * and small enough to inline on a serverless response.
+ * Uses react-pdf's bundled PDF core fonts (Helvetica + Times-Roman)
+ * to avoid any runtime font fetch on Vercel serverless. Custom brand
+ * fonts can be added later via Font.register with a local
+ * /public/fonts asset if we want Fraunces/Inter exactly.
  */
-
-Font.register({
-  family: "Fraunces",
-  src: "https://cdn.jsdelivr.net/fontsource/fonts/fraunces@latest/latin-500-normal.ttf",
-  fontWeight: 500,
-});
-Font.register({
-  family: "Inter",
-  fonts: [
-    {
-      src: "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.ttf",
-      fontWeight: 500,
-    },
-    {
-      src: "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.ttf",
-      fontWeight: 600,
-    },
-  ],
-});
+const DISPLAY = "Times-Roman";
+const DISPLAY_BOLD = "Times-Bold";
+const BODY = "Helvetica";
+const BODY_BOLD = "Helvetica-Bold";
 
 const c = {
   ink: "#1a1614",
@@ -66,7 +47,7 @@ const c = {
 
 const s = StyleSheet.create({
   page: {
-    fontFamily: "Inter",
+    fontFamily: BODY,
     fontSize: 10,
     color: c.ink,
     padding: 40,
@@ -92,9 +73,8 @@ const s = StyleSheet.create({
     fontWeight: 500,
   },
   title: {
-    fontFamily: "Fraunces",
+    fontFamily: DISPLAY_BOLD,
     fontSize: 20,
-    fontWeight: 500,
     color: c.ink,
     marginBottom: 6,
   },
@@ -104,7 +84,7 @@ const s = StyleSheet.create({
   },
   metaStrong: {
     color: c.ink,
-    fontWeight: 500,
+    fontFamily: BODY_BOLD,
   },
   menuBlock: {
     width: 200,
@@ -143,9 +123,8 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   supplierName: {
-    fontFamily: "Fraunces",
+    fontFamily: DISPLAY_BOLD,
     fontSize: 13,
-    fontWeight: 500,
   },
   supplierCount: {
     fontSize: 7,
@@ -191,9 +170,9 @@ const s = StyleSheet.create({
   colPU: { width: 46, textAlign: "right" },
   colTotal: { width: 54, textAlign: "right" },
   cellText: { fontSize: 10, color: c.ink },
-  prodName: { fontWeight: 500 },
+  prodName: { fontFamily: BODY_BOLD },
   prodSub: { fontSize: 7.5, color: c.muted, marginTop: 1.5 },
-  qtyBig: { fontSize: 11, fontWeight: 600 },
+  qtyBig: { fontSize: 11, fontFamily: BODY_BOLD },
   unitSmall: { fontSize: 7.5, color: c.muted, textTransform: "lowercase" },
 
   /* Subtotal */
@@ -204,7 +183,7 @@ const s = StyleSheet.create({
     paddingTop: 4,
   },
   subtotalLabel: { fontSize: 9, color: c.muted },
-  subtotalValue: { fontSize: 9, fontWeight: 600, color: c.ink },
+  subtotalValue: { fontSize: 9, fontFamily: BODY_BOLD, color: c.ink },
 
   /* Total */
   totalBlock: {
@@ -217,14 +196,12 @@ const s = StyleSheet.create({
     alignItems: "baseline",
   },
   totalLabel: {
-    fontFamily: "Fraunces",
+    fontFamily: DISPLAY_BOLD,
     fontSize: 15,
-    fontWeight: 500,
   },
   totalValue: {
-    fontFamily: "Fraunces",
+    fontFamily: DISPLAY_BOLD,
     fontSize: 18,
-    fontWeight: 500,
   },
 
   /* Footer */
