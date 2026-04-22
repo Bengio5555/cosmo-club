@@ -102,20 +102,6 @@
         "section": "Galerie Événements"
       }
     },
-    "gallery": {
-      "bento-bar": {
-        "title": "Bento Bar",
-        "path": "/brand/ai/bento-bar-cocktails.png",
-        "orientation": "portrait",
-        "section": "Galerie"
-      },
-      "bento-barista": {
-        "title": "Bento Barista",
-        "path": "/brand/ai/bento-barista.png",
-        "orientation": "portrait",
-        "section": "Galerie"
-      }
-    },
     "lattes": {
       "latte-matcha": {
         "title": "Matcha Latte",
