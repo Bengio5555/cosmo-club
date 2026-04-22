@@ -1,0 +1,314 @@
+/*
+ * Print-friendly shopping list styles. Scoped to the courses page so it
+ * won't leak into the rest of the dashboard. On print we hide the
+ * dashboard chrome (sidebar / topbar / mobile nav) via aggressive
+ * selectors and reset the page to a plain A4 layout.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600&family=Inter:wght@400;500;600&display=swap");
+
+:root {
+  --paper: #fbfaf7;
+  --ink: #1a1614;
+  --muted: #5a5147;
+  --line: #dcd6c9;
+  --grenat: #8b1a1a;
+}
+
+.courses-body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  font-weight: 400;
+  line-height: 1.55;
+  min-height: 100vh;
+  padding: 24px 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.courses-toolbar {
+  max-width: 820px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.courses-toolbar .left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+.courses-toolbar .right {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.courses-toolbar a,
+.courses-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid #262626;
+  background: #171717;
+  color: #e5e5e5;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.courses-toolbar a:hover,
+.courses-toolbar button:hover {
+  background: #262626;
+}
+.courses-toolbar .primary {
+  background: var(--grenat);
+  border-color: var(--grenat);
+  color: #f5efe0;
+}
+.courses-toolbar .primary:hover {
+  background: #a62222;
+}
+
+.courses {
+  max-width: 820px;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 48px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.06);
+}
+
+.courses-header {
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.courses-eyebrow {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--grenat);
+  margin-bottom: 6px;
+}
+
+.courses-title {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.courses-meta {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.courses-meta strong {
+  color: var(--ink);
+}
+
+.courses-menu {
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+  max-width: 240px;
+}
+.courses-menu dt {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 4px;
+}
+.courses-menu dd {
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* Supplier groups */
+.supplier-group {
+  margin-bottom: 28px;
+}
+.supplier-group:last-child {
+  margin-bottom: 0;
+}
+.supplier-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 8px;
+}
+.supplier-name {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.supplier-count {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+.courses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.courses-table thead th {
+  text-align: left;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+}
+.courses-table tbody td {
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.courses-table .check {
+  width: 24px;
+}
+.courses-table .check span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1.2px solid var(--ink);
+  border-radius: 2px;
+  vertical-align: middle;
+}
+.courses-table .prod-name {
+  color: var(--ink);
+  font-weight: 500;
+}
+.courses-table .prod-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.courses-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.courses-table .qty {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.courses-table .unit {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+}
+
+.supplier-subtotal {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 6px 0;
+  font-size: 11px;
+  color: var(--muted);
+  gap: 6px;
+}
+.supplier-subtotal strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.courses-totals {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 2px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.courses-totals .label {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+.courses-totals .value {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.courses-footer {
+  margin-top: 40px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.7;
+  text-align: center;
+}
+
+.courses-empty {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  background: rgba(139, 26, 26, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+/* ─── Print ─── */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  /* Kill every bit of dashboard chrome. */
+  aside,
+  header.sticky,
+  nav.sticky,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  .courses-body {
+    padding: 0;
+  }
+  .courses {
+    box-shadow: none;
+    border: none;
+    max-width: none;
+    padding: 0;
+  }
+  .courses-toolbar {
+    display: none;
+  }
+  .supplier-group {
+    break-inside: avoid;
+  }
+}

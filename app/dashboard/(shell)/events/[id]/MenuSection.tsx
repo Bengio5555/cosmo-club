@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Calculator,
+  ListChecks,
   Loader2,
   Plus,
   Trash2,
@@ -139,15 +140,25 @@ export function MenuSection({
               : `${menu.length} recette${menu.length > 1 ? "s" : ""} · ${totalCocktails} cocktail${totalCocktails > 1 ? "s" : ""} servis au total`}
           </p>
         </div>
-        {!readOnly && menu.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowCompute(true)}
-            disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200 transition-colors hover:bg-amber-500/20 disabled:opacity-60"
-          >
-            <Calculator className="h-3 w-3" /> Calculer le stock
-          </button>
+        {menu.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/dashboard/events/${eventId}/courses`}
+              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-neutral-100 transition-colors hover:bg-neutral-700"
+            >
+              <ListChecks className="h-3 w-3" /> Liste de courses
+            </Link>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => setShowCompute(true)}
+                disabled={pending}
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200 transition-colors hover:bg-amber-500/20 disabled:opacity-60"
+              >
+                <Calculator className="h-3 w-3" /> Calculer le stock
+              </button>
+            )}
+          </div>
         )}
       </div>
 
