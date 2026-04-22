@@ -20,9 +20,11 @@ import {
   setQuoteStatus,
   sendDevis,
   deleteQuote,
+  createInvoiceFromQuote,
   type SaveQuoteInput,
 } from "./actions";
 import { CatalogPicker, type PickedItem } from "./CatalogPicker";
+import { Receipt } from "lucide-react";
 
 type Quote = Tables<"quotes">;
 type QuoteItem = Tables<"quote_items">;
@@ -224,6 +226,18 @@ export function DevisEditor({
     });
   }
 
+  function createInvoice() {
+    startTransition(async () => {
+      setMsg(null);
+      const res = await createInvoiceFromQuote(quote.id);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      router.push(`/dashboard/factures/${res.invoiceId}`);
+    });
+  }
+
   // ─── Item operations ───────────────────────────────────────
   function addItem(section: string) {
     setItems((prev) => [
@@ -305,6 +319,7 @@ export function DevisEditor({
         onRefuse={() => transition("refuse")}
         onReopen={() => transition("brouillon")}
         onDelete={doDelete}
+        onCreateInvoice={createInvoice}
       />
 
       {msg && (
@@ -515,6 +530,7 @@ function TopBar({
   onRefuse,
   onReopen,
   onDelete,
+  onCreateInvoice,
 }: {
   quote: Quote;
   dirty: boolean;
@@ -525,6 +541,7 @@ function TopBar({
   onRefuse: () => void;
   onReopen: () => void;
   onDelete: () => void;
+  onCreateInvoice: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
@@ -570,6 +587,17 @@ function TopBar({
               <Trash2 className="h-3 w-3" /> Supprimer
             </button>
           </>
+        )}
+
+        {quote.status === "accepte" && (
+          <button
+            type="button"
+            onClick={onCreateInvoice}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
+          >
+            <Receipt className="h-3 w-3" /> Créer la facture
+          </button>
         )}
 
         {quote.status === "envoye" && (

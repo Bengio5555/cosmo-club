@@ -346,6 +346,113 @@ function escape(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Créer une facture brouillon à partir d'un devis accepté.
+ *  - Mint un numéro de facture continu via next_invoice_number()
+ *  - Copie la liste des items (snapshot — les modifs futures du devis ne
+ *    se répercutent pas sur la facture)
+ *  - Pré-remplit subject/event_date/due_date à partir du devis +
+ *    settings.invoice_due_days
+ *  - Ne duplique PAS si une facture existe déjà pour ce devis (retour ok
+ *    avec l'id existant, on renvoie vers la fiche)
+ */
+export async function createInvoiceFromQuote(quoteId: string) {
+  const supabase = await createClient();
+
+  const { data: quote, error: qErr } = await supabase
+    .from("quotes")
+    .select("id,number,status,client_id,event_date,subject,terms,tva_rate,total_ht,total_tva,total_ttc")
+    .eq("id", quoteId)
+    .maybeSingle();
+  if (qErr || !quote) {
+    return { ok: false as const, error: qErr?.message ?? "Devis introuvable" };
+  }
+  if (quote.status !== "accepte") {
+    return {
+      ok: false as const,
+      error: "La facture se crée depuis un devis accepté uniquement.",
+    };
+  }
+
+  // Skip duplication if a facture already exists for this quote.
+  const { data: existing } = await supabase
+    .from("invoices")
+    .select("id")
+    .eq("quote_id", quoteId)
+    .maybeSingle();
+  if (existing) {
+    return { ok: true as const, invoiceId: existing.id, created: false };
+  }
+
+  // Mint the next invoice number (SECURITY DEFINER function).
+  const { data: nbr, error: nbrErr } = await supabase.rpc("next_invoice_number");
+  if (nbrErr || !nbr) {
+    return { ok: false as const, error: nbrErr?.message ?? "Numérotation impossible" };
+  }
+
+  // Due date = today + settings.invoice_due_days (default 30).
+  const { data: settings } = await supabase
+    .from("settings")
+    .select("invoice_due_days")
+    .eq("id", 1)
+    .maybeSingle();
+  const dueDays = settings?.invoice_due_days ?? 30;
+  const issueDate = new Date();
+  const dueDate = new Date(issueDate);
+  dueDate.setDate(dueDate.getDate() + dueDays);
+
+  const { data: invoice, error: iErr } = await supabase
+    .from("invoices")
+    .insert({
+      number: nbr,
+      quote_id: quote.id,
+      client_id: quote.client_id,
+      status: "brouillon",
+      issue_date: issueDate.toISOString().slice(0, 10),
+      due_date: dueDate.toISOString().slice(0, 10),
+      event_date: quote.event_date,
+      subject: quote.subject,
+      terms: quote.terms,
+      tva_rate: quote.tva_rate,
+      total_ht: quote.total_ht,
+      total_tva: quote.total_tva,
+      total_ttc: quote.total_ttc,
+    })
+    .select("id")
+    .single();
+  if (iErr || !invoice) {
+    return { ok: false as const, error: iErr?.message ?? "Création facture échouée" };
+  }
+
+  // Copy the items (snapshot).
+  const { data: items } = await supabase
+    .from("quote_items")
+    .select("position,title,description,qty,unit,unit_price_ht")
+    .eq("quote_id", quote.id)
+    .order("position", { ascending: true });
+
+  if (items && items.length > 0) {
+    const { error: itemsErr } = await supabase.from("invoice_items").insert(
+      items.map((it) => ({
+        invoice_id: invoice.id,
+        position: it.position,
+        title: it.title,
+        description: it.description,
+        qty: it.qty,
+        unit: it.unit,
+        unit_price_ht: it.unit_price_ht,
+      })),
+    );
+    if (itemsErr) return { ok: false as const, error: itemsErr.message };
+  }
+
+  revalidatePath(`/dashboard/devis/${quoteId}`);
+  revalidatePath("/dashboard/factures");
+  revalidatePath("/dashboard");
+
+  return { ok: true as const, invoiceId: invoice.id, created: true };
+}
+
 export async function deleteQuote(id: string) {
   const supabase = await createClient();
   const { data: q } = await supabase.from("quotes").select("id,status,lead_id").eq("id", id).maybeSingle();

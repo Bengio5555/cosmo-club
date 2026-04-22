@@ -1,0 +1,696 @@
+"use client";
+
+import { useMemo, useState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Plus,
+  Trash2,
+  Check,
+  Loader2,
+  Send,
+  Eye,
+  GripVertical,
+  Euro,
+  XCircle,
+  Ban,
+} from "lucide-react";
+import type { Database, Tables } from "@/types/database";
+import { formatEUR } from "@/lib/format";
+import {
+  saveInvoice,
+  setInvoiceStatus,
+  sendInvoice,
+  markInvoicePaid,
+  deleteInvoice,
+  type SaveInvoiceInput,
+} from "./actions";
+
+type Invoice = Tables<"invoices">;
+type InvoiceItem = Tables<"invoice_items">;
+type InvoiceStatus = Database["public"]["Enums"]["invoice_status"];
+
+type EditableItem = {
+  localId: string;
+  dbId?: string;
+  title: string;
+  description: string;
+  qty: number;
+  unit: string;
+  unit_price_ht: number;
+};
+
+function uid() {
+  return `new-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+}
+function round2(n: number) {
+  return Math.round(n * 100) / 100;
+}
+
+export function InvoiceEditor({
+  invoice,
+  items: initialItems,
+}: {
+  invoice: Invoice;
+  items: InvoiceItem[];
+}) {
+  const router = useRouter();
+  const readOnly = invoice.status !== "brouillon";
+
+  // ─── Metadata state ───
+  const [subject, setSubject] = useState(invoice.subject ?? "");
+  const [terms, setTerms] = useState(invoice.terms ?? "");
+  const [issueDate, setIssueDate] = useState<string>(
+    invoice.issue_date ? invoice.issue_date.slice(0, 10) : "",
+  );
+  const [dueDate, setDueDate] = useState<string>(
+    invoice.due_date ? invoice.due_date.slice(0, 10) : "",
+  );
+  const [eventDate, setEventDate] = useState<string>(
+    invoice.event_date ? invoice.event_date.slice(0, 10) : "",
+  );
+  const [tvaRate, setTvaRate] = useState<string>(String(invoice.tva_rate ?? 20));
+
+  const [items, setItems] = useState<EditableItem[]>(() =>
+    initialItems
+      .slice()
+      .sort((a, b) => a.position - b.position)
+      .map((i) => ({
+        localId: i.id,
+        dbId: i.id,
+        title: i.title ?? "",
+        description: i.description ?? "",
+        qty: Number(i.qty ?? 1),
+        unit: i.unit ?? "unité",
+        unit_price_ht: Number(i.unit_price_ht ?? 0),
+      })),
+  );
+
+  // ─── Live totals ───
+  const totalHt = useMemo(
+    () => round2(items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0)),
+    [items],
+  );
+  const tvaNum = Number(tvaRate) || 0;
+  const totalTva = round2((totalHt * tvaNum) / 100);
+  const totalTtc = round2(totalHt + totalTva);
+
+  // ─── Transition + save ───
+  const [pending, startTransition] = useTransition();
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const [baseline, setBaseline] = useState<string>("");
+  useEffect(() => {
+    setBaseline(serialize(toPayload()));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const isDirty = baseline !== "" && serialize(toPayload()) !== baseline;
+
+  function toPayload(): SaveInvoiceInput {
+    return {
+      subject: subject.trim() || null,
+      terms: terms.trim() || null,
+      issue_date: issueDate || new Date().toISOString().slice(0, 10),
+      due_date: dueDate || null,
+      event_date: eventDate || null,
+      tva_rate: tvaNum,
+      items: items.map((it, i) => ({
+        id: it.dbId,
+        position: i,
+        title: it.title.trim(),
+        description: it.description.trim() || null,
+        qty: it.qty,
+        unit: it.unit.trim() || null,
+        unit_price_ht: it.unit_price_ht,
+      })),
+    };
+  }
+
+  function save() {
+    const payload = toPayload();
+    if (payload.items.some((it) => !it.title)) {
+      setMsg({ kind: "err", text: "Chaque ligne a besoin d'un titre." });
+      return;
+    }
+    startTransition(async () => {
+      setMsg(null);
+      const res = await saveInvoice(invoice.id, payload);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      setBaseline(serialize(payload));
+      setMsg({ kind: "ok", text: "Facture enregistrée." });
+      setTimeout(() => setMsg(null), 2500);
+      router.refresh();
+    });
+  }
+
+  function send() {
+    if (
+      !window.confirm(
+        "Figer et envoyer la facture ? Une fois émise, elle ne pourra plus être modifiée (conformité FR).",
+      )
+    )
+      return;
+    startTransition(async () => {
+      setMsg(null);
+      const res = await sendInvoice(invoice.id);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      if (res.emailed) {
+        setMsg({ kind: "ok", text: "Facture émise + envoyée par email ✓" });
+      } else {
+        setMsg({
+          kind: "ok",
+          text: "Facture émise. " + (res.warning ?? "Email non envoyé."),
+        });
+      }
+      setTimeout(() => setMsg(null), 5000);
+      router.refresh();
+    });
+  }
+
+  function markPaid() {
+    startTransition(async () => {
+      const res = await markInvoicePaid(invoice.id);
+      if (!res.ok) setMsg({ kind: "err", text: res.error });
+      else router.refresh();
+    });
+  }
+
+  function transition(next: InvoiceStatus) {
+    startTransition(async () => {
+      const res = await setInvoiceStatus(invoice.id, next);
+      if (!res.ok) setMsg({ kind: "err", text: res.error });
+      else router.refresh();
+    });
+  }
+
+  function doDelete() {
+    if (!window.confirm("Supprimer ce brouillon ? Irréversible.")) return;
+    startTransition(async () => {
+      const res = await deleteInvoice(invoice.id);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      router.replace("/dashboard/factures");
+    });
+  }
+
+  // ─── Item ops ───
+  function addItem() {
+    setItems((prev) => [
+      ...prev,
+      {
+        localId: uid(),
+        title: "",
+        description: "",
+        qty: 1,
+        unit: "unité",
+        unit_price_ht: 0,
+      },
+    ]);
+  }
+  function patchItem(localId: string, patch: Partial<EditableItem>) {
+    setItems((prev) =>
+      prev.map((it) => (it.localId === localId ? { ...it, ...patch } : it)),
+    );
+  }
+  function removeItem(localId: string) {
+    setItems((prev) => prev.filter((it) => it.localId !== localId));
+  }
+
+  return (
+    <div className="px-4 py-6 md:px-8 md:py-8">
+      <TopBar
+        invoice={invoice}
+        dirty={isDirty}
+        pending={pending}
+        onSave={save}
+        onSend={send}
+        onMarkPaid={markPaid}
+        onCancel={() => transition("annule")}
+        onDelete={doDelete}
+      />
+
+      {msg && (
+        <div
+          className={`mt-3 rounded-md border px-3 py-2 text-xs ${
+            msg.kind === "ok"
+              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+              : "border-red-500/40 bg-red-500/10 text-red-200"
+          }`}
+        >
+          {msg.text}
+        </div>
+      )}
+
+      {readOnly && (
+        <div className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-200">
+          Facture verrouillée ({invoice.status}). Pour toute modification, émets
+          un avoir — une facture émise est immuable (art. 242 nonies A du CGI).
+        </div>
+      )}
+
+      <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+        <div className="space-y-5">
+          <Card title="Sujet">
+            <LabeledInput
+              label="Sujet (apparaît en haut de la facture)"
+              value={subject}
+              onChange={setSubject}
+              readOnly={readOnly}
+              placeholder="Facture — Mariage Dubois 14/06/2026"
+            />
+          </Card>
+
+          <Card title="Dates">
+            <Row3>
+              <LabeledInput
+                label="Émission"
+                type="date"
+                value={issueDate}
+                onChange={setIssueDate}
+                readOnly={readOnly}
+              />
+              <LabeledInput
+                label="Échéance"
+                type="date"
+                value={dueDate}
+                onChange={setDueDate}
+                readOnly={readOnly}
+              />
+              <LabeledInput
+                label="Date prestation"
+                type="date"
+                value={eventDate}
+                onChange={setEventDate}
+                readOnly={readOnly}
+              />
+            </Row3>
+          </Card>
+
+          <Card title="Prestations">
+            {items.length === 0 ? (
+              <p className="py-6 text-center text-sm text-neutral-500">
+                Aucune ligne.
+                {!readOnly && (
+                  <>
+                    {" "}
+                    <button onClick={addItem} className="text-neutral-300 underline">
+                      Ajouter la première ligne
+                    </button>
+                  </>
+                )}
+              </p>
+            ) : (
+              <>
+                <div className="divide-y divide-neutral-900">
+                  {items.map((it) => (
+                    <ItemRow
+                      key={it.localId}
+                      item={it}
+                      readOnly={readOnly}
+                      onPatch={(patch) => patchItem(it.localId, patch)}
+                      onRemove={() => removeItem(it.localId)}
+                    />
+                  ))}
+                </div>
+                {!readOnly && (
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={addItem}
+                      className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-neutral-400 transition-colors hover:text-white"
+                    >
+                      <Plus className="h-3 w-3" /> Ajouter une ligne
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </Card>
+
+          <Card title="Mentions / conditions de paiement">
+            <LabeledTextarea
+              label="Mentions complémentaires"
+              value={terms}
+              onChange={setTerms}
+              readOnly={readOnly}
+              rows={3}
+              placeholder="Paiement par virement, RIB ci-joint. Escompte 2% sous 8j."
+            />
+          </Card>
+        </div>
+
+        <aside className="space-y-5">
+          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              Totaux
+            </p>
+            <dl className="space-y-1.5 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-neutral-500">Total HT</dt>
+                <dd className="font-medium text-neutral-100">{formatEUR(totalHt)}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <dt className="flex items-center gap-2 text-neutral-500">
+                  TVA
+                  <input
+                    type="number"
+                    value={tvaRate}
+                    step="0.01"
+                    min="0"
+                    onChange={(e) => setTvaRate(e.target.value)}
+                    disabled={readOnly}
+                    className="w-14 rounded border border-neutral-800 bg-neutral-900 px-1.5 py-0.5 text-right text-xs text-neutral-100 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                  />
+                  %
+                </dt>
+                <dd className="text-neutral-200">{formatEUR(totalTva)}</dd>
+              </div>
+              <div className="flex justify-between border-t border-neutral-800 pt-2 text-base font-semibold">
+                <dt className="text-neutral-300">Total TTC</dt>
+                <dd className="text-white">{formatEUR(totalTtc)}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 text-xs text-neutral-500">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              Workflow
+            </p>
+            <ul className="space-y-1 leading-relaxed">
+              <li>brouillon → envoyée (figé)</li>
+              <li>envoyée → payée / en retard</li>
+              <li>payée / annulée = terminal</li>
+            </ul>
+            <p className="mt-3 text-[11px] leading-relaxed">
+              Pour corriger une facture émise, crée un avoir (à venir).
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function serialize(p: SaveInvoiceInput): string {
+  return JSON.stringify(p);
+}
+
+/* ─── Top bar (status + actions) ─────────────────────────────────── */
+
+function TopBar({
+  invoice,
+  dirty,
+  pending,
+  onSave,
+  onSend,
+  onMarkPaid,
+  onCancel,
+  onDelete,
+}: {
+  invoice: Invoice;
+  dirty: boolean;
+  pending: boolean;
+  onSave: () => void;
+  onSend: () => void;
+  onMarkPaid: () => void;
+  onCancel: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+          Facture
+        </p>
+        <h1 className="font-display text-2xl text-white md:text-3xl">{invoice.number}</h1>
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+          <StatusPill status={invoice.status} />
+          {invoice.sent_at && (
+            <span>Émise le {new Date(invoice.sent_at).toLocaleDateString("fr-FR")}</span>
+          )}
+          {invoice.paid_at && (
+            <span>Payée le {new Date(invoice.paid_at).toLocaleDateString("fr-FR")}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {invoice.status === "brouillon" && (
+          <>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={pending || !dirty}
+              className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              {dirty ? "Enregistrer" : "Enregistré"}
+            </button>
+            <button
+              type="button"
+              onClick={onSend}
+              disabled={pending || dirty}
+              title={dirty ? "Enregistre d'abord" : undefined}
+              className="inline-flex items-center gap-2 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Send className="h-3 w-3" /> Figer & envoyer
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              className="inline-flex items-center gap-1 rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-300 transition-colors hover:bg-red-500/10"
+            >
+              <Trash2 className="h-3 w-3" /> Supprimer
+            </button>
+          </>
+        )}
+
+        {(invoice.status === "envoye" || invoice.status === "en_retard") && (
+          <>
+            <button
+              type="button"
+              onClick={onMarkPaid}
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500"
+            >
+              <Euro className="h-3 w-3" /> Marquer payée
+            </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+            >
+              <Ban className="h-3 w-3" /> Annuler
+            </button>
+          </>
+        )}
+
+        {invoice.status === "paye" && (
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
+            <Check className="h-3 w-3" /> Encaissée
+          </span>
+        )}
+
+        {invoice.status === "annule" && (
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs font-semibold text-neutral-400">
+            <XCircle className="h-3 w-3" /> Annulée
+          </span>
+        )}
+
+        <a
+          href={`/factures/${invoice.number}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+        >
+          <Eye className="h-3 w-3" /> Facture PDF
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function StatusPill({ status }: { status: InvoiceStatus }) {
+  const map: Record<InvoiceStatus, { cls: string; label: string }> = {
+    brouillon: { cls: "border-neutral-700 bg-neutral-800 text-neutral-300", label: "Brouillon" },
+    envoye: { cls: "border-violet-500/40 bg-violet-500/10 text-violet-200", label: "Envoyée" },
+    paye: { cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200", label: "Payée" },
+    en_retard: { cls: "border-red-500/50 bg-red-500/15 text-red-300", label: "En retard" },
+    annule: { cls: "border-neutral-700 bg-neutral-800 text-neutral-400", label: "Annulée" },
+  };
+  const p = map[status];
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${p.cls}`}>
+      {p.label}
+    </span>
+  );
+}
+
+/* ─── Shared primitives ──────────────────────────────────────────── */
+
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+        {title}
+      </p>
+      <div className="space-y-3">{children}</div>
+    </section>
+  );
+}
+
+function Row3({ children }: { children: React.ReactNode }) {
+  return <div className="grid gap-3 md:grid-cols-3">{children}</div>;
+}
+
+function LabeledInput({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  readOnly,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  placeholder?: string;
+  readOnly?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+        {label}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+      />
+    </label>
+  );
+}
+
+function LabeledTextarea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+  readOnly,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+  readOnly?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+        {label}
+      </span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        readOnly={readOnly}
+        className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+      />
+    </label>
+  );
+}
+
+function ItemRow({
+  item,
+  readOnly,
+  onPatch,
+  onRemove,
+}: {
+  item: EditableItem;
+  readOnly: boolean;
+  onPatch: (patch: Partial<EditableItem>) => void;
+  onRemove: () => void;
+}) {
+  const total = item.qty * item.unit_price_ht;
+  return (
+    <div className="grid gap-2 py-2.5 md:grid-cols-[auto_minmax(0,1fr)_72px_88px_100px_24px] md:items-start md:gap-3">
+      <div className="mt-2 hidden text-neutral-600 md:block">
+        <GripVertical className="h-3.5 w-3.5" />
+      </div>
+      <div className="space-y-1">
+        <input
+          type="text"
+          value={item.title}
+          onChange={(e) => onPatch({ title: e.target.value })}
+          placeholder="Intitulé de la prestation"
+          readOnly={readOnly}
+          className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        />
+        <textarea
+          value={item.description}
+          onChange={(e) => onPatch({ description: e.target.value })}
+          placeholder="Description (optionnelle)"
+          rows={1}
+          readOnly={readOnly}
+          className="w-full resize-y rounded-md border border-neutral-800/70 bg-neutral-900/60 px-2.5 py-1.5 text-xs text-neutral-300 placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        />
+      </div>
+      <input
+        type="number"
+        min="0"
+        step="0.5"
+        value={item.qty}
+        onChange={(e) => onPatch({ qty: Number(e.target.value) || 0 })}
+        readOnly={readOnly}
+        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+      />
+      <input
+        type="text"
+        value={item.unit}
+        onChange={(e) => onPatch({ unit: e.target.value })}
+        placeholder="unité"
+        readOnly={readOnly}
+        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+      />
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        value={item.unit_price_ht}
+        onChange={(e) => onPatch({ unit_price_ht: Number(e.target.value) || 0 })}
+        readOnly={readOnly}
+        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+      />
+      <div className="flex items-center justify-end gap-2 md:flex-col md:items-end md:gap-1 md:pt-1">
+        <span className="text-xs font-medium text-neutral-300 md:text-[11px]">
+          {formatEUR(total)}
+        </span>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="rounded text-neutral-500 transition-colors hover:text-red-300"
+            aria-label="Supprimer la ligne"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
