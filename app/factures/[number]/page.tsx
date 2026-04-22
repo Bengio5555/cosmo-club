@@ -12,8 +12,9 @@ const PUBLIC_STATUSES = ["envoye", "paye", "en_retard", "annule"] as const;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { number } = await params;
+  const label = number.startsWith("AV-") ? "Avoir" : "Facture";
   return {
-    title: `Facture ${number} — Cosmo Club Paris`,
+    title: `${label} ${number} — Cosmo Club Paris`,
     robots: { index: false, follow: false },
   };
 }
@@ -53,17 +54,25 @@ export default async function InvoicePage({ params }: { params: Params }) {
     notFound();
   }
 
-  const [{ data: items }, { data: settings }, { data: client }] = await Promise.all([
-    supabase
-      .from("invoice_items")
-      .select("*")
-      .eq("invoice_id", invoice.id)
-      .order("position", { ascending: true }),
-    supabase.from("settings").select("*").eq("id", 1).maybeSingle(),
-    invoice.client_id
-      ? supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
-      : Promise.resolve({ data: null }),
-  ]);
+  const [{ data: items }, { data: settings }, { data: client }, { data: sourceInvoice }] =
+    await Promise.all([
+      supabase
+        .from("invoice_items")
+        .select("*")
+        .eq("invoice_id", invoice.id)
+        .order("position", { ascending: true }),
+      supabase.from("settings").select("*").eq("id", 1).maybeSingle(),
+      invoice.client_id
+        ? supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      invoice.is_credit_note && invoice.source_invoice_id
+        ? supabase
+            .from("invoices")
+            .select("number,issue_date")
+            .eq("id", invoice.source_invoice_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
 
   // Prefer the frozen legal snapshot captured at issuance; fall back to
   // current settings only for drafts that aren't yet stamped (shouldn't
@@ -98,17 +107,25 @@ export default async function InvoicePage({ params }: { params: Params }) {
           </div>
 
           <div className="invoice-title-box">
-            <p className="invoice-eyebrow">Facture</p>
+            <p className="invoice-eyebrow">
+              {invoice.is_credit_note ? "Avoir" : "Facture"}
+            </p>
             <h1 className="invoice-number">{invoice.number}</h1>
             <dl className="invoice-title-meta">
               <div>
-                <dt>Émise le</dt>
+                <dt>Émis{invoice.is_credit_note ? "" : "e"} le</dt>
                 <dd>{formatDateFR(invoice.issue_date)}</dd>
               </div>
-              {invoice.due_date && (
+              {!invoice.is_credit_note && invoice.due_date && (
                 <div>
                   <dt>Échéance</dt>
                   <dd>{formatDateFR(invoice.due_date)}</dd>
+                </div>
+              )}
+              {invoice.is_credit_note && sourceInvoice && (
+                <div>
+                  <dt>Sur facture</dt>
+                  <dd>{sourceInvoice.number}</dd>
                 </div>
               )}
             </dl>
@@ -174,12 +191,23 @@ export default async function InvoicePage({ params }: { params: Params }) {
         </section>
 
         {/* ─── Subject / event context ─── */}
-        {(invoice.subject || invoice.event_date) && (
+        {(invoice.subject || invoice.event_date || invoice.credit_note_reason) && (
           <section className="invoice-subject">
             {invoice.subject && <p className="invoice-subject-line">{invoice.subject}</p>}
             {invoice.event_date && (
               <p className="invoice-subject-sub">
                 Date de la prestation&nbsp;: {formatDateFR(invoice.event_date)}
+              </p>
+            )}
+            {invoice.is_credit_note && invoice.credit_note_reason && (
+              <p className="invoice-subject-sub">
+                Motif&nbsp;: {invoice.credit_note_reason}
+              </p>
+            )}
+            {invoice.is_credit_note && sourceInvoice && (
+              <p className="invoice-subject-sub">
+                Annule/rectifie la facture {sourceInvoice.number} émise le{" "}
+                {formatDateFR(sourceInvoice.issue_date)}.
               </p>
             )}
           </section>
@@ -219,35 +247,53 @@ export default async function InvoicePage({ params }: { params: Params }) {
         {/* ─── Totals ─── */}
         <section className="invoice-totals">
           <div>
-            <p className="invoice-label">Conditions de paiement</p>
-            <p className="invoice-paynotes">
-              {invoice.terms?.trim() || (
-                <>
-                  Paiement par virement{" "}
-                  {legal.iban ? (
+            {invoice.is_credit_note ? (
+              <>
+                <p className="invoice-label">Traitement de l&apos;avoir</p>
+                <p className="invoice-paynotes">
+                  Montant à déduire du solde dû sur la facture d&apos;origine,
+                  ou remboursé par virement sur le compte du client le cas
+                  échéant.
+                </p>
+                {legal.tva_franchise && (
+                  <p className="invoice-paynotes small">
+                    TVA non applicable, art. 293 B du CGI.
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="invoice-label">Conditions de paiement</p>
+                <p className="invoice-paynotes">
+                  {invoice.terms?.trim() || (
                     <>
-                      — IBAN {legal.iban}
-                      {legal.bic ? `, BIC ${legal.bic}` : ""}
+                      Paiement par virement{" "}
+                      {legal.iban ? (
+                        <>
+                          — IBAN {legal.iban}
+                          {legal.bic ? `, BIC ${legal.bic}` : ""}
+                        </>
+                      ) : (
+                        "ou chèque à l'ordre de l'émetteur"
+                      )}
+                      .
                     </>
-                  ) : (
-                    "ou chèque à l'ordre de l'émetteur"
                   )}
-                  .
-                </>
-              )}
-            </p>
-            {legal.penalty_rate_text && (
-              <p className="invoice-paynotes small">
-                {legal.penalty_rate_text}
-              </p>
-            )}
-            <p className="invoice-paynotes small">
-              Indemnité forfaitaire de recouvrement&nbsp;: 40&nbsp;€ (art. L441-10 C. com.).
-            </p>
-            {legal.tva_franchise && (
-              <p className="invoice-paynotes small">
-                TVA non applicable, art. 293 B du CGI.
-              </p>
+                </p>
+                {legal.penalty_rate_text && (
+                  <p className="invoice-paynotes small">
+                    {legal.penalty_rate_text}
+                  </p>
+                )}
+                <p className="invoice-paynotes small">
+                  Indemnité forfaitaire de recouvrement&nbsp;: 40&nbsp;€ (art. L441-10 C. com.).
+                </p>
+                {legal.tva_franchise && (
+                  <p className="invoice-paynotes small">
+                    TVA non applicable, art. 293 B du CGI.
+                  </p>
+                )}
+              </>
             )}
           </div>
 
@@ -270,13 +316,21 @@ export default async function InvoicePage({ params }: { params: Params }) {
               <span>Total TTC</span>
               <span>{formatEUR(invoice.total_ttc)}</span>
             </div>
-            {invoice.status === "paye" && (
+            {!invoice.is_credit_note && invoice.status === "paye" && (
               <p className="invoice-paid">
                 ✓ Facture acquittée le {formatDateFR(invoice.paid_at)}
               </p>
             )}
             {invoice.status === "annule" && (
-              <p className="invoice-cancelled">Facture annulée</p>
+              <p className="invoice-cancelled">
+                {invoice.is_credit_note ? "Avoir annulé" : "Facture annulée"}
+              </p>
+            )}
+            {invoice.is_credit_note && (
+              <p className="invoice-paynotes small" style={{ marginTop: 12 }}>
+                Document rectificatif — article 289, I-2° du CGI. Montant à
+                déduire du solde dû.
+              </p>
             )}
           </div>
         </section>
@@ -291,8 +345,9 @@ export default async function InvoicePage({ params }: { params: Params }) {
               : ""}
           </p>
           <p>
-            Facture {invoice.number} — conservée 10 ans conformément à l&apos;article
-            L123-22 du Code de commerce.
+            {invoice.is_credit_note ? "Avoir" : "Facture"} {invoice.number} —
+            conservé{invoice.is_credit_note ? "" : "e"} 10 ans conformément à
+            l&apos;article L123-22 du Code de commerce.
           </p>
         </footer>
       </article>

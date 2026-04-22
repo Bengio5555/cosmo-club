@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Plus,
   Trash2,
@@ -13,6 +14,9 @@ import {
   Euro,
   XCircle,
   Ban,
+  RotateCcw,
+  ExternalLink,
+  X,
 } from "lucide-react";
 import type { Database, Tables } from "@/types/database";
 import { formatEUR } from "@/lib/format";
@@ -22,6 +26,7 @@ import {
   sendInvoice,
   markInvoicePaid,
   deleteInvoice,
+  createCreditNote,
   type SaveInvoiceInput,
 } from "./actions";
 
@@ -46,15 +51,28 @@ function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
+type CreditNoteRef = { id: string; number: string; status: InvoiceStatus; total_ttc: number };
+type SourceInvoiceRef = { id: string; number: string };
+
 export function InvoiceEditor({
   invoice,
   items: initialItems,
+  sourceInvoice = null,
+  creditNotes = [],
 }: {
   invoice: Invoice;
   items: InvoiceItem[];
+  sourceInvoice?: SourceInvoiceRef | null;
+  creditNotes?: CreditNoteRef[];
 }) {
   const router = useRouter();
   const readOnly = invoice.status !== "brouillon";
+  const isCreditNote = invoice.is_credit_note;
+  const canIssueCreditNote =
+    !isCreditNote && ["envoye", "en_retard", "paye"].includes(invoice.status);
+
+  const [creditModal, setCreditModal] = useState(false);
+  const [creditReason, setCreditReason] = useState("");
 
   // ─── Metadata state ───
   const [subject, setSubject] = useState(invoice.subject ?? "");
@@ -200,6 +218,18 @@ export function InvoiceEditor({
     });
   }
 
+  function issueCreditNote() {
+    startTransition(async () => {
+      const res = await createCreditNote(invoice.id, creditReason.trim() || null);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      setCreditModal(false);
+      router.push(`/dashboard/factures/${res.creditNoteId}`);
+    });
+  }
+
   // ─── Item ops ───
   function addItem() {
     setItems((prev) => [
@@ -229,12 +259,58 @@ export function InvoiceEditor({
         invoice={invoice}
         dirty={isDirty}
         pending={pending}
+        canIssueCreditNote={canIssueCreditNote}
         onSave={save}
         onSend={send}
         onMarkPaid={markPaid}
         onCancel={() => transition("annule")}
         onDelete={doDelete}
+        onOpenCreditNote={() => {
+          setCreditReason("");
+          setCreditModal(true);
+        }}
       />
+
+      {isCreditNote && sourceInvoice && (
+        <div className="mt-3 rounded-md border border-violet-500/30 bg-violet-500/5 px-3 py-2 text-xs text-violet-200 flex items-center justify-between gap-3">
+          <span>
+            Avoir rattaché à la facture{" "}
+            <Link
+              href={`/dashboard/factures/${sourceInvoice.id}`}
+              className="font-medium underline decoration-dotted underline-offset-4"
+            >
+              {sourceInvoice.number}
+            </Link>
+            {invoice.credit_note_reason ? ` · motif : ${invoice.credit_note_reason}` : ""}
+          </span>
+        </div>
+      )}
+
+      {!isCreditNote && creditNotes.length > 0 && (
+        <div className="mt-3 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 mb-1">
+            Avoirs émis
+          </p>
+          <ul className="space-y-1">
+            {creditNotes.map((cn) => (
+              <li key={cn.id} className="flex items-center justify-between gap-3">
+                <Link
+                  href={`/dashboard/factures/${cn.id}`}
+                  className="inline-flex items-center gap-1.5 text-neutral-200 hover:text-white"
+                >
+                  <ExternalLink className="h-3 w-3" /> {cn.number}
+                  <span className="text-[10px] uppercase tracking-wide text-neutral-500">
+                    · {cn.status}
+                  </span>
+                </Link>
+                <span className="font-medium text-violet-200">
+                  {formatEUR(Number(cn.total_ttc))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {msg && (
         <div
@@ -389,11 +465,67 @@ export function InvoiceEditor({
               <li>payée / annulée = terminal</li>
             </ul>
             <p className="mt-3 text-[11px] leading-relaxed">
-              Pour corriger une facture émise, crée un avoir (à venir).
+              Pour corriger une facture émise, clique « Avoir ».
             </p>
           </div>
         </aside>
       </div>
+
+      {creditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl">
+            <div className="mb-3 flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                  Émettre un avoir
+                </p>
+                <h2 className="mt-1 font-display text-lg text-white">
+                  Sur la facture {invoice.number}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCreditModal(false)}
+                className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+                aria-label="Fermer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mb-4 text-xs leading-relaxed text-neutral-400">
+              L&apos;avoir duplique les lignes en quantités négatives (TTC{" "}
+              {formatEUR(-Number(invoice.total_ttc))}). Tu pourras l&apos;ajuster
+              en brouillon avant émission — par ex. avoir partiel.
+            </p>
+            <LabeledTextarea
+              label="Motif (apparaît sur l'avoir)"
+              value={creditReason}
+              onChange={setCreditReason}
+              rows={2}
+              placeholder="Geste commercial suite à prestation écourtée, etc."
+            />
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setCreditModal(false)}
+                disabled={pending}
+                className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={issueCreditNote}
+                disabled={pending}
+                className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:opacity-60"
+              >
+                {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                Créer l&apos;avoir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -408,26 +540,30 @@ function TopBar({
   invoice,
   dirty,
   pending,
+  canIssueCreditNote,
   onSave,
   onSend,
   onMarkPaid,
   onCancel,
   onDelete,
+  onOpenCreditNote,
 }: {
   invoice: Invoice;
   dirty: boolean;
   pending: boolean;
+  canIssueCreditNote: boolean;
   onSave: () => void;
   onSend: () => void;
   onMarkPaid: () => void;
   onCancel: () => void;
   onDelete: () => void;
+  onOpenCreditNote: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
       <div>
         <p className="text-[11px] uppercase tracking-wide text-neutral-500">
-          Facture
+          {invoice.is_credit_note ? "Avoir" : "Facture"}
         </p>
         <h1 className="font-display text-2xl text-white md:text-3xl">{invoice.number}</h1>
         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
@@ -505,13 +641,24 @@ function TopBar({
           </span>
         )}
 
+        {canIssueCreditNote && (
+          <button
+            type="button"
+            onClick={onOpenCreditNote}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-md border border-violet-500/40 bg-violet-500/10 px-3 py-2 text-xs font-semibold text-violet-200 transition-colors hover:bg-violet-500/20 disabled:opacity-60"
+          >
+            <RotateCcw className="h-3 w-3" /> Avoir
+          </button>
+        )}
+
         <a
           href={`/factures/${invoice.number}`}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
         >
-          <Eye className="h-3 w-3" /> Facture PDF
+          <Eye className="h-3 w-3" /> {invoice.is_credit_note ? "Avoir PDF" : "Facture PDF"}
         </a>
       </div>
     </div>

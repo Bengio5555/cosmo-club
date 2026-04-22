@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft, ExternalLink, Mail, Phone, FileText } from "lucide-react";
 import { InvoiceEditor } from "./InvoiceEditor";
+import { PaymentsSection } from "./PaymentsSection";
 
 type Params = Promise<{ id: string }>;
 
@@ -10,22 +11,44 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: invoice }, { data: items }] = await Promise.all([
+  const [{ data: invoice }, { data: items }, { data: payments }] = await Promise.all([
     supabase.from("invoices").select("*").eq("id", id).maybeSingle(),
     supabase
       .from("invoice_items")
       .select("*")
       .eq("invoice_id", id)
       .order("position", { ascending: true }),
+    supabase
+      .from("invoice_payments")
+      .select("*")
+      .eq("invoice_id", id)
+      .order("paid_on", { ascending: false }),
   ]);
 
   if (!invoice) {
     notFound();
   }
 
-  const { data: client } = invoice.client_id
-    ? await supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
-    : { data: null };
+  const [{ data: client }, { data: sourceInvoice }, { data: creditNotes }] =
+    await Promise.all([
+      invoice.client_id
+        ? supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      invoice.source_invoice_id
+        ? supabase
+            .from("invoices")
+            .select("id,number")
+            .eq("id", invoice.source_invoice_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+      !invoice.is_credit_note
+        ? supabase
+            .from("invoices")
+            .select("id,number,status,total_ttc")
+            .eq("source_invoice_id", invoice.id)
+            .order("created_at", { ascending: false })
+        : Promise.resolve({ data: [] }),
+    ]);
 
   return (
     <>
@@ -38,7 +61,26 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
         </Link>
       </div>
 
-      <InvoiceEditor invoice={invoice} items={items ?? []} />
+      <InvoiceEditor
+        invoice={invoice}
+        items={items ?? []}
+        sourceInvoice={sourceInvoice ?? null}
+        creditNotes={creditNotes ?? []}
+      />
+
+      {!invoice.is_credit_note &&
+        (invoice.status === "envoye" ||
+          invoice.status === "en_retard" ||
+          invoice.status === "paye") && (
+          <div className="px-4 pb-6 md:px-8">
+            <PaymentsSection
+              invoiceId={invoice.id}
+              invoiceStatus={invoice.status}
+              totalTtc={Number(invoice.total_ttc)}
+              payments={payments ?? []}
+            />
+          </div>
+        )}
 
       <div className="border-t border-neutral-900 px-4 py-6 md:px-8">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">

@@ -302,6 +302,140 @@ export async function sendInvoice(id: string) {
   }
 }
 
+/**
+ * Créer un avoir (credit note) à partir d'une facture émise.
+ *  - Duplique items et totaux de la facture source
+ *  - Négation des quantités → le TTC devient négatif par défaut
+ *  - Status `brouillon`; l'owner peut ensuite ajuster pour un avoir partiel
+ *  - Numérotation dédiée AV-YYYY-NNNNN (séquence annuelle)
+ *  - Le `reason` est stocké pour traçabilité (art. 289 CGI)
+ */
+export async function createCreditNote(
+  sourceInvoiceId: string,
+  reason: string | null,
+) {
+  const supabase = await createClient();
+
+  const { data: src, error: sErr } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("id", sourceInvoiceId)
+    .maybeSingle();
+  if (sErr || !src) {
+    return { ok: false as const, error: sErr?.message ?? "Facture source introuvable" };
+  }
+  if (src.is_credit_note) {
+    return { ok: false as const, error: "Un avoir ne peut pas être créé depuis un avoir." };
+  }
+  if (!["envoye", "paye", "en_retard"].includes(src.status)) {
+    return {
+      ok: false as const,
+      error: "Un avoir n'est créable que sur une facture émise.",
+    };
+  }
+
+  const { data: nbr, error: nbrErr } = await supabase.rpc("next_credit_note_number");
+  if (nbrErr || !nbr) {
+    return { ok: false as const, error: nbrErr?.message ?? "Numérotation impossible" };
+  }
+
+  const issueDate = new Date().toISOString().slice(0, 10);
+
+  const { data: credit, error: cErr } = await supabase
+    .from("invoices")
+    .insert({
+      number: nbr,
+      quote_id: src.quote_id,
+      client_id: src.client_id,
+      status: "brouillon",
+      issue_date: issueDate,
+      due_date: null,
+      event_date: src.event_date,
+      subject: `Avoir sur facture ${src.number}`,
+      terms: src.terms,
+      tva_rate: src.tva_rate,
+      total_ht: -src.total_ht,
+      total_tva: -src.total_tva,
+      total_ttc: -src.total_ttc,
+      is_credit_note: true,
+      source_invoice_id: src.id,
+      credit_note_reason: reason,
+    })
+    .select("id")
+    .single();
+  if (cErr || !credit) {
+    return { ok: false as const, error: cErr?.message ?? "Création avoir échouée" };
+  }
+
+  // Copy items with negated quantities.
+  const { data: items } = await supabase
+    .from("invoice_items")
+    .select("position,title,description,qty,unit,unit_price_ht")
+    .eq("invoice_id", src.id)
+    .order("position", { ascending: true });
+
+  if (items && items.length > 0) {
+    const { error: itemsErr } = await supabase.from("invoice_items").insert(
+      items.map((it) => ({
+        invoice_id: credit.id,
+        position: it.position,
+        title: it.title,
+        description: it.description,
+        qty: -(it.qty ?? 0),
+        unit: it.unit,
+        unit_price_ht: it.unit_price_ht,
+      })),
+    );
+    if (itemsErr) return { ok: false as const, error: itemsErr.message };
+  }
+
+  revalidatePath(`/dashboard/factures/${sourceInvoiceId}`);
+  revalidatePath("/dashboard/factures");
+  revalidatePath("/dashboard");
+
+  return { ok: true as const, creditNoteId: credit.id };
+}
+
+/* ─── Payments ──────────────────────────────────────────────────── */
+
+export async function addPayment(
+  invoiceId: string,
+  input: {
+    amount: number;
+    paid_on: string; // YYYY-MM-DD
+    method?: string | null;
+    reference?: string | null;
+    notes?: string | null;
+  },
+) {
+  if (!Number.isFinite(input.amount) || input.amount === 0) {
+    return { ok: false as const, error: "Le montant doit être différent de zéro." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.from("invoice_payments").insert({
+    invoice_id: invoiceId,
+    amount: input.amount,
+    paid_on: input.paid_on,
+    method: input.method?.trim() || null,
+    reference: input.reference?.trim() || null,
+    notes: input.notes?.trim() || null,
+  });
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/factures/${invoiceId}`);
+  revalidatePath("/dashboard/factures");
+  revalidatePath("/dashboard");
+  return { ok: true as const };
+}
+
+export async function removePayment(paymentId: string, invoiceId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("invoice_payments").delete().eq("id", paymentId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/factures/${invoiceId}`);
+  revalidatePath("/dashboard/factures");
+  return { ok: true as const };
+}
+
 export async function deleteInvoice(id: string) {
   const supabase = await createClient();
   const { data: inv } = await supabase

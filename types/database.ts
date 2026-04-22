@@ -75,9 +75,11 @@ export type Database = {
           archived_pdf_url: string | null
           client_id: string | null
           created_at: string
+          credit_note_reason: string | null
           due_date: string | null
           event_date: string | null
           id: string
+          is_credit_note: boolean
           issue_date: string
           legal_snapshot: Json | null
           number: string
@@ -85,6 +87,7 @@ export type Database = {
           pdf_url: string | null
           quote_id: string | null
           sent_at: string | null
+          source_invoice_id: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           subject: string | null
           terms: string | null
@@ -96,6 +99,25 @@ export type Database = {
         }
         Insert: Partial<Database["public"]["Tables"]["invoices"]["Row"]> & { number: string }
         Update: Partial<Database["public"]["Tables"]["invoices"]["Row"]>
+        Relationships: []
+      }
+      invoice_payments: {
+        Row: {
+          id: string
+          invoice_id: string
+          amount: number
+          paid_on: string
+          method: string | null
+          reference: string | null
+          notes: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["invoice_payments"]["Row"]> & {
+          invoice_id: string
+          amount: number
+        }
+        Update: Partial<Database["public"]["Tables"]["invoice_payments"]["Row"]>
         Relationships: []
       }
       invoice_items: {
@@ -229,6 +251,7 @@ export type Database = {
           company_name: string | null
           country: string | null
           created_at: string
+          credit_note_number_prefix: string
           default_tva_rate: number
           email: string | null
           iban: string | null
@@ -314,6 +337,7 @@ export type Database = {
     Functions: {
       next_invoice_number: { Args: Record<string, never>; Returns: string }
       next_quote_number: { Args: Record<string, never>; Returns: string }
+      next_credit_note_number: { Args: Record<string, never>; Returns: string }
     }
     Enums: {
       event_status: "a_venir" | "en_cours" | "termine" | "annule"
