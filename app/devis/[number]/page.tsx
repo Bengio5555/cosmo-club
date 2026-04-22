@@ -3,16 +3,68 @@ import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { AcceptanceActions } from "./AcceptanceActions";
+import { NavDots } from "./NavDots";
 import "./plaquette.css";
 
 type Params = Promise<{ number: string }>;
 
-// The devis number is human-readable ("DV-2026-00001") — anyone with the
-// URL can view the plaquette. We also scope visibility to statuses that
-// are intentionally exposed: drafts stay private, everything else can be
-// read (the client needs to see the devis even after it has been
-// accepted/refused so they can re-download their copy).
+// Drafts stay private; anything beyond it is viewable via the URL the
+// client received in their email.
 const PUBLIC_STATUSES = ["envoye", "accepte", "refuse", "expire"] as const;
+
+// Default moodboard — 8 visuals from the public site. Good enough for a
+// polished first-send; later we can let the owner override per-quote.
+const MOODBOARD: string[] = [
+  "/brand/ai/gallery-event.png",
+  "/brand/ai/bento-bar-cocktails.png",
+  "/brand/ai/hero-bar-cocktails.png",
+  "/brand/ai/bento-barista.png",
+  "/brand/ai/latte-matcha.png",
+  "/brand/ai/hero-barista.png",
+  "/brand/ai/latte-ube.png",
+  "/brand/ai/pastilles.png",
+];
+
+const DEFAULT_COVER = "/brand/ai/hero-bar-cocktails.png";
+const DEFAULT_OFFER_IMAGE = "/brand/ai/bento-bar-cocktails.png";
+
+const DEFAULT_COCKTAILS = [
+  "Cosmopolitan",
+  "Margarita",
+  "Moscow Mule",
+  "Pornstar Martini",
+  "Espresso Martini",
+  "Basilic Smash",
+  "Amaretto Sour",
+  "Old Fashioned",
+];
+
+// Default FR terms when quote.terms is empty.
+const DEFAULT_TERMS: { label: string; text: string }[] = [
+  {
+    label: "Validité",
+    text: "Cette proposition est valable 30 jours à compter de sa date d'émission. Au-delà, un réajustement tarifaire pourra s'appliquer selon la disponibilité.",
+  },
+  {
+    label: "Acompte",
+    text: "Un acompte de 30 % est demandé à la signature pour confirmer la réservation de la date. Le solde est réglé à J-7.",
+  },
+  {
+    label: "Annulation",
+    text: "En cas d'annulation à plus de 30 jours de l'événement, 50 % de l'acompte est remboursé. Entre 30 et 15 jours, 25 %. Moins de 15 jours, l'acompte est conservé.",
+  },
+  {
+    label: "Modifications",
+    text: "Les ajustements mineurs de carte ou d'effectif (±10 %) sont acceptés jusqu'à J-10 sans surcoût.",
+  },
+];
+
+// Default note shown under the totals when settings don't provide one.
+const DEFAULT_TOTALS_NOTE =
+  "Les prix s'entendent hors taxes, matériel et consommables inclus.\n" +
+  "Frais de déplacement Paris intra-muros inclus.\n" +
+  "Repérage du lieu effectué 48h avant l'événement, sans frais.\n" +
+  "Un brief personnalisé vous sera adressé la semaine précédant la date.";
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { number } = await params;
@@ -24,12 +76,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function DevisPlaquettePage({ params }: { params: Params }) {
   const { number } = await params;
-  // Use the service-role client server-side: RLS on quotes only lets
-  // authenticated users read, but the plaquette must be viewable by
-  // unauthenticated clients who received the link by email. We manually
-  // gate visibility on `status` below so drafts stay private. A future
-  // improvement is adding a per-quote `public_token` column so the URL
-  // isn't enumerable from the sequence number.
   const supabase = createAdminClient();
 
   const { data: quote } = await supabase
@@ -54,14 +100,19 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
       : Promise.resolve({ data: null }),
   ]);
 
-  // Group items by section (preserving position order within each group).
-  const sections = new Map<string, typeof items>();
+  // ─── Group items by section ───
+  const bySection = new Map<string, typeof items>();
   for (const it of items ?? []) {
     const key = it.section ?? "Prestations";
-    const arr = sections.get(key) ?? [];
+    const arr = bySection.get(key) ?? [];
     arr.push(it);
-    sections.set(key, arr);
+    bySection.set(key, arr);
   }
+  const sections = [...bySection.entries()];
+
+  // ─── Derived display bits ───
+  const companyName = settings?.company_name || "Cosmo Club Paris";
+  const senderShortName = "Cosmo Club";
 
   const clientDisplayName =
     [client?.first_name, client?.last_name].filter(Boolean).join(" ") ||
@@ -69,213 +120,454 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
     client?.email ||
     "";
 
+  const coverTitle = buildCoverTitle(quote.subject, clientDisplayName, quote.number);
+
+  const marqueeWords = buildMarquee(items ?? []);
+
+  const letterHook = buildLetterHook(clientDisplayName);
+
+  const terms = splitTerms(quote.terms) ?? DEFAULT_TERMS;
+
+  const validUntilLabel = quote.valid_until
+    ? `Valable jusqu'au ${formatDateFR(quote.valid_until)}`
+    : "Valable 30 jours à compter de l'émission";
+
+  const deposit = round2(quote.total_ttc * 0.3);
+
+  // Totals note from settings (penalty + any custom copy) or the default.
+  const totalsNote =
+    settings?.penalty_rate_text && settings.penalty_rate_text.trim()
+      ? `${DEFAULT_TOTALS_NOTE}\n\n${settings.penalty_rate_text}`
+      : DEFAULT_TOTALS_NOTE;
+
   return (
-    <main className="plaquette">
-      {/* ─── Cover ─── */}
-      <section className="plaquette__cover">
-        <header className="plaquette__brand">
-          <div className="plaquette__brand-mark">CC</div>
-          <div>
-            <p className="plaquette__brand-name">Cosmo Club Paris</p>
-            <p className="plaquette__brand-tag">Bar à cocktails · Barista · Événementiel</p>
-          </div>
-        </header>
+    <div className="plaquette-body">
+      <NavDots />
 
-        <div className="plaquette__cover-body">
-          <p className="plaquette__eyebrow">Proposition</p>
-          <h1 className="plaquette__cover-title">
-            {quote.subject || `Devis ${quote.number}`}
-          </h1>
-          {quote.intro && (
-            <p className="plaquette__cover-intro">{quote.intro}</p>
-          )}
-          <dl className="plaquette__cover-meta">
-            <div>
-              <dt>Client</dt>
-              <dd>{clientDisplayName || "—"}</dd>
+      {/* ============ 01 — COVER ============ */}
+      <section id="cover" className="cover">
+        <div
+          className="cover-image"
+          style={{ backgroundImage: `url('${DEFAULT_COVER}')` }}
+        />
+        <div className="cover-content">
+          <header className="cover-top">
+            <div className="cover-logo">COSMO&nbsp;&nbsp;CLUB</div>
+            <div className="cover-ref">
+              <small>Proposition N°</small>
+              {quote.number}
             </div>
-            <div>
-              <dt>Référence</dt>
-              <dd>{quote.number}</dd>
-            </div>
-            <div>
-              <dt>Émis le</dt>
-              <dd>{formatDateFR(quote.issue_date)}</dd>
-            </div>
-            {quote.valid_until && (
-              <div>
-                <dt>Valable jusqu&apos;au</dt>
-                <dd>{formatDateFR(quote.valid_until)}</dd>
-              </div>
-            )}
-            {quote.event_date && (
-              <div>
-                <dt>Événement</dt>
-                <dd>{formatDateFR(quote.event_date)}</dd>
-              </div>
-            )}
-            {quote.event_location && (
-              <div>
-                <dt>Lieu</dt>
-                <dd>{quote.event_location}</dd>
-              </div>
-            )}
-            {quote.guests_count && (
-              <div>
-                <dt>Invités</dt>
-                <dd>{quote.guests_count}</dd>
-              </div>
-            )}
-          </dl>
-        </div>
-      </section>
-
-      {/* ─── Sections ─── */}
-      {Array.from(sections.entries()).map(([name, sectionItems], idx) => (
-        <section className="plaquette__section" key={name}>
-          <header className="plaquette__section-head">
-            <p className="plaquette__eyebrow">Section {String(idx + 1).padStart(2, "0")}</p>
-            <h2 className="plaquette__section-title">{name}</h2>
           </header>
 
-          <table className="plaquette__table">
-            <thead>
-              <tr>
-                <th className="plaquette__col-title">Prestation</th>
-                <th className="plaquette__col-qty">Qté</th>
-                <th className="plaquette__col-unit">Unité</th>
-                <th className="plaquette__col-price">PU HT</th>
-                <th className="plaquette__col-total">Total HT</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(sectionItems ?? []).map((it) => (
-                <tr key={it.id}>
-                  <td>
-                    <p className="plaquette__item-title">{it.title}</p>
-                    {it.description && (
-                      <p className="plaquette__item-desc">{it.description}</p>
-                    )}
-                  </td>
-                  <td className="plaquette__num">{it.qty}</td>
-                  <td className="plaquette__unit">{it.unit ?? ""}</td>
-                  <td className="plaquette__num">{formatEUR(it.unit_price_ht ?? 0)}</td>
-                  <td className="plaquette__num plaquette__total">
-                    {formatEUR(it.line_total_ht ?? 0)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      ))}
+          <div className="cover-main">
+            <div className="cover-kicker">
+              <em>Une proposition pour</em>
+            </div>
+            <h1 className="cover-title" dangerouslySetInnerHTML={{ __html: coverTitle }} />
 
-      {/* ─── Totaux ─── */}
-      <section className="plaquette__totals">
-        <div className="plaquette__totals-box">
-          <div className="plaquette__totals-row">
-            <span>Total HT</span>
-            <span>{formatEUR(quote.total_ht)}</span>
-          </div>
-          <div className="plaquette__totals-row">
-            <span>
-              {settings?.tva_franchise ? "TVA" : `TVA (${quote.tva_rate}%)`}
-            </span>
-            <span>
-              {settings?.tva_franchise
-                ? "Non applicable"
-                : formatEUR(quote.total_tva)}
-            </span>
-          </div>
-          <div className="plaquette__totals-row plaquette__totals-ttc">
-            <span>Total TTC</span>
-            <span>{formatEUR(quote.total_ttc)}</span>
+            <div className="cover-meta">
+              {quote.event_date && (
+                <div className="cover-meta-item">
+                  <small>Date</small>
+                  <strong>{formatDateFR(quote.event_date)}</strong>
+                </div>
+              )}
+              {quote.event_location && (
+                <div className="cover-meta-item">
+                  <small>Lieu</small>
+                  <strong>{quote.event_location}</strong>
+                </div>
+              )}
+              {quote.guests_count != null && (
+                <div className="cover-meta-item">
+                  <small>Invités</small>
+                  <strong>{quote.guests_count}</strong>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Conditions + mentions légales ─── */}
-      {(quote.terms || settings) && (
-        <section className="plaquette__fine-print">
-          {quote.terms && (
-            <div className="plaquette__terms">
-              <p className="plaquette__eyebrow">Conditions</p>
-              <p>{quote.terms}</p>
+      {/* ============ MARQUEE ============ */}
+      <div className="marquee">
+        <div className="marquee-inner">
+          {[...marqueeWords, ...marqueeWords].map((w, i) => (
+            <span key={i}>
+              {w}
+              {i < marqueeWords.length * 2 - 1 && (
+                <span className="dot" style={{ margin: 0 }}>
+                  {" "}
+                  ·{" "}
+                </span>
+              )}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ============ 02 — LETTER ============ */}
+      {quote.intro && (
+        <section id="lettre" className="intro-letter">
+          <div className="brand-mark">COSMO CLUB</div>
+          <span className="page-mark">— 02 —</span>
+
+          <div className="intro-letter-wrap">
+            <div className="letter-kicker">Un mot pour commencer</div>
+            <h2 className="letter-hook" dangerouslySetInnerHTML={{ __html: letterHook }} />
+
+            <p className="letter-body dropcap">{quote.intro}</p>
+
+            <p className="letter-body">
+              Cette proposition est valable <strong>30 jours</strong>. Nous
+              restons à votre écoute pour l&apos;adapter à mesure que votre
+              vision se précise.
+            </p>
+
+            <div className="letter-signoff">
+              <div>
+                <div className="signature-text">{senderShortName} Team</div>
+                <div className="signature-name">— L&apos;équipe {senderShortName}</div>
+              </div>
+              <div className="letter-date">
+                Paris, le {formatDateFR(quote.issue_date)}
+              </div>
+            </div>
+          </div>
+
+          <div className="page-number">— ii —</div>
+        </section>
+      )}
+
+      {/* ============ 03 — MOODBOARD ============ */}
+      <section id="moodboard" className="moodboard">
+        <div className="brand-mark">COSMO CLUB</div>
+        <span className="page-mark">— 03 —</span>
+
+        <div className="moodboard-header">
+          <div>
+            <div className="section-label">Moodboard</div>
+          </div>
+          <h2 className="section-title">
+            L&apos;ambiance que nous <em>imaginons</em> pour vous.
+          </h2>
+        </div>
+
+        <div className="moodboard-grid">
+          {MOODBOARD.slice(0, 8).map((src, i) => (
+            <div
+              key={i}
+              className={`mb-img mb-${i + 1}`}
+              style={{ backgroundImage: `url('${src}')` }}
+            />
+          ))}
+        </div>
+
+        <p className="moodboard-caption">
+          Grenat profond, dorures subtiles, lumières basses. Un bar
+          scénographié comme une pièce montée liquide — pensé pour être
+          photographié autant que dégusté.
+        </p>
+
+        <div className="page-number">— iii —</div>
+      </section>
+
+      {/* ============ 04 — OFFER ============ */}
+      {sections.length > 0 && (
+        <section id="offre" className="offer-section">
+          <div className="brand-mark">COSMO CLUB</div>
+          <span className="page-mark">— 04 —</span>
+
+          <div className="moodboard-header">
+            <div>
+              <div className="section-label">La proposition</div>
+            </div>
+            <h2 className="section-title">
+              {quote.subject || "Notre proposition"}
+            </h2>
+          </div>
+
+          <div className="offer-split">
+            <div
+              className="offer-image"
+              style={{ backgroundImage: `url('${DEFAULT_OFFER_IMAGE}')` }}
+            />
+
+            <div className="offer-content">
+              {quote.intro && (
+                <p className="offer-intro">{truncate(quote.intro, 260)}</p>
+              )}
+
+              {sections.map(([sectionName, sectionItems], idx) => (
+                <div className="offer-card" key={sectionName}>
+                  <div className="offer-card-num">
+                    — N°{String(idx + 1).padStart(2, "0")}
+                  </div>
+                  <h3 className="offer-card-title">{sectionName}</h3>
+                  <ul className="offer-list">
+                    {(sectionItems ?? []).map((it) => (
+                      <li key={it.id}>
+                        <span>{it.title}</span>
+                        <span>{buildItemAside(it)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="page-number">— iv —</div>
+        </section>
+      )}
+
+      {/* ============ 05 — PRICING ============ */}
+      <section id="chiffrage" className="pricing">
+        <span className="page-mark" style={{ color: "rgba(245,241,232,0.4)" }}>
+          — 05 —
+        </span>
+
+        <div className="pricing-header">
+          <h2>
+            Le <em>chiffrage</em>.
+          </h2>
+          <div className="pricing-badge">
+            <small>Proposition</small>
+            {validUntilLabel}
+          </div>
+        </div>
+
+        <table className="price-table">
+          <tbody>
+            {sections.flatMap(([sectionName, sectionItems]) => [
+              <tr key={`cat-${sectionName}`} className="category-row">
+                <td colSpan={4}>{sectionName}</td>
+              </tr>,
+              ...(sectionItems ?? []).map((it) => (
+                <tr key={it.id}>
+                  <td>
+                    <strong>{it.title}</strong>
+                    {it.description && <small>{it.description}</small>}
+                  </td>
+                  <td>{`${it.qty}${it.unit ? ` ${it.unit}` : ""}`}</td>
+                  <td>{formatEUR(it.unit_price_ht ?? 0)}</td>
+                  <td>{formatEUR(it.line_total_ht ?? 0)}</td>
+                </tr>
+              )),
+            ])}
+          </tbody>
+        </table>
+
+        <div className="totals-block">
+          <p className="totals-note">{totalsNote}</p>
+
+          <div>
+            <table className="totals-table">
+              <tbody>
+                <tr>
+                  <td>Sous-total HT</td>
+                  <td>{formatEUR(quote.total_ht)}</td>
+                </tr>
+                <tr>
+                  <td>
+                    {settings?.tva_franchise ? "TVA" : `TVA ${quote.tva_rate}%`}
+                  </td>
+                  <td>
+                    {settings?.tva_franchise
+                      ? "Non applicable"
+                      : formatEUR(quote.total_tva)}
+                  </td>
+                </tr>
+                <tr className="total-final">
+                  <td>Total TTC</td>
+                  <td>{formatEUR(quote.total_ttc)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div className="deposit-block">
+              <span>Acompte à la signature (30 %)</span>
+              <span>{formatEUR(deposit)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="page-number" style={{ color: "rgba(245,241,232,0.4)" }}>
+          — v —
+        </div>
+      </section>
+
+      {/* ============ 06 — SIGNATURE ============ */}
+      <section id="signature" className="signature-page">
+        <div className="brand-mark">COSMO CLUB</div>
+        <span className="page-mark">— 06 —</span>
+
+        <div className="sig-wrap">
+          <h2 className="sig-title">
+            On <em>scelle ça</em> ensemble ?
+          </h2>
+
+          <div className="terms">
+            {terms.slice(0, 4).map((t) => (
+              <div className="term-item" key={t.label}>
+                <h4>{t.label}</h4>
+                <p>{t.text}</p>
+              </div>
+            ))}
+          </div>
+
+          {quote.status === "envoye" && (
+            <div className="sig-cta">
+              <div className="sig-cta-text">
+                Un clic et nous <em>bloquons votre date</em>.
+                <br />
+                Signature numérique sécurisée, réponse sous 24 h.
+              </div>
+              <AcceptanceActions quoteId={quote.id} number={quote.number} />
             </div>
           )}
-          {settings && (
-            <div className="plaquette__legal">
-              <p className="plaquette__eyebrow">Cosmo Club Paris</p>
-              <p>
-                {settings.company_name}
-                {settings.legal_form ? ` · ${settings.legal_form}` : ""}
-                {settings.siret ? ` · SIRET ${settings.siret}` : ""}
-                {settings.tva_intracom ? ` · TVA ${settings.tva_intracom}` : ""}
-              </p>
-              {settings.tva_franchise && (
-                <p className="plaquette__legal-note">
-                  TVA non applicable, art. 293 B du CGI.
-                </p>
-              )}
-              {(settings.address_line1 || settings.city) && (
-                <p>
-                  {[settings.address_line1, settings.address_line2]
-                    .filter(Boolean)
-                    .join(", ")}
-                  {settings.postal_code || settings.city
-                    ? ` — ${[settings.postal_code, settings.city].filter(Boolean).join(" ")}`
-                    : ""}
-                </p>
-              )}
-              <p>
-                {settings.email ? settings.email : ""}
-                {settings.phone ? ` · ${settings.phone}` : ""}
-              </p>
-              {settings.penalty_rate_text && (
-                <p className="plaquette__legal-note">
-                  {settings.penalty_rate_text}
-                </p>
-              )}
+
+          {quote.status === "accepte" && (
+            <div className="sig-cta-status">
+              ✓ Devis accepté{clientDisplayName ? ` — merci ${clientDisplayName}.` : "."}
+              <br />
+              Nous revenons vers vous avec contrat + acompte sous 24 h.
             </div>
           )}
-        </section>
-      )}
 
-      {/* ─── Acceptation (only when sent) ─── */}
-      {quote.status === "envoye" && (
-        <section className="plaquette__cta">
-          <h2 className="plaquette__cta-title">Prêt à valider ?</h2>
-          <p className="plaquette__cta-sub">
-            Un clic sur « Accepter le devis » vaut engagement. Nous revenons
-            vers vous sous 24 h pour la suite (acompte, contrat, logistique).
-          </p>
-          <AcceptanceActions quoteId={quote.id} number={quote.number} />
-        </section>
-      )}
+          {quote.status === "refuse" && (
+            <div className="sig-cta-status refused">
+              Devis refusé. Nous restons à votre disposition pour ajuster si
+              besoin.
+            </div>
+          )}
 
-      {quote.status === "accepte" && (
-        <section className="plaquette__cta plaquette__cta--accepte">
-          <p className="plaquette__eyebrow">Devis accepté</p>
-          <h2 className="plaquette__cta-title">Merci {clientDisplayName} !</h2>
-          <p className="plaquette__cta-sub">
-            Nous revenons vers vous avec le contrat + modalités de paiement.
-          </p>
-        </section>
-      )}
+          <footer className="sig-footer">
+            <div className="sig-footer-left">
+              {companyName}
+              {settings?.city ? ` — ${settings.city}` : ""}
+            </div>
+            <div className="sig-footer-right">
+              {settings?.email ?? "contact@cosmoclub.fr"}
+              {settings?.phone ? ` · ${settings.phone}` : ""}
+            </div>
+          </footer>
+        </div>
 
-      {quote.status === "refuse" && (
-        <section className="plaquette__cta plaquette__cta--refuse">
-          <p className="plaquette__eyebrow">Devis refusé</p>
-          <p className="plaquette__cta-sub">
-            On prend note. On reste à votre disposition pour ajuster si
-            besoin.
-          </p>
-        </section>
-      )}
-
-      <footer className="plaquette__footer">
-        <p>© {new Date().getFullYear()} Cosmo Club Paris — Tous droits réservés.</p>
-      </footer>
-    </main>
+        <div className="page-number">— vi —</div>
+      </section>
+    </div>
   );
+}
+
+/* ─── Helpers ─────────────────────────────────────────────────────── */
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Cover title logic:
+ *  - quote.subject looks like "Julie & Mathieu" / "Sophie Dubois" → keep it
+ *    but wrap the "&" in <em> so it renders gold-italic
+ *  - no subject → fall back to client name, then to the devis number
+ * Always returns HTML-safe markup.
+ */
+function buildCoverTitle(
+  subject: string | null,
+  clientDisplayName: string,
+  number: string,
+): string {
+  const text = (subject && subject.trim()) || clientDisplayName || `Devis ${number}`;
+  // Highlight " & " as gold italic; otherwise insert a <br/> roughly in
+  // the middle for a big two-line title look on long strings.
+  const escaped = escapeHtml(text);
+  if (/\s&\s/.test(text)) {
+    return escaped.replace(/\s&\s/, " <em>&amp;</em><br/>");
+  }
+  return escaped;
+}
+
+function buildLetterHook(clientName: string): string {
+  if (clientName) {
+    return `${escapeHtml(clientName)},<br/>merci de nous <em>avoir choisis</em>.`;
+  }
+  return `Merci de nous <em>avoir choisis</em>.`;
+}
+
+/**
+ * Pick 8 marquee words: unique item titles first, padded with defaults.
+ * Titles longer than 24 chars are truncated to keep the ribbon visually
+ * consistent.
+ */
+function buildMarquee(
+  items: Array<{ title: string | null }>,
+): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const it of items) {
+    const t = (it.title ?? "").trim();
+    if (!t) continue;
+    const short = t.length > 24 ? t.slice(0, 22) + "…" : t;
+    if (!seen.has(short)) {
+      seen.add(short);
+      out.push(short);
+    }
+    if (out.length >= 8) break;
+  }
+  while (out.length < 8) out.push(DEFAULT_COCKTAILS[out.length]);
+  return out;
+}
+
+/**
+ * Right-column label of an offer list line: the qty with unit if > 1,
+ * or the unit price. Falls back to "inclus".
+ */
+function buildItemAside(it: {
+  qty: number | null;
+  unit: string | null;
+  unit_price_ht: number | null;
+}): string {
+  const qty = it.qty ?? 0;
+  if (qty > 1 && it.unit) return `${qty} ${it.unit}`;
+  if (qty > 1) return String(qty);
+  if (it.unit_price_ht && it.unit_price_ht > 0) return formatEUR(it.unit_price_ht);
+  return "inclus";
+}
+
+/**
+ * Split free-form quote.terms into up to 4 labelled sections.
+ * Supports two formats:
+ *   "Label: text...\n\nLabel2: text..."
+ *   "- text...\n- text..." (no labels → generic ones)
+ * Returns null to fall back to the DEFAULT_TERMS.
+ */
+function splitTerms(
+  terms: string | null,
+): { label: string; text: string }[] | null {
+  if (!terms || !terms.trim()) return null;
+  const blocks = terms
+    .split(/\n\s*\n/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+  if (blocks.length === 0) return null;
+  const fallbackLabels = ["Validité", "Acompte", "Annulation", "Modifications"];
+  return blocks.slice(0, 4).map((b, i) => {
+    const m = b.match(/^([^:\n]{2,40}):\s*([\s\S]+)$/);
+    if (m) return { label: m[1].trim(), text: m[2].trim() };
+    return { label: fallbackLabels[i] ?? `Condition ${i + 1}`, text: b };
+  });
+}
+
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1).trimEnd() + "…";
 }
