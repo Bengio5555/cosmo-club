@@ -13,6 +13,7 @@ import {
   ImageIcon,
   Settings,
   CalendarDays,
+  BookText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ const nav: { section: string; items: NavItem[] }[] = [
     section: "Ressources",
     items: [
       { href: "/dashboard/clients", label: "Clients", icon: Contact },
+      { href: "/dashboard/catalog", label: "Catalogue", icon: BookText },
       { href: "/dashboard/stock", label: "Stock", icon: Package },
       { href: "/dashboard/staff", label: "Équipe", icon: Users },
     ],

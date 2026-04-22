@@ -10,6 +10,23 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" }
   public: {
     Tables: {
+      catalog_items: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          section: string | null
+          unit: string | null
+          unit_price_ht: number
+          sort_order: number
+          archived: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["catalog_items"]["Row"]> & { title: string }
+        Update: Partial<Database["public"]["Tables"]["catalog_items"]["Row"]>
+        Relationships: []
+      }
       clients: {
         Row: {
           billing_address: string | null

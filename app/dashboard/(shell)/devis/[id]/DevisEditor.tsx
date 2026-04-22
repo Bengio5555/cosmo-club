@@ -22,6 +22,7 @@ import {
   deleteQuote,
   type SaveQuoteInput,
 } from "./actions";
+import { CatalogPicker, type PickedItem } from "./CatalogPicker";
 
 type Quote = Tables<"quotes">;
 type QuoteItem = Tables<"quote_items">;
@@ -252,6 +253,26 @@ export function DevisEditor({
     addItem(name.trim());
   }
 
+  // Bulk-add from the catalog: each picked item becomes a fresh editable
+  // line. If targetSection is provided, it overrides each item's original
+  // section (matches the picker UX where the user chooses "Ajouter à la
+  // section X"). Items are appended at the bottom of the list; the
+  // section grouping in the UI will pull them into place.
+  function addFromCatalog(picks: PickedItem[], targetSection: string | null) {
+    setItems((prev) => [
+      ...prev,
+      ...picks.map<EditableItem>((p) => ({
+        localId: uid(),
+        section: (targetSection ?? p.section) ?? "",
+        title: p.title,
+        description: p.description ?? "",
+        qty: 1,
+        unit: p.unit ?? "unité",
+        unit_price_ht: Number(p.unit_price_ht) || 0,
+      })),
+    ]);
+  }
+
   // Group items by their section for display.
   const grouped = useMemo(() => {
     const map = new Map<string, EditableItem[]>();
@@ -361,12 +382,15 @@ export function DevisEditor({
             title="Prestations"
             action={
               !readOnly && (
-                <AddSectionButton
-                  onAdd={addSection}
-                  knownSections={knownSections.filter(
-                    (s) => !grouped.some(([g]) => g === s),
-                  )}
-                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <CatalogPicker onPick={addFromCatalog} />
+                  <AddSectionButton
+                    onAdd={addSection}
+                    knownSections={knownSections.filter(
+                      (s) => !grouped.some(([g]) => g === s),
+                    )}
+                  />
+                </div>
               )
             }
           >
@@ -393,6 +417,7 @@ export function DevisEditor({
                     onPatch={patchItem}
                     onRemove={removeItem}
                     onAddLine={() => addItem(sectionName)}
+                    onPickFromCatalog={addFromCatalog}
                   />
                 ))}
               </div>
@@ -754,6 +779,7 @@ function SectionBlock({
   onPatch,
   onRemove,
   onAddLine,
+  onPickFromCatalog,
 }: {
   name: string;
   items: EditableItem[];
@@ -761,6 +787,7 @@ function SectionBlock({
   onPatch: (localId: string, patch: Partial<EditableItem>) => void;
   onRemove: (localId: string) => void;
   onAddLine: () => void;
+  onPickFromCatalog?: (picks: PickedItem[], targetSection: string | null) => void;
 }) {
   const sectionTotal = items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0);
 
@@ -784,7 +811,7 @@ function SectionBlock({
         ))}
       </div>
       {!readOnly && (
-        <div className="border-t border-neutral-800/60 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-3 border-t border-neutral-800/60 px-3 py-2">
           <button
             type="button"
             onClick={onAddLine}
@@ -792,6 +819,12 @@ function SectionBlock({
           >
             <Plus className="h-3 w-3" /> Ajouter une ligne
           </button>
+          {onPickFromCatalog && (
+            <CatalogPicker
+              onPick={onPickFromCatalog}
+              defaultSection={name}
+            />
+          )}
         </div>
       )}
     </div>
