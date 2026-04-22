@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import logoSrc from "@/public/brand/cosmo-logo.avif";
 
 export function Topbar({ email }: { email: string | null }) {
   const router = useRouter();
@@ -20,12 +22,21 @@ export function Topbar({ email }: { email: string | null }) {
       {/* Mobile brand */}
       <Link
         href="/dashboard"
-        className="flex items-center gap-2 text-[13px] font-semibold text-white md:hidden"
+        aria-label="Cosmo Club — tableau de bord"
+        className="flex items-center gap-2 md:hidden"
       >
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-sm bg-[color:var(--color-grenat)] text-[10px] font-bold text-[color:var(--color-bone)]">
-          CC
+        <Image
+          src={logoSrc}
+          alt="Cosmo Club"
+          width={Math.round((304 / 106) * 22)}
+          height={22}
+          priority
+          unoptimized
+          className="h-[22px] w-auto select-none"
+        />
+        <span className="text-[10px] uppercase tracking-widest text-neutral-500">
+          Admin
         </span>
-        Cosmo Club Admin
       </Link>
 
       <div className="hidden md:block" />

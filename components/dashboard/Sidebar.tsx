@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -16,6 +17,7 @@ import {
   BookText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import logoSrc from "@/public/brand/cosmo-logo.avif";
 
 type NavItem = {
   href: string;
@@ -60,12 +62,18 @@ export function Sidebar() {
     <aside className="hidden w-60 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950 px-3 py-4 text-neutral-300 md:flex">
       <Link
         href="/dashboard"
-        className="mb-6 flex items-center gap-2 px-2 text-[13px] font-semibold tracking-wide text-white"
+        aria-label="Cosmo Club — tableau de bord"
+        className="mb-6 flex items-center gap-2 px-2 transition-opacity hover:opacity-85"
       >
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-sm bg-[color:var(--color-grenat)] text-[10px] font-bold text-[color:var(--color-bone)]">
-          CC
-        </span>
-        Cosmo Club
+        <Image
+          src={logoSrc}
+          alt="Cosmo Club"
+          width={Math.round((304 / 106) * 24)}
+          height={24}
+          priority
+          unoptimized
+          className="h-6 w-auto select-none"
+        />
         <span className="ml-auto text-[10px] uppercase tracking-widest text-neutral-500">
           Admin
         </span>
