@@ -1,14 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+type Mode = "password" | "magic";
+
 export function LoginForm() {
+  const router = useRouter();
+  const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const params = useSearchParams();
   const from = params.get("from") || "/dashboard";
   const callbackError = params.get("error");
@@ -18,15 +24,27 @@ export function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     const supabase = createClient();
-    const redirectTo = `${window.location.origin}/dashboard/auth/callback?next=${encodeURIComponent(from)}`;
 
+    if (mode === "password") {
+      const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+      setLoading(false);
+      if (err) {
+        setError(err.message);
+        return;
+      }
+      // Session cookie is set; bounce to the requested page.
+      router.replace(from);
+      router.refresh();
+      return;
+    }
+
+    // Magic link
+    const redirectTo = `${window.location.origin}/dashboard/auth/callback?next=${encodeURIComponent(from)}`;
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: redirectTo },
     });
-
     setLoading(false);
     if (err) {
       setError(err.message);
@@ -55,37 +73,90 @@ export function LoginForm() {
           {callbackDetail && <p className="mt-1 opacity-80">{callbackDetail}</p>}
         </div>
       )}
+
+      {/* Mode toggle */}
+      <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border border-neutral-800 bg-neutral-900 p-1 text-xs">
+        <button
+          type="button"
+          onClick={() => setMode("password")}
+          className={`rounded px-2 py-1.5 transition-colors ${
+            mode === "password"
+              ? "bg-neutral-800 text-white"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          Mot de passe
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("magic")}
+          className={`rounded px-2 py-1.5 transition-colors ${
+            mode === "magic"
+              ? "bg-neutral-800 text-white"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          Lien email
+        </button>
+      </div>
+
       <form onSubmit={onSubmit} className="space-y-3">
-      <label className="block">
-        <span className="mb-1.5 block text-xs font-medium text-neutral-400">
-          Adresse email
-        </span>
-        <input
-          type="email"
-          required
-          autoFocus
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
-          placeholder="toi@cosmoclub.fr"
-        />
-      </label>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium text-neutral-400">
+            Adresse email
+          </span>
+          <input
+            type="email"
+            required
+            autoFocus
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+            placeholder="toi@cosmoclub.fr"
+          />
+        </label>
 
-      {error && (
-        <p className="rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-          {error}
-        </p>
-      )}
+        {mode === "password" && (
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-medium text-neutral-400">
+              Mot de passe
+            </span>
+            <input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+            />
+          </label>
+        )}
 
-      <button
-        type="submit"
-        disabled={loading || !email}
-        className="w-full rounded-md bg-[color:var(--color-grenat)] px-3 py-2.5 text-sm font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? "Envoi…" : "Recevoir le lien"}
-      </button>
+        {error && (
+          <p className="rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading || !email || (mode === "password" && !password)}
+          className="w-full rounded-md bg-[color:var(--color-grenat)] px-3 py-2.5 text-sm font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading
+            ? "…"
+            : mode === "password"
+            ? "Se connecter"
+            : "Recevoir le lien"}
+        </button>
       </form>
+
+      <p className="mt-4 text-center text-[10px] text-neutral-500">
+        {mode === "password"
+          ? "Pense à changer ton mot de passe après la 1ʳᵉ connexion."
+          : "Aucun mot de passe, tu reçois un lien unique par email."}
+      </p>
     </>
   );
 }
