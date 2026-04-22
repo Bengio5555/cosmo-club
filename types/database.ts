@@ -81,11 +81,13 @@ export type Database = {
           id: string
           is_credit_note: boolean
           issue_date: string
+          last_reminded_at: string | null
           legal_snapshot: Json | null
           number: string
           paid_at: string | null
           pdf_url: string | null
           quote_id: string | null
+          reminder_count: number
           sent_at: string | null
           source_invoice_id: string | null
           status: Database["public"]["Enums"]["invoice_status"]

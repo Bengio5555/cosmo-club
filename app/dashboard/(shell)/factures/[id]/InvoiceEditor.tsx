@@ -17,6 +17,7 @@ import {
   RotateCcw,
   ExternalLink,
   X,
+  BellRing,
 } from "lucide-react";
 import type { Database, Tables } from "@/types/database";
 import { formatEUR } from "@/lib/format";
@@ -24,6 +25,7 @@ import {
   saveInvoice,
   setInvoiceStatus,
   sendInvoice,
+  sendInvoiceReminder,
   markInvoicePaid,
   deleteInvoice,
   createCreditNote,
@@ -70,6 +72,8 @@ export function InvoiceEditor({
   const isCreditNote = invoice.is_credit_note;
   const canIssueCreditNote =
     !isCreditNote && ["envoye", "en_retard", "paye"].includes(invoice.status);
+  const canRemind =
+    !isCreditNote && (invoice.status === "envoye" || invoice.status === "en_retard");
 
   const [creditModal, setCreditModal] = useState(false);
   const [creditReason, setCreditReason] = useState("");
@@ -230,6 +234,33 @@ export function InvoiceEditor({
     });
   }
 
+  function remind() {
+    const prev = invoice.reminder_count ?? 0;
+    const label =
+      prev === 0
+        ? "Envoyer une relance au client par email ?"
+        : `Envoyer une nouvelle relance (${prev + 1}e) au client par email ?`;
+    if (!window.confirm(label)) return;
+    startTransition(async () => {
+      setMsg(null);
+      const res = await sendInvoiceReminder(invoice.id);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      if (res.emailed) {
+        setMsg({ kind: "ok", text: "Relance envoyée par email ✓" });
+      } else {
+        setMsg({
+          kind: "ok",
+          text: "Relance enregistrée. " + (res.warning ?? ""),
+        });
+      }
+      setTimeout(() => setMsg(null), 5000);
+      router.refresh();
+    });
+  }
+
   // ─── Item ops ───
   function addItem() {
     setItems((prev) => [
@@ -260,6 +291,7 @@ export function InvoiceEditor({
         dirty={isDirty}
         pending={pending}
         canIssueCreditNote={canIssueCreditNote}
+        canRemind={canRemind}
         onSave={save}
         onSend={send}
         onMarkPaid={markPaid}
@@ -269,6 +301,7 @@ export function InvoiceEditor({
           setCreditReason("");
           setCreditModal(true);
         }}
+        onRemind={remind}
       />
 
       {isCreditNote && sourceInvoice && (
@@ -541,23 +574,27 @@ function TopBar({
   dirty,
   pending,
   canIssueCreditNote,
+  canRemind,
   onSave,
   onSend,
   onMarkPaid,
   onCancel,
   onDelete,
   onOpenCreditNote,
+  onRemind,
 }: {
   invoice: Invoice;
   dirty: boolean;
   pending: boolean;
   canIssueCreditNote: boolean;
+  canRemind: boolean;
   onSave: () => void;
   onSend: () => void;
   onMarkPaid: () => void;
   onCancel: () => void;
   onDelete: () => void;
   onOpenCreditNote: () => void;
+  onRemind: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
@@ -573,6 +610,12 @@ function TopBar({
           )}
           {invoice.paid_at && (
             <span>Payée le {new Date(invoice.paid_at).toLocaleDateString("fr-FR")}</span>
+          )}
+          {(invoice.reminder_count ?? 0) > 0 && invoice.last_reminded_at && (
+            <span className="text-amber-300/80">
+              · {invoice.reminder_count} relance{(invoice.reminder_count ?? 0) > 1 ? "s" : ""} · dernière le{" "}
+              {new Date(invoice.last_reminded_at).toLocaleDateString("fr-FR")}
+            </span>
           )}
         </div>
       </div>
@@ -610,6 +653,27 @@ function TopBar({
 
         {(invoice.status === "envoye" || invoice.status === "en_retard") && (
           <>
+            {canRemind && (
+              <button
+                type="button"
+                onClick={onRemind}
+                disabled={pending}
+                title={
+                  invoice.last_reminded_at
+                    ? `Dernière relance : ${new Date(invoice.last_reminded_at).toLocaleDateString("fr-FR")}`
+                    : "Aucune relance encore envoyée"
+                }
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-200 transition-colors hover:bg-amber-500/20 disabled:opacity-60"
+              >
+                <BellRing className="h-3 w-3" />
+                Relancer
+                {(invoice.reminder_count ?? 0) > 0 && (
+                  <span className="ml-1 rounded-full bg-amber-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-100">
+                    {invoice.reminder_count}
+                  </span>
+                )}
+              </button>
+            )}
             <button
               type="button"
               onClick={onMarkPaid}

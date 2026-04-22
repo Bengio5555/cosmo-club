@@ -396,6 +396,145 @@ export async function createCreditNote(
   return { ok: true as const, creditNoteId: credit.id };
 }
 
+/**
+ * Envoi manuel d'une relance email sur une facture émise non payée.
+ *  - N'accepte que les statuts `envoye` ou `en_retard` (pas d'avoir, pas de
+ *    facture payée ou annulée — côté UI on masque le bouton, côté serveur
+ *    on refuse par sécurité).
+ *  - Ton commercial poli en FR, avec le solde restant s'il y a déjà des
+ *    encaissements partiels (on déduit sum(invoice_payments.amount) du
+ *    TTC pour afficher le montant vraiment dû).
+ *  - Incrémente reminder_count et stamp last_reminded_at même si l'envoi
+ *    Resend échoue, on renvoie quand même ok:true avec un warning — le
+ *    propriétaire voit dans l'UI que l'email n'est pas parti et peut
+ *    retenter / contacter le client autrement.
+ */
+export async function sendInvoiceReminder(id: string) {
+  const supabase = await createClient();
+
+  const { data: invoice, error: iErr } = await supabase
+    .from("invoices")
+    .select(
+      "id,status,number,subject,client_id,due_date,total_ttc,is_credit_note,legal_snapshot,reminder_count",
+    )
+    .eq("id", id)
+    .maybeSingle();
+  if (iErr || !invoice) {
+    return { ok: false as const, error: iErr?.message ?? "Facture introuvable" };
+  }
+  if (invoice.is_credit_note) {
+    return { ok: false as const, error: "Un avoir ne se relance pas." };
+  }
+  if (invoice.status !== "envoye" && invoice.status !== "en_retard") {
+    return {
+      ok: false as const,
+      error: `Relance impossible sur une facture ${invoice.status}.`,
+    };
+  }
+
+  const [{ data: client }, { data: payments }] = await Promise.all([
+    invoice.client_id
+      ? supabase
+          .from("clients")
+          .select("first_name,last_name,company_name,email")
+          .eq("id", invoice.client_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("invoice_payments")
+      .select("amount")
+      .eq("invoice_id", id),
+  ]);
+
+  if (!client?.email) {
+    return {
+      ok: false as const,
+      error: "Client sans email — ajoute une adresse dans la fiche client.",
+    };
+  }
+
+  const paid = (payments ?? []).reduce((s, p) => s + Number(p.amount ?? 0), 0);
+  const remaining =
+    Math.round((Number(invoice.total_ttc ?? 0) - paid) * 100) / 100;
+  if (remaining <= 0) {
+    return {
+      ok: false as const,
+      error: "Facture déjà soldée — marque-la payée plutôt.",
+    };
+  }
+
+  // Stamp the reminder first so we always track the attempt.
+  const nowIso = new Date().toISOString();
+  const { error: stampErr } = await supabase
+    .from("invoices")
+    .update({
+      last_reminded_at: nowIso,
+      reminder_count: (invoice.reminder_count ?? 0) + 1,
+    })
+    .eq("id", id);
+  if (stampErr) return { ok: false as const, error: stampErr.message };
+
+  revalidatePath(`/dashboard/factures/${id}`);
+  revalidatePath("/dashboard/factures");
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "factures@cosmoclub.fr";
+  if (!apiKey) {
+    return {
+      ok: true as const,
+      emailed: false,
+      warning: "RESEND_API_KEY non configurée — relance enregistrée mais non envoyée.",
+    };
+  }
+
+  const legal =
+    (invoice.legal_snapshot as { company_name?: string | null } | null) || null;
+  const companyName = legal?.company_name || "Cosmo Club Paris";
+
+  try {
+    const resend = new Resend(apiKey);
+    const origin =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://cosmo-club.vercel.app";
+    const link = `${origin}/factures/${invoice.number}`;
+    const firstName =
+      (client as { first_name?: string | null }).first_name ?? "";
+    const subjectLine =
+      invoice.subject || `Facture ${invoice.number}`;
+    const dueFormatted = invoice.due_date
+      ? new Date(invoice.due_date).toLocaleDateString("fr-FR")
+      : null;
+    const nth = (invoice.reminder_count ?? 0) + 1; // already bumped locally for the email text
+
+    await resend.emails.send({
+      from: `${companyName} <${fromEmail}>`,
+      to: [client.email],
+      subject:
+        nth === 1
+          ? `Rappel — ${subjectLine}`
+          : `Relance (${nth}e) — ${subjectLine}`,
+      html: buildReminderEmailHtml({
+        firstName,
+        subjectLine,
+        number: invoice.number,
+        dueFormatted,
+        remainingEUR: formatEURInline(remaining),
+        link,
+        sender: companyName,
+        nth,
+      }),
+    });
+    return { ok: true as const, emailed: true };
+  } catch (err) {
+    console.error("[sendInvoiceReminder] resend error:", err);
+    return {
+      ok: true as const,
+      emailed: false,
+      warning:
+        "Relance enregistrée mais email non envoyé (Resend a refusé). Réessaie ou contacte le client autrement.",
+    };
+  }
+}
+
 /* ─── Payments ──────────────────────────────────────────────────── */
 
 export async function addPayment(
@@ -505,4 +644,74 @@ function escape(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function formatEURInline(n: number): string {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+  }).format(n);
+}
+
+function buildReminderEmailHtml(o: {
+  firstName: string;
+  subjectLine: string;
+  number: string;
+  dueFormatted: string | null;
+  remainingEUR: string;
+  link: string;
+  sender: string;
+  nth: number;
+}): string {
+  const greeting = o.firstName ? `Bonjour ${o.firstName},` : "Bonjour,";
+  // Tone: cordial on #1, a touch firmer after that — still polite.
+  const opener =
+    o.nth === 1
+      ? `Sauf erreur de notre part, notre facture <strong>${escape(
+          o.number,
+        )}</strong> n'a pas encore été réglée.`
+      : `Nous nous permettons de revenir vers vous concernant notre facture <strong>${escape(
+          o.number,
+        )}</strong>, qui reste à ce jour impayée.`;
+  const dueLine = o.dueFormatted
+    ? `Échéance initiale&nbsp;: ${escape(o.dueFormatted)}.`
+    : "";
+  return `
+<!doctype html>
+<html><body style="font-family: Inter, system-ui, sans-serif; background:#f5efe0; margin:0; padding:32px; color:#2a1f14;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden;">
+    <tr>
+      <td style="padding:32px 32px 8px;">
+        <p style="font-size:10px; letter-spacing:0.28em; text-transform:uppercase; color:#8b1a1a; margin:0 0 12px;">${escape(o.sender)}</p>
+        <h1 style="font-family:Georgia,serif; font-size:24px; line-height:1.2; margin:0 0 18px; color:#2a1f14;">${escape(o.subjectLine)}</h1>
+        <p style="margin:0 0 8px;">${escape(greeting)}</p>
+        <p style="margin:0 0 8px;">${opener}</p>
+        ${dueLine ? `<p style="margin:0 0 8px; font-size:13px; color:#3a2a1e;">${dueLine}</p>` : ""}
+        <p style="margin:12px 0 6px; padding:12px 14px; background:#f5efe0; border-left:3px solid #8b1a1a; font-size:14px;">
+          Montant restant dû&nbsp;: <strong>${escape(o.remainingEUR)}</strong>
+        </p>
+        <p style="margin:16px 0 8px; font-size:13px; color:#3a2a1e;">
+          Merci de régulariser dès que possible. Si le règlement a croisé cet
+          email, n'en tenez naturellement pas compte.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:8px 32px 32px;">
+        <a href="${o.link}" style="display:inline-block; padding:14px 28px; background:#8b1a1a; color:#f5efe0; text-decoration:none; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase;">
+          Revoir la facture
+        </a>
+        <p style="margin:20px 0 0; font-size:12px; color:#3a2a1e; opacity:0.7;">
+          Ou copiez ce lien dans votre navigateur&nbsp;:<br/>
+          <a href="${o.link}" style="color:#8b1a1a;">${o.link}</a>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 32px; background:#f5efe0; font-size:11px; color:#3a2a1e; opacity:0.7;">
+        Référence&nbsp;: ${escape(o.number)} · ${escape(o.sender)} · relance ${o.nth}
+      </td>
+    </tr>
+  </table>
+</body></html>`.trim();
 }
