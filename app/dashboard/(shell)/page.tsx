@@ -1,17 +1,24 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Inbox, FileText, Receipt, Package } from "lucide-react";
+import { Inbox, FileText, Receipt, Package, ArrowRight } from "lucide-react";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
+import { formatDateFR } from "@/lib/format";
 
 export default async function DashboardHome() {
   const supabase = await createClient();
 
   // Lightweight KPI queries. Count-only — cheap and fine for <1000 rows.
-  const [{ count: leadsNew }, { count: quotesPending }, { count: invoicesUnpaid }, { count: lowStock }] =
+  const [{ count: leadsNew }, { count: quotesPending }, { count: invoicesUnpaid }, { count: lowStock }, { data: recentLeads }] =
     await Promise.all([
       supabase.from("leads").select("*", { count: "exact", head: true }).eq("status", "nouveau"),
       supabase.from("quotes").select("*", { count: "exact", head: true }).eq("status", "envoye"),
       supabase.from("invoices").select("*", { count: "exact", head: true }).in("status", ["envoye", "en_retard"]),
       supabase.from("products").select("*", { count: "exact", head: true }).eq("archived", false).filter("stock_qty", "lte", 0),
+      supabase.from("leads")
+        .select("id,status,contact_name,contact_email,event_type,event_date,created_at")
+        .order("created_at", { ascending: false })
+        .limit(5),
     ]);
 
   const kpis = [
@@ -50,6 +57,52 @@ export default async function DashboardHome() {
           );
         })}
       </div>
+
+      {recentLeads && recentLeads.length > 0 && (
+        <section className="mt-10">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-neutral-300">Demandes récentes</h2>
+            <Link
+              href="/dashboard/leads"
+              className="inline-flex items-center gap-1 text-xs text-neutral-400 transition-colors hover:text-white"
+            >
+              Tout voir <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+            <table className="w-full text-left text-sm">
+              <tbody>
+                {recentLeads.map((l) => (
+                  <tr
+                    key={l.id}
+                    className="border-t border-neutral-900 first:border-t-0 transition-colors hover:bg-neutral-900"
+                  >
+                    <td className="px-4 py-2.5">
+                      <Link href={`/dashboard/leads/${l.id}`} className="block">
+                        <p className="text-sm font-medium text-white">
+                          {l.contact_name || l.contact_email || "Sans nom"}
+                        </p>
+                        <p className="text-[11px] text-neutral-500">
+                          {formatDateFR(l.created_at, { withTime: true })}
+                        </p>
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <EventTypeLabel value={l.event_type} />
+                    </td>
+                    <td className="hidden px-4 py-2.5 text-xs text-neutral-400 md:table-cell">
+                      {formatDateFR(l.event_date)}
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <StatusBadge status={l.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       <section className="mt-10">
         <h2 className="mb-3 text-sm font-semibold text-neutral-300">Accès rapide</h2>
