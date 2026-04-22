@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "motion/react";
 import { useState, useCallback } from "react";
@@ -335,7 +335,21 @@ function StepLogistics({ form }: { form: Form }) {
           hint="ex. 14 juin 2026, fin septembre, printemps 2026"
           htmlFor="date"
         >
-          <Input id="date" placeholder="14 juin 2026" {...form.register("date")} />
+          <Controller
+            name="date"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                id="date"
+                placeholder="14 juin 2026"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
+          />
         </FieldShell>
 
         <FieldShell
@@ -344,7 +358,21 @@ function StepLogistics({ form }: { form: Form }) {
           hint="Ville, quartier ou adresse exacte"
           htmlFor="location"
         >
-          <Input id="location" placeholder="Paris 8 — Hôtel de Crillon" {...form.register("location")} />
+          <Controller
+            name="location"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                id="location"
+                placeholder="Paris 8 — Hôtel de Crillon"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
+          />
         </FieldShell>
 
         <FieldShell
@@ -353,13 +381,26 @@ function StepLogistics({ form }: { form: Form }) {
           hint="Approximatif — 80, 150, 400…"
           htmlFor="guests"
         >
-          <Input
-            id="guests"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            placeholder="120"
-            {...form.register("guests")}
+          <Controller
+            name="guests"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                id="guests"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                placeholder="120"
+                value={field.value ?? ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  field.onChange(v === "" ? undefined : Number(v));
+                }}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
           />
         </FieldShell>
       </div>
@@ -383,16 +424,78 @@ function StepContact({ form }: { form: Form }) {
 
       <div className="grid gap-6 sm:grid-cols-2">
         <FieldShell label="Prénom" error={errors.firstName?.message} htmlFor="firstName">
-          <Input id="firstName" autoComplete="given-name" placeholder="Camille" {...form.register("firstName")} />
+          <Controller
+            name="firstName"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                id="firstName"
+                autoComplete="given-name"
+                placeholder="Camille"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
+          />
         </FieldShell>
         <FieldShell label="Nom" error={errors.lastName?.message} htmlFor="lastName">
-          <Input id="lastName" autoComplete="family-name" placeholder="Martin" {...form.register("lastName")} />
+          <Controller
+            name="lastName"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                id="lastName"
+                autoComplete="family-name"
+                placeholder="Martin"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
+          />
         </FieldShell>
         <FieldShell label="Email" error={errors.email?.message} htmlFor="email">
-          <Input id="email" type="email" autoComplete="email" placeholder="camille@domaine.fr" {...form.register("email")} />
+          <Controller
+            name="email"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="camille@domaine.fr"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
+          />
         </FieldShell>
         <FieldShell label="Téléphone" error={errors.phone?.message} htmlFor="phone">
-          <Input id="phone" type="tel" autoComplete="tel" placeholder="06 12 34 56 78" {...form.register("phone")} />
+          <Controller
+            name="phone"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                id="phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="06 12 34 56 78"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
+          />
         </FieldShell>
       </div>
 
@@ -403,7 +506,21 @@ function StepContact({ form }: { form: Form }) {
           hint="Ambiance, budget, contraintes, envies particulières…"
           htmlFor="message"
         >
-          <Textarea id="message" placeholder="Dites-nous tout." {...form.register("message")} />
+          <Controller
+            name="message"
+            control={form.control}
+            render={({ field }) => (
+              <Textarea
+                id="message"
+                placeholder="Dites-nous tout."
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={field.ref}
+              />
+            )}
+          />
         </FieldShell>
       </div>
     </div>
