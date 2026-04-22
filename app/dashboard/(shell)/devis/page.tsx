@@ -8,9 +8,21 @@ export default async function DevisListPage() {
   const supabase = await createClient();
   const { data: quotes, error } = await supabase
     .from("quotes")
-    .select("id,number,status,issue_date,event_date,event_type,total_ttc,client:clients(first_name,last_name,company_name,email)")
+    .select("id,number,status,issue_date,event_date,event_type,total_ttc,client_id")
     .order("created_at", { ascending: false })
     .limit(200);
+
+  // Resolve clients in a second query so the types stay simple.
+  const clientIds = Array.from(
+    new Set((quotes ?? []).map((q) => q.client_id).filter((x): x is string => !!x)),
+  );
+  const { data: clientsList } = clientIds.length
+    ? await supabase
+        .from("clients")
+        .select("id,first_name,last_name,company_name,email")
+        .in("id", clientIds)
+    : { data: [] };
+  const clientsMap = new Map((clientsList ?? []).map((c) => [c.id, c]));
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
@@ -42,9 +54,7 @@ export default async function DevisListPage() {
             </thead>
             <tbody>
               {quotes.map((q) => {
-                const client = q.client as
-                  | { first_name?: string | null; last_name?: string | null; company_name?: string | null; email?: string | null }
-                  | null;
+                const client = q.client_id ? clientsMap.get(q.client_id) : null;
                 const who =
                   client?.company_name ||
                   [client?.first_name, client?.last_name].filter(Boolean).join(" ") ||

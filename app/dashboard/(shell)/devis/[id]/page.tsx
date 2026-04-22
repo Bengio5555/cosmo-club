@@ -12,14 +12,8 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: quote }, { data: client }, { data: items }] = await Promise.all([
+  const [{ data: quote }, { data: items }] = await Promise.all([
     supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
-    supabase
-      .from("quotes")
-      .select("client:clients(*)")
-      .eq("id", id)
-      .maybeSingle()
-      .then((r) => ({ data: r.data?.client ?? null })),
     supabase
       .from("quote_items")
       .select("*")
@@ -30,6 +24,13 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
   if (!quote) {
     notFound();
   }
+
+  // Second hop for the client — keeps the types simple and avoids the
+  // embed-relationship inference that Supabase-js occasionally loses
+  // track of (fails the production build with a SelectQueryError type).
+  const { data: client } = quote.client_id
+    ? await supabase.from("clients").select("*").eq("id", quote.client_id).maybeSingle()
+    : { data: null };
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
