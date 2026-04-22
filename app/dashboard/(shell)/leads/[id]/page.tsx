@@ -7,6 +7,27 @@ import { formatDateFR } from "@/lib/format";
 import { LeadDetailForm } from "./LeadDetailForm";
 import { ArrowLeft, Mail, Phone, Building2, Calendar, Users } from "lucide-react";
 
+// The /contact form lets visitors type the date in free French
+// ("14 juin 2026", "printemps 2026", "fin septembre"). Most of the time
+// Postgres can't coerce that into a DATE so `event_date` stays null.
+// The original text is kept in `raw_payload.date` so we surface that in
+// the UI when the typed column is empty.
+function rawDate(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "date" in payload) {
+    const v = (payload as Record<string, unknown>).date;
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return null;
+}
+
+function rawLocation(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "location" in payload) {
+    const v = (payload as Record<string, unknown>).location;
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return null;
+}
+
 type Params = Promise<{ id: string }>;
 
 export default async function LeadDetailPage({ params }: { params: Params }) {
@@ -68,7 +89,16 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               </dd>
 
               <dt className="text-xs text-neutral-500">Date événement</dt>
-              <dd className="text-right text-neutral-200">{formatDateFR(lead.event_date)}</dd>
+              <dd className="text-right text-neutral-200">
+                {lead.event_date
+                  ? formatDateFR(lead.event_date)
+                  : rawDate(lead.raw_payload) ?? "—"}
+              </dd>
+
+              <dt className="text-xs text-neutral-500">Lieu</dt>
+              <dd className="text-right text-neutral-200">
+                {rawLocation(lead.raw_payload) ?? "—"}
+              </dd>
 
               <dt className="text-xs text-neutral-500">Invités</dt>
               <dd className="text-right text-neutral-200">
@@ -124,9 +154,13 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
                   <span className="text-neutral-200">{lead.company}</span>
                 </Row>
               )}
-              {lead.event_date && (
+              {(lead.event_date || rawDate(lead.raw_payload)) && (
                 <Row icon={Calendar} label="Date">
-                  <span className="text-neutral-200">{formatDateFR(lead.event_date)}</span>
+                  <span className="text-neutral-200">
+                    {lead.event_date
+                      ? formatDateFR(lead.event_date)
+                      : rawDate(lead.raw_payload)}
+                  </span>
                 </Row>
               )}
               {lead.guests_count != null && (

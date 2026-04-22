@@ -18,7 +18,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
 
   let query = supabase
     .from("leads")
-    .select("id,status,contact_name,contact_email,company,event_type,event_date,guests_count,message,created_at")
+    .select("id,status,contact_name,contact_email,company,event_type,event_date,guests_count,message,raw_payload,created_at")
     .order("created_at", { ascending: false });
 
   if (status && STATUS_VALUES.includes(status as LeadStatus)) {
@@ -90,7 +90,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
                     <EventTypeLabel value={l.event_type} />
                   </td>
                   <td className="px-3 py-3 text-xs text-neutral-300 md:px-4">
-                    {formatDateFR(l.event_date)}
+                    {l.event_date
+                      ? formatDateFR(l.event_date)
+                      : rawDateText(l.raw_payload) ?? (
+                          <span className="text-neutral-500">—</span>
+                        )}
                   </td>
                   <td className="hidden px-3 py-3 text-xs text-neutral-300 md:table-cell md:px-4">
                     {l.guests_count ?? <span className="text-neutral-500">—</span>}
@@ -134,3 +138,14 @@ type LeadStatus = Database["public"]["Enums"]["lead_status"];
 type EventType = Database["public"]["Enums"]["event_type"];
 const STATUS_VALUES: LeadStatus[] = ["nouveau", "contacte", "devis_envoye", "gagne", "perdu"];
 const TYPE_VALUES: EventType[] = ["mariage", "corporate", "prive", "defile", "lancement", "autre"];
+
+// Free-form date typed by the visitor ("14 juin 2026"). When Postgres can't
+// coerce it, we keep the raw text in `raw_payload.date` — surface it when
+// the typed column is null so the list stays informative.
+function rawDateText(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "date" in payload) {
+    const v = (payload as Record<string, unknown>).date;
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return null;
+}
