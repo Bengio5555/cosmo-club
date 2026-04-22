@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { Database } from "@/types/database";
+import type { Database, TablesUpdate } from "@/types/database";
 
 type ProductCategory = Database["public"]["Enums"]["product_category"];
+type ProductUpdate = TablesUpdate<"products">;
 
 export type ProductInput = {
   name: string;
@@ -54,7 +55,7 @@ export async function saveNewProduct(input: ProductInput) {
 
 export async function saveProduct(id: string, input: Partial<ProductInput>) {
   const supabase = await createClient();
-  const patch: Partial<ProductInput> & Record<string, unknown> = {};
+  const patch: ProductUpdate = {};
   if (input.name !== undefined) patch.name = input.name.trim();
   if (input.category !== undefined) patch.category = input.category;
   if (input.unit !== undefined) patch.unit = input.unit.trim() || "unité";

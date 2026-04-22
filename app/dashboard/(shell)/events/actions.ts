@@ -3,9 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Database } from "@/types/database";
+import type { Database, TablesUpdate } from "@/types/database";
 
 type EventStatus = Database["public"]["Enums"]["event_status"];
+type EventUpdate = TablesUpdate<"events">;
+type EventStaffUpdate = TablesUpdate<"event_staff">;
 
 export type EventInput = {
   title: string;
@@ -121,7 +123,7 @@ export async function createEventFromQuote(quoteId: string) {
 
 export async function saveEvent(id: string, input: Partial<EventInput>) {
   const supabase = await createClient();
-  const patch: Record<string, unknown> = {};
+  const patch: EventUpdate = {};
   if (input.title !== undefined) patch.title = input.title.trim();
   if (input.date !== undefined) patch.date = input.date;
   if (input.start_time !== undefined) patch.start_time = clean(input.start_time);
@@ -317,7 +319,7 @@ export async function updateStaffAssignment(
   },
 ) {
   const supabase = await createClient();
-  const update: Record<string, unknown> = {};
+  const update: EventStaffUpdate = {};
   if (patch.hours_planned !== undefined) update.hours_planned = patch.hours_planned;
   if (patch.hours_done !== undefined) update.hours_done = patch.hours_done;
   if (patch.rate_override !== undefined) update.rate_override = patch.rate_override;
