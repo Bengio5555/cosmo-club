@@ -1,21 +1,26 @@
-"use client";
-
-import { Printer } from "lucide-react";
+import { Download } from "lucide-react";
 
 /**
- * Thin client wrapper around window.print(). Kept tiny so the rest of
- * the shopping list page stays fully server-rendered. The browser print
- * dialog also exposes "Save as PDF" — no PDF library needed.
+ * PDF download — hits the server API route that renders the shopping
+ * list with @react-pdf/renderer and streams it as an attachment. Plain
+ * `<a download>` rather than window.print() so the user gets a real
+ * file without going through the print dialog.
  */
-export function PrintButton() {
+export function PrintButton({
+  eventId,
+  mode,
+}: {
+  eventId: string;
+  mode: "shortage" | "full";
+}) {
+  const qs = mode === "full" ? "?mode=full" : "";
   return (
-    <button
-      type="button"
+    <a
       className="primary"
-      onClick={() => window.print()}
+      href={`/api/dashboard/events/${eventId}/courses-pdf${qs}`}
     >
-      <Printer className="h-3 w-3" />
-      Imprimer / PDF
-    </button>
+      <Download className="h-3 w-3" />
+      Télécharger PDF
+    </a>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Calculator,
+  Download,
   ListChecks,
   Loader2,
   Plus,
@@ -142,11 +143,19 @@ export function MenuSection({
         </div>
         {menu.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={`/api/dashboard/events/${eventId}/courses-pdf`}
+              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-neutral-100 transition-colors hover:bg-neutral-700"
+              title="Télécharger la liste de courses en PDF"
+            >
+              <Download className="h-3 w-3" /> Liste de courses (PDF)
+            </a>
             <Link
               href={`/dashboard/events/${eventId}/courses`}
-              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-neutral-100 transition-colors hover:bg-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1 text-[11px] text-neutral-300 transition-colors hover:border-neutral-700"
+              title="Aperçu à l'écran avant téléchargement"
             >
-              <ListChecks className="h-3 w-3" /> Liste de courses
+              <ListChecks className="h-3 w-3" /> Aperçu
             </Link>
             {!readOnly && (
               <button
