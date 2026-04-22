@@ -32,9 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
+
+# AI generation scratch dir (latte shoots) — not part of the site
+/generated-lattes/
 
 # typescript
 *.tsbuildinfo

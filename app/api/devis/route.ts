@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { devisSchema } from "@/lib/content/devis";
 import { site } from "@/lib/site";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { Database } from "@/types/database";
 
 export const runtime = "nodejs";
 
@@ -10,6 +12,48 @@ const TO_EMAIL = process.env.DEVIS_TO_EMAIL ?? site.email;
 const FROM_EMAIL = process.env.DEVIS_FROM_EMAIL ?? "devis@cosmoclub.fr";
 
 const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;
+
+// Map the form's eventType values to the DB enum. `mariage` / `corporate` /
+// `prive` / `defile` are shared; `autre` is a safe fallback for unknowns.
+function toDbEventType(
+  v: string,
+): Database["public"]["Enums"]["event_type"] | null {
+  const allowed: Database["public"]["Enums"]["event_type"][] = [
+    "mariage",
+    "corporate",
+    "prive",
+    "defile",
+    "lancement",
+    "autre",
+  ];
+  return (allowed as string[]).includes(v) ? (v as Database["public"]["Enums"]["event_type"]) : "autre";
+}
+
+// Persist the lead into the `leads` table. Non-blocking: failures are logged
+// and swallowed so the user still gets a successful response if the email
+// went through.
+async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return; // Supabase not configured yet — skip silently.
+  }
+  try {
+    const supabase = createAdminClient();
+    await supabase.from("leads").insert({
+      source: "site",
+      status: "nouveau",
+      contact_name: `${data.firstName} ${data.lastName}`.trim(),
+      contact_email: data.email,
+      contact_phone: data.phone,
+      event_type: toDbEventType(data.eventType),
+      event_date: data.date || null,
+      guests_count: typeof data.guests === "number" ? data.guests : Number(data.guests) || null,
+      message: data.message || null,
+      raw_payload: data as unknown as Database["public"]["Tables"]["leads"]["Insert"]["raw_payload"],
+    });
+  } catch (err) {
+    console.error("lead_persist_error", err);
+  }
+}
 
 export async function POST(req: Request) {
   let json: unknown;
@@ -54,6 +98,9 @@ export async function POST(req: Request) {
   ].join("\n");
 
   const htmlBody = renderHtml(data);
+
+  // Persist to DB alongside the email — failures in one don't affect the other.
+  await persistLead(data);
 
   if (!resend) {
     // Dev fallback: log to server console so the flow is testable without a key
