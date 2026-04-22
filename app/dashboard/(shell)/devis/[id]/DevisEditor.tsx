@@ -24,7 +24,8 @@ import {
   type SaveQuoteInput,
 } from "./actions";
 import { CatalogPicker, type PickedItem } from "./CatalogPicker";
-import { Receipt } from "lucide-react";
+import { Receipt, CalendarPlus } from "lucide-react";
+import { createEventFromQuote } from "../../events/actions";
 
 type Quote = Tables<"quotes">;
 type QuoteItem = Tables<"quote_items">;
@@ -238,6 +239,18 @@ export function DevisEditor({
     });
   }
 
+  function createEvent() {
+    startTransition(async () => {
+      setMsg(null);
+      // Success path redirects inside the server action. If we get here,
+      // it failed and returned a structured error.
+      const res = await createEventFromQuote(quote.id);
+      if (res && !res.ok) {
+        setMsg({ kind: "err", text: res.error });
+      }
+    });
+  }
+
   // ─── Item operations ───────────────────────────────────────
   function addItem(section: string) {
     setItems((prev) => [
@@ -320,6 +333,7 @@ export function DevisEditor({
         onReopen={() => transition("brouillon")}
         onDelete={doDelete}
         onCreateInvoice={createInvoice}
+        onCreateEvent={createEvent}
       />
 
       {msg && (
@@ -531,6 +545,7 @@ function TopBar({
   onReopen,
   onDelete,
   onCreateInvoice,
+  onCreateEvent,
 }: {
   quote: Quote;
   dirty: boolean;
@@ -542,6 +557,7 @@ function TopBar({
   onReopen: () => void;
   onDelete: () => void;
   onCreateInvoice: () => void;
+  onCreateEvent: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
@@ -590,14 +606,24 @@ function TopBar({
         )}
 
         {quote.status === "accepte" && (
-          <button
-            type="button"
-            onClick={onCreateInvoice}
-            disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
-          >
-            <Receipt className="h-3 w-3" /> Créer la facture
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={onCreateEvent}
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-sky-500 disabled:opacity-60"
+            >
+              <CalendarPlus className="h-3 w-3" /> Créer l&apos;événement
+            </button>
+            <button
+              type="button"
+              onClick={onCreateInvoice}
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
+            >
+              <Receipt className="h-3 w-3" /> Créer la facture
+            </button>
+          </>
         )}
 
         {quote.status === "envoye" && (

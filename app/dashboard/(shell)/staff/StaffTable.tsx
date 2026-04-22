@@ -1,0 +1,344 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Archive, ArchiveRestore, Loader2, Pencil, Plus, X } from "lucide-react";
+import type { Tables, Database } from "@/types/database";
+import { saveNewStaff, saveStaff, toggleStaffArchived, type StaffInput } from "./actions";
+
+type Staff = Tables<"staff">;
+type StaffRole = Database["public"]["Enums"]["staff_role"];
+
+const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
+  { value: "barman", label: "Barman" },
+  { value: "barista", label: "Barista" },
+  { value: "runner", label: "Runner" },
+  { value: "chef_de_salle", label: "Chef de salle" },
+  { value: "autre", label: "Autre" },
+];
+
+const ROLE_LABEL: Record<StaffRole, string> = Object.fromEntries(
+  ROLE_OPTIONS.map((r) => [r.value, r.label]),
+) as Record<StaffRole, string>;
+
+export function StaffTable({ staff }: { staff: Staff[] }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+  const [modal, setModal] = useState<"new" | { edit: Staff } | null>(null);
+
+  const active = staff.filter((s) => !s.archived);
+  const archived = staff.filter((s) => s.archived);
+
+  function submitNew(form: FormData) {
+    setErr(null);
+    const input: StaffInput = {
+      full_name: String(form.get("full_name") || ""),
+      role: (form.get("role") as StaffRole) || "barman",
+      hourly_rate: form.get("hourly_rate")
+        ? Number(form.get("hourly_rate"))
+        : null,
+      email: String(form.get("email") || ""),
+      phone: String(form.get("phone") || ""),
+      notes: String(form.get("notes") || ""),
+    };
+    startTransition(async () => {
+      const res = await saveNewStaff(input);
+      if (!res.ok) {
+        setErr(res.error);
+        return;
+      }
+      setModal(null);
+      router.refresh();
+    });
+  }
+
+  function submitEdit(id: string, form: FormData) {
+    setErr(null);
+    const patch: Partial<StaffInput> = {
+      full_name: String(form.get("full_name") || ""),
+      role: form.get("role") as StaffRole,
+      hourly_rate: form.get("hourly_rate")
+        ? Number(form.get("hourly_rate"))
+        : null,
+      email: String(form.get("email") || ""),
+      phone: String(form.get("phone") || ""),
+      notes: String(form.get("notes") || ""),
+    };
+    startTransition(async () => {
+      const res = await saveStaff(id, patch);
+      if (!res.ok) {
+        setErr(res.error);
+        return;
+      }
+      setModal(null);
+      router.refresh();
+    });
+  }
+
+  function toggleArchive(id: string, currentlyArchived: boolean) {
+    startTransition(async () => {
+      const res = await toggleStaffArchived(id, !currentlyArchived);
+      if (!res.ok) setErr(res.error);
+      else router.refresh();
+    });
+  }
+
+  return (
+    <>
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-xs text-neutral-500">
+          {active.length} actif{active.length > 1 ? "s" : ""}
+          {archived.length > 0 && ` · ${archived.length} archivé${archived.length > 1 ? "s" : ""}`}
+        </p>
+        <button
+          type="button"
+          onClick={() => setModal("new")}
+          className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)]"
+        >
+          <Plus className="h-3.5 w-3.5" /> Ajouter
+        </button>
+      </div>
+
+      {err && (
+        <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-200">
+          {err}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+        {staff.length === 0 ? (
+          <div className="p-8 text-center text-sm text-neutral-500">
+            Aucun membre d&apos;équipe. Clique « Ajouter » pour commencer.
+          </div>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-neutral-800 text-[10px] uppercase tracking-wide text-neutral-500">
+              <tr>
+                <th className="px-3 py-2.5 font-medium md:px-4">Nom</th>
+                <th className="px-3 py-2.5 font-medium md:px-4">Rôle</th>
+                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Contact</th>
+                <th className="px-3 py-2.5 text-right font-medium md:px-4">Taux h.</th>
+                <th className="px-3 py-2.5 text-right font-medium md:px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...active, ...archived].map((s) => (
+                <tr
+                  key={s.id}
+                  className={`border-t border-neutral-900 transition-colors hover:bg-neutral-900 ${s.archived ? "opacity-50" : ""}`}
+                >
+                  <td className="px-3 py-3 md:px-4">
+                    <p className="font-medium text-white">{s.full_name}</p>
+                    {s.notes && (
+                      <p className="mt-0.5 text-[11px] text-neutral-500 line-clamp-1">
+                        {s.notes}
+                      </p>
+                    )}
+                  </td>
+                  <td className="px-3 py-3 md:px-4">
+                    <span className="inline-flex rounded-full border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-300">
+                      {ROLE_LABEL[s.role]}
+                    </span>
+                  </td>
+                  <td className="hidden px-3 py-3 text-xs text-neutral-300 md:table-cell md:px-4">
+                    {s.email && <div>{s.email}</div>}
+                    {s.phone && <div className="text-neutral-500">{s.phone}</div>}
+                  </td>
+                  <td className="px-3 py-3 text-right text-sm text-neutral-200 md:px-4">
+                    {s.hourly_rate != null
+                      ? `${Number(s.hourly_rate).toFixed(2)} €`
+                      : "—"}
+                  </td>
+                  <td className="px-3 py-3 text-right md:px-4">
+                    <div className="inline-flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setModal({ edit: s })}
+                        disabled={pending}
+                        className="rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
+                        aria-label="Modifier"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleArchive(s.id, s.archived)}
+                        disabled={pending}
+                        className="rounded p-1.5 text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-neutral-200"
+                        aria-label={s.archived ? "Désarchiver" : "Archiver"}
+                        title={s.archived ? "Désarchiver" : "Archiver"}
+                      >
+                        {s.archived ? (
+                          <ArchiveRestore className="h-3.5 w-3.5" />
+                        ) : (
+                          <Archive className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {modal && (
+        <Modal
+          staff={typeof modal === "object" ? modal.edit : null}
+          pending={pending}
+          onClose={() => {
+            setErr(null);
+            setModal(null);
+          }}
+          onSubmit={(form) =>
+            typeof modal === "object" ? submitEdit(modal.edit.id, form) : submitNew(form)
+          }
+        />
+      )}
+    </>
+  );
+}
+
+function Modal({
+  staff,
+  pending,
+  onClose,
+  onSubmit,
+}: {
+  staff: Staff | null;
+  pending: boolean;
+  onClose: () => void;
+  onSubmit: (form: FormData) => void;
+}) {
+  const isEdit = !!staff;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl">
+        <div className="mb-3 flex items-start justify-between">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              {isEdit ? "Modifier" : "Nouveau"}
+            </p>
+            <h2 className="mt-1 font-display text-lg text-white">
+              {isEdit ? staff!.full_name : "Membre d'équipe"}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+            aria-label="Fermer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <form action={onSubmit} className="space-y-3">
+          <Field label="Nom complet">
+            <input
+              name="full_name"
+              required
+              defaultValue={staff?.full_name ?? ""}
+              autoFocus
+              className={inputCls}
+            />
+          </Field>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <Field label="Rôle">
+              <select
+                name="role"
+                defaultValue={staff?.role ?? "barman"}
+                className={inputCls}
+              >
+                {ROLE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Taux horaire (€)">
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                name="hourly_rate"
+                defaultValue={staff?.hourly_rate ?? ""}
+                className={inputCls}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <Field label="Email">
+              <input
+                type="email"
+                name="email"
+                defaultValue={staff?.email ?? ""}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Téléphone">
+              <input
+                name="phone"
+                defaultValue={staff?.phone ?? ""}
+                className={inputCls}
+              />
+            </Field>
+          </div>
+
+          <Field label="Notes internes">
+            <textarea
+              name="notes"
+              rows={2}
+              defaultValue={staff?.notes ?? ""}
+              className={inputCls}
+            />
+          </Field>
+
+          <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-900 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={pending}
+              className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:opacity-60"
+            >
+              {pending && <Loader2 className="h-3 w-3 animate-spin" />}
+              {isEdit ? "Enregistrer" : "Créer"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
