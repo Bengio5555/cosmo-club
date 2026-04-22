@@ -130,13 +130,19 @@ body {
   );
 }
 
-/* ─── Custom cursor ───────────────────────────────── */
+/* ─── Custom cursor — scoped to the public site layout only ─── */
+/* Activated by the `.site-chrome` class on the (site) layout root.      */
+/* The /dashboard tree never gets this class, so the native cursor is    */
+/* preserved there.                                                      */
 @media (hover: hover) and (pointer: fine) {
-  html,
-  body {
-    cursor: none;
-  }
-  a, button, [role="button"], input, textarea, select, label {
+  .site-chrome,
+  .site-chrome a,
+  .site-chrome button,
+  .site-chrome [role="button"],
+  .site-chrome input,
+  .site-chrome textarea,
+  .site-chrome select,
+  .site-chrome label {
     cursor: none;
   }
 }
