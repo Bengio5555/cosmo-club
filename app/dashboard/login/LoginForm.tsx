@@ -11,6 +11,8 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const params = useSearchParams();
   const from = params.get("from") || "/dashboard";
+  const callbackError = params.get("error");
+  const callbackDetail = params.get("detail");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,7 +48,14 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
+    <>
+      {callbackError && (
+        <div className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+          <p className="font-semibold">Échec du lien magique — {callbackError}</p>
+          {callbackDetail && <p className="mt-1 opacity-80">{callbackDetail}</p>}
+        </div>
+      )}
+      <form onSubmit={onSubmit} className="space-y-3">
       <label className="block">
         <span className="mb-1.5 block text-xs font-medium text-neutral-400">
           Adresse email
@@ -76,6 +85,7 @@ export function LoginForm() {
       >
         {loading ? "Envoi…" : "Recevoir le lien"}
       </button>
-    </form>
+      </form>
+    </>
   );
 }
