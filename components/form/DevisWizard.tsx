@@ -316,6 +316,15 @@ function StepOffer({ form, onSelect }: { form: Form; onSelect: (id: string) => v
 
 function StepLogistics({ form }: { form: Form }) {
   const errors = form.formState.errors;
+  const currentDate = form.watch("date") ?? "";
+  // If the value looks like YYYY-MM-DD we use the native date picker, else
+  // fall back to the free-text field. The visitor can toggle back and forth.
+  const [dateMode, setDateMode] = useState<"exact" | "approx">(
+    /^\d{4}-\d{2}-\d{2}$/.test(currentDate) || currentDate === ""
+      ? "exact"
+      : "approx",
+  );
+
   return (
     <div className="flex flex-col">
       <header className="mb-8">
@@ -332,22 +341,55 @@ function StepLogistics({ form }: { form: Form }) {
         <FieldShell
           label="Date de l'événement"
           error={errors.date?.message}
-          hint="ex. 14 juin 2026, fin septembre, printemps 2026"
+          hint={
+            dateMode === "exact"
+              ? "Sélectionne une date précise"
+              : "ex. printemps 2026, fin septembre, flexible…"
+          }
           htmlFor="date"
         >
           <Controller
             name="date"
             control={form.control}
             render={({ field }) => (
-              <Input
-                id="date"
-                placeholder="14 juin 2026"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                name={field.name}
-                ref={field.ref}
-              />
+              <div className="space-y-2">
+                {dateMode === "exact" ? (
+                  <Input
+                    id="date"
+                    type="date"
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                ) : (
+                  <Input
+                    id="date"
+                    placeholder="printemps 2026, fin septembre…"
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDateMode((m) => (m === "exact" ? "approx" : "exact"));
+                    // Reset the field when switching modes to avoid carrying
+                    // over an incompatible value (eg. "printemps 2026" into
+                    // a native date picker).
+                    field.onChange("");
+                  }}
+                  className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--color-grenat)] transition-colors hover:text-[color:var(--color-grenat-glow)]"
+                >
+                  {dateMode === "exact"
+                    ? "↻ Pas de date précise"
+                    : "↻ Choisir une date précise"}
+                </button>
+              </div>
             )}
           />
         </FieldShell>
