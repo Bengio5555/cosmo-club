@@ -69,6 +69,10 @@ export function StockTable({
       cost_ht: form.get("cost_ht") ? Number(form.get("cost_ht")) : null,
       supplier: String(form.get("supplier") || ""),
       notes: String(form.get("notes") || ""),
+      content_per_unit: form.get("content_per_unit")
+        ? Number(form.get("content_per_unit"))
+        : null,
+      content_unit: String(form.get("content_unit") || "") || null,
     };
     startTransition(async () => {
       const res = await saveNewProduct(input);
@@ -88,6 +92,10 @@ export function StockTable({
       cost_ht: form.get("cost_ht") ? Number(form.get("cost_ht")) : null,
       supplier: String(form.get("supplier") || ""),
       notes: String(form.get("notes") || ""),
+      content_per_unit: form.get("content_per_unit")
+        ? Number(form.get("content_per_unit"))
+        : null,
+      content_unit: String(form.get("content_unit") || "") || null,
     };
     startTransition(async () => {
       const res = await saveProduct(id, patch);
@@ -500,6 +508,36 @@ function ProductModal({
               />
             </Field>
           </div>
+
+          <div className="grid gap-3 md:grid-cols-[1fr_120px]">
+            <Field label="Contenu par unité (pour recettes)">
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="content_per_unit"
+                defaultValue={product?.content_per_unit ?? ""}
+                placeholder="ex: 70 pour une bouteille 70cl"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Unité contenu">
+              <select
+                name="content_unit"
+                defaultValue={product?.content_unit ?? ""}
+                className={inputCls}
+              >
+                <option value="">—</option>
+                <option value="cl">cl</option>
+                <option value="g">g</option>
+                <option value="pc">pc</option>
+              </select>
+            </Field>
+          </div>
+          <p className="-mt-1 text-[10px] text-neutral-600">
+            Optionnel · utilisé par le menu cocktails pour calculer le stock
+            nécessaire à un événement (ex: 1 btl = 70 cl).
+          </p>
 
           <Field label="Notes internes">
             <textarea

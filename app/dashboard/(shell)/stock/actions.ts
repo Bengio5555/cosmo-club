@@ -16,6 +16,10 @@ export type ProductInput = {
   cost_ht: number | null;
   supplier: string | null;
   notes: string | null;
+  /** For liquids: how many `content_unit` per stock unit (e.g. 70 for a 70cl bottle). */
+  content_per_unit: number | null;
+  /** Physical content unit: "cl" | "g" | "pc" — drives the cocktail recipe autocalc. */
+  content_unit: string | null;
 };
 
 function clean(v: string | null | undefined): string | null {
@@ -43,6 +47,12 @@ export async function saveNewProduct(input: ProductInput) {
           : Number(input.cost_ht),
       supplier: clean(input.supplier),
       notes: clean(input.notes),
+      content_per_unit:
+        input.content_per_unit == null ||
+        !Number.isFinite(Number(input.content_per_unit))
+          ? null
+          : Number(input.content_per_unit),
+      content_unit: clean(input.content_unit),
     })
     .select("id")
     .single();
@@ -69,6 +79,14 @@ export async function saveProduct(id: string, input: Partial<ProductInput>) {
         : Number(input.cost_ht);
   if (input.supplier !== undefined) patch.supplier = clean(input.supplier);
   if (input.notes !== undefined) patch.notes = clean(input.notes);
+  if (input.content_per_unit !== undefined)
+    patch.content_per_unit =
+      input.content_per_unit == null ||
+      !Number.isFinite(Number(input.content_per_unit))
+        ? null
+        : Number(input.content_per_unit);
+  if (input.content_unit !== undefined)
+    patch.content_unit = clean(input.content_unit);
 
   const { error } = await supabase.from("products").update(patch).eq("id", id);
   if (error) return { ok: false as const, error: error.message };

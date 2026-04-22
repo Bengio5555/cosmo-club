@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { EventEditor } from "./EventEditor";
 import { StaffSection } from "./StaffSection";
 import { StockSection } from "./StockSection";
+import { MenuSection } from "./MenuSection";
 
 type Params = Promise<{ id: string }>;
 
@@ -40,6 +41,8 @@ export default async function EventDetailPage({
     { data: assignments },
     { data: allProducts },
     { data: reservations },
+    { data: menuRaw },
+    { data: cocktailOptions },
   ] = await Promise.all([
     event.client_id
       ? supabase.from("clients").select("*").eq("id", event.client_id).maybeSingle()
@@ -62,7 +65,9 @@ export default async function EventDetailPage({
       .eq("event_id", id),
     supabase
       .from("products")
-      .select("id,name,category,unit,stock_qty,archived")
+      .select(
+        "id,name,category,unit,stock_qty,archived,content_per_unit,content_unit,cost_ht",
+      )
       .eq("archived", false)
       .order("category")
       .order("name"),
@@ -70,7 +75,101 @@ export default async function EventDetailPage({
       .from("event_stock")
       .select("*")
       .eq("event_id", id),
+    supabase
+      .from("event_cocktails")
+      .select("event_id,cocktail_id,qty_planned")
+      .eq("event_id", id),
+    supabase
+      .from("cocktails")
+      .select("id,name,category")
+      .eq("archived", false)
+      .order("category", { nullsFirst: false })
+      .order("name"),
   ]);
+
+  // Resolve cocktail names for the menu rows + ingredients for the
+  // "Calculer le stock" modal (done server-side so the client gets an
+  // already-computed breakdown).
+  const menuCocktailIds = (menuRaw ?? []).map((m) => m.cocktail_id);
+  const [{ data: menuCocktailDetails }, { data: menuIngredients }] =
+    await Promise.all([
+      menuCocktailIds.length
+        ? supabase
+            .from("cocktails")
+            .select("id,name,category")
+            .in("id", menuCocktailIds)
+        : Promise.resolve({ data: [] }),
+      menuCocktailIds.length
+        ? supabase
+            .from("cocktail_ingredients")
+            .select("cocktail_id,product_id,qty")
+            .in("cocktail_id", menuCocktailIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+  const cocktailById = new Map(
+    (menuCocktailDetails ?? []).map((c) => [c.id, c]),
+  );
+  const menu = (menuRaw ?? []).map((m) => ({
+    ...m,
+    cocktail: cocktailById.get(m.cocktail_id) ?? {
+      id: m.cocktail_id,
+      name: "—",
+      category: null,
+    },
+  }));
+
+  // Compute stock need per product.
+  const productsById = new Map(
+    (allProducts ?? []).map((p) => [p.id, p]),
+  );
+  const qtyByCocktail = new Map(
+    (menuRaw ?? []).map((m) => [m.cocktail_id, m.qty_planned]),
+  );
+  const totalNeed = new Map<string, number>();
+  for (const ing of menuIngredients ?? []) {
+    const planned = qtyByCocktail.get(ing.cocktail_id) ?? 0;
+    if (!planned) continue;
+    totalNeed.set(
+      ing.product_id,
+      (totalNeed.get(ing.product_id) ?? 0) + Number(ing.qty) * planned,
+    );
+  }
+
+  const computed = Array.from(totalNeed.entries())
+    .map(([productId, need]) => {
+      const p = productsById.get(productId);
+      if (!p) return null;
+      const perUnit = p.content_per_unit ? Number(p.content_per_unit) : null;
+      const packs =
+        perUnit && perUnit > 0 ? Math.ceil(need / perUnit) : Math.ceil(need);
+      const stockQty = Number(p.stock_qty ?? 0);
+      const shortage = Math.max(0, packs - stockQty);
+      const costHt = p.cost_ht != null ? Number(p.cost_ht) : null;
+      const lineCost = costHt != null ? Math.round(costHt * packs * 100) / 100 : null;
+      return {
+        productId,
+        productName: p.name,
+        productCategory: p.category,
+        need,
+        contentUnit: p.content_unit ?? p.unit,
+        packUnit: p.unit,
+        perUnit,
+        packsNeeded: packs,
+        stockQty,
+        shortage,
+        costPerPack: costHt,
+        lineCost,
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x)
+    .sort((a, b) => {
+      // Sort shortages first, then by product category+name
+      if (a.shortage > 0 && b.shortage === 0) return -1;
+      if (a.shortage === 0 && b.shortage > 0) return 1;
+      return (a.productCategory + a.productName).localeCompare(
+        b.productCategory + b.productName,
+      );
+    });
 
   return (
     <>
@@ -84,6 +183,17 @@ export default async function EventDetailPage({
       </div>
 
       <EventEditor event={event} />
+
+      <div className="px-4 pb-5 md:px-8">
+        <MenuSection
+          eventId={event.id}
+          eventStatus={event.status}
+          menu={menu}
+          cocktailOptions={cocktailOptions ?? []}
+          computed={computed}
+          existingReservationCount={(reservations ?? []).length}
+        />
+      </div>
 
       <div className="grid gap-5 px-4 pb-6 md:grid-cols-2 md:px-8">
         <StaffSection

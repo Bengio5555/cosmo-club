@@ -167,6 +167,8 @@ export type Database = {
         Row: {
           archived: boolean
           category: Database["public"]["Enums"]["product_category"]
+          content_per_unit: number | null
+          content_unit: string | null
           cost_ht: number | null
           created_at: string
           id: string
@@ -180,6 +182,41 @@ export type Database = {
         }
         Insert: Partial<Database["public"]["Tables"]["products"]["Row"]> & { name: string; category: Database["public"]["Enums"]["product_category"] }
         Update: Partial<Database["public"]["Tables"]["products"]["Row"]>
+        Relationships: []
+      }
+      cocktails: {
+        Row: {
+          archived: boolean
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["cocktails"]["Row"]> & { name: string }
+        Update: Partial<Database["public"]["Tables"]["cocktails"]["Row"]>
+        Relationships: []
+      }
+      cocktail_ingredients: {
+        Row: {
+          cocktail_id: string
+          product_id: string
+          qty: number
+          position: number
+        }
+        Insert: Partial<Database["public"]["Tables"]["cocktail_ingredients"]["Row"]> & { cocktail_id: string; product_id: string; qty: number }
+        Update: Partial<Database["public"]["Tables"]["cocktail_ingredients"]["Row"]>
+        Relationships: []
+      }
+      event_cocktails: {
+        Row: {
+          event_id: string
+          cocktail_id: string
+          qty_planned: number
+        }
+        Insert: Partial<Database["public"]["Tables"]["event_cocktails"]["Row"]> & { event_id: string; cocktail_id: string }
+        Update: Partial<Database["public"]["Tables"]["event_cocktails"]["Row"]>
         Relationships: []
       }
       profiles: {

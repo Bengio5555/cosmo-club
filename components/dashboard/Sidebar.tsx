@@ -15,6 +15,7 @@ import {
   Settings,
   CalendarDays,
   BookText,
+  Wine,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoSrc from "@/public/brand/cosmo-logo.avif";
@@ -42,6 +43,7 @@ const nav: { section: string; items: NavItem[] }[] = [
     items: [
       { href: "/dashboard/clients", label: "Clients", icon: Contact },
       { href: "/dashboard/catalog", label: "Catalogue", icon: BookText },
+      { href: "/dashboard/cocktails", label: "Cocktails", icon: Wine },
       { href: "/dashboard/stock", label: "Stock", icon: Package },
       { href: "/dashboard/staff", label: "Équipe", icon: Users },
     ],

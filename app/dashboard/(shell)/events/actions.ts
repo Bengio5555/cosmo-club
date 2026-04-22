@@ -410,3 +410,157 @@ export async function removeReservation(eventId: string, productId: string) {
   revalidatePath(`/dashboard/events/${eventId}`);
   return { ok: true as const };
 }
+
+/* ─── Cocktail menu ─────────────────────────────────────────────── */
+
+export async function addCocktailToMenu(
+  eventId: string,
+  cocktailId: string,
+  qtyPlanned: number,
+) {
+  if (!Number.isFinite(qtyPlanned) || qtyPlanned < 0) {
+    return { ok: false as const, error: "Quantité invalide." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.from("event_cocktails").upsert(
+    {
+      event_id: eventId,
+      cocktail_id: cocktailId,
+      qty_planned: Math.round(qtyPlanned),
+    },
+    { onConflict: "event_id,cocktail_id" },
+  );
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
+export async function updateCocktailQty(
+  eventId: string,
+  cocktailId: string,
+  qtyPlanned: number,
+) {
+  if (!Number.isFinite(qtyPlanned) || qtyPlanned < 0) {
+    return { ok: false as const, error: "Quantité invalide." };
+  }
+  const supabase = await createClient();
+  if (qtyPlanned === 0) {
+    const { error } = await supabase
+      .from("event_cocktails")
+      .delete()
+      .eq("event_id", eventId)
+      .eq("cocktail_id", cocktailId);
+    if (error) return { ok: false as const, error: error.message };
+  } else {
+    const { error } = await supabase
+      .from("event_cocktails")
+      .update({ qty_planned: Math.round(qtyPlanned) })
+      .eq("event_id", eventId)
+      .eq("cocktail_id", cocktailId);
+    if (error) return { ok: false as const, error: error.message };
+  }
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
+export async function removeCocktailFromMenu(
+  eventId: string,
+  cocktailId: string,
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("event_cocktails")
+    .delete()
+    .eq("event_id", eventId)
+    .eq("cocktail_id", cocktailId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
+/**
+ * Replace event_stock entirely with packs computed from the cocktail menu.
+ * For each ingredient: Σ (qty_planned × qty_per_cocktail), converted to
+ * product packs via content_per_unit with ceiling-rounding. Products
+ * without content_per_unit fall back to a direct ceiling on the raw qty.
+ *
+ * The reservation strategy is "replace all": anything the owner manually
+ * added before gets overwritten — that was option A in the workflow
+ * we validated together. A warning is surfaced in the UI before the
+ * destructive confirm.
+ */
+export async function replaceStockFromMenu(eventId: string) {
+  const supabase = await createClient();
+
+  const { data: menu, error: mErr } = await supabase
+    .from("event_cocktails")
+    .select("cocktail_id,qty_planned")
+    .eq("event_id", eventId);
+  if (mErr) return { ok: false as const, error: mErr.message };
+  if (!menu || menu.length === 0) {
+    return { ok: false as const, error: "Menu vide — ajoute des cocktails d'abord." };
+  }
+
+  const cocktailIds = menu.map((m) => m.cocktail_id);
+  const { data: ingredients, error: iErr } = await supabase
+    .from("cocktail_ingredients")
+    .select("cocktail_id,product_id,qty")
+    .in("cocktail_id", cocktailIds);
+  if (iErr) return { ok: false as const, error: iErr.message };
+
+  const productIds = Array.from(
+    new Set((ingredients ?? []).map((i) => i.product_id)),
+  );
+  const { data: products } = productIds.length
+    ? await supabase
+        .from("products")
+        .select("id,content_per_unit,content_unit,unit")
+        .in("id", productIds)
+    : { data: [] };
+  const productById = new Map((products ?? []).map((p) => [p.id, p]));
+
+  // Aggregate: product_id → total content-unit need
+  const totalNeed = new Map<string, number>();
+  const qtyByCocktail = new Map(menu.map((m) => [m.cocktail_id, m.qty_planned]));
+  for (const ing of ingredients ?? []) {
+    const planned = qtyByCocktail.get(ing.cocktail_id) ?? 0;
+    if (!planned) continue;
+    totalNeed.set(
+      ing.product_id,
+      (totalNeed.get(ing.product_id) ?? 0) + Number(ing.qty) * planned,
+    );
+  }
+
+  // Explode to packs (ceil)
+  const reservations: { event_id: string; product_id: string; qty_reserved: number }[] = [];
+  for (const [productId, need] of totalNeed.entries()) {
+    const p = productById.get(productId);
+    const perUnit = p?.content_per_unit ? Number(p.content_per_unit) : null;
+    const packs =
+      perUnit && perUnit > 0 ? Math.ceil(need / perUnit) : Math.ceil(need);
+    if (packs > 0) {
+      reservations.push({
+        event_id: eventId,
+        product_id: productId,
+        qty_reserved: packs,
+      });
+    }
+  }
+
+  // Wipe then insert (option A in workflow)
+  const { error: delErr } = await supabase
+    .from("event_stock")
+    .delete()
+    .eq("event_id", eventId);
+  if (delErr) return { ok: false as const, error: delErr.message };
+
+  if (reservations.length > 0) {
+    const { error: insErr } = await supabase
+      .from("event_stock")
+      .insert(reservations);
+    if (insErr) return { ok: false as const, error: insErr.message };
+  }
+
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const, linesWritten: reservations.length };
+}
