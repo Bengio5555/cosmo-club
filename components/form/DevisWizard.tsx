@@ -66,27 +66,55 @@ export function DevisWizard() {
     setStep(3);
   }, [form]);
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    setStatus("submitting");
-    setServerError(null);
-    try {
-      const res = await fetch("/api/devis", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok || !body.ok) {
+  const onSubmit = form.handleSubmit(
+    async (values) => {
+      setStatus("submitting");
+      setServerError(null);
+      try {
+        const res = await fetch("/api/devis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok || !body.ok) {
+          setStatus("error");
+          setServerError(typeof body?.error === "string" ? body.error : "send_failed");
+          return;
+        }
+        setStatus("success");
+      } catch {
         setStatus("error");
-        setServerError(typeof body?.error === "string" ? body.error : "send_failed");
-        return;
+        setServerError("network");
       }
-      setStatus("success");
-    } catch {
-      setStatus("error");
-      setServerError("network");
-    }
-  });
+    },
+    // Invalid-submit handler: find the first step that still has errors and
+    // bring the user back to it so they can fix. Without this, validation
+    // errors on hidden earlier steps fail silently and the submit button
+    // appears dead.
+    (errors) => {
+      const order: (keyof DevisInput)[][] = [
+        [...stepFields[1]] as (keyof DevisInput)[],
+        [...stepFields[2]] as (keyof DevisInput)[],
+        [...stepFields[3]] as (keyof DevisInput)[],
+        [...stepFields[4]] as (keyof DevisInput)[],
+      ];
+      for (let i = 0; i < order.length; i++) {
+        const hasError = order[i].some((f) => errors[f]);
+        if (hasError) {
+          setDirection(-1);
+          setStep((i + 1) as typeof step);
+          setStatus("error");
+          const firstField = order[i].find((f) => errors[f]);
+          const msg = firstField
+            ? errors[firstField]?.message || "Champ invalide"
+            : "Formulaire invalide";
+          setServerError(`validation:${firstField ?? ""}:${msg}`);
+          return;
+        }
+      }
+    },
+  );
 
   if (status === "success") {
     return <SuccessScreen firstName={form.getValues("firstName")} />;
@@ -172,15 +200,23 @@ export function DevisWizard() {
       </div>
 
       {status === "error" && (
-        <p className="mt-4 text-sm text-[color:var(--color-grenat-glow)]">
-          Impossible d'envoyer — réessayez dans un instant ou écrivez-nous directement à
-          {" "}
-          <a href="mailto:contact@cosmoclub.fr" className="underline">
-            contact@cosmoclub.fr
-          </a>
-          .
-          {serverError ? ` (code: ${serverError})` : ""}
-        </p>
+        <div className="mt-4 rounded-md border border-[color:var(--color-grenat)]/30 bg-[color:var(--color-grenat)]/5 p-3 text-sm text-[color:var(--color-grenat)]">
+          {serverError && serverError.startsWith("validation:") ? (
+            <p>
+              Un champ est invalide : <strong>{serverError.split(":")[2] || "vérifie le formulaire"}</strong>. On t&apos;a ramené à l&apos;étape concernée — corrige puis renvoie.
+            </p>
+          ) : (
+            <p>
+              Impossible d&apos;envoyer — réessayez dans un instant ou écrivez-nous directement à
+              {" "}
+              <a href="mailto:contact@cosmoclub.fr" className="underline">
+                contact@cosmoclub.fr
+              </a>
+              .
+              {serverError ? ` (code: ${serverError})` : ""}
+            </p>
+          )}
+        </div>
       )}
     </form>
   );
