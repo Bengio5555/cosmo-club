@@ -106,10 +106,6 @@ export function DevisEditor({
       })),
   );
 
-  // Track dirty state so the Save button only lights up when needed.
-  const [baseline, setBaseline] = useState(() => serialize(toPayload()));
-  const isDirty = serialize(toPayload()) !== baseline;
-
   // ─── Live totals ───────────────────────────────────────────
   const totalHt = useMemo(
     () => round2(items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0)),
@@ -122,6 +118,19 @@ export function DevisEditor({
   // ─── Save / status transitions ─────────────────────────────
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  // Track dirty state so the Save button only lights up when needed.
+  // NB: we can't call toPayload() in the useState initializer because
+  // toPayload closes over `tvaNum` which is declared above — that used to
+  // work only by accident of hoisting order. Lazily seed on mount instead.
+  const [baseline, setBaseline] = useState<string>("");
+  useEffect(() => {
+    setBaseline(serialize(toPayload()));
+    // Intentionally empty deps: we only seed once on mount. Subsequent
+    // rebase happens after a successful save.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const isDirty = baseline !== "" && serialize(toPayload()) !== baseline;
 
   function toPayload(): SaveQuoteInput {
     return {
