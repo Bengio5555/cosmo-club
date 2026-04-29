@@ -4,6 +4,7 @@ import {
   MapPin,
   Users,
   Wine,
+  Package,
   List,
   LayoutGrid,
   ChevronLeft,
@@ -215,6 +216,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
   const [
     { data: eventStaffRows },
     { data: eventCocktailRows },
+    { data: eventStockRows },
     { data: clientRows },
   ] = await Promise.all([
     eventIds.length
@@ -226,6 +228,12 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
     eventIds.length
       ? supabase
           .from("event_cocktails")
+          .select("event_id")
+          .in("event_id", eventIds)
+      : Promise.resolve({ data: [] }),
+    eventIds.length
+      ? supabase
+          .from("event_stock")
           .select("event_id")
           .in("event_id", eventIds)
       : Promise.resolve({ data: [] }),
@@ -249,6 +257,13 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
     cocktailCountByEvent.set(
       r.event_id,
       (cocktailCountByEvent.get(r.event_id) ?? 0) + 1,
+    );
+  }
+  const stockCountByEvent = new Map<string, number>();
+  for (const r of eventStockRows ?? []) {
+    stockCountByEvent.set(
+      r.event_id,
+      (stockCountByEvent.get(r.event_id) ?? 0) + 1,
     );
   }
   const clientsMap = new Map((clientRows ?? []).map((c) => [c.id, c]));
@@ -322,16 +337,19 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                 "—";
               const staffCount = staffCountByEvent.get(ev.id) ?? 0;
               const cocktailCount = cocktailCountByEvent.get(ev.id) ?? 0;
+              const stockCount = stockCountByEvent.get(ev.id) ?? 0;
               const daysUntil = Math.floor(
                 (new Date(ev.date).getTime() - new Date(today).getTime()) /
                   86400000,
               );
-              const cocktailsDue =
-                cocktailCount === 0 &&
+              const stillActionable =
                 ev.status !== "annule" &&
                 ev.status !== "termine" &&
-                daysUntil >= 0 &&
-                daysUntil <= 15;
+                daysUntil >= 0;
+              const cocktailsDue =
+                stillActionable && cocktailCount === 0 && daysUntil <= 15;
+              const stockDue =
+                stillActionable && stockCount === 0 && daysUntil <= 10;
               return (
                 <li key={ev.id}>
                   <Link
@@ -401,6 +419,23 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                         {cocktailsDue && (
                           <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-amber-400/80">
                             <Wine className="h-3 w-3" /> à prévoir
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-neutral-600">
+                          Stock
+                        </p>
+                        <p
+                          className={
+                            stockDue ? "text-amber-300" : "text-neutral-200"
+                          }
+                        >
+                          {stockCount}
+                        </p>
+                        {stockDue && (
+                          <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-amber-400/80">
+                            <Package className="h-3 w-3" /> à réserver
                           </p>
                         )}
                       </div>

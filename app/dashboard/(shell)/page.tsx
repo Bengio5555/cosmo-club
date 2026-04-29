@@ -13,6 +13,7 @@ import {
   Clock,
   Users,
   Wine,
+  PackageCheck,
   ArrowUpCircle,
   ArrowDownCircle,
   Zap,
@@ -39,6 +40,9 @@ export default async function DashboardHome() {
   const fifteenDaysFromNow = new Date(today.getTime() + 15 * 24 * 3600 * 1000)
     .toISOString()
     .slice(0, 10);
+  const tenDaysFromNow = new Date(today.getTime() + 10 * 24 * 3600 * 1000)
+    .toISOString()
+    .slice(0, 10);
 
   // ─── Fan out all queries in parallel ───────────────────────────
   const [
@@ -51,6 +55,7 @@ export default async function DashboardHome() {
     { data: lowStockProducts },
     { data: upcomingEvents },
     { data: cocktailWindowEvents },
+    { data: stockWindowEvents },
     { data: recentMovements },
   ] = await Promise.all([
     // CA du mois: issued invoices (not draft/cancelled) this calendar month
@@ -115,6 +120,14 @@ export default async function DashboardHome() {
       .lte("date", fifteenDaysFromNow)
       .neq("status", "annule")
       .neq("status", "termine"),
+    // Events within 10 days — used to flag missing stock reservations
+    supabase
+      .from("events")
+      .select("id,date,status")
+      .gte("date", todayISO)
+      .lte("date", tenDaysFromNow)
+      .neq("status", "annule")
+      .neq("status", "termine"),
     // Recent stock movements
     supabase
       .from("stock_movements")
@@ -175,6 +188,25 @@ export default async function DashboardHome() {
   }
   const eventsWithoutCocktails = (cocktailWindowEvents ?? []).filter(
     (e) => (cocktailCountByEvent.get(e.id) ?? 0) === 0,
+  );
+
+  // ─── Derive stock-reservation counts for the J-10 window ──────
+  const stockWindowIds = (stockWindowEvents ?? []).map((e) => e.id);
+  const { data: eventStockRows } = stockWindowIds.length
+    ? await supabase
+        .from("event_stock")
+        .select("event_id")
+        .in("event_id", stockWindowIds)
+    : { data: [] };
+  const stockCountByEvent = new Map<string, number>();
+  for (const r of eventStockRows ?? []) {
+    stockCountByEvent.set(
+      r.event_id,
+      (stockCountByEvent.get(r.event_id) ?? 0) + 1,
+    );
+  }
+  const eventsWithoutStock = (stockWindowEvents ?? []).filter(
+    (e) => (stockCountByEvent.get(e.id) ?? 0) === 0,
   );
 
   // ─── Resolve client names for events + unpaid invoices ─────────
@@ -269,7 +301,8 @@ export default async function DashboardHome() {
     overdueInvoices.length > 0 ||
     lowStock.length > 0 ||
     eventsWithoutStaff.length > 0 ||
-    eventsWithoutCocktails.length > 0;
+    eventsWithoutCocktails.length > 0 ||
+    eventsWithoutStock.length > 0;
 
   // Top-5 unpaid (sorted by due date, overdue first)
   const topUnpaid = invoicesWithRemaining.slice(0, 5);
@@ -372,6 +405,16 @@ export default async function DashboardHome() {
                       {eventsWithoutCocktails.length}
                     </strong>{" "}
                     événement{eventsWithoutCocktails.length > 1 ? "s" : ""} sans menu cocktails (≤ 15j)
+                  </Link>
+                </li>
+              )}
+              {eventsWithoutStock.length > 0 && (
+                <li>
+                  <Link href="/dashboard/events" className="hover:text-white">
+                    <strong className="text-amber-200">
+                      {eventsWithoutStock.length}
+                    </strong>{" "}
+                    événement{eventsWithoutStock.length > 1 ? "s" : ""} sans stock réservé (≤ 10j)
                   </Link>
                 </li>
               )}
@@ -508,6 +551,9 @@ export default async function DashboardHome() {
                 const cocktailCount = cocktailCountByEvent.get(ev.id) ?? 0;
                 const noCocktails =
                   cocktailCount === 0 && ev.status !== "annule";
+                const stockCount = stockCountByEvent.get(ev.id) ?? 0;
+                const noStock =
+                  stockCount === 0 && ev.status !== "annule";
                 return (
                   <li key={ev.id} className="py-2.5">
                     <Link
@@ -562,12 +608,24 @@ export default async function DashboardHome() {
                             <Wine className="h-3 w-3" />
                             {cocktailCount}
                           </div>
+                          <div
+                            className={`inline-flex items-center gap-1 ${
+                              noStock ? "text-amber-300" : "text-neutral-400"
+                            }`}
+                          >
+                            <PackageCheck className="h-3 w-3" />
+                            {stockCount}
+                          </div>
                         </div>
-                        {(noStaff || noCocktails) && (
+                        {(noStaff || noCocktails || noStock) && (
                           <p className="text-[10px] text-amber-400/70">
-                            {noStaff && "à staffer"}
-                            {noStaff && noCocktails && " · "}
-                            {noCocktails && "menu à prévoir"}
+                            {[
+                              noStaff && "à staffer",
+                              noCocktails && "menu à prévoir",
+                              noStock && "stock à réserver",
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
                           </p>
                         )}
                       </div>
