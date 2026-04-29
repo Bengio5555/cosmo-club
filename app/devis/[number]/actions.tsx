@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { renderToBuffer } from "@react-pdf/renderer";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CGV_TEXT, cgvVersion } from "@/lib/cgv";
+import { cgvVersion } from "@/lib/cgv";
+import { SignedQuotePdf, type SignedQuoteData } from "@/lib/pdf/SignedQuotePdf";
 
 // Public acceptance / refusal flow. No auth is checked — the plaquette
 // URL itself is the access token. We only allow the transition from
@@ -77,20 +79,29 @@ export async function acceptDevis(input: AcceptDevisInput) {
     .eq("id", input.quoteId);
   if (error) return { ok: false as const, error: error.message };
 
-  // Best-effort email confirmation to both parties. Failure here is
-  // not fatal — the acceptance is already persisted.
-  void sendAcceptanceEmails({
-    quoteId: q.id,
-    quoteNumber: q.number,
-    quoteSubject: q.subject ?? null,
-    quoteTotalTtc: Number(q.total_ttc ?? 0),
-    clientId: q.client_id,
-    signerName,
-    signedAt: now,
-    signedIp: ip,
-    cgvVersion: version,
-    signatureData,
-  }).catch((err) => console.error("[acceptDevis] email error:", err));
+  // Block on the email step. Earlier we ran it fire-and-forget but
+  // Vercel kills the serverless invocation as soon as the server
+  // action responds, so the Resend request was being dropped mid-air.
+  // Awaiting it adds a couple of seconds to the user-perceived latency
+  // but is the only reliable path on Vercel without setting up a
+  // queue. Errors inside still don't fail the action — the acceptance
+  // is already persisted, the email is best-effort.
+  try {
+    await sendAcceptanceEmails({
+      quoteId: q.id,
+      quoteNumber: q.number,
+      quoteSubject: q.subject ?? null,
+      quoteTotalTtc: Number(q.total_ttc ?? 0),
+      clientId: q.client_id,
+      signerName,
+      signedAt: now,
+      signedIp: ip,
+      cgvVersion: version,
+      signatureData,
+    });
+  } catch (err) {
+    console.error("[acceptDevis] email step failed:", err);
+  }
 
   revalidatePath(`/devis/${q.number}`);
   revalidatePath(`/dashboard/devis/${input.quoteId}`);
@@ -138,24 +149,63 @@ async function sendAcceptanceEmails(o: {
   signatureData: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "devis@cosmoclub.fr";
+  // Two env names exist in this project for historical reasons:
+  // - DEVIS_FROM_EMAIL is what the contact form (/api/devis) reads
+  // - RESEND_FROM_EMAIL is what the dashboard sendDevis flow reads
+  // We accept either so the user only needs to set one. If neither is
+  // present we fall back to Resend's onboarding sender, which works
+  // without a verified domain — useful while the cosmoclub.fr DNS
+  // can't be moved off Wix.
+  const fromEmail =
+    process.env.RESEND_FROM_EMAIL ||
+    process.env.DEVIS_FROM_EMAIL ||
+    "onboarding@resend.dev";
   if (!apiKey) {
     console.warn("[acceptDevis] RESEND_API_KEY missing — email skipped.");
     return;
   }
+  console.log(
+    "[acceptDevis] sending emails via",
+    fromEmail,
+    "for quote",
+    o.quoteNumber,
+  );
 
+  // Pull everything react-pdf needs in one shot. Failure on any of
+  // these is fatal for the PDF (we still send a plain HTML email).
   const supabase = createAdminClient();
-  const [{ data: client }, { data: settings }] = await Promise.all([
+  const [
+    { data: quote },
+    { data: items },
+    { data: client },
+    { data: settings },
+  ] = await Promise.all([
+    supabase
+      .from("quotes")
+      .select(
+        "number,subject,issue_date,event_date,event_location,guests_count,tva_rate,commission_rate,total_ht,total_tva,total_ttc,client_id",
+      )
+      .eq("id", o.quoteId)
+      .maybeSingle(),
+    supabase
+      .from("quote_items")
+      .select(
+        "section,title,description,qty,unit,unit_price_ht,line_total_ht,position",
+      )
+      .eq("quote_id", o.quoteId)
+      .order("position", { ascending: true }),
     o.clientId
       ? supabase
           .from("clients")
-          .select("email,first_name,last_name,company_name")
+          .select("email,first_name,last_name,company_name,phone")
           .eq("id", o.clientId)
           .maybeSingle()
       : Promise.resolve({ data: null }),
     supabase
       .from("settings")
-      .select("company_name,email")
+      .select(
+        "company_name,email,phone,address_line1,address_line2,postal_code,city,siret",
+      )
       .eq("id", 1)
       .maybeSingle(),
   ]);
@@ -176,46 +226,165 @@ async function sendAcceptanceEmails(o: {
     timeStyle: "short",
   });
 
-  const html = buildAcceptanceHtml({
-    company: companyName,
-    quoteNumber: o.quoteNumber,
-    quoteSubject: o.quoteSubject,
-    quoteTotalTtc: o.quoteTotalTtc,
-    signerName: o.signerName,
-    signedAt: dateLabel,
-    signedIp: o.signedIp,
-    cgvVersion: o.cgvVersion,
-    link,
-  });
+  // ─── Build the signed PDF (best-effort) ──────────────────────
+  let pdfBase64: string | null = null;
+  if (quote && items) {
+    try {
+      const pdfData: SignedQuoteData = {
+        quote: {
+          number: quote.number,
+          subject: quote.subject,
+          issue_date: quote.issue_date,
+          event_date: quote.event_date,
+          event_location: quote.event_location,
+          guests_count: quote.guests_count,
+          tva_rate: Number(quote.tva_rate ?? 20),
+          commission_rate: Number(quote.commission_rate ?? 0),
+          total_ht: Number(quote.total_ht ?? 0),
+          total_tva: Number(quote.total_tva ?? 0),
+          total_ttc: Number(quote.total_ttc ?? 0),
+        },
+        items: (items ?? []).map((it) => {
+          // Apply the gross-up at PDF render time so the signed
+          // document matches what the client saw on the public page.
+          const rate = Number(quote.commission_rate ?? 0);
+          const factor = rate > 0 ? 100 / (100 - rate) : 1;
+          return {
+            section: it.section,
+            title: it.title,
+            description: it.description,
+            qty: Number(it.qty ?? 0),
+            unit: it.unit,
+            unit_price_ht: Number(it.unit_price_ht ?? 0) * factor,
+            line_total_ht: Number(it.line_total_ht ?? 0) * factor,
+          };
+        }),
+        client: client
+          ? {
+              company_name: client.company_name,
+              first_name: client.first_name,
+              last_name: client.last_name,
+              email: client.email,
+              phone: (client as { phone?: string | null }).phone ?? null,
+            }
+          : null,
+        company: {
+          name: companyName,
+          address_line1:
+            (settings as { address_line1?: string | null } | null)
+              ?.address_line1 ?? null,
+          address_line2:
+            (settings as { address_line2?: string | null } | null)
+              ?.address_line2 ?? null,
+          postal_code:
+            (settings as { postal_code?: string | null } | null)
+              ?.postal_code ?? null,
+          city:
+            (settings as { city?: string | null } | null)?.city ?? null,
+          siret:
+            (settings as { siret?: string | null } | null)?.siret ?? null,
+          email:
+            (settings as { email?: string | null } | null)?.email ?? null,
+          phone:
+            (settings as { phone?: string | null } | null)?.phone ?? null,
+        },
+        signature: {
+          name: o.signerName,
+          signedAt: o.signedAt,
+          ip: o.signedIp,
+          cgvVersion: o.cgvVersion,
+          pngDataUrl: o.signatureData,
+        },
+      };
+      const buffer = await renderToBuffer(<SignedQuotePdf data={pdfData} />);
+      pdfBase64 = buffer.toString("base64");
+    } catch (err) {
+      console.error("[acceptDevis] PDF generation failed:", err);
+    }
+  }
 
-  // Inline the PNG signature as a CID-style attachment for the
-  // confirmation receipt.
-  const pngBase64 = o.signatureData.replace(
-    /^data:image\/png;base64,/,
-    "",
-  );
+  const baseAttachments = pdfBase64
+    ? [
+        {
+          filename: `devis-${o.quoteNumber}-signe.pdf`,
+          content: pdfBase64,
+        },
+      ]
+    : [];
 
-  const attachments = [
-    {
-      filename: `signature-${o.quoteNumber}.png`,
-      content: pngBase64,
-    },
-  ];
+  // ─── Two distinct emails: one to the client, one to Cosmo ──
+  const resend = new Resend(apiKey);
 
-  const recipients = [ownerEmail];
-  if (client?.email) recipients.unshift(client.email);
+  // 1. Client confirmation
+  if (client?.email) {
+    try {
+      const res = await resend.emails.send({
+        from: `${companyName} <${fromEmail}>`,
+        to: [client.email],
+        subject: `Confirmation — devis ${o.quoteNumber} signé`,
+        html: buildClientHtml({
+          company: companyName,
+          quoteNumber: o.quoteNumber,
+          quoteSubject: o.quoteSubject,
+          quoteTotalTtc: o.quoteTotalTtc,
+          signerName: o.signerName,
+          signedAt: dateLabel,
+          link,
+          firstName: client.first_name ?? null,
+          hasPdf: !!pdfBase64,
+        }),
+        attachments: baseAttachments,
+      });
+      if ((res as { error?: unknown }).error) {
+        console.error(
+          "[acceptDevis] client email error from Resend:",
+          (res as { error: unknown }).error,
+        );
+      } else {
+        console.log("[acceptDevis] client email sent to", client.email);
+      }
+    } catch (err) {
+      console.error("[acceptDevis] client email threw:", err);
+    }
+  } else {
+    console.warn(
+      "[acceptDevis] no client email on file — only owner will be notified.",
+    );
+  }
 
+  // 2. Owner notification (Cosmo)
   try {
-    const resend = new Resend(apiKey);
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: `${companyName} <${fromEmail}>`,
-      to: recipients,
-      subject: `Devis ${o.quoteNumber} signé — ${companyName}`,
-      html,
-      attachments,
+      to: [ownerEmail],
+      replyTo: client?.email ?? undefined,
+      subject: `Devis ${o.quoteNumber} signé — ${o.signerName}`,
+      html: buildOwnerHtml({
+        company: companyName,
+        quoteNumber: o.quoteNumber,
+        quoteSubject: o.quoteSubject,
+        quoteTotalTtc: o.quoteTotalTtc,
+        signerName: o.signerName,
+        signedAt: dateLabel,
+        signedIp: o.signedIp,
+        cgvVersion: o.cgvVersion,
+        link,
+        clientEmail: client?.email ?? null,
+        clientPhone:
+          (client as { phone?: string | null } | null)?.phone ?? null,
+      }),
+      attachments: baseAttachments,
     });
+    if ((res as { error?: unknown }).error) {
+      console.error(
+        "[acceptDevis] owner email error from Resend:",
+        (res as { error: unknown }).error,
+      );
+    } else {
+      console.log("[acceptDevis] owner email sent to", ownerEmail);
+    }
   } catch (err) {
-    console.error("[acceptDevis] resend error:", err);
+    console.error("[acceptDevis] owner email threw:", err);
   }
 }
 
@@ -236,7 +405,53 @@ function formatEUR(n: number) {
   });
 }
 
-function buildAcceptanceHtml(o: {
+function buildClientHtml(o: {
+  company: string;
+  quoteNumber: string;
+  quoteSubject: string | null;
+  quoteTotalTtc: number;
+  signerName: string;
+  signedAt: string;
+  link: string;
+  firstName: string | null;
+  hasPdf: boolean;
+}) {
+  const greeting = o.firstName ? `Bonjour ${escape(o.firstName)},` : "Bonjour,";
+  return `
+<!doctype html><html><body style="font-family: ui-sans-serif,system-ui,sans-serif; background:#0a0a0a; color:#e9e2d0; padding:24px;">
+  <div style="max-width:640px; margin:0 auto; background:#141311; border:1px solid #3a3733; border-radius:14px; padding:28px;">
+    <p style="font-size:11px; letter-spacing:0.28em; text-transform:uppercase; color:#c9a961; margin:0 0 8px;">${escape(o.company)} · Confirmation</p>
+    <h1 style="font-family:Georgia,serif; font-size:26px; margin:0 0 16px; color:#f5f1e8;">Devis ${escape(o.quoteNumber)} signé</h1>
+
+    <p style="font-size:14px; line-height:1.6;">${greeting}</p>
+    <p style="font-size:14px; line-height:1.6;">
+      Nous accusons réception de votre signature électronique sur le devis
+      <strong>${escape(o.quoteNumber)}</strong>${o.quoteSubject ? ` — ${escape(o.quoteSubject)}` : ""}.
+      ${o.hasPdf ? "Vous trouverez en pièce jointe le PDF du devis signé, accompagné des CGV en page&nbsp;2." : "Une copie écrite vous parviendra sous peu."}
+    </p>
+
+    <table style="width:100%; border-collapse:collapse; font-size:13px; line-height:1.6; margin-top:16px;">
+      <tr><td style="padding:6px 0; color:#726d63; width:130px;">Total TTC</td><td><strong>${formatEUR(o.quoteTotalTtc)}</strong></td></tr>
+      <tr><td style="padding:6px 0; color:#726d63;">Signataire</td><td>${escape(o.signerName)}</td></tr>
+      <tr><td style="padding:6px 0; color:#726d63;">Horodatage</td><td>${escape(o.signedAt)}</td></tr>
+    </table>
+
+    <p style="font-size:13px; line-height:1.6; margin-top:18px;">
+      Prochaine étape&nbsp;: notre équipe revient vers vous pour le règlement
+      de l&apos;acompte (50&nbsp;%) et le calage final.
+    </p>
+    <p style="font-size:13px;">Plaquette consultable en ligne&nbsp;: <a href="${o.link}" style="color:#c9a961;">${o.link}</a></p>
+
+    <p style="font-size:12px; line-height:1.6; color:#726d63; margin-top:24px;">
+      Conditions générales de vente disponibles à tout moment sur notre site,
+      onglet « CGV ». Conformément à l&apos;article 1366 du Code civil, votre
+      signature électronique a la même force probante qu&apos;une signature manuscrite.
+    </p>
+  </div>
+</body></html>`.trim();
+}
+
+function buildOwnerHtml(o: {
   company: string;
   quoteNumber: string;
   quoteSubject: string | null;
@@ -246,30 +461,39 @@ function buildAcceptanceHtml(o: {
   signedIp: string | null;
   cgvVersion: string;
   link: string;
+  clientEmail: string | null;
+  clientPhone: string | null;
 }) {
-  // Used to silence unused-import warnings — keeps the CGV text close
-  // to the email so future tweaks land in one place.
-  void CGV_TEXT;
-
   return `
 <!doctype html><html><body style="font-family: ui-sans-serif,system-ui,sans-serif; background:#0a0a0a; color:#e9e2d0; padding:24px;">
   <div style="max-width:640px; margin:0 auto; background:#141311; border:1px solid #3a3733; border-radius:14px; padding:28px;">
-    <p style="font-size:11px; letter-spacing:0.28em; text-transform:uppercase; color:#c9a961; margin:0 0 8px;">${escape(o.company)} · Devis signé</p>
-    <h1 style="font-family:Georgia,serif; font-size:26px; margin:0 0 16px; color:#f5f1e8;">Devis ${escape(o.quoteNumber)}</h1>
+    <p style="font-size:11px; letter-spacing:0.28em; text-transform:uppercase; color:#c9a961; margin:0 0 8px;">Devis signé · à traiter</p>
+    <h1 style="font-family:Georgia,serif; font-size:26px; margin:0 0 16px; color:#f5f1e8;">${escape(o.quoteNumber)}</h1>
 
-    <p style="font-size:14px; line-height:1.6;">Le devis a été accepté et signé électroniquement.</p>
+    <p style="font-size:14px; line-height:1.6;">
+      <strong>${escape(o.signerName)}</strong> vient de signer le devis
+      ${o.quoteSubject ? `<em>${escape(o.quoteSubject)}</em>` : ""} pour
+      <strong>${formatEUR(o.quoteTotalTtc)}</strong> TTC.
+    </p>
+    <p style="font-size:14px; line-height:1.6;">
+      Action&nbsp;: déclencher la demande d&apos;acompte (50&nbsp;%) et caler
+      la prestation.
+    </p>
 
     <table style="width:100%; border-collapse:collapse; font-size:13px; line-height:1.6; margin-top:16px;">
-      ${o.quoteSubject ? `<tr><td style="padding:6px 0; color:#726d63; width:130px;">Objet</td><td>${escape(o.quoteSubject)}</td></tr>` : ""}
+      <tr><td style="padding:6px 0; color:#726d63; width:130px;">Signataire</td><td>${escape(o.signerName)}</td></tr>
+      ${o.clientEmail ? `<tr><td style="padding:6px 0; color:#726d63;">Email</td><td><a href="mailto:${escape(o.clientEmail)}" style="color:#c9a961;">${escape(o.clientEmail)}</a></td></tr>` : ""}
+      ${o.clientPhone ? `<tr><td style="padding:6px 0; color:#726d63;">Téléphone</td><td>${escape(o.clientPhone)}</td></tr>` : ""}
       <tr><td style="padding:6px 0; color:#726d63;">Total TTC</td><td><strong>${formatEUR(o.quoteTotalTtc)}</strong></td></tr>
-      <tr><td style="padding:6px 0; color:#726d63;">Signataire</td><td>${escape(o.signerName)}</td></tr>
       <tr><td style="padding:6px 0; color:#726d63;">Horodatage</td><td>${escape(o.signedAt)}</td></tr>
       ${o.signedIp ? `<tr><td style="padding:6px 0; color:#726d63;">IP</td><td>${escape(o.signedIp)}</td></tr>` : ""}
       <tr><td style="padding:6px 0; color:#726d63;">Version CGV</td><td><code>${escape(o.cgvVersion)}</code></td></tr>
     </table>
 
-    <p style="font-size:13px; line-height:1.6; margin-top:18px;">Le tracé de la signature est joint à ce mail (PNG). Devis et CGV consultables&nbsp;:</p>
-    <p style="font-size:13px;"><a href="${o.link}" style="color:#c9a961;">${o.link}</a></p>
+    <p style="font-size:13px; line-height:1.6; margin-top:18px;">
+      PDF signé en pièce jointe (devis + CGV reproduites). Plaquette publique&nbsp;:
+      <a href="${o.link}" style="color:#c9a961;">${o.link}</a>
+    </p>
   </div>
 </body></html>`.trim();
 }
