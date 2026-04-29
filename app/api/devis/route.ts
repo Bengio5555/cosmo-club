@@ -71,9 +71,43 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
   }
   try {
     const supabase = createAdminClient();
+
+    // Upsert a client row first so the lead is linked to a real fiche
+    // client. Lookup is by email (case-insensitive). Failures here are
+    // non-fatal — the lead is still inserted unlinked.
+    let clientId: string | null = null;
+    if (data.email) {
+      const emailLower = data.email.trim().toLowerCase();
+      const { data: existing } = await supabase
+        .from("clients")
+        .select("id")
+        .ilike("email", emailLower)
+        .maybeSingle();
+      if (existing?.id) {
+        clientId = existing.id;
+      } else {
+        const { data: createdClient, error: cErr } = await supabase
+          .from("clients")
+          .insert({
+            first_name: data.firstName?.trim() || null,
+            last_name: data.lastName?.trim() || null,
+            email: emailLower,
+            phone: data.phone || null,
+          })
+          .select("id")
+          .single();
+        if (cErr) {
+          console.error("[persistLead] client insert error:", cErr.message);
+        } else {
+          clientId = createdClient?.id ?? null;
+        }
+      }
+    }
+
     const payload = {
       source: "site",
       status: "nouveau" as const,
+      client_id: clientId,
       contact_name: `${data.firstName} ${data.lastName}`.trim(),
       contact_email: data.email,
       contact_phone: data.phone,
@@ -97,7 +131,7 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
       console.error("[persistLead] insert error:", error.message, error.details, error.hint);
       return;
     }
-    console.log("[persistLead] ok id=", inserted?.id);
+    console.log("[persistLead] ok id=", inserted?.id, "client_id=", clientId);
   } catch (err) {
     console.error("[persistLead] thrown:", err);
   }

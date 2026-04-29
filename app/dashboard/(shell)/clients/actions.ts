@@ -88,7 +88,28 @@ export async function saveNewClient(input: ClientInput) {
     return { ok: false as const, error: error?.message ?? "Création échouée" };
   }
 
+  // Mirror the client as a "nouveau" lead so manually-added contacts
+  // surface in /dashboard/leads alongside form submissions. Failure is
+  // non-blocking — the client row is already persisted.
+  const contactName =
+    [v.first_name, v.last_name].filter(Boolean).join(" ") ||
+    v.company_name ||
+    null;
+  const { error: leadErr } = await supabase.from("leads").insert({
+    source: "dashboard",
+    status: "nouveau",
+    client_id: created.id,
+    contact_name: contactName,
+    contact_email: v.email,
+    contact_phone: v.phone,
+    company: v.company_name,
+  });
+  if (leadErr) {
+    console.error("[saveNewClient] lead mirror failed:", leadErr.message);
+  }
+
   revalidatePath("/dashboard/clients");
+  revalidatePath("/dashboard/leads");
   revalidatePath("/dashboard");
   return { ok: true as const, id: created.id };
 }
