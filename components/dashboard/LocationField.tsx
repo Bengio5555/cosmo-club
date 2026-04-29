@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapPin } from "lucide-react";
+import { ExternalLink, MapPin, X } from "lucide-react";
 
 type Suggestion = { label: string };
 
@@ -33,6 +33,7 @@ export function LocationField({
   const [open, setOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [activeIdx, setActiveIdx] = useState(-1);
+  const [mapOpen, setMapOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const justPickedRef = useRef(false);
 
@@ -95,7 +96,13 @@ export function LocationField({
   }
 
   const trimmed = value.trim();
-  const mapHref = trimmed
+  const hasAddress = trimmed.length > 0;
+  // Google's embed URL is the actual map iframe (not the full site).
+  // No API key required when output=embed is used.
+  const embedSrc = hasAddress
+    ? `https://www.google.com/maps?q=${encodeURIComponent(trimmed)}&output=embed`
+    : null;
+  const externalHref = hasAddress
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`
     : null;
 
@@ -158,21 +165,103 @@ export function LocationField({
           </ul>
         )}
       </div>
-      <a
-        href={mapHref ?? "#"}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={() => hasAddress && setMapOpen(true)}
+        disabled={!hasAddress}
         aria-label="Voir sur la carte"
-        title={mapHref ? "Voir sur Google Maps" : "Renseigne d'abord une adresse"}
-        onClick={(e) => {
-          if (!mapHref) e.preventDefault();
-        }}
+        title={hasAddress ? "Ouvrir la carte" : "Renseigne d'abord une adresse"}
         className={`inline-flex shrink-0 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900 px-2.5 text-neutral-400 transition-colors hover:border-neutral-700 hover:text-white ${
-          !mapHref ? "pointer-events-none opacity-40" : ""
+          !hasAddress ? "cursor-not-allowed opacity-40" : ""
         }`}
       >
         <MapPin className="h-3.5 w-3.5" />
-      </a>
+      </button>
+
+      {mapOpen && embedSrc && (
+        <MapModal
+          src={embedSrc}
+          address={trimmed}
+          externalHref={externalHref}
+          onClose={() => setMapOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function MapModal({
+  src,
+  address,
+  externalHref,
+  onClose,
+}: {
+  src: string;
+  address: string;
+  externalHref: string | null;
+  onClose: () => void;
+}) {
+  // Close on Escape.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Carte — ${address}`}
+      onClick={onClose}
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-neutral-900 px-4 py-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              Lieu
+            </p>
+            <p className="mt-0.5 truncate text-sm text-white" title={address}>
+              {address}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            {externalHref && (
+              <a
+                href={externalHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Ouvrir dans Google Maps"
+                className="inline-flex items-center gap-1 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-[11px] text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+              >
+                <ExternalLink className="h-3 w-3" /> Maps
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fermer"
+              className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        <iframe
+          src={src}
+          title={`Carte de ${address}`}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          className="h-[60vh] w-full border-0"
+          allowFullScreen
+        />
+      </div>
     </div>
   );
 }
