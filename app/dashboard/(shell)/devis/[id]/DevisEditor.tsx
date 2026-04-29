@@ -89,6 +89,13 @@ export function DevisEditor({
     quote.guests_count != null ? String(quote.guests_count) : "",
   );
   const [tvaRate, setTvaRate] = useState<string>(String(quote.tva_rate ?? 20));
+  const initialCommission = Number(quote.commission_rate ?? 0);
+  const [commissionEnabled, setCommissionEnabled] = useState(
+    initialCommission > 0,
+  );
+  const [commissionRate, setCommissionRate] = useState<string>(
+    initialCommission > 0 ? String(initialCommission) : "20",
+  );
   const [validUntil, setValidUntil] = useState<string>(
     quote.valid_until ? quote.valid_until.slice(0, 10) : "",
   );
@@ -111,11 +118,20 @@ export function DevisEditor({
   );
 
   // ─── Live totals ───────────────────────────────────────────
-  const totalHt = useMemo(
+  const subtotalHt = useMemo(
     () => round2(items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0)),
     [items],
   );
   const tvaNum = Number(tvaRate) || 0;
+  // Effective commission rate used for math: 0 when toggle off, capped
+  // at 99 (formula collapses at 100).
+  const commissionRateNum = commissionEnabled
+    ? Math.min(99, Math.max(0, Number(commissionRate) || 0))
+    : 0;
+  const commissionFactor =
+    commissionRateNum > 0 ? 100 / (100 - commissionRateNum) : 1;
+  const totalHt = round2(subtotalHt * commissionFactor);
+  const commissionAmount = round2(totalHt - subtotalHt);
   const totalTva = round2((totalHt * tvaNum) / 100);
   const totalTtc = round2(totalHt + totalTva);
 
@@ -146,6 +162,7 @@ export function DevisEditor({
       event_location: eventLocation.trim() || null,
       guests_count: guestsCount ? Number(guestsCount) : null,
       tva_rate: tvaNum,
+      commission_rate: commissionRateNum,
       valid_until: validUntil || null,
       items: items.map((it, i) => ({
         id: it.dbId,
@@ -472,6 +489,18 @@ export function DevisEditor({
               Totaux
             </p>
             <dl className="space-y-1.5 text-sm">
+              {commissionRateNum > 0 ? (
+                <>
+                  <div className="flex justify-between">
+                    <dt className="text-neutral-500">Sous-total HT</dt>
+                    <dd className="text-neutral-200">{formatEUR(subtotalHt)}</dd>
+                  </div>
+                  <div className="flex justify-between text-amber-300/90">
+                    <dt>Apporteur ({commissionRateNum}%)</dt>
+                    <dd>+ {formatEUR(commissionAmount)}</dd>
+                  </div>
+                </>
+              ) : null}
               <div className="flex justify-between">
                 <dt className="text-neutral-500">Total HT</dt>
                 <dd className="font-medium text-neutral-100">{formatEUR(totalHt)}</dd>
@@ -497,6 +526,53 @@ export function DevisEditor({
                 <dd className="text-white">{formatEUR(totalTtc)}</dd>
               </div>
             </dl>
+          </div>
+
+          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                Apporteur d&apos;affaires
+              </span>
+              <input
+                type="checkbox"
+                checked={commissionEnabled}
+                disabled={readOnly}
+                onChange={(e) => setCommissionEnabled(e.target.checked)}
+                className="h-4 w-4 cursor-pointer accent-[color:var(--color-grenat)] disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </label>
+            {commissionEnabled ? (
+              <>
+                <p className="mt-2 text-[11px] leading-relaxed text-neutral-500">
+                  Majoration appliquée pour reverser la commission sans
+                  rogner sur la marge. Formule&nbsp;: prix ÷ (1 − x%).
+                </p>
+                <label className="mt-3 flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={commissionRate}
+                    onChange={(e) => setCommissionRate(e.target.value)}
+                    min="0"
+                    max="99"
+                    step="0.5"
+                    disabled={readOnly}
+                    className="w-20 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                  />
+                  <span className="text-sm text-neutral-400">% de commission</span>
+                </label>
+                <div className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200/90">
+                  À reverser à l&apos;apporteur&nbsp;:
+                  <span className="ml-1 font-semibold">
+                    {formatEUR(round2(totalHt * (commissionRateNum / 100)))} HT
+                  </span>
+                </div>
+              </>
+            ) : (
+              <p className="mt-2 text-[11px] leading-relaxed text-neutral-500">
+                Active pour majorer le devis quand un apporteur (agence,
+                wedding planner…) prend une commission sur l&apos;affaire.
+              </p>
+            )}
           </div>
 
           <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">

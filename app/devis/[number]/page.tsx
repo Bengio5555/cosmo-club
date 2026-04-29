@@ -134,6 +134,18 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
 
   const deposit = round2(quote.total_ttc * 0.3);
 
+  // Gross-up factor when an agency commission is in play. We persist
+  // base prices on quote_items and apply the multiplier at render so
+  // line totals add up to quote.total_ht. The owner-side editor stores
+  // commission_rate; on the client-facing PDF nothing is labeled
+  // "commission" — only the inflated figures are visible.
+  const commissionRate = Math.min(
+    99,
+    Math.max(0, Number(quote.commission_rate ?? 0)),
+  );
+  const grossUp =
+    commissionRate > 0 ? 100 / (100 - commissionRate) : 1;
+
   // Totals note from settings (penalty + any custom copy) or the default.
   const totalsNote =
     settings?.penalty_rate_text && settings.penalty_rate_text.trim()
@@ -350,8 +362,12 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
                     {it.description && <small>{it.description}</small>}
                   </td>
                   <td>{`${it.qty}${it.unit ? ` ${it.unit}` : ""}`}</td>
-                  <td>{formatEUR(it.unit_price_ht ?? 0)}</td>
-                  <td>{formatEUR(it.line_total_ht ?? 0)}</td>
+                  <td>
+                    {formatEUR(round2((it.unit_price_ht ?? 0) * grossUp))}
+                  </td>
+                  <td>
+                    {formatEUR(round2((it.line_total_ht ?? 0) * grossUp))}
+                  </td>
                 </tr>
               )),
             ])}

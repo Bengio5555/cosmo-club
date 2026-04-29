@@ -254,6 +254,7 @@ export type Database = {
         Row: {
           accepted_at: string | null
           client_id: string | null
+          commission_rate: number
           created_at: string
           event_date: string | null
           event_location: string | null

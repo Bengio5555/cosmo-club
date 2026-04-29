@@ -27,12 +27,32 @@ export type SaveQuoteInput = {
   event_location: string | null;
   guests_count: number | null;
   tva_rate: number;
+  /**
+   * Commission percentage owed to a referring agency. Used to gross up
+   * line totals so that, after paying the agency, the original margin is
+   * preserved. 0 means no commission. Capped at 99 in the editor — math
+   * collapses at 100.
+   * Formula: factor = 1 / (1 − rate/100); displayed_total_ht = subtotal × factor.
+   */
+  commission_rate: number;
   valid_until: string | null;
   items: QuoteItemInput[];
 };
 
 function round2(n: number) {
   return Math.round(n * 100) / 100;
+}
+
+/**
+ * Convert a commission percentage (e.g. 20) into the multiplier that
+ * grosses up base prices so the agency's cut doesn't eat the margin.
+ * 20% → 1/0.80 = 1.25 (so a base of 100 is shown to the client at 125;
+ * 25 goes to the agency, 100 stays in the pocket).
+ */
+function commissionFactor(rate: number): number {
+  if (!Number.isFinite(rate) || rate <= 0) return 1;
+  const safe = Math.min(99, Math.max(0, rate));
+  return 100 / (100 - safe);
 }
 
 /**
@@ -110,15 +130,21 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
     }
   }
 
-  // 3. Re-sum the final items for the canonical totals.
+  // 3. Re-sum the final items for the canonical totals, then apply the
+  //    commission gross-up so the stored total_ht is what the client
+  //    sees after referrer markup.
   const { data: finalItems } = await supabase
     .from("quote_items")
     .select("line_total_ht")
     .eq("quote_id", id);
-  const totalHt = round2(
+  const subtotalHt = round2(
     (finalItems ?? []).reduce((sum, r) => sum + (r.line_total_ht ?? 0), 0),
   );
   const tvaRate = Number.isFinite(input.tva_rate) ? input.tva_rate : 20;
+  const commissionRate = Number.isFinite(input.commission_rate)
+    ? Math.min(99, Math.max(0, input.commission_rate))
+    : 0;
+  const totalHt = round2(subtotalHt * commissionFactor(commissionRate));
   const totalTva = round2((totalHt * tvaRate) / 100);
   const totalTtc = round2(totalHt + totalTva);
 
@@ -134,6 +160,7 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
       event_location: input.event_location,
       guests_count: input.guests_count,
       tva_rate: tvaRate,
+      commission_rate: commissionRate,
       valid_until: input.valid_until,
       total_ht: totalHt,
       total_tva: totalTva,
@@ -361,7 +388,9 @@ export async function createInvoiceFromQuote(quoteId: string) {
 
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
-    .select("id,number,status,client_id,event_date,subject,terms,tva_rate,total_ht,total_tva,total_ttc")
+    .select(
+      "id,number,status,client_id,event_date,subject,terms,tva_rate,commission_rate,total_ht,total_tva,total_ttc",
+    )
     .eq("id", quoteId)
     .maybeSingle();
   if (qErr || !quote) {
@@ -432,6 +461,12 @@ export async function createInvoiceFromQuote(quoteId: string) {
     .order("position", { ascending: true });
 
   if (items && items.length > 0) {
+    // Quote items are stored at base prices; the agency commission is
+    // applied at the totals level (quote.total_ht is already grossed up).
+    // The invoice keeps no commission concept of its own — it's just a
+    // snapshot — so we bake the gross-up into each line's unit_price_ht
+    // here so the printed invoice's lines add up to its total_ht.
+    const factor = commissionFactor(Number(quote.commission_rate ?? 0));
     const { error: itemsErr } = await supabase.from("invoice_items").insert(
       items.map((it) => ({
         invoice_id: invoice.id,
@@ -440,7 +475,7 @@ export async function createInvoiceFromQuote(quoteId: string) {
         description: it.description,
         qty: it.qty,
         unit: it.unit,
-        unit_price_ht: it.unit_price_ht,
+        unit_price_ht: round2(Number(it.unit_price_ht ?? 0) * factor),
       })),
     );
     if (itemsErr) return { ok: false as const, error: itemsErr.message };
