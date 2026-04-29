@@ -15,6 +15,7 @@ import { formatDateFR } from "@/lib/format";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { NewEventButton } from "./NewEventButton";
 import { CalendarView, gridRange } from "./CalendarView";
+import { autoStartDueEvents } from "./actions";
 
 type SP = Promise<{
   view?: string;
@@ -64,6 +65,7 @@ function ViewSwitcher({ currentView }: { currentView: "list" | "calendar" }) {
 /* ─── Calendar view ──────────────────────────────────────────────── */
 
 async function CalendarPage({ monthParam }: { monthParam?: string }) {
+  await autoStartDueEvents();
   const supabase = await createClient();
 
   // Parse or fall back to current month.
@@ -182,6 +184,9 @@ function shiftMonth(d: Date, delta: number): Date {
 
 async function ListPage({ when, status }: { when?: string; status?: string }) {
   const whenEffective = when ?? "upcoming";
+  // Auto-start any overdue events before we render — keeps the list in
+  // sync with reality without needing a cron job.
+  await autoStartDueEvents();
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
 

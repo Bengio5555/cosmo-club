@@ -11,6 +11,8 @@ import {
   Ban,
   Trash2,
   CalendarDays,
+  X,
+  Package,
 } from "lucide-react";
 import type { Tables } from "@/types/database";
 import { formatDateFR } from "@/lib/format";
@@ -25,9 +27,23 @@ import {
 
 type Event = Tables<"events">;
 
-export function EventEditor({ event }: { event: Event }) {
+export type CloseReservation = {
+  product_id: string;
+  product_name: string;
+  unit: string;
+  qty_reserved: number;
+};
+
+export function EventEditor({
+  event,
+  closeReservations = [],
+}: {
+  event: Event;
+  closeReservations?: CloseReservation[];
+}) {
   const router = useRouter();
   const readOnly = event.status === "termine" || event.status === "annule";
+  const [closeOpen, setCloseOpen] = useState(false);
 
   const [title, setTitle] = useState(event.title ?? "");
   const [date, setDate] = useState<string>(
@@ -110,21 +126,19 @@ export function EventEditor({ event }: { event: Event }) {
     });
   }
 
-  function close() {
-    if (
-      !window.confirm(
-        "Clôturer l'événement ? Les stocks réservés seront déduits des produits (mouvements OUT automatiques).",
-      )
-    )
-      return;
+  function confirmClose(
+    returns: Array<{ product_id: string; qty_returned: number }>,
+  ) {
     startTransition(async () => {
-      const res = await closeEvent(event.id);
-      if (!res.ok) setMsg({ kind: "err", text: res.error });
-      else {
-        setMsg({ kind: "ok", text: "Événement clôturé. Stocks mis à jour." });
-        setTimeout(() => setMsg(null), 3000);
-        router.refresh();
+      const res = await closeEvent(event.id, returns);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
       }
+      setCloseOpen(false);
+      setMsg({ kind: "ok", text: "Événement clôturé. Stocks mis à jour." });
+      setTimeout(() => setMsg(null), 3000);
+      router.refresh();
     });
   }
 
@@ -213,7 +227,7 @@ export function EventEditor({ event }: { event: Event }) {
             <>
               <button
                 type="button"
-                onClick={close}
+                onClick={() => setCloseOpen(true)}
                 disabled={pending}
                 className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
               >
@@ -318,6 +332,200 @@ export function EventEditor({ event }: { event: Event }) {
               className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
             />
           </label>
+        </div>
+      </div>
+
+      {closeOpen && (
+        <CloseEventDialog
+          reservations={closeReservations}
+          pending={pending}
+          onCancel={() => setCloseOpen(false)}
+          onConfirm={confirmClose}
+        />
+      )}
+    </div>
+  );
+}
+
+function CloseEventDialog({
+  reservations,
+  pending,
+  onCancel,
+  onConfirm,
+}: {
+  reservations: CloseReservation[];
+  pending: boolean;
+  onCancel: () => void;
+  onConfirm: (
+    returns: Array<{ product_id: string; qty_returned: number }>,
+  ) => void;
+}) {
+  const [returns, setReturns] = useState<Record<string, string>>(
+    () => Object.fromEntries(reservations.map((r) => [r.product_id, ""])),
+  );
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && !pending) onCancel();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onCancel, pending]);
+
+  function setReturn(productId: string, raw: string) {
+    setReturns((prev) => ({ ...prev, [productId]: raw }));
+  }
+
+  const totals = reservations.reduce(
+    (acc, r) => {
+      const ret = Math.min(
+        Math.max(0, Number(returns[r.product_id] || 0)),
+        r.qty_reserved,
+      );
+      acc.reserved += r.qty_reserved;
+      acc.returned += ret;
+      acc.consumed += Math.max(0, r.qty_reserved - ret);
+      return acc;
+    },
+    { reserved: 0, returned: 0, consumed: 0 },
+  );
+
+  function submit() {
+    const payload = reservations.map((r) => ({
+      product_id: r.product_id,
+      qty_returned: Math.min(
+        Math.max(0, Number(returns[r.product_id] || 0)),
+        r.qty_reserved,
+      ),
+    }));
+    onConfirm(payload);
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Clôturer l'événement"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      onClick={() => !pending && onCancel()}
+    >
+      <div
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-neutral-900 px-5 py-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              Clôture événement
+            </p>
+            <h2 className="mt-1 font-display text-lg text-white">
+              Quantités retournées
+            </h2>
+            <p className="mt-1 text-xs text-neutral-400">
+              Renseigne les quantités revenues du terrain. La consommation
+              réelle (= sortie − retour) est déduite du stock.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            aria-label="Fermer"
+            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white disabled:opacity-50"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {reservations.length === 0 ? (
+            <div className="rounded-md border border-neutral-800 bg-neutral-900/40 px-3 py-4 text-center text-xs text-neutral-400">
+              Aucun produit réservé pour cet événement. La clôture
+              n&apos;écrira aucun mouvement de stock.
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-[10px] uppercase tracking-wide text-neutral-500">
+                  <th className="pb-2 font-medium">Produit</th>
+                  <th className="pb-2 text-right font-medium">Sortie</th>
+                  <th className="pb-2 text-right font-medium">Retour</th>
+                  <th className="pb-2 text-right font-medium">Consommé</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-900">
+                {reservations.map((r) => {
+                  const raw = returns[r.product_id] ?? "";
+                  const ret = Math.min(
+                    Math.max(0, Number(raw || 0)),
+                    r.qty_reserved,
+                  );
+                  const consumed = Math.max(0, r.qty_reserved - ret);
+                  return (
+                    <tr key={r.product_id}>
+                      <td className="py-2 pr-2 text-neutral-200">
+                        {r.product_name}
+                      </td>
+                      <td className="py-2 pr-2 text-right text-neutral-400">
+                        {r.qty_reserved} {r.unit}
+                      </td>
+                      <td className="py-2 pr-2 text-right">
+                        <input
+                          type="number"
+                          min={0}
+                          max={r.qty_reserved}
+                          step={1}
+                          value={raw}
+                          onChange={(e) =>
+                            setReturn(r.product_id, e.target.value)
+                          }
+                          placeholder="0"
+                          disabled={pending}
+                          className="w-20 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-right text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                        />
+                      </td>
+                      <td className="py-2 text-right text-neutral-200">
+                        {consumed} {r.unit}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {reservations.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-neutral-900 px-5 py-3 text-[11px] text-neutral-400">
+            <span className="inline-flex items-center gap-1.5">
+              <Package className="h-3 w-3" />
+              {totals.reserved} sortis
+            </span>
+            <span>· {totals.returned} retournés</span>
+            <span className="font-semibold text-neutral-200">
+              · {totals.consumed} consommés
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-end gap-2 border-t border-neutral-900 px-5 py-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700 disabled:opacity-50"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
+          >
+            {pending && <Loader2 className="h-3 w-3 animate-spin" />}
+            <Flag className="h-3 w-3" /> Clôturer définitivement
+          </button>
         </div>
       </div>
     </div>

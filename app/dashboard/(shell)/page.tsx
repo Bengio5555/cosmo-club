@@ -22,8 +22,12 @@ import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { QuickRemindButton } from "@/components/dashboard/QuickRemindButton";
 import { formatDateFR, formatEUR } from "@/lib/format";
+import { autoStartDueEvents } from "./events/actions";
 
 export default async function DashboardHome() {
+  // Auto-flip a_venir → en_cours for events whose start time has
+  // passed, so the home reflects the live state without a cron.
+  await autoStartDueEvents();
   const supabase = await createClient();
 
   const today = new Date();

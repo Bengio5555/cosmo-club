@@ -13,6 +13,7 @@ import { EventEditor } from "./EventEditor";
 import { StaffSection } from "./StaffSection";
 import { StockSection } from "./StockSection";
 import { MenuSection } from "./MenuSection";
+import { autoStartDueEvents } from "../actions";
 
 type Params = Promise<{ id: string }>;
 
@@ -22,6 +23,9 @@ export default async function EventDetailPage({
   params: Params;
 }) {
   const { id } = await params;
+  // Sweep overdue → en_cours so the detail page already shows the
+  // correct state when the user lands.
+  await autoStartDueEvents();
   const supabase = await createClient();
 
   const { data: event } = await supabase
@@ -122,6 +126,24 @@ export default async function EventDetailPage({
   const productsById = new Map(
     (allProducts ?? []).map((p) => [p.id, p]),
   );
+
+  // Build the reservation snapshot used by the closure modal. Pulled
+  // here rather than client-fetched so the popup has names+units ready
+  // instantly when the owner clicks "Clôturer".
+  const closeReservations = (reservations ?? [])
+    .map((r) => {
+      const p = productsById.get(r.product_id);
+      if (!p) return null;
+      return {
+        product_id: r.product_id,
+        product_name: p.name,
+        unit: p.unit,
+        qty_reserved: Number(r.qty_reserved ?? 0),
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x)
+    .filter((r) => r.qty_reserved > 0)
+    .sort((a, b) => a.product_name.localeCompare(b.product_name));
   const qtyByCocktail = new Map(
     (menuRaw ?? []).map((m) => [m.cocktail_id, m.qty_planned]),
   );
@@ -182,7 +204,7 @@ export default async function EventDetailPage({
         </Link>
       </div>
 
-      <EventEditor event={event} />
+      <EventEditor event={event} closeReservations={closeReservations} />
 
       <div className="px-4 pb-5 md:px-8">
         <MenuSection

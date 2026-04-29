@@ -179,17 +179,22 @@ export async function setEventStatus(id: string, next: EventStatus) {
 
 /**
  * Close a running event:
- *  - writes stock_movements(out) rows from event_stock reservations,
- *    decrements products.stock_qty accordingly;
+ *  - reads `event_stock` reservations as the planned outflow;
+ *  - subtracts the optional per-product `qty_returned` to compute the
+ *    actual physical consumption (consumed = max(0, reserved - returned));
+ *  - writes one `stock_movements(out)` row per product (skipping zero
+ *    consumption) and decrements `products.stock_qty` by the same;
  *  - flips status to `termine`;
  *  - leaves event_stock.qty_reserved untouched so the owner can still see
- *    what was planned vs what was physically consumed (staff.hours_done
- *    is captured in the Staff section separately).
+ *    what was planned vs what was physically consumed.
  *
  * Idempotent guard: refuses if the event is already terminé/annulé so we
  * don't double-decrement stock on a re-click.
  */
-export async function closeEvent(id: string) {
+export async function closeEvent(
+  id: string,
+  returns?: Array<{ product_id: string; qty_returned: number }>,
+) {
   const supabase = await createClient();
 
   const { data: ev, error: eErr } = await supabase
@@ -205,6 +210,14 @@ export async function closeEvent(id: string) {
       ok: false as const,
       error: `Événement déjà ${ev.status}, rien à clôturer.`,
     };
+  }
+
+  // Build the per-product returned map (caller passes whatever was filled
+  // in the closure popup; products absent → 0 returned).
+  const returnedByProduct = new Map<string, number>();
+  for (const r of returns ?? []) {
+    if (!Number.isFinite(r.qty_returned) || r.qty_returned < 0) continue;
+    returnedByProduct.set(r.product_id, Number(r.qty_returned));
   }
 
   // Fetch reservations + current product stocks.
@@ -227,15 +240,23 @@ export async function closeEvent(id: string) {
   // Insert movements + update stock. Separate roundtrips but we're in a
   // server action already — acceptable for the <50 products case.
   for (const r of reservations ?? []) {
-    if (!r.qty_reserved || r.qty_reserved <= 0) continue;
+    const reserved = Number(r.qty_reserved ?? 0);
+    if (reserved <= 0) continue;
+    const returned = Math.min(returnedByProduct.get(r.product_id) ?? 0, reserved);
+    const consumed = Math.max(0, reserved - returned);
+    if (consumed === 0) continue;
     const prevQty = stockById.get(r.product_id) ?? 0;
-    const nextQty = Math.max(0, prevQty - Number(r.qty_reserved));
+    const nextQty = Math.max(0, prevQty - consumed);
+    const reason =
+      returned > 0
+        ? `Clôture événement (retour: ${returned})`
+        : "Clôture événement";
     const { error: mvErr } = await supabase.from("stock_movements").insert({
       product_id: r.product_id,
-      qty: Number(r.qty_reserved),
+      qty: consumed,
       direction: "out",
       event_id: id,
-      reason: "Clôture événement",
+      reason,
     });
     if (mvErr) return { ok: false as const, error: mvErr.message };
     const { error: upErr } = await supabase
@@ -256,6 +277,40 @@ export async function closeEvent(id: string) {
   revalidatePath("/dashboard/stock");
   revalidatePath("/dashboard");
   return { ok: true as const };
+}
+
+/**
+ * Sweep `a_venir` events whose scheduled start time has passed and flip
+ * them to `en_cours`. Idempotent: if status already moved on, the
+ * subsequent updates touch zero rows. Cheap enough to run before the
+ * events list / detail server-renders, so the dashboard reflects the
+ * "started" state without needing a real cron job.
+ *
+ * Two-pass on purpose:
+ *   1. all events whose date is strictly past today
+ *   2. events scheduled today whose start_time has elapsed
+ * Events missing a start_time are left alone — auto-start needs a
+ * scheduled clock.
+ */
+export async function autoStartDueEvents() {
+  const supabase = await createClient();
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const hhmmss = now.toTimeString().slice(0, 8);
+
+  await supabase
+    .from("events")
+    .update({ status: "en_cours" })
+    .eq("status", "a_venir")
+    .lt("date", today);
+
+  await supabase
+    .from("events")
+    .update({ status: "en_cours" })
+    .eq("status", "a_venir")
+    .eq("date", today)
+    .not("start_time", "is", null)
+    .lte("start_time", hhmmss);
 }
 
 export async function deleteEvent(id: string) {
