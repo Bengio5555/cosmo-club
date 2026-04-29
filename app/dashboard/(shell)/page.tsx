@@ -12,6 +12,7 @@ import {
   Euro,
   Clock,
   Users,
+  Wine,
   ArrowUpCircle,
   ArrowDownCircle,
   Zap,
@@ -35,6 +36,9 @@ export default async function DashboardHome() {
   const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 3600 * 1000)
     .toISOString()
     .slice(0, 10);
+  const fifteenDaysFromNow = new Date(today.getTime() + 15 * 24 * 3600 * 1000)
+    .toISOString()
+    .slice(0, 10);
 
   // ─── Fan out all queries in parallel ───────────────────────────
   const [
@@ -46,6 +50,7 @@ export default async function DashboardHome() {
     { data: recentLeads },
     { data: lowStockProducts },
     { data: upcomingEvents },
+    { data: cocktailWindowEvents },
     { data: recentMovements },
   ] = await Promise.all([
     // CA du mois: issued invoices (not draft/cancelled) this calendar month
@@ -102,6 +107,14 @@ export default async function DashboardHome() {
       .lte("date", sevenDaysFromNow)
       .neq("status", "annule")
       .order("date", { ascending: true }),
+    // Events within 15 days — used to flag missing cocktail menus
+    supabase
+      .from("events")
+      .select("id,date,status")
+      .gte("date", todayISO)
+      .lte("date", fifteenDaysFromNow)
+      .neq("status", "annule")
+      .neq("status", "termine"),
     // Recent stock movements
     supabase
       .from("stock_movements")
@@ -141,6 +154,28 @@ export default async function DashboardHome() {
       (staffCountByEvent.get(r.event_id) ?? 0) + 1,
     );
   }
+
+  // ─── Derive cocktail menu counts for the J-15 window ───────────
+  // Pulls from a wider event set (≤15d) than the upcoming-7d list so
+  // events 8–15 days out also surface in the alerts band when their
+  // cocktail menu is empty.
+  const cocktailWindowIds = (cocktailWindowEvents ?? []).map((e) => e.id);
+  const { data: eventCocktailRows } = cocktailWindowIds.length
+    ? await supabase
+        .from("event_cocktails")
+        .select("event_id")
+        .in("event_id", cocktailWindowIds)
+    : { data: [] };
+  const cocktailCountByEvent = new Map<string, number>();
+  for (const r of eventCocktailRows ?? []) {
+    cocktailCountByEvent.set(
+      r.event_id,
+      (cocktailCountByEvent.get(r.event_id) ?? 0) + 1,
+    );
+  }
+  const eventsWithoutCocktails = (cocktailWindowEvents ?? []).filter(
+    (e) => (cocktailCountByEvent.get(e.id) ?? 0) === 0,
+  );
 
   // ─── Resolve client names for events + unpaid invoices ─────────
   const clientIds = Array.from(
@@ -233,7 +268,8 @@ export default async function DashboardHome() {
   const hasAlerts =
     overdueInvoices.length > 0 ||
     lowStock.length > 0 ||
-    eventsWithoutStaff.length > 0;
+    eventsWithoutStaff.length > 0 ||
+    eventsWithoutCocktails.length > 0;
 
   // Top-5 unpaid (sorted by due date, overdue first)
   const topUnpaid = invoicesWithRemaining.slice(0, 5);
@@ -326,6 +362,16 @@ export default async function DashboardHome() {
                       {eventsWithoutStaff.length}
                     </strong>{" "}
                     événement{eventsWithoutStaff.length > 1 ? "s" : ""} sans staff (≤ 7j)
+                  </Link>
+                </li>
+              )}
+              {eventsWithoutCocktails.length > 0 && (
+                <li>
+                  <Link href="/dashboard/events" className="hover:text-white">
+                    <strong className="text-amber-200">
+                      {eventsWithoutCocktails.length}
+                    </strong>{" "}
+                    événement{eventsWithoutCocktails.length > 1 ? "s" : ""} sans menu cocktails (≤ 15j)
                   </Link>
                 </li>
               )}
@@ -459,6 +505,9 @@ export default async function DashboardHome() {
               {(upcomingEvents ?? []).map((ev) => {
                 const staffCount = staffCountByEvent.get(ev.id) ?? 0;
                 const noStaff = staffCount === 0 && ev.status !== "annule";
+                const cocktailCount = cocktailCountByEvent.get(ev.id) ?? 0;
+                const noCocktails =
+                  cocktailCount === 0 && ev.status !== "annule";
                 return (
                   <li key={ev.id} className="py-2.5">
                     <Link
@@ -496,17 +545,29 @@ export default async function DashboardHome() {
                         </p>
                       </div>
                       <div className="shrink-0 text-right text-[11px]">
-                        <div
-                          className={`inline-flex items-center gap-1 ${
-                            noStaff ? "text-amber-300" : "text-neutral-400"
-                          }`}
-                        >
-                          <Users className="h-3 w-3" />
-                          {staffCount}
+                        <div className="flex items-center justify-end gap-2">
+                          <div
+                            className={`inline-flex items-center gap-1 ${
+                              noStaff ? "text-amber-300" : "text-neutral-400"
+                            }`}
+                          >
+                            <Users className="h-3 w-3" />
+                            {staffCount}
+                          </div>
+                          <div
+                            className={`inline-flex items-center gap-1 ${
+                              noCocktails ? "text-amber-300" : "text-neutral-400"
+                            }`}
+                          >
+                            <Wine className="h-3 w-3" />
+                            {cocktailCount}
+                          </div>
                         </div>
-                        {noStaff && (
+                        {(noStaff || noCocktails) && (
                           <p className="text-[10px] text-amber-400/70">
-                            à staffer
+                            {noStaff && "à staffer"}
+                            {noStaff && noCocktails && " · "}
+                            {noCocktails && "menu à prévoir"}
                           </p>
                         )}
                       </div>

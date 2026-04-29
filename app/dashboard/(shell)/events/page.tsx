@@ -3,6 +3,7 @@ import {
   CalendarDays,
   MapPin,
   Users,
+  Wine,
   List,
   LayoutGrid,
   ChevronLeft,
@@ -211,11 +212,21 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
     ),
   );
   const eventIds = (events ?? []).map((e) => e.id);
-  const [{ data: eventStaffRows }, { data: clientRows }] = await Promise.all([
+  const [
+    { data: eventStaffRows },
+    { data: eventCocktailRows },
+    { data: clientRows },
+  ] = await Promise.all([
     eventIds.length
       ? supabase
           .from("event_staff")
           .select("event_id,staff_id")
+          .in("event_id", eventIds)
+      : Promise.resolve({ data: [] }),
+    eventIds.length
+      ? supabase
+          .from("event_cocktails")
+          .select("event_id")
           .in("event_id", eventIds)
       : Promise.resolve({ data: [] }),
     clientIds.length
@@ -231,6 +242,13 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
     staffCountByEvent.set(
       r.event_id,
       (staffCountByEvent.get(r.event_id) ?? 0) + 1,
+    );
+  }
+  const cocktailCountByEvent = new Map<string, number>();
+  for (const r of eventCocktailRows ?? []) {
+    cocktailCountByEvent.set(
+      r.event_id,
+      (cocktailCountByEvent.get(r.event_id) ?? 0) + 1,
     );
   }
   const clientsMap = new Map((clientRows ?? []).map((c) => [c.id, c]));
@@ -303,6 +321,17 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                 client?.email ||
                 "—";
               const staffCount = staffCountByEvent.get(ev.id) ?? 0;
+              const cocktailCount = cocktailCountByEvent.get(ev.id) ?? 0;
+              const daysUntil = Math.floor(
+                (new Date(ev.date).getTime() - new Date(today).getTime()) /
+                  86400000,
+              );
+              const cocktailsDue =
+                cocktailCount === 0 &&
+                ev.status !== "annule" &&
+                ev.status !== "termine" &&
+                daysUntil >= 0 &&
+                daysUntil <= 15;
               return (
                 <li key={ev.id}>
                   <Link
@@ -357,6 +386,23 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                           Staff
                         </p>
                         <p className="text-neutral-200">{staffCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-neutral-600">
+                          Cocktails
+                        </p>
+                        <p
+                          className={
+                            cocktailsDue ? "text-amber-300" : "text-neutral-200"
+                          }
+                        >
+                          {cocktailCount}
+                        </p>
+                        {cocktailsDue && (
+                          <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-amber-400/80">
+                            <Wine className="h-3 w-3" /> à prévoir
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Link>
