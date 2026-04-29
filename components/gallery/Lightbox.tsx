@@ -70,6 +70,7 @@ export function Lightbox({ slides, index, onClose, onIndexChange }: Props) {
   if (!isOpen || !slide) return null;
 
   const src = typeof slide.src === "string" ? slide.src : slide.src.src;
+  const bypassOptimizer = typeof slide.src === "string" && src.startsWith("/api/");
 
   return (
     <div
@@ -133,6 +134,7 @@ export function Lightbox({ slides, index, onClose, onIndexChange }: Props) {
             fill
             sizes="100vw"
             priority
+            unoptimized={bypassOptimizer}
             className="object-contain"
           />
         </div>

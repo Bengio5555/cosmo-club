@@ -58,6 +58,7 @@ export function BottlesSection() {
                   alt={`Cosmo Club bouteille ${b.format}`}
                   fill
                   sizes="(min-width: 1024px) 320px, (min-width: 768px) 240px, 100vw"
+                  unoptimized={bottleSrcs[i].startsWith("/api/")}
                   className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.03]"
                 />
               </div>

@@ -141,6 +141,9 @@ function BentoCard({
 /* ─── Decorative visuals (CSS/SVG — replace with real photos later) ─── */
 
 function CocktailVisual({ src, priority }: { src: string; priority?: boolean }) {
+  // Bypass next/image optimizer for our authed blob proxy URLs; keep
+  // optimization for static /brand/... paths so they still get resized.
+  const bypassOptimizer = src.startsWith("/api/");
   return (
     <div className="relative h-full w-full overflow-hidden">
       <Image
@@ -149,6 +152,7 @@ function CocktailVisual({ src, priority }: { src: string; priority?: boolean }) 
         alt=""
         fill
         sizes="(min-width: 768px) 66vw, 100vw"
+        unoptimized={bypassOptimizer}
         className="object-cover object-center transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.05]"
         priority={priority}
       />
@@ -157,6 +161,7 @@ function CocktailVisual({ src, priority }: { src: string; priority?: boolean }) 
 }
 
 function LatteVisual({ src }: { src: string }) {
+  const bypassOptimizer = src.startsWith("/api/");
   return (
     <div className="relative h-full w-full overflow-hidden">
       <Image
@@ -165,6 +170,7 @@ function LatteVisual({ src }: { src: string }) {
         alt=""
         fill
         sizes="(min-width: 768px) 33vw, 100vw"
+        unoptimized={bypassOptimizer}
         className="object-cover object-center transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.05]"
       />
     </div>

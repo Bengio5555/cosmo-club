@@ -103,6 +103,7 @@ function LatteCard({
             alt={`Latte ${latte.name}`}
             fill
             sizes="(min-width: 768px) 240px, 192px"
+            unoptimized={src.startsWith("/api/")}
             className="object-cover"
           />
         </div>

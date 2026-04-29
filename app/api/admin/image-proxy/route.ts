@@ -55,15 +55,12 @@ export async function GET(request: NextRequest) {
     const buffer = await response.arrayBuffer();
     const contentType = response.headers.get("content-type") || "image/png";
 
-    // Blob URLs are content-addressed (random pathname per upload), so we can
-    // cache aggressively. The Vercel image optimizer fetches this route and
-    // generates AVIF/WebP variants — letting it cache for a year matches the
-    // immutability of the underlying object.
+    // Return as image with proper headers
     return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": "public, max-age=3600",
       },
     });
   } catch (error) {

@@ -10,6 +10,7 @@ import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 export function BaristaHero() {
   const config = useImageConfig();
   const heroSrc = pickPath(config, "barista", "hero", heroBaristaImg.src);
+  const heroUnoptimized = heroSrc.startsWith("/api/");
 
   return (
     <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
@@ -22,8 +23,7 @@ export function BaristaHero() {
           fill
           sizes="100vw"
           priority
-          fetchPriority="high"
-          quality={75}
+          unoptimized={heroUnoptimized}
           className="object-cover object-center"
         />
         <div

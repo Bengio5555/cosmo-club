@@ -10,6 +10,7 @@ import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 export function BarHero() {
   const config = useImageConfig();
   const heroSrc = pickPath(config, "bar-a-cocktails", "hero", heroBarImg.src);
+  const heroUnoptimized = heroSrc.startsWith("/api/");
 
   return (
     <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
@@ -22,8 +23,7 @@ export function BarHero() {
           fill
           sizes="100vw"
           priority
-          fetchPriority="high"
-          quality={75}
+          unoptimized={heroUnoptimized}
           className="object-cover object-center"
         />
         {/* léger gradient pour readabilité du texte côté gauche */}
