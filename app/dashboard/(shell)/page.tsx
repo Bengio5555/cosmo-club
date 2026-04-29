@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   Inbox,
   FileText,
+  FileCheck2,
   Receipt,
   Package,
   ArrowRight,
@@ -28,6 +29,9 @@ export default async function DashboardHome() {
   const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
     .toISOString()
     .slice(0, 10);
+  const firstOfYear = new Date(today.getFullYear(), 0, 1)
+    .toISOString()
+    .slice(0, 10);
   const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 3600 * 1000)
     .toISOString()
     .slice(0, 10);
@@ -37,6 +41,7 @@ export default async function DashboardHome() {
     { data: monthInvoices },
     { data: unpaidInvoices },
     { data: pendingQuotes },
+    { data: signedQuotesYear },
     { count: leadsNew },
     { data: recentLeads },
     { data: lowStockProducts },
@@ -65,6 +70,12 @@ export default async function DashboardHome() {
       .from("quotes")
       .select("id,total_ttc,status")
       .eq("status", "envoye"),
+    // Signed quotes — current calendar year, by accepted_at
+    supabase
+      .from("quotes")
+      .select("id,total_ttc,accepted_at")
+      .eq("status", "accepte")
+      .gte("accepted_at", firstOfYear),
     // New leads count
     supabase
       .from("leads")
@@ -201,6 +212,12 @@ export default async function DashboardHome() {
   );
   const pendingQuotesCount = (pendingQuotes ?? []).length;
 
+  const signedQuotesYearValue = (signedQuotesYear ?? []).reduce(
+    (s, q) => s + Number(q.total_ttc ?? 0),
+    0,
+  );
+  const signedQuotesYearCount = (signedQuotesYear ?? []).length;
+
   const overdueInvoices = invoicesWithRemaining.filter(
     (inv) => inv.due_date && inv.due_date < todayISO,
   );
@@ -238,7 +255,7 @@ export default async function DashboardHome() {
       </header>
 
       {/* ─── Hero KPIs ─── */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-5">
         <HeroKpi
           label="CA du mois"
           value={formatEUR(caMonth)}
@@ -254,6 +271,14 @@ export default async function DashboardHome() {
           tone={totalRemaining > 0 ? "pending" : "ok"}
           hint={`${invoicesWithRemaining.length} facture${invoicesWithRemaining.length > 1 ? "s" : ""} ouverte${invoicesWithRemaining.length > 1 ? "s" : ""}`}
           href="/dashboard/factures"
+        />
+        <HeroKpi
+          label={`Devis signés ${today.getFullYear()}`}
+          value={String(signedQuotesYearCount)}
+          icon={FileCheck2}
+          tone="ok"
+          hint={signedQuotesYearValue > 0 ? formatEUR(signedQuotesYearValue) : "aucun signé cette année"}
+          href="/dashboard/devis"
         />
         <HeroKpi
           label="Devis en attente"
