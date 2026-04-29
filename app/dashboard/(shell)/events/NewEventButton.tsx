@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, X } from "lucide-react";
 import { saveNewEvent, type EventInput } from "./actions";
+import { LocationField } from "@/components/dashboard/LocationField";
 
 type ClientOption = {
   id: string;
@@ -16,6 +17,7 @@ export function NewEventButton() {
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
   const [clients, setClients] = useState<ClientOption[]>([]);
+  const [location, setLocation] = useState("");
 
   // Lazy-load clients when the modal opens. Keeps the initial list page
   // cheap and doesn't hit the DB until the owner actually wants to link
@@ -63,6 +65,7 @@ export function NewEventButton() {
         type="button"
         onClick={() => {
           setErr(null);
+          setLocation("");
           setOpen(true);
         }}
         className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)]"
@@ -128,10 +131,12 @@ export function NewEventButton() {
               </div>
 
               <Field label="Lieu">
-                <input
+                <LocationField
                   name="location"
+                  value={location}
+                  onChange={setLocation}
                   placeholder="Adresse ou nom du site"
-                  className={inputCls}
+                  inputClassName={inputCls}
                 />
               </Field>
 

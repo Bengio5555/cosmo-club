@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Tables } from "@/types/database";
 import { formatDateFR } from "@/lib/format";
+import { LocationField } from "@/components/dashboard/LocationField";
 import {
   saveEvent,
   setEventStatus,
@@ -282,13 +283,18 @@ export function EventEditor({ event }: { event: Event }) {
               readOnly={readOnly}
             />
           </div>
-          <LabeledInput
-            label="Lieu"
-            value={location}
-            onChange={setLocation}
-            readOnly={readOnly}
-            placeholder="Adresse ou nom du site"
-          />
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+              Lieu
+            </span>
+            <LocationField
+              value={location}
+              onChange={setLocation}
+              readOnly={readOnly}
+              placeholder="Adresse ou nom du site"
+              inputClassName="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+            />
+          </label>
           <LabeledInput
             label="Invités"
             type="number"
