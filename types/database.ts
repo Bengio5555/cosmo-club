@@ -253,6 +253,8 @@ export type Database = {
       quotes: {
         Row: {
           accepted_at: string | null
+          cgv_accepted_at: string | null
+          cgv_version: string | null
           client_id: string | null
           commission_rate: number
           created_at: string
@@ -268,6 +270,9 @@ export type Database = {
           pdf_url: string | null
           refused_at: string | null
           sent_at: string | null
+          signature_data: string | null
+          signed_by_name: string | null
+          signed_ip: string | null
           status: Database["public"]["Enums"]["quote_status"]
           subject: string | null
           terms: string | null

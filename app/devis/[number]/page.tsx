@@ -439,15 +439,54 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
                 <br />
                 Signature numérique sécurisée, réponse sous 24 h.
               </div>
-              <AcceptanceActions quoteId={quote.id} number={quote.number} />
+              <AcceptanceActions
+                quoteId={quote.id}
+                number={quote.number}
+                defaultName={clientDisplayName}
+              />
             </div>
           )}
 
           {quote.status === "accepte" && (
             <div className="sig-cta-status">
-              ✓ Devis accepté{clientDisplayName ? ` — merci ${clientDisplayName}.` : "."}
+              ✓ Devis accepté
+              {quote.signed_by_name
+                ? ` par ${quote.signed_by_name}`
+                : clientDisplayName
+                  ? ` — merci ${clientDisplayName}`
+                  : ""}
+              {quote.accepted_at &&
+                ` le ${new Date(quote.accepted_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`}
+              .
               <br />
               Nous revenons vers vous avec contrat + acompte sous 24 h.
+              {quote.signature_data && (
+                <div
+                  style={{
+                    marginTop: "16px",
+                    padding: "12px",
+                    background: "rgba(255,255,255,0.04)",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(201,169,97,0.25)",
+                  }}
+                >
+                  <p style={{ margin: 0, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.6 }}>
+                    Signature enregistrée
+                  </p>
+                  <img
+                    src={quote.signature_data}
+                    alt={`Signature de ${quote.signed_by_name ?? "client"}`}
+                    style={{
+                      marginTop: "6px",
+                      maxWidth: "260px",
+                      maxHeight: "100px",
+                      background: "#fff",
+                      borderRadius: "6px",
+                      padding: "6px",
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
 

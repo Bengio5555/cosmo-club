@@ -2,31 +2,22 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { acceptDevis, refuseDevis } from "./actions";
+import { refuseDevis } from "./actions";
+import { AcceptanceModal } from "./AcceptanceModal";
 
 export function AcceptanceActions({
   quoteId,
   number,
+  defaultName,
 }: {
   quoteId: string;
   number: string;
+  defaultName?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
-
-  function accept() {
-    if (!window.confirm(`Confirmer l'acceptation du devis ${number} ?`)) return;
-    startTransition(async () => {
-      setErr(null);
-      const res = await acceptDevis(quoteId);
-      if (!res.ok) {
-        setErr(res.error);
-        return;
-      }
-      router.refresh();
-    });
-  }
+  const [open, setOpen] = useState(false);
 
   function refuse() {
     if (
@@ -50,11 +41,11 @@ export function AcceptanceActions({
     <div className="sig-cta-buttons">
       <button
         type="button"
-        onClick={accept}
+        onClick={() => setOpen(true)}
         disabled={pending}
         className="sig-cta-button"
       >
-        {pending ? "…" : "Accepter & signer"}
+        Accepter & signer
       </button>
       <button
         type="button"
@@ -62,9 +53,18 @@ export function AcceptanceActions({
         disabled={pending}
         className="sig-cta-button secondary"
       >
-        Refuser le devis
+        {pending ? "…" : "Refuser le devis"}
       </button>
       {err && <p className="sig-cta-err">{err}</p>}
+
+      {open && (
+        <AcceptanceModal
+          quoteId={quoteId}
+          number={number}
+          defaultName={defaultName}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 }
