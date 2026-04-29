@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { MobileNav } from "@/components/dashboard/MobileNav";
+import { ThemeProvider } from "@/components/dashboard/ThemeProvider";
 
 /**
  * Shell layout: sidebar + topbar. Applied to every authenticated dashboard
@@ -26,13 +27,15 @@ export default async function ShellLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar email={user.email ?? null} />
-        <main className="flex-1 overflow-x-hidden">{children}</main>
-        <MobileNav />
+    <ThemeProvider>
+      <div className="flex min-h-screen bg-neutral-950 text-neutral-200">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Topbar email={user.email ?? null} />
+          <main className="flex-1 overflow-x-hidden">{children}</main>
+          <MobileNav />
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }

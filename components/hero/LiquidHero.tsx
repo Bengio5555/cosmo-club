@@ -13,7 +13,6 @@ export function LiquidHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const config = useImageConfig();
   const heroSrc = pickPath(config, "home", "hero", heroHomeImg.src);
-  const heroUnoptimized = heroSrc.startsWith("/api/");
 
   useEffect(() => {
     const v = videoRef.current;
@@ -30,27 +29,26 @@ export function LiquidHero() {
 
   return (
     <section className="relative isolate h-[100svh] min-h-[680px] w-full overflow-hidden bg-[color:var(--color-cream-paper)]">
-      {/* ─── Background video (with photo fallback) ─── */}
+      {/* ─── Background image (LCP candidate, always rendered) + video overlay ─── */}
       <div aria-hidden className="absolute inset-0 -z-20">
-        {reduce ? (
-          <Image
-            key={heroSrc}
-            src={heroSrc}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            unoptimized={heroUnoptimized}
-            className="object-cover object-center"
-          />
-        ) : (
+        <Image
+          key={heroSrc}
+          src={heroSrc}
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          fetchPriority="high"
+          quality={70}
+          className="object-cover object-center"
+        />
+        {!reduce && (
           <video
             ref={videoRef}
             autoPlay
             muted
             playsInline
-            preload="auto"
-            poster={heroSrc}
+            preload="metadata"
             className="absolute inset-0 h-full w-full object-cover object-center"
           >
             <source src="/brand/ai/hero-home.mp4" type="video/mp4" />
@@ -89,13 +87,8 @@ export function LiquidHero() {
           <span className="rule" />Cocktails · Barista · Événementiel
         </motion.p>
 
-        {/* Logo wordmark (accessible h1) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1.1, ease: [0.19, 1, 0.22, 1] }}
-          className="relative"
-        >
+        {/* Logo wordmark (accessible h1) — rendered immediately as LCP element */}
+        <div className="relative">
           <h1 className="sr-only">Cosmo Club Paris</h1>
           <p
             aria-hidden
@@ -107,7 +100,7 @@ export function LiquidHero() {
             aria-hidden
             className="mx-auto mt-2 h-px w-40 bg-gradient-to-r from-transparent via-[color:var(--color-or-deep)]/80 to-transparent"
           />
-        </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}

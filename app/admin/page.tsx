@@ -16,12 +16,14 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
   const [uploading, setUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   // Check localStorage on mount
   useEffect(() => {
     const savedLogin = localStorage.getItem("adminLogin") === "true";
     const savedPassword = localStorage.getItem("adminPassword");
     const savedPage = localStorage.getItem("selectedPage");
+    const savedTheme = localStorage.getItem("adminTheme");
 
     if (savedLogin && savedPassword) {
       setIsLoggedIn(true);
@@ -32,8 +34,18 @@ export default function AdminPage() {
       setSelectedPage(savedPage);
     }
 
+    if (savedTheme === "light" || savedTheme === "dark") {
+      setTheme(savedTheme);
+    }
+
     setIsLoading(false);
   }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("adminTheme", next);
+  };
 
   // Save selectedPage to localStorage whenever it changes
   useEffect(() => {
@@ -447,9 +459,10 @@ export default function AdminPage() {
 
   const pages = Object.keys(config.pages);
   const currentPageData = config.pages[selectedPage] || {};
+  const isLight = theme === "light";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#000", padding: "2rem", fontFamily: "system-ui, -apple-system, sans-serif", cursor: "auto" }}>
+    <div style={{ minHeight: "100vh", background: isLight ? "#f5f5f5" : "#000", padding: "2rem", fontFamily: "system-ui, -apple-system, sans-serif", cursor: "auto" }}>
       <style>{`
         html, body, * { cursor: auto !important; }
         button { cursor: pointer !important; }
@@ -459,35 +472,54 @@ export default function AdminPage() {
       `}</style>
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", paddingBottom: "1rem", borderBottom: `1px solid ${isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)"}` }}>
           <div>
-            <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "white", margin: "0" }}>
+            <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: isLight ? "#0a0a0a" : "white", margin: "0" }}>
               📸 Gestion Images
             </h1>
-            <p style={{ color: "#999", margin: "0.5rem 0 0 0", fontSize: "0.875rem" }}>
+            <p style={{ color: isLight ? "#555" : "#999", margin: "0.5rem 0 0 0", fontSize: "0.875rem" }}>
               Upload, modifier, sauvegarder
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            style={{
-              background: "#b91c1c",
-              color: "white",
-              padding: "0.75rem 1.5rem",
-              borderRadius: "0.5rem",
-              cursor: "pointer",
-              border: "none",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-            }}
-          >
-            Déconnexion
-          </button>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <button
+              onClick={toggleTheme}
+              aria-label="Basculer le thème"
+              title={isLight ? "Passer en mode sombre" : "Passer en mode clair"}
+              style={{
+                background: isLight ? "#0a0a0a" : "#fff",
+                color: isLight ? "#fff" : "#0a0a0a",
+                padding: "0.75rem 1rem",
+                borderRadius: "0.5rem",
+                cursor: "pointer",
+                border: "none",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+              }}
+            >
+              {isLight ? "🌙 Sombre" : "☀️ Clair"}
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                background: "#b91c1c",
+                color: "white",
+                padding: "0.75rem 1.5rem",
+                borderRadius: "0.5rem",
+                cursor: "pointer",
+                border: "none",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+              }}
+            >
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         {/* Message */}
         {message && (
-          <div style={{ marginBottom: "1rem", padding: "1rem", background: message.includes("✅") ? "rgba(34, 197, 94, 0.2)" : "rgba(185, 28, 28, 0.2)", borderLeft: `3px solid ${message.includes("✅") ? "#22c55e" : "#b91c1c"}`, color: "white", borderRadius: "0.25rem", fontSize: "0.875rem" }}>
+          <div style={{ marginBottom: "1rem", padding: "1rem", background: message.includes("✅") ? "rgba(34, 197, 94, 0.2)" : "rgba(185, 28, 28, 0.2)", borderLeft: `3px solid ${message.includes("✅") ? "#22c55e" : "#b91c1c"}`, color: isLight ? "#0a0a0a" : "white", borderRadius: "0.25rem", fontSize: "0.875rem" }}>
             {message}
           </div>
         )}
@@ -495,38 +527,43 @@ export default function AdminPage() {
         <div className="grid grid-cols-[220px_1fr] gap-6 mb-6">
           {/* Sidebar - Page Navigation */}
           <div>
-            <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">
+            <h3 className={`text-xs font-bold uppercase mb-3 ${isLight ? "text-gray-600" : "text-gray-400"}`}>
               Pages
             </h3>
             <div className="flex flex-col gap-2">
-              {pages.map((page) => (
-                <button
-                  key={page}
-                  onClick={() => {
-                    setSelectedPage(page);
-                    setSelectedImageKey(null); // Reset selection when changing pages
-                  }}
-                  className={`text-left px-3 py-2 rounded text-sm font-medium transition ${
-                    selectedPage === page
-                      ? "bg-red-600 text-white border border-red-600"
-                      : "bg-gray-800 text-white border border-gray-700 hover:bg-gray-700"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              {pages.map((page) => {
+                const active = selectedPage === page;
+                const cls = active
+                  ? "bg-red-600 text-white border border-red-600"
+                  : isLight
+                  ? "bg-white text-gray-900 border border-gray-200 hover:bg-gray-100"
+                  : "bg-gray-800 text-white border border-gray-700 hover:bg-gray-700";
+                return (
+                  <button
+                    key={page}
+                    onClick={() => {
+                      setSelectedPage(page);
+                      setSelectedImageKey(null); // Reset selection when changing pages
+                    }}
+                    className={`text-left px-3 py-2 rounded text-sm font-medium transition ${cls}`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Main Content - Two Panel Layout */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-white capitalize">
+              <h2 className={`text-lg font-bold capitalize ${isLight ? "text-gray-900" : "text-white"}`}>
                 {selectedPage} ({Object.keys(currentPageData).length} images)
               </h2>
             </div>
 
             <AdminLayout
+              theme={theme}
               leftPanel={
                 <ImageListPanel
                   images={currentPageData}
@@ -534,6 +571,7 @@ export default function AdminPage() {
                   onSelectImage={setSelectedImageKey}
                   onUpload={handleImageUpload}
                   uploading={uploading}
+                  theme={theme}
                 />
               }
               rightPanel={
@@ -545,12 +583,13 @@ export default function AdminPage() {
                     onOrientationChange={handleOrientationChange}
                     onDelete={handleDeleteImage}
                     saving={saving}
+                    theme={theme}
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center">
-                      <p className="text-gray-400 text-sm mb-2">👈 Sélectionnez une image</p>
-                      <p className="text-gray-600 text-xs">pour voir les détails</p>
+                      <p className={`text-sm mb-2 ${isLight ? "text-gray-500" : "text-gray-400"}`}>👈 Sélectionnez une image</p>
+                      <p className={`text-xs ${isLight ? "text-gray-400" : "text-gray-600"}`}>pour voir les détails</p>
                     </div>
                   </div>
                 )

@@ -3,12 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useTheme } from "@/components/dashboard/ThemeProvider";
 import logoSrc from "@/public/brand/cosmo-logo.avif";
 
 export function Topbar({ email }: { email: string | null }) {
   const router = useRouter();
+  const { theme, toggle } = useTheme();
 
   async function handleLogout() {
     const supabase = createClient();
@@ -47,6 +49,19 @@ export function Topbar({ email }: { email: string | null }) {
             {email}
           </span>
         )}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+          title={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+          className="inline-flex items-center justify-center rounded-md border border-neutral-800 bg-neutral-900 p-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-3.5 w-3.5" />
+          ) : (
+            <Moon className="h-3.5 w-3.5" />
+          )}
+        </button>
         <button
           type="button"
           onClick={handleLogout}
