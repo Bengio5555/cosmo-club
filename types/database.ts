@@ -271,6 +271,7 @@ export type Database = {
           number: string
           pdf_url: string | null
           refused_at: string | null
+          schedule: Json | null
           sent_at: string | null
           signature_data: string | null
           signed_by_name: string | null

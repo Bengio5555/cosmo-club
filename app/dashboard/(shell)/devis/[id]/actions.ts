@@ -37,11 +37,46 @@ export type SaveQuoteInput = {
    */
   commission_rate: number;
   valid_until: string | null;
+  /**
+   * Run-of-show steps ("14:00 — Livraison"). Persisted as JSONB on
+   * `quotes`. Empty array = no schedule (the public plaquette falls
+   * back to the default offer photo).
+   */
+  schedule: ScheduleItem[];
   items: QuoteItemInput[];
 };
 
+export type ScheduleItem = { time: string; label: string };
+
 function round2(n: number) {
   return Math.round(n * 100) / 100;
+}
+
+/**
+ * Sanitize the run-of-show steps before persisting.
+ * - Drops malformed or empty entries.
+ * - Pads time to HH:MM (handles `9:30` and `09:30`).
+ * - Caps to 30 steps so the JSON column stays small.
+ */
+function sanitizeSchedule(input: ScheduleItem[] | undefined): ScheduleItem[] {
+  if (!Array.isArray(input)) return [];
+  const out: ScheduleItem[] = [];
+  for (const raw of input) {
+    if (!raw) continue;
+    const time = String(raw.time ?? "").trim();
+    const label = String(raw.label ?? "").trim();
+    if (!label) continue;
+    const m = time.match(/^(\d{1,2}):?([0-5]\d)?$/);
+    let normalized = "";
+    if (m) {
+      const hh = Math.min(23, Math.max(0, Number(m[1] ?? 0)));
+      const mm = m[2] ? Number(m[2]) : 0;
+      normalized = `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+    }
+    out.push({ time: normalized, label: label.slice(0, 120) });
+    if (out.length >= 30) break;
+  }
+  return out;
 }
 
 /**
@@ -165,6 +200,7 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
       tva_rate: tvaRate,
       commission_rate: commissionRate,
       valid_until: input.valid_until,
+      schedule: sanitizeSchedule(input.schedule),
       total_ht: totalHt,
       total_tva: totalTva,
       total_ttc: totalTtc,

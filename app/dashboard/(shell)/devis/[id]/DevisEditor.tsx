@@ -22,6 +22,7 @@ import {
   deleteQuote,
   createInvoiceFromQuote,
   type SaveQuoteInput,
+  type ScheduleItem,
 } from "./actions";
 import { CatalogPicker, type PickedItem } from "./CatalogPicker";
 import { Receipt, CalendarPlus } from "lucide-react";
@@ -103,6 +104,28 @@ export function DevisEditor({
     quote.valid_until ? quote.valid_until.slice(0, 10) : "",
   );
 
+  // Run-of-show steps. Stored as JSONB in DB; the column may be null
+  // or may contain other shapes if migrated from older data, so we
+  // defensively coerce to a clean array on load.
+  const [schedule, setSchedule] = useState<ScheduleItem[]>(() => {
+    const raw = (quote as { schedule?: unknown }).schedule;
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((r) =>
+        r && typeof r === "object"
+          ? {
+              time: String(
+                (r as { time?: unknown }).time ?? "",
+              ),
+              label: String(
+                (r as { label?: unknown }).label ?? "",
+              ),
+            }
+          : { time: "", label: "" },
+      )
+      .filter((s) => s.label.trim().length > 0);
+  });
+
   // ─── Items state ───────────────────────────────────────────
   const [items, setItems] = useState<EditableItem[]>(() =>
     initialItems
@@ -179,6 +202,7 @@ export function DevisEditor({
       tva_rate: tvaNum,
       commission_rate: commissionRateNum,
       valid_until: validUntil || null,
+      schedule,
       items: items.map((it, i) => ({
         id: it.dbId,
         position: i,
@@ -453,6 +477,29 @@ export function DevisEditor({
                 readOnly={readOnly}
               />
             </Row2>
+          </Card>
+
+          <Card
+            title="Planning de l'événement"
+            action={
+              !readOnly && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSchedule((prev) => [...prev, { time: "", label: "" }])
+                  }
+                  className="inline-flex items-center gap-1 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1 text-[11px] text-neutral-300 hover:border-neutral-700 hover:text-white"
+                >
+                  + Ajouter une étape
+                </button>
+              )
+            }
+          >
+            <ScheduleEditor
+              steps={schedule}
+              onChange={setSchedule}
+              readOnly={readOnly}
+            />
           </Card>
 
           <Card
@@ -1080,6 +1127,72 @@ function LabeledTextarea({
         className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
+  );
+}
+
+/* ─── Run-of-show editor ─────────────────────────────────────────── */
+
+function ScheduleEditor({
+  steps,
+  onChange,
+  readOnly,
+}: {
+  steps: ScheduleItem[];
+  onChange: (next: ScheduleItem[]) => void;
+  readOnly: boolean;
+}) {
+  function patch(idx: number, p: Partial<ScheduleItem>) {
+    onChange(steps.map((s, i) => (i === idx ? { ...s, ...p } : s)));
+  }
+  function remove(idx: number) {
+    onChange(steps.filter((_, i) => i !== idx));
+  }
+
+  if (steps.length === 0) {
+    return (
+      <p className="py-2 text-xs text-neutral-500">
+        {readOnly
+          ? "Aucun planning défini."
+          : "Détaille le déroulé : livraison, arrivée invités, fin de prestation, rangement…"}
+      </p>
+    );
+  }
+
+  return (
+    <ul className="space-y-2">
+      {steps.map((step, idx) => (
+        <li
+          key={idx}
+          className="flex items-center gap-2 rounded-md border border-neutral-800/80 bg-neutral-900/40 px-2 py-1.5"
+        >
+          <input
+            type="time"
+            value={step.time}
+            onChange={(e) => patch(idx, { time: e.target.value })}
+            readOnly={readOnly}
+            className="w-[88px] rounded border border-neutral-800 bg-neutral-900 px-2 py-1 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          />
+          <input
+            type="text"
+            value={step.label}
+            onChange={(e) => patch(idx, { label: e.target.value })}
+            placeholder="Étape (ex. Arrivée invités)"
+            readOnly={readOnly}
+            className="min-w-0 flex-1 rounded border border-neutral-800 bg-neutral-900 px-2 py-1 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          />
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={() => remove(idx)}
+              aria-label="Supprimer l'étape"
+              className="shrink-0 rounded p-1 text-neutral-500 hover:text-red-300"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }
 

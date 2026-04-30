@@ -300,10 +300,44 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
           </div>
 
           <div className="offer-split">
-            <div
-              className="offer-image"
-              style={{ backgroundImage: `url('${DEFAULT_OFFER_IMAGE}')` }}
-            />
+            {(() => {
+              const rawSchedule = (quote as { schedule?: unknown }).schedule;
+              const scheduleItems = Array.isArray(rawSchedule)
+                ? (rawSchedule as Array<{ time?: string; label?: string }>)
+                    .map((s) => ({
+                      time: String(s?.time ?? "").trim(),
+                      label: String(s?.label ?? "").trim(),
+                    }))
+                    .filter((s) => s.label.length > 0)
+                : [];
+              if (scheduleItems.length > 0) {
+                return (
+                  <div className="offer-schedule">
+                    <p className="offer-schedule-eyebrow">Déroulé</p>
+                    <h3 className="offer-schedule-title">
+                      Planning de la prestation
+                    </h3>
+                    <ol className="offer-schedule-list">
+                      {scheduleItems.map((s, i) => (
+                        <li key={i} className="offer-schedule-row">
+                          <span className="offer-schedule-time">
+                            {s.time || "—"}
+                          </span>
+                          <span className="offer-schedule-rule" aria-hidden />
+                          <span className="offer-schedule-label">{s.label}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                );
+              }
+              return (
+                <div
+                  className="offer-image"
+                  style={{ backgroundImage: `url('${DEFAULT_OFFER_IMAGE}')` }}
+                />
+              );
+            })()}
 
             <div className="offer-content">
               {quote.intro && (
