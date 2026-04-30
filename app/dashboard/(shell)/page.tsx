@@ -575,61 +575,62 @@ export default async function DashboardHome() {
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="flex items-center gap-2 truncate text-sm font-medium text-white">
-                          {ev.title}
-                          <StatusBadge status={ev.status} />
-                        </p>
-                        <p className="flex flex-wrap items-center gap-2 text-[11px] text-neutral-500">
+                        <div className="flex items-center gap-2">
+                          <span className="min-w-0 truncate text-sm font-medium text-white">
+                            {ev.title}
+                          </span>
+                          <span className="shrink-0">
+                            <StatusBadge status={ev.status} />
+                          </span>
+                        </div>
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-neutral-500">
                           {ev.start_time && (
-                            <span className="flex items-center gap-1">
+                            <span className="inline-flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               {ev.start_time.slice(0, 5)}
                             </span>
                           )}
-                          <span className="truncate">
+                          <span className="min-w-0 truncate">
                             {clientName(ev.client_id)}
                           </span>
                           {ev.guests_count && (
-                            <span>· {ev.guests_count} pers.</span>
+                            <span className="shrink-0">· {ev.guests_count} pers.</span>
                           )}
                         </p>
                       </div>
                       <div className="shrink-0 text-right text-[11px]">
-                        <div className="flex items-center justify-end gap-2">
-                          <div
-                            className={`inline-flex items-center gap-1 ${
+                        <div className="flex items-center justify-end gap-1.5">
+                          <span
+                            className={`inline-flex items-center gap-0.5 tabular-nums ${
                               noStaff ? "text-amber-300" : "text-neutral-400"
                             }`}
+                            title="Staff assignés"
                           >
                             <Users className="h-3 w-3" />
                             {staffCount}
-                          </div>
-                          <div
-                            className={`inline-flex items-center gap-1 ${
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-0.5 tabular-nums ${
                               noCocktails ? "text-amber-300" : "text-neutral-400"
                             }`}
+                            title="Cocktails au menu"
                           >
                             <Wine className="h-3 w-3" />
                             {cocktailCount}
-                          </div>
-                          <div
-                            className={`inline-flex items-center gap-1 ${
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-0.5 tabular-nums ${
                               noStock ? "text-amber-300" : "text-neutral-400"
                             }`}
+                            title="Produits réservés"
                           >
                             <PackageCheck className="h-3 w-3" />
                             {stockCount}
-                          </div>
+                          </span>
                         </div>
                         {(noStaff || noCocktails || noStock) && (
-                          <p className="text-[10px] text-amber-400/70">
-                            {[
-                              noStaff && "à staffer",
-                              noCocktails && "menu à prévoir",
-                              noStock && "stock à réserver",
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
+                          <p className="mt-0.5 text-[10px] text-amber-400/70">
+                            à compléter
                           </p>
                         )}
                       </div>
@@ -786,16 +787,17 @@ function HeroKpi({
   return (
     <Link
       href={href}
-      className="group rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900"
+      className="group block min-w-0 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900"
     >
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-wide text-neutral-500">
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 truncate text-[10px] uppercase tracking-wide text-neutral-500">
           {label}
         </p>
-        <Icon className="h-3.5 w-3.5 text-neutral-600 transition-colors group-hover:text-neutral-400" />
+        <Icon className="h-3.5 w-3.5 shrink-0 text-neutral-600 transition-colors group-hover:text-neutral-400" />
       </div>
       <p
-        className={`mt-3 font-display text-2xl md:text-3xl leading-tight ${valueCls}`}
+        className={`mt-3 truncate font-display text-xl leading-tight tabular-nums sm:text-2xl xl:text-3xl ${valueCls}`}
+        title={value}
       >
         {value}
       </p>
