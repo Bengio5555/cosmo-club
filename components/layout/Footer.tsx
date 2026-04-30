@@ -78,9 +78,6 @@ export function Footer() {
 
         <div className="mt-16 flex flex-col-reverse items-start justify-between gap-6 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-espresso)]/50 md:flex-row md:items-end">
           <p>© {new Date().getFullYear()} {site.name} — Tous droits réservés</p>
-          <p className="font-display text-[10vw] leading-none text-[color:var(--color-espresso)]/5 md:text-[6vw]">
-            COSMO · CLUB
-          </p>
         </div>
       </div>
     </footer>
