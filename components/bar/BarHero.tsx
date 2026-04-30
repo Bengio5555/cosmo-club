@@ -58,7 +58,11 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
 
         <h1 className="font-display text-[13vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[12vw] md:text-[9vw]">
           <SplitText text="Mixologie" as="span" className="block" delay={0.3} />
-          <span className="block">
+          {/* Negative top margin compensates for the descender breathing
+              room that SplitText adds below each line — keeps the visual
+              gap between the two lines tight even though the wrapper is
+              now slightly taller. */}
+          <span className="-mt-[0.22em] block">
             <SplitText
               text="événementielle."
               as="span"
