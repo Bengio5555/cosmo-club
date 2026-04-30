@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/lib/site";
+import logoSrc from "@/public/brand/cosmo-logo.avif";
 
 /**
  * Hero is now driven by a `heroSrc` prop resolved server-side. Earlier
@@ -62,23 +63,29 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
           <span className="rule" />Cocktails · Barista · Événementiel
         </motion.p>
 
-        {/* Logo wordmark (accessible h1) */}
+        {/* Logo lockup (accessible h1 hidden for SR) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 1.1, ease: [0.19, 1, 0.22, 1] }}
-          className="relative"
+          className="relative flex flex-col items-center"
         >
           <h1 className="sr-only">Cosmo Club Paris</h1>
-          <p
-            aria-hidden
-            className="font-display text-[14vw] font-medium leading-[0.9] tracking-[0.02em] text-[color:var(--color-grenat)] sm:text-[12vw] md:text-[9.5vw] lg:text-[8vw]"
-          >
-            Cosmo <span className="font-accent italic text-[color:var(--color-grenat)]/85">Club</span>
-          </p>
+          <Image
+            src={logoSrc}
+            alt="Cosmo Club Paris"
+            priority
+            unoptimized
+            // The logo is a wide lockup (~304×106 source). We size by
+            // viewport width, capped, so it scales gracefully from
+            // mobile to desktop without ever feeling small or
+            // overwhelming the hero.
+            sizes="(min-width: 1024px) 560px, (min-width: 640px) 460px, 80vw"
+            className="h-auto w-[80vw] max-w-[560px] select-none sm:w-[70vw] md:w-[58vw] lg:w-[42vw]"
+          />
           <div
             aria-hidden
-            className="mx-auto mt-2 h-px w-40 bg-gradient-to-r from-transparent via-[color:var(--color-or-deep)]/80 to-transparent"
+            className="mx-auto mt-4 h-px w-40 bg-gradient-to-r from-transparent via-[color:var(--color-or-deep)]/80 to-transparent"
           />
         </motion.div>
 
