@@ -13,7 +13,9 @@ import { EventEditor } from "./EventEditor";
 import { StaffSection } from "./StaffSection";
 import { StockSection } from "./StockSection";
 import { MenuSection } from "./MenuSection";
+import { MarginSection } from "./MarginSection";
 import { autoStartDueEvents } from "../actions";
+import { computeEventMargin } from "@/lib/server/eventMargin";
 
 type Params = Promise<{ id: string }>;
 
@@ -37,6 +39,9 @@ export default async function EventDetailPage({
   if (!event) {
     notFound();
   }
+
+  // Margin breakdown — runs alongside the other queries.
+  const marginPromise = computeEventMargin(supabase, event.id);
 
   const [
     { data: client },
@@ -230,6 +235,10 @@ export default async function EventDetailPage({
           productOptions={allProducts ?? []}
           reservations={reservations ?? []}
         />
+      </div>
+
+      <div className="px-4 pb-6 md:px-8">
+        <MarginSection margin={await marginPromise} />
       </div>
 
       {(client || quote) && (
