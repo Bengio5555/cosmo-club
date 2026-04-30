@@ -109,15 +109,7 @@ export function ImagesManager({ initialConfig }: { initialConfig: Config }) {
 
     startTransition(async () => {
       const res = await updateImageSlot(selectedPage, selectedKey, patch);
-      if (!res.ok) {
-        flash(
-          res.readOnly
-            ? "Impossible d'écrire le fichier de config (FS read-only en prod). La modification reste affichée localement."
-            : res.error,
-          "err",
-          5000,
-        );
-      }
+      if (!res.ok) flash(res.error, "err", 5000);
     });
   }
 

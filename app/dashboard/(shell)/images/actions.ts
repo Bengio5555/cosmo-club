@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { put, list, del } from "@vercel/blob";
 import { createClient } from "@/lib/supabase/server";
@@ -24,13 +24,15 @@ async function requireAuth() {
 
 /**
  * Server-side equivalent of /api/admin/images-full. Reads
- * `public/images-config.json` (the static slot map) and merges in
- * Vercel Blob uploads. The blob URLs are wrapped in
- * `/api/admin/image-proxy` so the same authenticated reader path
- * everything else uses delivers them.
+ * `public/images-config.json` (the static slot map), merges in
+ * Vercel Blob uploads, then overlays the per-image editorial
+ * overrides stored in `image_overrides` (DB). The blob URLs are
+ * wrapped in `/api/admin/image-proxy` so the same authenticated
+ * reader path everything else uses delivers them.
  */
 export async function loadDashboardImagesConfig(): Promise<Config> {
-  await requireAuth();
+  const user = await requireAuth();
+  void user;
 
   let config: Config = { pages: {} };
   try {
@@ -94,16 +96,39 @@ export async function loadDashboardImagesConfig(): Promise<Config> {
     console.warn("[loadDashboardImagesConfig] blob list failed:", err);
   }
 
+  // Apply DB overrides on top so the admin sees the latest editorial
+  // metadata even though images-config.json is read-only in prod.
+  try {
+    const supabase = await createClient();
+    const { data: overrides } = await supabase
+      .from("image_overrides")
+      .select("page,image_key,title,label,orientation");
+    for (const o of overrides ?? []) {
+      const slot = config.pages[o.page]?.[o.image_key];
+      if (!slot) continue;
+      if (o.title) slot.title = o.title;
+      if (o.label) slot.label = o.label;
+      if (
+        o.orientation === "portrait" ||
+        o.orientation === "landscape" ||
+        o.orientation === "square"
+      ) {
+        slot.orientation = o.orientation;
+      }
+    }
+  } catch (err) {
+    console.warn("[loadDashboardImagesConfig] overrides merge failed:", err);
+  }
+
   return config;
 }
 
 /**
  * Patch one slot's editable metadata (title / orientation / label).
- * The static portion of the config lives in
- * `public/images-config.json`; on Vercel that filesystem is read-only
- * outside of the build, so on prod this returns a structured warning
- * the UI can show — admin still works locally and the metadata can
- * be checked in via git.
+ * Persisted in `image_overrides` (DB). The actual image path stays
+ * driven by static config + Vercel Blob — only the editorial
+ * metadata is overlaid on top, so this works in prod without the
+ * filesystem being writable.
  */
 export async function updateImageSlot(
   page: string,
@@ -112,37 +137,35 @@ export async function updateImageSlot(
 ) {
   await requireAuth();
 
-  let config: Config;
-  try {
-    const raw = await readFile(CONFIG_PATH, "utf-8");
-    config = JSON.parse(raw) as Config;
-  } catch {
-    config = { pages: {} };
+  if (!page || !key) {
+    return { ok: false as const, error: "Slot invalide." };
   }
 
-  if (!config.pages[page]) config.pages[page] = {};
-  const existing = config.pages[page][key] ?? {
-    title: key,
-    path: "",
-    orientation: "landscape",
-    section: page,
-    label: "Événement",
+  const supabase = await createClient();
+  const upsert: {
+    page: string;
+    image_key: string;
+    title?: string | null;
+    label?: string | null;
+    orientation?: string | null;
+    updated_at: string;
+  } = {
+    page,
+    image_key: key,
+    updated_at: new Date().toISOString(),
   };
-  config.pages[page][key] = { ...existing, ...patch } as ImageConfig;
+  if (patch.title !== undefined) upsert.title = patch.title;
+  if (patch.label !== undefined) upsert.label = patch.label;
+  if (patch.orientation !== undefined) upsert.orientation = patch.orientation;
 
-  try {
-    await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), "utf-8");
-  } catch (err) {
-    return {
-      ok: false as const,
-      readOnly: true,
-      error:
-        err instanceof Error ? err.message : "Système de fichiers en lecture seule.",
-    };
-  }
+  const { error } = await supabase
+    .from("image_overrides")
+    .upsert(upsert, { onConflict: "page,image_key" });
+  if (error) return { ok: false as const, error: error.message };
 
   revalidatePath("/dashboard/images");
   revalidatePath("/");
+  revalidatePath("/evenements");
   return { ok: true as const };
 }
 

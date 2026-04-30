@@ -122,6 +122,19 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["invoice_payments"]["Row"]>
         Relationships: []
       }
+      image_overrides: {
+        Row: {
+          image_key: string
+          label: string | null
+          orientation: string | null
+          page: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["image_overrides"]["Row"]> & { page: string; image_key: string }
+        Update: Partial<Database["public"]["Tables"]["image_overrides"]["Row"]>
+        Relationships: []
+      }
       homepage_gallery_selection: {
         Row: {
           created_at: string

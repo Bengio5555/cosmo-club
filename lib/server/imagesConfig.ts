@@ -2,6 +2,7 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { list } from "@vercel/blob";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type ServerImageSlot = {
   path?: string;
@@ -85,6 +86,32 @@ async function loadImagesConfig(): Promise<ServerImageConfig> {
     }
   } catch (err) {
     console.warn("[loadImagesConfig] blob list failed:", err);
+  }
+
+  // Editorial overrides live in `image_overrides` (DB) — see
+  // /dashboard/images. Apply them so public readers (homepage hero,
+  // events gallery labels, etc.) see the latest titles / labels /
+  // orientations even when the static JSON is stale.
+  try {
+    const supabase = createAdminClient();
+    const { data: overrides } = await supabase
+      .from("image_overrides")
+      .select("page,image_key,title,label,orientation");
+    for (const o of overrides ?? []) {
+      const slot = config.pages[o.page]?.[o.image_key];
+      if (!slot) continue;
+      if (o.title) slot.title = o.title;
+      if (o.label) slot.label = o.label;
+      if (
+        o.orientation === "portrait" ||
+        o.orientation === "landscape" ||
+        o.orientation === "square"
+      ) {
+        slot.orientation = o.orientation;
+      }
+    }
+  } catch (err) {
+    console.warn("[loadImagesConfig] overrides merge failed:", err);
   }
 
   return config;
