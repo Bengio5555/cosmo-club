@@ -8,8 +8,14 @@ import { EventsGallery } from "@/components/home/EventsGallery";
 import { ClientsMarquee } from "@/components/marquee/ClientsMarquee";
 import { CtaDevis } from "@/components/home/CtaDevis";
 import { site } from "@/lib/site";
+import heroHomeImg from "@/public/brand/ai/hero-home.png";
+import { getImagePath } from "@/lib/server/imagesConfig";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Resolve the hero URL server-side so the admin-uploaded image (if
+  // any) is in the SSR HTML — no flash from the static fallback.
+  const heroSrc = await getImagePath("home", "hero", heroHomeImg.src);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -35,7 +41,7 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <LiquidHero />
+      <LiquidHero heroSrc={heroSrc} />
       <CocktailMarquee />
       <BaristaMarquee />
       <UniversBento />

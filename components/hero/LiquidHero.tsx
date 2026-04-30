@@ -4,12 +4,16 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/lib/site";
-import heroHomeImg from "@/public/brand/ai/hero-home.png";
-import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-export function LiquidHero() {
-  const config = useImageConfig();
-  const heroSrc = pickPath(config, "home", "hero", heroHomeImg.src);
+/**
+ * Hero is now driven by a `heroSrc` prop resolved server-side. Earlier
+ * we used the client-side `useImageConfig` hook here, which caused the
+ * static fallback PNG to paint first and then visibly swap to the
+ * admin-uploaded image once the hook fetched the config — that's the
+ * "image flashing before the fixed one" the owner reported. Pulling
+ * the URL into SSR removes the swap entirely.
+ */
+export function LiquidHero({ heroSrc }: { heroSrc: string }) {
   const heroUnoptimized = heroSrc.startsWith("/api/");
 
   return (
@@ -17,7 +21,6 @@ export function LiquidHero() {
       {/* ─── Background image ─── */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
-          key={heroSrc}
           src={heroSrc}
           alt=""
           fill
