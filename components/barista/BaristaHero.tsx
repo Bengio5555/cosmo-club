@@ -4,12 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { SplitText } from "@/components/motion/SplitText";
-import heroBaristaImg from "@/public/brand/ai/hero-barista.png";
-import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-export function BaristaHero() {
-  const config = useImageConfig();
-  const heroSrc = pickPath(config, "barista", "hero", heroBaristaImg.src);
+/**
+ * heroSrc is now resolved server-side and passed in as a prop. Same
+ * fix as LiquidHero / BarHero — prevents the visible swap from the
+ * static fallback PNG to the admin-uploaded image on first paint.
+ */
+export function BaristaHero({ heroSrc }: { heroSrc: string }) {
   const heroUnoptimized = heroSrc.startsWith("/api/");
 
   return (
@@ -17,7 +18,6 @@ export function BaristaHero() {
       {/* editorial backdrop */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
-          key={heroSrc}
           src={heroSrc}
           alt=""
           fill

@@ -4,12 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { SplitText } from "@/components/motion/SplitText";
-import heroBarImg from "@/public/brand/ai/hero-bar.png";
-import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-export function BarHero() {
-  const config = useImageConfig();
-  const heroSrc = pickPath(config, "bar-a-cocktails", "hero", heroBarImg.src);
+/**
+ * Backdrop image is now resolved server-side and passed in as a prop
+ * (same fix as LiquidHero). Earlier we read it via the client-only
+ * useImageConfig hook, which painted the static fallback first and
+ * then visibly swapped to the admin-uploaded image when the hook
+ * resolved. SSR-resolving the URL kills the swap.
+ */
+export function BarHero({ heroSrc }: { heroSrc: string }) {
   const heroUnoptimized = heroSrc.startsWith("/api/");
 
   return (
@@ -17,7 +20,6 @@ export function BarHero() {
       {/* backdrop image */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
-          key={heroSrc}
           src={heroSrc}
           alt=""
           fill
