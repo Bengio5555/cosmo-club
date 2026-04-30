@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/lib/site";
-import logoSrc from "@/public/brand/cosmo-logo.avif";
+import logoSrc from "@/public/brand/cosmo-logo.png";
 
 /**
  * Hero is now driven by a `heroSrc` prop resolved server-side. Earlier
@@ -75,11 +75,9 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
             src={logoSrc}
             alt="Cosmo Club Paris"
             priority
-            unoptimized
-            // The logo is a wide lockup (~304×106 source). We size by
-            // viewport width, capped, so it scales gracefully from
-            // mobile to desktop without ever feeling small or
-            // overwhelming the hero.
+            // High-res PNG source — let next/image generate the per-
+            // viewport AVIF/WebP variants so each device gets a crisp
+            // build instead of the same heavy file.
             sizes="(min-width: 1024px) 560px, (min-width: 640px) 460px, 80vw"
             className="h-auto w-[80vw] max-w-[560px] select-none sm:w-[70vw] md:w-[58vw] lg:w-[42vw]"
           />
