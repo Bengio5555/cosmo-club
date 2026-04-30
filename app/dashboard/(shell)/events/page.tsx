@@ -11,11 +11,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { formatDateFR } from "@/lib/format";
+import { formatDateFR, formatEUR } from "@/lib/format";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { NewEventButton } from "./NewEventButton";
 import { CalendarView, gridRange } from "./CalendarView";
 import { autoStartDueEvents } from "./actions";
+import { computeEventMarginsBatch } from "@/lib/server/eventMargin";
 
 type SP = Promise<{
   view?: string;
@@ -273,6 +274,13 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
   }
   const clientsMap = new Map((clientRows ?? []).map((c) => [c.id, c]));
 
+  // Batch margin per event — single round-trip per supporting table,
+  // computed in JS afterwards.
+  const margins = await computeEventMarginsBatch(
+    supabase,
+    (events ?? []).map((e) => ({ id: e.id, quote_id: e.quote_id })),
+  );
+
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -355,6 +363,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                 stillActionable && cocktailCount === 0 && daysUntil <= 15;
               const stockDue =
                 stillActionable && stockCount === 0 && daysUntil <= 10;
+              const margin = margins.get(ev.id);
               return (
                 <li key={ev.id}>
                   <Link
@@ -442,6 +451,40 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                           <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-amber-400/80">
                             <Package className="h-3 w-3" /> à réserver
                           </p>
+                        )}
+                      </div>
+                      <div className="min-w-[64px]">
+                        <p className="text-[10px] uppercase tracking-wide text-neutral-600">
+                          Marge
+                        </p>
+                        {margin && margin.basis !== "none" ? (
+                          <>
+                            <p
+                              className={
+                                margin.marginHt < 0
+                                  ? "text-red-300"
+                                  : margin.marginPct != null && margin.marginPct < 30
+                                    ? "text-amber-300"
+                                    : "text-emerald-300"
+                              }
+                            >
+                              {margin.marginPct != null
+                                ? `${margin.marginPct.toFixed(0)} %`
+                                : "—"}
+                            </p>
+                            <p className="mt-0.5 text-[10px] text-neutral-500">
+                              {margin.marginHt >= 0
+                                ? formatEUR(margin.marginHt)
+                                : `−${formatEUR(-margin.marginHt)}`}
+                              {margin.basis === "projected" && (
+                                <span className="ml-1 italic text-neutral-600">
+                                  estim.
+                                </span>
+                              )}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-neutral-600">—</p>
                         )}
                       </div>
                     </div>

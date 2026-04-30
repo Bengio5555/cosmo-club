@@ -179,3 +179,208 @@ export async function computeEventMargin(
     basis,
   };
 }
+
+/**
+ * Batched margin computation for many events at once. Designed for
+ * the events list page so we don't fan out N individual sub-queries.
+ *
+ * One round-trip per supporting table (quotes, stock_movements,
+ * event_stock, products, event_staff, staff), then everything is
+ * computed in JS from in-memory Maps.
+ *
+ * Returns a `Map<eventId, EventMargin>` so callers can index in O(1)
+ * while iterating their event list.
+ */
+export async function computeEventMarginsBatch(
+  supabase: SupabaseClient<Database>,
+  events: Array<{ id: string; quote_id: string | null }>,
+): Promise<Map<string, EventMargin>> {
+  const result = new Map<string, EventMargin>();
+  if (events.length === 0) return result;
+
+  const eventIds = events.map((e) => e.id);
+  const quoteIds = Array.from(
+    new Set(events.map((e) => e.quote_id).filter((q): q is string => !!q)),
+  );
+
+  // Pull every supporting table in parallel.
+  const [
+    { data: quotes },
+    { data: movements },
+    { data: reservations },
+    { data: assignments },
+  ] = await Promise.all([
+    quoteIds.length
+      ? supabase
+          .from("quotes")
+          .select("id,total_ht,commission_rate")
+          .in("id", quoteIds)
+      : Promise.resolve({ data: [] }),
+    supabase
+      .from("stock_movements")
+      .select("event_id,product_id,qty,direction")
+      .in("event_id", eventIds)
+      .eq("direction", "out"),
+    supabase
+      .from("event_stock")
+      .select("event_id,product_id,qty_reserved")
+      .in("event_id", eventIds),
+    supabase
+      .from("event_staff")
+      .select("event_id,staff_id,hours_planned,hours_done,rate_override")
+      .in("event_id", eventIds),
+  ]);
+
+  const quoteById = new Map(
+    (quotes ?? []).map((q) => [
+      q.id,
+      {
+        total_ht: Number(q.total_ht ?? 0),
+        commission_rate: Number(q.commission_rate ?? 0),
+      },
+    ]),
+  );
+
+  const productIds = new Set<string>();
+  for (const m of movements ?? []) productIds.add(m.product_id);
+  for (const r of reservations ?? []) productIds.add(r.product_id);
+
+  const staffIds = new Set<string>();
+  for (const a of assignments ?? []) staffIds.add(a.staff_id);
+
+  const [{ data: products }, { data: staffRows }] = await Promise.all([
+    productIds.size > 0
+      ? supabase
+          .from("products")
+          .select("id,cost_ht")
+          .in("id", Array.from(productIds))
+      : Promise.resolve({ data: [] }),
+    staffIds.size > 0
+      ? supabase
+          .from("staff")
+          .select("id,hourly_rate")
+          .in("id", Array.from(staffIds))
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const costByProduct = new Map(
+    (products ?? []).map((p) => [p.id, Number(p.cost_ht ?? 0)]),
+  );
+  const rateByStaff = new Map(
+    (staffRows ?? []).map((s) => [s.id, Number(s.hourly_rate ?? 0)]),
+  );
+
+  // Group movements / reservations / assignments by event_id.
+  const movementsByEvent = new Map<
+    string,
+    Array<{ product_id: string; qty: number }>
+  >();
+  for (const m of movements ?? []) {
+    if (!m.event_id) continue;
+    const arr = movementsByEvent.get(m.event_id) ?? [];
+    arr.push({ product_id: m.product_id, qty: Number(m.qty ?? 0) });
+    movementsByEvent.set(m.event_id, arr);
+  }
+  const reservationsByEvent = new Map<
+    string,
+    Array<{ product_id: string; qty_reserved: number }>
+  >();
+  for (const r of reservations ?? []) {
+    const arr = reservationsByEvent.get(r.event_id) ?? [];
+    arr.push({
+      product_id: r.product_id,
+      qty_reserved: Number(r.qty_reserved ?? 0),
+    });
+    reservationsByEvent.set(r.event_id, arr);
+  }
+  const assignmentsByEvent = new Map<
+    string,
+    Array<{
+      staff_id: string;
+      hours_planned: number;
+      hours_done: number | null;
+      rate_override: number | null;
+    }>
+  >();
+  for (const a of assignments ?? []) {
+    const arr = assignmentsByEvent.get(a.event_id) ?? [];
+    arr.push({
+      staff_id: a.staff_id,
+      hours_planned: Number(a.hours_planned ?? 0),
+      hours_done: a.hours_done == null ? null : Number(a.hours_done),
+      rate_override: a.rate_override == null ? null : Number(a.rate_override),
+    });
+    assignmentsByEvent.set(a.event_id, arr);
+  }
+
+  for (const ev of events) {
+    let grossRevenueHt = 0;
+    let commissionRate = 0;
+    if (ev.quote_id) {
+      const q = quoteById.get(ev.quote_id);
+      if (q) {
+        grossRevenueHt = q.total_ht;
+        commissionRate = q.commission_rate;
+      }
+    }
+    const commissionHt =
+      commissionRate > 0
+        ? Math.round((grossRevenueHt * commissionRate) / 100)
+        : 0;
+    const revenueNetHt = Math.round(grossRevenueHt - commissionHt);
+
+    const evMovements = movementsByEvent.get(ev.id) ?? [];
+    const evReservations = reservationsByEvent.get(ev.id) ?? [];
+    const usingActual = evMovements.length > 0;
+    const consumption = usingActual
+      ? evMovements
+      : evReservations.map((r) => ({
+          product_id: r.product_id,
+          qty: r.qty_reserved,
+        }));
+
+    let stockCostHt = 0;
+    for (const c of consumption) {
+      stockCostHt += c.qty * (costByProduct.get(c.product_id) ?? 0);
+    }
+    stockCostHt = Math.round(stockCostHt * 100) / 100;
+
+    let staffCostHt = 0;
+    for (const a of assignmentsByEvent.get(ev.id) ?? []) {
+      const hours = a.hours_done ?? a.hours_planned;
+      const rate =
+        a.rate_override != null
+          ? a.rate_override
+          : (rateByStaff.get(a.staff_id) ?? 0);
+      staffCostHt += hours * rate;
+    }
+    staffCostHt = Math.round(staffCostHt * 100) / 100;
+
+    const marginHt =
+      Math.round((revenueNetHt - stockCostHt - staffCostHt) * 100) / 100;
+    const marginPct =
+      revenueNetHt > 0
+        ? Math.round((marginHt / revenueNetHt) * 1000) / 10
+        : null;
+
+    const basis: EventMargin["basis"] =
+      !ev.quote_id && consumption.length === 0
+        ? "none"
+        : usingActual
+          ? "actual"
+          : "projected";
+
+    result.set(ev.id, {
+      revenueNetHt,
+      grossRevenueHt,
+      commissionHt,
+      stockCostHt,
+      staffCostHt,
+      marginHt,
+      marginPct,
+      basis,
+    });
+  }
+
+  return result;
+}
