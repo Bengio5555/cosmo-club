@@ -49,7 +49,9 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
         </p>
       </div>
       <div className="pointer-events-none absolute inset-y-0 right-6 hidden items-center md:flex">
-        <p className="eyebrow [writing-mode:vertical-rl]">Édition&nbsp;MMXXVI</p>
+        <p className="eyebrow [writing-mode:vertical-rl]">
+          Édition&nbsp;{new Date().getFullYear()}
+        </p>
       </div>
 
       {/* ─── Content ─── */}
