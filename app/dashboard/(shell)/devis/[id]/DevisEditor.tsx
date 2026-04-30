@@ -353,7 +353,7 @@ export function DevisEditor({
   const tvaDisabled = readOnly;
 
   return (
-    <div className="px-4 py-6 md:px-8 md:py-8">
+    <div className="min-w-0 max-w-full px-4 py-6 md:px-8 md:py-8">
       <TopBar
         quote={quote}
         dirty={isDirty}
@@ -1089,12 +1089,14 @@ function SectionBlock({
   const sectionTotal = items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0);
 
   return (
-    <div className="rounded-lg border border-neutral-800/80 bg-neutral-900/40">
-      <div className="flex items-center justify-between border-b border-neutral-800/60 px-3 py-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-300">
+    <div className="overflow-hidden rounded-lg border border-neutral-800/80 bg-neutral-900/40">
+      <div className="flex items-center justify-between gap-3 border-b border-neutral-800/60 px-3 py-2">
+        <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-neutral-300">
           {name}
         </p>
-        <p className="text-xs text-neutral-500">{formatEUR(sectionTotal)}</p>
+        <p className="shrink-0 text-xs tabular-nums text-neutral-500">
+          {formatEUR(sectionTotal)}
+        </p>
       </div>
       <div className="divide-y divide-neutral-900">
         {items.map((it) => (
@@ -1141,8 +1143,8 @@ function ItemRow({
 }) {
   const total = item.qty * item.unit_price_ht;
   return (
-    <div className="grid gap-2 px-3 py-2.5 md:grid-cols-[auto_minmax(0,1fr)_72px_88px_100px_24px] md:items-start md:gap-3">
-      <div className="mt-2 hidden text-neutral-600 md:block">
+    <div className="grid gap-2 px-3 py-2.5 md:grid-cols-[minmax(0,1fr)_56px_60px_84px_72px] md:items-start md:gap-2 lg:grid-cols-[16px_minmax(0,1fr)_60px_64px_92px_88px] lg:gap-3">
+      <div className="mt-2 hidden text-neutral-600 lg:block">
         <GripVertical className="h-3.5 w-3.5" />
       </div>
 
