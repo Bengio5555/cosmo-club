@@ -125,7 +125,7 @@ function LatteCard({
 
       <p
         className="relative mt-3 font-accent text-lg italic md:text-xl"
-        style={{ color: latte.hue.soft }}
+        style={{ color: latte.hue.primary }}
       >
         « {latte.tasting} »
       </p>
