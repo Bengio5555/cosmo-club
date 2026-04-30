@@ -142,8 +142,12 @@ function LatteCard({
             key={n}
             className="rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em]"
             style={{
+              // The "soft" pastels were nearly invisible on the cream
+              // background. Using the saturated `primary` hue gives
+              // each latte its real signature colour and proper
+              // contrast on the page bg.
               borderColor: `${latte.hue.primary}66`,
-              color: latte.hue.soft,
+              color: latte.hue.primary,
             }}
           >
             {n}
