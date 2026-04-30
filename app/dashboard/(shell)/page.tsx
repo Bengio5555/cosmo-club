@@ -312,7 +312,7 @@ export default async function DashboardHome() {
   const topUnpaid = invoicesWithRemaining.slice(0, 5);
 
   return (
-    <div className="px-4 py-6 md:px-8 md:py-8">
+    <div className="min-w-0 max-w-full px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6">
         <p className="text-[11px] uppercase tracking-widest text-neutral-500">
           {new Date().toLocaleDateString("fr-FR", {
@@ -438,7 +438,7 @@ export default async function DashboardHome() {
       {/* ─── Two-column main body ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Factures à encaisser */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
@@ -524,7 +524,7 @@ export default async function DashboardHome() {
         </section>
 
         {/* Prochains événements (7 jours) */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
@@ -646,7 +646,7 @@ export default async function DashboardHome() {
       {/* ─── Activity feeds: leads + movements ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Demandes récentes */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
               <Inbox className="h-3.5 w-3.5 text-neutral-500" />
@@ -691,7 +691,7 @@ export default async function DashboardHome() {
         </section>
 
         {/* Mouvements stock */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
               <Package className="h-3.5 w-3.5 text-neutral-500" />
