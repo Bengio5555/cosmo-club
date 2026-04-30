@@ -113,7 +113,7 @@ function LatteCard({
         <p className="eyebrow">{latte.num} · {latte.origin}</p>
         <span
           className="font-display text-xs tracking-[0.3em]"
-          style={{ color: latte.hue.soft }}
+          style={{ color: latte.hue.primary }}
         >
           Hot · Iced
         </span>
