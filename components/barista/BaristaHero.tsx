@@ -54,7 +54,9 @@ export function BaristaHero({ heroSrc }: { heroSrc: string }) {
 
         <h1 className="font-display text-[13vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[12vw] md:text-[9vw]">
           <SplitText text="Latte," as="span" className="block" delay={0.3} />
-          <span className="block">
+          {/* Compensates the descender breathing room SplitText now
+              reserves below each line — keeps the two-line gap tight. */}
+          <span className="-mt-[0.22em] block">
             <SplitText
               text="d'exception."
               as="span"
