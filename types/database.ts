@@ -292,6 +292,7 @@ export type Database = {
           address_line1: string | null
           address_line2: string | null
           bic: string | null
+          calendar_token: string | null
           city: string | null
           company_name: string | null
           country: string | null

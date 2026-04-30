@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "./SettingsForm";
+import { CalendarSection } from "./CalendarSection";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -14,7 +15,12 @@ export default async function SettingsPage() {
         </p>
       </header>
 
-      <SettingsForm initial={data ?? null} />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <SettingsForm initial={data ?? null} />
+        <div className="space-y-5">
+          <CalendarSection initialToken={data?.calendar_token ?? null} />
+        </div>
+      </div>
     </div>
   );
 }
