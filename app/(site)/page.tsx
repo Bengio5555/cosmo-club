@@ -11,13 +11,15 @@ import { site } from "@/lib/site";
 import heroHomeImg from "@/public/brand/ai/hero-home.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
 import { getPublicClientLogos } from "@/lib/server/clientLogos";
+import { getHomeGalleryTiles } from "@/lib/server/homeGallery";
 
 export default async function HomePage() {
   // Resolve the hero URL server-side so the admin-uploaded image (if
   // any) is in the SSR HTML — no flash from the static fallback.
-  const [heroSrc, clientLogos] = await Promise.all([
+  const [heroSrc, clientLogos, galleryTiles] = await Promise.all([
     getImagePath("home", "hero", heroHomeImg.src),
     getPublicClientLogos(),
+    getHomeGalleryTiles(),
   ]);
 
   const jsonLd = {
@@ -51,7 +53,7 @@ export default async function HomePage() {
       <UniversBento />
       <ConceptManifesto />
       <Personnalisation />
-      <EventsGallery />
+      <EventsGallery tiles={galleryTiles} showSeeMore />
       <ClientsMarquee logos={clientLogos} />
       <CtaDevis />
     </>

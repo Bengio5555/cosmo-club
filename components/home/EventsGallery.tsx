@@ -8,7 +8,6 @@ import galleryEventImg from "@/public/brand/ai/gallery-event.png";
 import heroBarImg from "@/public/brand/ai/hero-bar.png";
 import bentoBarImg from "@/public/brand/ai/bento-bar.png";
 import bentoBaristaImg from "@/public/brand/ai/bento-barista.png";
-import { useImageConfig } from "@/lib/hooks/useImageConfig";
 import { Lightbox } from "@/components/gallery/Lightbox";
 
 type Tile = {
@@ -17,6 +16,8 @@ type Tile = {
   label: string;
   object: string;
 };
+
+const POSITIONS = ["center", "top", "bottom", "left", "right"];
 
 const defaultTiles: Tile[] = [
   { h: 520, src: galleryEventImg, label: "Mariage", object: "center" },
@@ -29,23 +30,30 @@ const defaultTiles: Tile[] = [
   { h: 360, src: bentoBaristaImg, label: "Privé", object: "center" },
 ];
 
-export function EventsGallery() {
-  const config = useImageConfig();
+/**
+ * Tiles can be resolved server-side and passed in via the
+ * `tiles` prop — preferred path, kills the client-only flash from
+ * the legacy useImageConfig hook. The legacy fallback below stays
+ * around for callers that haven't been migrated yet.
+ */
+export function EventsGallery({
+  tiles: tilesProp,
+  showSeeMore = false,
+}: {
+  tiles?: { url: string; label: string }[];
+  /** Show the "Voir tous les événements" link in the header. */
+  showSeeMore?: boolean;
+} = {}) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const tiles = useMemo<Tile[]>(() => {
-    const evenementImages = config?.pages?.evenements || {};
-    const entries = Object.values(evenementImages);
-    if (entries.length === 0) return defaultTiles;
-    const positions = ["center", "top", "bottom", "left", "right"];
-    return entries
-      .filter((img) => typeof img.path === "string")
-      .map((img, i) => ({
-        h: 380 + (i % 3) * 60,
-        src: img.path as string,
-        label: img.label || img.title || "Événement",
-        object: positions[i % positions.length],
-      }));
-  }, [config]);
+    if (!tilesProp || tilesProp.length === 0) return defaultTiles;
+    return tilesProp.map((t, i) => ({
+      h: 380 + (i % 3) * 60,
+      src: t.url,
+      label: t.label,
+      object: POSITIONS[i % POSITIONS.length],
+    }));
+  }, [tilesProp]);
 
   return (
     <section className="relative bg-[color:var(--color-cream-paper)] py-20 text-[color:var(--color-ink-text)] md:py-28">
@@ -63,13 +71,15 @@ export function EventsGallery() {
               </span>
             </h2>
           </div>
-          <Link
-            href="/evenements"
-            className="group mt-6 inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-grenat)] hover:text-[color:var(--color-grenat-glow)] md:mt-0"
-          >
-            Voir tous les événements
-            <span className="h-px w-8 bg-current transition-all duration-500 group-hover:w-12" />
-          </Link>
+          {showSeeMore && (
+            <Link
+              href="/evenements"
+              className="group mt-6 inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-grenat)] hover:text-[color:var(--color-grenat-glow)] md:mt-0"
+            >
+              Voir tous les événements
+              <span className="h-px w-8 bg-current transition-all duration-500 group-hover:w-12" />
+            </Link>
+          )}
         </Reveal>
 
         <div className="columns-2 gap-4 md:columns-3 lg:columns-4 lg:gap-6">

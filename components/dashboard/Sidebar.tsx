@@ -53,6 +53,7 @@ const nav: { section: string; items: NavItem[] }[] = [
     section: "Contenu",
     items: [
       { href: "/dashboard/images", label: "Images site", icon: ImageIcon },
+      { href: "/dashboard/home-gallery", label: "Galerie home", icon: ImageIcon },
       { href: "/dashboard/logos", label: "Logos clients", icon: Building2 },
       { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
     ],

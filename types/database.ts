@@ -122,6 +122,16 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["invoice_payments"]["Row"]>
         Relationships: []
       }
+      homepage_gallery_selection: {
+        Row: {
+          created_at: string
+          image_key: string
+          position: number
+        }
+        Insert: Partial<Database["public"]["Tables"]["homepage_gallery_selection"]["Row"]> & { image_key: string }
+        Update: Partial<Database["public"]["Tables"]["homepage_gallery_selection"]["Row"]>
+        Relationships: []
+      }
       client_logos: {
         Row: {
           archived: boolean
