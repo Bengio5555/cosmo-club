@@ -190,7 +190,7 @@ async function sendAcceptanceEmails(o: {
     supabase
       .from("quote_items")
       .select(
-        "section,title,description,qty,unit,unit_price_ht,line_total_ht,position",
+        "section,title,description,qty,unit,unit_price_ht,line_total_ht,discount_ht,position",
       )
       .eq("quote_id", o.quoteId)
       .order("position", { ascending: true }),
@@ -249,6 +249,9 @@ async function sendAcceptanceEmails(o: {
           // document matches what the client saw on the public page.
           const rate = Number(quote.commission_rate ?? 0);
           const factor = rate > 0 ? 100 / (100 - rate) : 1;
+          const discount = Number(
+            (it as { discount_ht?: number | null }).discount_ht ?? 0,
+          );
           return {
             section: it.section,
             title: it.title,
@@ -257,6 +260,7 @@ async function sendAcceptanceEmails(o: {
             unit: it.unit,
             unit_price_ht: Number(it.unit_price_ht ?? 0) * factor,
             line_total_ht: Number(it.line_total_ht ?? 0) * factor,
+            discount_ht: discount * factor,
           };
         }),
         client: client

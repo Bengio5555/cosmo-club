@@ -44,6 +44,7 @@ export type SignedQuoteData = {
     unit: string | null;
     unit_price_ht: number;
     line_total_ht: number;
+    discount_ht?: number;
   }>;
   client: {
     company_name: string | null;
@@ -453,6 +454,11 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
                   {it.description && (
                     <Text style={s.cellSub}>{it.description}</Text>
                   )}
+                  {it.discount_ht && it.discount_ht > 0 ? (
+                    <Text style={[s.cellSub, { color: c.grenat }]}>
+                      Remise commerciale : −{formatEUR(it.discount_ht)}
+                    </Text>
+                  ) : null}
                 </View>
                 <Text style={[s.cell, s.colQty]}>
                   {it.qty}

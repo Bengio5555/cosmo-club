@@ -881,3 +881,19 @@ html {
     color: #000 !important;
   }
 }
+
+/* Line-level discount: small cream-on-blood cue under the title and a
+   strike-through on the gross subtotal in the right column. */
+.price-table .line-discount {
+  display: block;
+  margin-top: 2px;
+  color: #b88a2a;
+  font-style: italic;
+  font-size: 0.78rem;
+}
+.price-table .line-strike {
+  display: block;
+  font-size: 0.82em;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: line-through;
+}

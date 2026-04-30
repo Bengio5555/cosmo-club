@@ -43,6 +43,7 @@ type EditableItem = {
   qty: number;
   unit: string;
   unit_price_ht: number;
+  discount_ht: number;
 };
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
@@ -116,12 +117,24 @@ export function DevisEditor({
         qty: Number(i.qty ?? 1),
         unit: i.unit ?? "unité",
         unit_price_ht: Number(i.unit_price_ht ?? 0),
+        discount_ht: Number(i.discount_ht ?? 0),
       })),
   );
 
   // ─── Live totals ───────────────────────────────────────────
+  // Each line: max(0, qty × unit_price_ht − discount_ht). Mirrors the
+  // generated-column formula in Postgres so what the editor shows
+  // matches what the DB will compute on save.
   const subtotalHt = useMemo(
-    () => round2(items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0)),
+    () =>
+      round2(
+        items.reduce(
+          (s, it) =>
+            s +
+            Math.max(0, it.qty * it.unit_price_ht - (it.discount_ht ?? 0)),
+          0,
+        ),
+      ),
     [items],
   );
   const tvaNum = Number(tvaRate) || 0;
@@ -175,6 +188,7 @@ export function DevisEditor({
         qty: it.qty,
         unit: it.unit.trim() || null,
         unit_price_ht: it.unit_price_ht,
+        discount_ht: it.discount_ht ?? 0,
       })),
     };
   }
@@ -295,6 +309,7 @@ export function DevisEditor({
         qty: 1,
         unit: "unité",
         unit_price_ht: 0,
+        discount_ht: 0,
       },
     ]);
   }
@@ -328,6 +343,7 @@ export function DevisEditor({
         qty: 1,
         unit: p.unit ?? "unité",
         unit_price_ht: Number(p.unit_price_ht) || 0,
+        discount_ht: 0,
       })),
     ]);
   }
@@ -1141,7 +1157,9 @@ function ItemRow({
   onPatch: (patch: Partial<EditableItem>) => void;
   onRemove: () => void;
 }) {
-  const total = item.qty * item.unit_price_ht;
+  const subtotal = item.qty * item.unit_price_ht;
+  const discount = Number(item.discount_ht ?? 0);
+  const total = Math.max(0, subtotal - discount);
   return (
     <div className="grid gap-2 px-3 py-2.5 md:grid-cols-[minmax(0,1fr)_56px_60px_84px_72px] md:items-start md:gap-2 lg:grid-cols-[16px_minmax(0,1fr)_60px_64px_92px_88px] lg:gap-3">
       <div className="mt-2 hidden text-neutral-600 lg:block">
@@ -1165,6 +1183,26 @@ function ItemRow({
           readOnly={readOnly}
           className="w-full resize-y rounded-md border border-neutral-800/70 bg-neutral-900/60 px-2.5 py-1.5 text-xs text-neutral-300 placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
+        <label
+          className={`inline-flex items-center gap-1.5 text-[11px] ${
+            discount > 0 ? "text-amber-300" : "text-neutral-500"
+          }`}
+        >
+          <span className="uppercase tracking-wide">Remise</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={discount === 0 ? "" : discount}
+            placeholder="0"
+            onChange={(e) =>
+              onPatch({ discount_ht: Number(e.target.value) || 0 })
+            }
+            readOnly={readOnly}
+            className="w-20 rounded border border-neutral-800 bg-neutral-900 px-1.5 py-0.5 text-right text-[11px] text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          />
+          <span>€ HT</span>
+        </label>
       </div>
 
       <input
@@ -1200,6 +1238,11 @@ function ItemRow({
         <span className="text-xs font-medium text-neutral-300 md:text-[11px]">
           {formatEUR(total)}
         </span>
+        {discount > 0 && (
+          <span className="text-[10px] text-amber-300/80" title="Remise appliquée">
+            −{formatEUR(discount)}
+          </span>
+        )}
         {!readOnly && (
           <button
             type="button"

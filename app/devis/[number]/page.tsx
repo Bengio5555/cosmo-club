@@ -355,21 +355,47 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
               <tr key={`cat-${sectionName}`} className="category-row">
                 <td colSpan={4}>{sectionName}</td>
               </tr>,
-              ...(sectionItems ?? []).map((it) => (
-                <tr key={it.id}>
-                  <td>
-                    <strong>{it.title}</strong>
-                    {it.description && <small>{it.description}</small>}
-                  </td>
-                  <td>{`${it.qty}${it.unit ? ` ${it.unit}` : ""}`}</td>
-                  <td>
-                    {formatEUR(round2((it.unit_price_ht ?? 0) * grossUp))}
-                  </td>
-                  <td>
-                    {formatEUR(round2((it.line_total_ht ?? 0) * grossUp))}
-                  </td>
-                </tr>
-              )),
+              ...(sectionItems ?? []).map((it) => {
+                const discount = Number(it.discount_ht ?? 0);
+                const grossSubtotal = round2(
+                  Number(it.qty ?? 0) *
+                    Number(it.unit_price_ht ?? 0) *
+                    grossUp,
+                );
+                const grossDiscount = round2(discount * grossUp);
+                const grossLineTotal = round2(
+                  Number(it.line_total_ht ?? 0) * grossUp,
+                );
+                return (
+                  <tr key={it.id}>
+                    <td>
+                      <strong>{it.title}</strong>
+                      {it.description && <small>{it.description}</small>}
+                      {discount > 0 && (
+                        <small className="line-discount">
+                          Remise commerciale&nbsp;: −{formatEUR(grossDiscount)}
+                        </small>
+                      )}
+                    </td>
+                    <td>{`${it.qty}${it.unit ? ` ${it.unit}` : ""}`}</td>
+                    <td>
+                      {formatEUR(round2((it.unit_price_ht ?? 0) * grossUp))}
+                    </td>
+                    <td>
+                      {discount > 0 ? (
+                        <>
+                          <span className="line-strike">
+                            {formatEUR(grossSubtotal)}
+                          </span>
+                          <strong>{formatEUR(grossLineTotal)}</strong>
+                        </>
+                      ) : (
+                        formatEUR(grossLineTotal)
+                      )}
+                    </td>
+                  </tr>
+                );
+              }),
             ])}
           </tbody>
         </table>

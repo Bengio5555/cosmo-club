@@ -126,6 +126,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          discount_ht: number
           id: string
           invoice_id: string
           line_total_ht: number | null
@@ -236,6 +237,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          discount_ht: number
           id: string
           line_total_ht: number | null
           position: number
