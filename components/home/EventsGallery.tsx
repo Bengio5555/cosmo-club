@@ -103,7 +103,7 @@ export function EventsGallery({
               />
               {/* Tag visible always */}
               <div className="pointer-events-none absolute inset-x-4 top-4 flex items-start justify-between">
-                <span className="eyebrow text-[color:var(--color-grenat)] bg-[color:var(--color-espresso)]/50 backdrop-blur-sm px-2 py-1 rounded-sm">
+                <span className="eyebrow text-[color:var(--color-bone)] bg-[color:var(--color-espresso)]/55 backdrop-blur-sm px-2 py-1 rounded-sm">
                   {tile.label}
                 </span>
               </div>
