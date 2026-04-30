@@ -44,7 +44,7 @@ export function SplitText({
 
   return (
     <Comp
-      className={cn("inline-block overflow-x-visible overflow-y-hidden align-bottom", className)}
+      className={cn("inline-block overflow-x-visible overflow-y-hidden align-bottom pb-[0.22em]", className)}
       variants={container}
       initial="hidden"
       animate="show"
@@ -54,7 +54,7 @@ export function SplitText({
         /^\s+$/.test(part) ? (
           <span key={i}> </span>
         ) : (
-          <span key={i} className="inline-block overflow-x-visible overflow-y-hidden align-bottom">
+          <span key={i} className="inline-block overflow-x-visible overflow-y-hidden align-bottom pb-[0.22em]">
             <motion.span className="inline-block" variants={child}>
               {part}
             </motion.span>
