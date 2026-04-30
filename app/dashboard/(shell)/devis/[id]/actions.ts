@@ -226,13 +226,37 @@ export async function setQuoteStatus(
 }
 
 /**
+ * Basic email validation — just enough to skip junk before handing it
+ * to Resend (which rejects malformed addresses with a 422 anyway).
+ */
+function parseCcEmails(input: string[] | undefined): string[] {
+  if (!input || input.length === 0) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of input) {
+    const e = String(raw ?? "").trim().toLowerCase();
+    if (!e) continue;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) continue;
+    if (seen.has(e)) continue;
+    seen.add(e);
+    out.push(e);
+  }
+  return out.slice(0, 5); // hard cap — sane upper bound
+}
+
+/**
  * Figer + envoyer le devis.
  *  - Transition status: brouillon → envoye (+ sent_at)
  *  - Si RESEND_API_KEY configuré et client.email présent : envoie l'email
- *    avec le lien vers la plaquette
+ *    avec le lien vers la plaquette. Une liste optionnelle d'adresses CC
+ *    peut être passée pour transmettre le devis à des tiers (apporteur,
+ *    chef de projet client, etc.).
  *  - Retourne emailed=true si l'email est parti, false sinon (avec warning)
  */
-export async function sendDevis(id: string) {
+export async function sendDevis(
+  id: string,
+  opts?: { cc?: string[] },
+) {
   const supabase = await createClient();
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
@@ -298,9 +322,11 @@ export async function sendDevis(id: string) {
     const companyName =
       (settings as { company_name?: string | null } | null)?.company_name || "Cosmo Club Paris";
 
+    const cc = parseCcEmails(opts?.cc);
     await resend.emails.send({
       from: `${companyName} <${fromEmail}>`,
       to: [client.email],
+      cc: cc.length > 0 ? cc : undefined,
       subject: `Votre devis ${quote.number} — ${companyName}`,
       html: buildEmailHtml({
         firstName,
@@ -310,7 +336,7 @@ export async function sendDevis(id: string) {
         sender: companyName,
       }),
     });
-    return { ok: true as const, emailed: true };
+    return { ok: true as const, emailed: true, ccCount: cc.length };
   } catch (err) {
     console.error("[sendDevis] resend error:", err);
     return {

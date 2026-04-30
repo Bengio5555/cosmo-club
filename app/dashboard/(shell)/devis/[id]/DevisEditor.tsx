@@ -67,9 +67,11 @@ function round2(n: number) {
 export function DevisEditor({
   quote,
   items: initialItems,
+  clientEmail,
 }: {
   quote: Quote;
   items: QuoteItem[];
+  clientEmail?: string | null;
 }) {
   const router = useRouter();
   const readOnly = quote.status !== "brouillon";
@@ -209,16 +211,29 @@ export function DevisEditor({
     });
   }
 
-  function send() {
+  // Two-step send: clicking "Figer & envoyer" opens a small modal so the
+  // owner can append CC addresses (apporteur, chef de projet client…).
+  // The actual server call still happens in `confirmSend`.
+  const [sendOpen, setSendOpen] = useState(false);
+
+  function confirmSend(cc: string[]) {
     startTransition(async () => {
       setMsg(null);
-      const res = await sendDevis(quote.id);
+      const res = await sendDevis(quote.id, { cc });
       if (!res.ok) {
         setMsg({ kind: "err", text: res.error });
         return;
       }
+      setSendOpen(false);
       if (res.emailed) {
-        setMsg({ kind: "ok", text: "Devis envoyé par email ✓" });
+        const ccCount = res.ccCount ?? 0;
+        setMsg({
+          kind: "ok",
+          text:
+            ccCount > 0
+              ? `Devis envoyé (+${ccCount} en copie) ✓`
+              : "Devis envoyé par email ✓",
+        });
       } else {
         setMsg({
           kind: "ok",
@@ -344,7 +359,7 @@ export function DevisEditor({
         dirty={isDirty}
         pending={pending}
         onSave={save}
-        onSend={send}
+        onSend={() => setSendOpen(true)}
         onAccept={() => transition("accepte")}
         onRefuse={() => transition("refuse")}
         onReopen={() => transition("brouillon")}
@@ -599,6 +614,158 @@ export function DevisEditor({
             </ul>
           </div>
         </aside>
+      </div>
+
+      {sendOpen && (
+        <SendDevisDialog
+          quoteNumber={quote.number}
+          clientEmail={clientEmail ?? null}
+          pending={pending}
+          onCancel={() => setSendOpen(false)}
+          onConfirm={confirmSend}
+        />
+      )}
+    </div>
+  );
+}
+
+function SendDevisDialog({
+  quoteNumber,
+  clientEmail,
+  pending,
+  onCancel,
+  onConfirm,
+}: {
+  quoteNumber: string;
+  clientEmail: string | null;
+  pending: boolean;
+  onCancel: () => void;
+  onConfirm: (cc: string[]) => void;
+}) {
+  const [ccRaw, setCcRaw] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && !pending) onCancel();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onCancel, pending]);
+
+  function submit() {
+    setErr(null);
+    // Comma- or whitespace-separated, validated server-side too.
+    const parts = ccRaw
+      .split(/[\s,;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const invalid = parts.filter(
+      (p) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p),
+    );
+    if (invalid.length > 0) {
+      setErr(`Adresse(s) invalide(s) : ${invalid.join(", ")}`);
+      return;
+    }
+    if (parts.length > 5) {
+      setErr("Maximum 5 adresses en copie.");
+      return;
+    }
+    onConfirm(parts);
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Envoyer le devis ${quoteNumber}`}
+      onClick={() => !pending && onCancel()}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-neutral-900 px-5 py-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              Figer & envoyer
+            </p>
+            <h2 className="mt-1 font-display text-lg text-white">
+              Devis {quoteNumber}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            aria-label="Fermer"
+            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white disabled:opacity-50"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="space-y-4 px-5 py-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              Destinataire principal
+            </p>
+            <p className="mt-1 text-sm text-neutral-200">
+              {clientEmail ? (
+                clientEmail
+              ) : (
+                <span className="text-amber-300">
+                  Aucun email client renseigné — le devis sera figé mais
+                  pas envoyé.
+                </span>
+              )}
+            </p>
+          </div>
+
+          <label className="block">
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+              Copie (optionnel)
+            </span>
+            <input
+              type="text"
+              value={ccRaw}
+              onChange={(e) => setCcRaw(e.target.value)}
+              placeholder="apporteur@agence.com, autre@client.com"
+              autoFocus
+              className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+            />
+            <span className="mt-1 block text-[10px] text-neutral-500">
+              Sépare plusieurs adresses par une virgule. Max 5.
+            </span>
+          </label>
+
+          {err && (
+            <p className="rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+              {err}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-neutral-900 px-5 py-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700 disabled:opacity-50"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:opacity-60"
+          >
+            {pending && <Loader2 className="h-3 w-3 animate-spin" />}
+            <Send className="h-3 w-3" /> Confirmer & envoyer
+          </button>
+        </div>
       </div>
     </div>
   );

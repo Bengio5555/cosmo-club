@@ -38,7 +38,11 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
         </Link>
       </div>
 
-      <DevisEditor quote={quote} items={items ?? []} />
+      <DevisEditor
+        quote={quote}
+        items={items ?? []}
+        clientEmail={client?.email ?? null}
+      />
 
       {client && (
         <div className="border-t border-neutral-900 px-4 py-6 md:px-8">
