@@ -1,61 +1,31 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 import { site } from "@/lib/site";
 import heroHomeImg from "@/public/brand/ai/hero-home.png";
 import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
 export function LiquidHero() {
-  const reduce = useReducedMotion();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const config = useImageConfig();
   const heroSrc = pickPath(config, "home", "hero", heroHomeImg.src);
   const heroUnoptimized = heroSrc.startsWith("/api/");
 
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const tryPlay = () => {
-      v.play().catch(() => {
-        // autoplay blocked; remain paused, fallback poster is visible
-      });
-    };
-    if (v.readyState >= 3) tryPlay();
-    else v.addEventListener("canplay", tryPlay, { once: true });
-    return () => v.removeEventListener("canplay", tryPlay);
-  }, []);
-
   return (
     <section className="relative isolate h-[100svh] min-h-[680px] w-full overflow-hidden bg-[color:var(--color-cream-paper)]">
-      {/* ─── Background video (with photo fallback) ─── */}
+      {/* ─── Background image ─── */}
       <div aria-hidden className="absolute inset-0 -z-20">
-        {reduce ? (
-          <Image
-            key={heroSrc}
-            src={heroSrc}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            unoptimized={heroUnoptimized}
-            className="object-cover object-center"
-          />
-        ) : (
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-            poster={heroSrc}
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          >
-            <source src="/brand/ai/hero-home.mp4" type="video/mp4" />
-          </video>
-        )}
+        <Image
+          key={heroSrc}
+          src={heroSrc}
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          unoptimized={heroUnoptimized}
+          className="object-cover object-center"
+        />
       </div>
 
       {/* Gradient overlay for text readability */}
