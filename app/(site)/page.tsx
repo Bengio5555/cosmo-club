@@ -10,11 +10,15 @@ import { CtaDevis } from "@/components/home/CtaDevis";
 import { site } from "@/lib/site";
 import heroHomeImg from "@/public/brand/ai/hero-home.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
+import { getPublicClientLogos } from "@/lib/server/clientLogos";
 
 export default async function HomePage() {
   // Resolve the hero URL server-side so the admin-uploaded image (if
   // any) is in the SSR HTML — no flash from the static fallback.
-  const heroSrc = await getImagePath("home", "hero", heroHomeImg.src);
+  const [heroSrc, clientLogos] = await Promise.all([
+    getImagePath("home", "hero", heroHomeImg.src),
+    getPublicClientLogos(),
+  ]);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -48,7 +52,7 @@ export default async function HomePage() {
       <ConceptManifesto />
       <Personnalisation />
       <EventsGallery />
-      <ClientsMarquee />
+      <ClientsMarquee logos={clientLogos} />
       <CtaDevis />
     </>
   );

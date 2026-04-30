@@ -122,6 +122,20 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["invoice_payments"]["Row"]>
         Relationships: []
       }
+      client_logos: {
+        Row: {
+          archived: boolean
+          blob_url: string
+          created_at: string
+          id: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["client_logos"]["Row"]> & { name: string; blob_url: string }
+        Update: Partial<Database["public"]["Tables"]["client_logos"]["Row"]>
+        Relationships: []
+      }
       invoice_items: {
         Row: {
           created_at: string

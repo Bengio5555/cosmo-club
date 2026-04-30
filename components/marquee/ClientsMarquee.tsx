@@ -1,4 +1,6 @@
-const clients = [
+import type { PublicClientLogo } from "@/lib/server/clientLogos";
+
+const FALLBACK_CLIENTS = [
   "Chanel",
   "LVMH",
   "Louis Vuitton",
@@ -13,9 +15,27 @@ const clients = [
   "Kering",
 ];
 
-export function ClientsMarquee() {
-  const line = clients.map((c) => c.toUpperCase());
-  const block = [...line, ...line];
+/**
+ * "Ils nous ont fait confiance" marquee. When the owner has uploaded
+ * client logos in /dashboard/logos, we render the images at a fixed
+ * 48-px height with `object-contain` so wide and narrow logos line
+ * up consistently. Without uploads, we fall back to the original
+ * typographic word list so the homepage never looks empty.
+ */
+export function ClientsMarquee({
+  logos = [],
+}: {
+  logos?: PublicClientLogo[];
+}) {
+  const useLogos = logos.length > 0;
+  const logoBlock = useLogos ? [...logos, ...logos] : null;
+  const wordBlock = !useLogos
+    ? [
+        ...FALLBACK_CLIENTS.map((c) => c.toUpperCase()),
+        ...FALLBACK_CLIENTS.map((c) => c.toUpperCase()),
+      ]
+    : null;
+
   return (
     <section
       aria-label="Ils nous ont fait confiance"
@@ -27,15 +47,28 @@ export function ClientsMarquee() {
         <span aria-hidden className="h-px w-12 bg-[color:var(--color-grenat)] opacity-70" />
       </p>
       <div className="marquee edge-fade-x relative overflow-hidden">
-        <div className="marquee-track marquee-track--slow gap-16 md:gap-24">
-          {block.map((c, i) => (
-            <span
-              key={i}
-              className="shrink-0 font-display text-2xl tracking-[0.22em] text-[color:var(--color-espresso)]/55 md:text-3xl"
-            >
-              {c}
-            </span>
-          ))}
+        <div className="marquee-track marquee-track--slow items-center gap-16 md:gap-24">
+          {useLogos
+            ? // Same height, free width: object-contain keeps each
+              // logo's aspect ratio while normalising vertical scale.
+              logoBlock!.map((logo, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={`${logo.id}-${i}`}
+                  src={logo.url}
+                  alt={logo.name}
+                  loading="lazy"
+                  className="h-12 w-auto max-w-[180px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100"
+                />
+              ))
+            : wordBlock!.map((c, i) => (
+                <span
+                  key={i}
+                  className="shrink-0 font-display text-2xl tracking-[0.22em] text-[color:var(--color-espresso)]/55 md:text-3xl"
+                >
+                  {c}
+                </span>
+              ))}
         </div>
       </div>
     </section>
