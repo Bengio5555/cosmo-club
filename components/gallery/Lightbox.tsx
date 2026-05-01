@@ -85,8 +85,11 @@ export function Lightbox({ slides, index, onClose, onIndexChange }: Props) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Top bar: label + counter + close */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between px-6 py-5 md:px-10 md:py-7">
+      {/* Top bar: label + counter + close.
+          z-20 so it stacks above the relative image wrapper that
+          comes later in the DOM — without it the X was visible but
+          the clicks fell through to the full-viewport image div. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 md:px-10 md:py-7">
         <div className="pointer-events-auto flex items-center gap-4">
           {slide.label && (
             <span className="text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-bone)]/85 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-sm">
