@@ -47,7 +47,14 @@ export function ClientsMarquee({
         <span aria-hidden className="h-px w-12 bg-[color:var(--color-grenat)] opacity-70" />
       </p>
       <div className="marquee edge-fade-x relative overflow-hidden">
-        <div className="marquee-track items-center gap-16 md:gap-24">
+        <div
+          className="marquee-track items-center gap-16 md:gap-24"
+          // Inline override of the 55-s default — the strip is shorter
+          // than the cocktail/barista marquees (one logo per slot vs.
+          // long word strings) so it needs a tighter loop to feel like
+          // it's actually scrolling.
+          style={{ animationDuration: "32s" }}
+        >
           {useLogos
             ? // Same height, free width: object-contain keeps each
               // logo's aspect ratio while normalising vertical scale.
