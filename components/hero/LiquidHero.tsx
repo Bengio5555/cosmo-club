@@ -60,9 +60,10 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 1, ease: [0.19, 1, 0.22, 1] }}
-          className="mb-8 inline-flex items-center font-body text-[0.72rem] font-bold uppercase tracking-[0.32em] text-[color:var(--color-grenat)] md:mb-10"
+          className="mb-8 inline-flex items-center whitespace-nowrap font-body text-[0.55rem] font-bold uppercase tracking-[0.18em] text-[color:var(--color-grenat)] sm:text-[0.65rem] sm:tracking-[0.24em] md:mb-10 md:text-[0.72rem] md:tracking-[0.32em]"
         >
-          <span className="rule" />Cocktails · Barista · Événementiel
+          <span className="rule hidden md:inline-block" />
+          Cocktails · Barista · Événementiel
         </motion.p>
 
         {/* Logo lockup (accessible h1 hidden for SR) */}
