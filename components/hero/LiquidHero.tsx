@@ -60,7 +60,7 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 1, ease: [0.19, 1, 0.22, 1] }}
-          className="eyebrow mb-8 md:mb-10"
+          className="eyebrow mb-8 font-bold md:mb-10"
         >
           <span className="rule" />Cocktails · Barista · Événementiel
         </motion.p>
