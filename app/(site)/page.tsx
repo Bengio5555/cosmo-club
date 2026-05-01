@@ -52,9 +52,9 @@ export default async function HomePage() {
       <BaristaMarquee />
       <UniversBento />
       <ConceptManifesto />
+      <ClientsMarquee logos={clientLogos} />
       <Personnalisation />
       <EventsGallery tiles={galleryTiles} showSeeMore />
-      <ClientsMarquee logos={clientLogos} />
       <CtaDevis />
     </>
   );
