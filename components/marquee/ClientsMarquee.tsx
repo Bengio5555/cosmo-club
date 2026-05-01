@@ -47,7 +47,7 @@ export function ClientsMarquee({
         <span aria-hidden className="h-px w-12 bg-[color:var(--color-grenat)] opacity-70" />
       </p>
       <div className="marquee edge-fade-x relative overflow-hidden">
-        <div className="marquee-track marquee-track--slow items-center gap-16 md:gap-24">
+        <div className="marquee-track items-center gap-16 md:gap-24">
           {useLogos
             ? // Same height, free width: object-contain keeps each
               // logo's aspect ratio while normalising vertical scale.
