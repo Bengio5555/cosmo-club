@@ -55,7 +55,6 @@
 :root {
   color-scheme: light;
   --grain-opacity: 0.04;
-  --cursor-size: 10px;
 }
 
 html {
@@ -128,55 +127,6 @@ body {
     transparent 55%,
     rgba(42, 31, 20, 0.12) 100%
   );
-}
-
-/* ─── Custom cursor — scoped to the public site layout only ─── */
-/* Activated by the `.site-chrome` class on the (site) layout root.      */
-/* The /dashboard tree never gets this class, so the native cursor is    */
-/* preserved there.                                                      */
-@media (hover: hover) and (pointer: fine) {
-  .site-chrome,
-  .site-chrome a,
-  .site-chrome button,
-  .site-chrome [role="button"],
-  .site-chrome input,
-  .site-chrome textarea,
-  .site-chrome select,
-  .site-chrome label {
-    cursor: none;
-  }
-}
-
-.cursor-dot {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: var(--cursor-size);
-  height: var(--cursor-size);
-  border-radius: 999px;
-  background: var(--color-ink-text);
-  transform: translate3d(-50%, -50%, 0);
-  pointer-events: none;
-  z-index: 9999;
-  transition:
-    width 0.35s var(--ease-silk),
-    height 0.35s var(--ease-silk),
-    background 0.35s var(--ease-silk),
-    opacity 0.35s var(--ease-silk);
-  will-change: transform;
-}
-
-.cursor-dot[data-variant="hover"] {
-  width: 40px;
-  height: 40px;
-  background: var(--color-ink-text);
-  opacity: 0.25;
-}
-
-.cursor-dot[data-variant="text"] {
-  width: 3px;
-  height: 22px;
-  border-radius: 2px;
 }
 
 /* ─── Marquee infinie ─────────────────────────────── */
