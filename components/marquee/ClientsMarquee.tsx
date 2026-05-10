@@ -48,7 +48,7 @@ export function ClientsMarquee({
       </p>
       <div className="marquee edge-fade-x relative overflow-hidden">
         <div
-          className="marquee-track items-center gap-16 md:gap-24"
+          className="marquee-track items-center gap-8 md:gap-10"
           // Inline override of the 55-s default — the strip is shorter
           // than the cocktail/barista marquees (one logo per slot vs.
           // long word strings) so it needs a tighter loop to feel like
