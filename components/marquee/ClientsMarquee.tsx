@@ -63,7 +63,7 @@ export function ClientsMarquee({
               logoBlock!.map((logo, i) => (
                 <div
                   key={`${logo.id}-${i}`}
-                  className="flex h-8 w-36 shrink-0 items-center justify-center"
+                  className="flex h-10 w-44 shrink-0 items-center justify-center"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
