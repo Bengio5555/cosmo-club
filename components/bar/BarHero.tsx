@@ -107,10 +107,10 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
         </motion.div>
 
         {/* numeric anchors */}
-        <div className="pointer-events-none absolute bottom-10 right-6 hidden flex-col items-end gap-1 md:flex md:right-10">
+        <div className="pointer-events-none absolute bottom-10 right-6 hidden flex-col items-start gap-1 md:flex md:right-10">
           {["Classico", "Cosmo", "Émotion", "Création"].map((n, i) => (
             <div key={n} className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.32em] text-[color:var(--color-ink-text)]">
-              <span className="font-display font-bold text-[color:var(--color-ink-text)]">0{i + 1}</span>
+              <span className="font-display font-bold tabular-nums text-[color:var(--color-ink-text)]">0{i + 1}</span>
               <span>{n}</span>
             </div>
           ))}
