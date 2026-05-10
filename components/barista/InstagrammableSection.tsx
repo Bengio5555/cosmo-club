@@ -17,8 +17,6 @@ export function InstagrammableSection() {
           <p className="eyebrow mb-8 justify-center"><span className="rule" />L'effet</p>
           <h2 className="font-display text-balance text-5xl leading-[0.9] text-[color:var(--color-ink-text)] sm:text-6xl md:text-[9vw]">
             Un bar <span className="font-accent italic text-[color:var(--color-grenat)]">unique</span>.
-            <br />
-            <span className="font-accent italic text-[color:var(--color-grenat)]">Instagrammable</span> sans l'avoir cherché.
           </h2>
 
           <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-6 md:flex-row md:justify-between">
