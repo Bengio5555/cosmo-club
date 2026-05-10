@@ -28,12 +28,15 @@ export function ClientsMarquee({
   logos?: PublicClientLogo[];
 }) {
   const useLogos = logos.length > 0;
-  const logoBlock = useLogos ? [...logos, ...logos] : null;
+  // Repeat the source 4× (instead of 2×) so each "half" of the track
+  // is wide enough to cover the viewport on standard desktops. With
+  // only 2 copies, translateX(-50%) leaves a void on the right side
+  // of any viewport wider than a single logo set.
+  const logoBlock = useLogos ? Array(4).fill(logos).flat() : null;
   const wordBlock = !useLogos
-    ? [
-        ...FALLBACK_CLIENTS.map((c) => c.toUpperCase()),
-        ...FALLBACK_CLIENTS.map((c) => c.toUpperCase()),
-      ]
+    ? Array(4)
+        .fill(FALLBACK_CLIENTS.map((c) => c.toUpperCase()))
+        .flat()
     : null;
 
   return (
