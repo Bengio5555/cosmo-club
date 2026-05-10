@@ -78,14 +78,19 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
           transition={{ delay: 1.7, duration: 1, ease: [0.19, 1, 0.22, 1] }}
           className="mt-10 max-w-2xl"
         >
-          {/* Editorial frosted-glass card so the lede stays legible on
-              any photo crop. Cream-paper tint + light backdrop-blur
-              keeps the magazine feel; the grenat hairline on the left
-              edge anchors the block as an intentional callout rather
-              than a generic dark scrim. */}
-          <div className="relative overflow-hidden rounded-sm bg-[color:var(--color-cream-paper)]/82 px-6 py-5 shadow-[0_18px_60px_-30px_rgba(20,12,8,0.45)] ring-1 ring-[color:var(--color-ash-warm)]/35 backdrop-blur-md md:px-7 md:py-6">
-            <span aria-hidden className="absolute left-0 top-0 h-full w-[2px] bg-[color:var(--color-grenat)]" />
-            <p className="text-lg leading-relaxed text-[color:var(--color-ink-text)] md:text-xl">
+          {/* Liquid-glass card: heavy backdrop-blur + low-opacity white
+              tint refracts the rooftop photo behind the lede without
+              flattening it. Specular top sheen and inset highlight
+              mimic the polished-glass edge; grenat hairline keeps the
+              brand signature without breaking the glass illusion. */}
+          <div className="relative overflow-hidden rounded-xl bg-white/20 px-6 py-5 shadow-[0_24px_60px_-24px_rgba(20,12,8,0.55),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.06)] ring-1 ring-white/30 backdrop-blur-2xl backdrop-saturate-150 md:px-7 md:py-6">
+            {/* specular top sheen */}
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+            {/* warm gold tint in the bottom-right (catches the brand) */}
+            <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-[color:var(--color-or)]/[0.06]" />
+            {/* grenat hairline */}
+            <span aria-hidden className="absolute left-0 top-0 h-full w-[2px] bg-[color:var(--color-grenat)]/85" />
+            <p className="relative text-lg leading-relaxed text-[color:var(--color-ink-text)] md:text-xl">
               Quatre cartes, un seul principe : chaque verre doit valoir le coup d'œil, et mériter qu'on en reparle le lendemain. Classiques exécutés sans compromis, relectures signatures, toppings premium, créations écrites pour vous.
             </p>
           </div>
