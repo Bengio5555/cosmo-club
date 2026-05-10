@@ -48,7 +48,7 @@ export function ClientsMarquee({
       </p>
       <div className="marquee edge-fade-x relative overflow-hidden">
         <div
-          className="marquee-track items-center gap-3 md:gap-5"
+          className="marquee-track items-center gap-2 md:gap-3"
           // Inline override of the 55-s default — the strip is shorter
           // than the cocktail/barista marquees (one logo per slot vs.
           // long word strings) so it needs a tighter loop to feel like
@@ -56,23 +56,21 @@ export function ClientsMarquee({
           style={{ animationDuration: "32s" }}
         >
           {useLogos
-            ? // Fixed bounding box per logo so wide marks (Pokawa,
-              // Clinique des Champs-Élysées) don't visually outweigh
-              // compact ones (Kwerk). object-contain scales each logo
-              // to fit the identical footprint.
+            ? // Height-locked, width-natural: every logo renders at
+              // exactly h-10 (40 px) tall, so the dominant uniformity
+              // metric (visual height) is identical across marks. Width
+              // follows each logo's own aspect ratio, with a generous
+              // 220-px cap so very wide marks don't bulldoze the row.
+              // No outer box → no extra padding eating into the gap.
               logoBlock!.map((logo, i) => (
-                <div
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   key={`${logo.id}-${i}`}
-                  className="flex h-10 w-44 shrink-0 items-center justify-center"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={logo.url}
-                    alt={logo.name}
-                    loading="lazy"
-                    className="max-h-full max-w-full object-contain opacity-80 transition-opacity hover:opacity-100"
-                  />
-                </div>
+                  src={logo.url}
+                  alt={logo.name}
+                  loading="lazy"
+                  className="h-10 w-auto max-w-[220px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100"
+                />
               ))
             : wordBlock!.map((c, i) => (
                 <span
