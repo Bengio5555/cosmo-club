@@ -99,7 +99,7 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]"
+            className="inline-flex items-center gap-3 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.32em] text-[color:var(--color-ink-text)] transition-colors hover:text-[color:var(--color-grenat)]"
           >
             <span className="h-[1px] w-6 bg-current" />
             Demander un devis
