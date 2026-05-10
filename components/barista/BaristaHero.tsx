@@ -80,7 +80,7 @@ export function BaristaHero({ heroSrc }: { heroSrc: string }) {
             <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-[color:var(--color-or)]/[0.06]" />
             <span aria-hidden className="absolute left-0 top-0 h-full w-[2px] bg-[color:var(--color-grenat)]/85" />
             <p className="relative text-lg leading-relaxed text-[color:var(--color-ink-text)] md:text-xl">
-              Matcha, Ube, Blue, Golden. Quatre lattes d'auteur, servis chauds ou glacés depuis un stand qui devient scène. Un bar unique — <em className="font-accent italic text-[color:var(--color-grenat)]">instagrammable sans l'avoir cherché</em>.
+              Matcha, Ube, Blue, Golden. Quatre lattes d'auteur, servis chauds ou glacés depuis un stand qui devient scène.
             </p>
           </div>
         </motion.div>

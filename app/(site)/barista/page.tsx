@@ -3,7 +3,6 @@ import { BaristaHero } from "@/components/barista/BaristaHero";
 import { LattesGrid } from "@/components/barista/LattesGrid";
 import { StandsSection } from "@/components/barista/StandsSection";
 import { IdentitySection } from "@/components/barista/IdentitySection";
-import { InstagrammableSection } from "@/components/barista/InstagrammableSection";
 import { CtaDevis } from "@/components/home/CtaDevis";
 import heroBaristaImg from "@/public/brand/ai/hero-barista.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
@@ -22,7 +21,6 @@ export default async function Page() {
       <LattesGrid />
       <StandsSection />
       <IdentitySection />
-      <InstagrammableSection />
       <CtaDevis />
     </>
   );
