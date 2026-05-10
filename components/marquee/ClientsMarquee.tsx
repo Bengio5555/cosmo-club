@@ -56,17 +56,23 @@ export function ClientsMarquee({
           style={{ animationDuration: "32s" }}
         >
           {useLogos
-            ? // Same height, free width: object-contain keeps each
-              // logo's aspect ratio while normalising vertical scale.
+            ? // Fixed bounding box per logo so wide marks (Pokawa,
+              // Clinique des Champs-Élysées) don't visually outweigh
+              // compact ones (Kwerk). object-contain scales each logo
+              // to fit the identical footprint.
               logoBlock!.map((logo, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <div
                   key={`${logo.id}-${i}`}
-                  src={logo.url}
-                  alt={logo.name}
-                  loading="lazy"
-                  className="h-12 w-auto max-w-[180px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100"
-                />
+                  className="flex h-8 w-36 shrink-0 items-center justify-center"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logo.url}
+                    alt={logo.name}
+                    loading="lazy"
+                    className="max-h-full max-w-full object-contain opacity-80 transition-opacity hover:opacity-100"
+                  />
+                </div>
               ))
             : wordBlock!.map((c, i) => (
                 <span
