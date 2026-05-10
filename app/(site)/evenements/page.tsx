@@ -24,7 +24,7 @@ export default async function Page() {
         eyebrow="Références"
         title="Des soirées"
         italicWord="inoubliables."
-        description="Mariages, corporate, défilés, lancements de produit — une sélection de nos événements récents."
+        description={"Mariages, corporate, défilés, lancements de produit —\nune sélection de nos événements récents."}
       />
       <EventsGallery tiles={tiles} />
       <ClientsMarquee logos={clientLogos} />

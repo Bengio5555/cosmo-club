@@ -37,7 +37,7 @@ export function PageHeader({ eyebrow, title, italicWord, description }: Props) {
             )}
           </h1>
           {description && (
-            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-[color:var(--color-espresso)]/75 md:text-xl">
+            <p className="mt-8 max-w-2xl whitespace-pre-line text-lg leading-relaxed text-[color:var(--color-espresso)]/75 md:text-xl">
               {description}
             </p>
           )}
