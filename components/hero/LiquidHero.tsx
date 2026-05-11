@@ -128,27 +128,6 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
         </motion.div>
       </div>
 
-      {/* ─── Scroll indicator ─── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.2, duration: 1.4 }}
-        className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-center"
-      >
-        <span className="eyebrow block mb-2 text-[color:var(--color-espresso)]/60">
-          Scroll
-        </span>
-        <span className="relative mx-auto block h-10 w-px overflow-hidden bg-[color:var(--color-ash)]/40">
-          <span className="absolute top-0 left-0 block h-4 w-px bg-[color:var(--color-grenat)] [animation:scroll-hint_2.4s_var(--ease-silk)_infinite]" />
-        </span>
-        <style>{`
-          @keyframes scroll-hint {
-            0%   { transform: translateY(-100%); }
-            60%  { transform: translateY(150%); }
-            100% { transform: translateY(150%); }
-          }
-        `}</style>
-      </motion.div>
     </section>
   );
 }
