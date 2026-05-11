@@ -14,7 +14,14 @@ import { SplitText } from "@/components/motion/SplitText";
  */
 export function BarHero({ heroSrc }: { heroSrc: string }) {
   return (
-    <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
+    <section
+      className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)] bg-cover bg-center"
+      // CSS background-image of the same source: gets the photo
+      // painted under the card *before* next/image finishes its own
+      // pipeline, so the backdrop-blur on the lede card samples the
+      // photo from the very first frame — no creamy→photo flicker.
+      style={{ backgroundImage: `url(${heroSrc})` }}
+    >
       {/* backdrop image */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image

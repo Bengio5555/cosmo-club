@@ -12,7 +12,13 @@ import { SplitText } from "@/components/motion/SplitText";
  */
 export function BaristaHero({ heroSrc }: { heroSrc: string }) {
   return (
-    <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
+    <section
+      className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)] bg-cover bg-center"
+      // Same trick as BarHero: paint the source as a CSS background
+      // so the card's backdrop-blur always sees the photo, even
+      // before next/image's optimized variant finishes loading.
+      style={{ backgroundImage: `url(${heroSrc})` }}
+    >
       {/* editorial backdrop */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
