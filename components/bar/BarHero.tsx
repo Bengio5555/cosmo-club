@@ -76,16 +76,14 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
           transition={{ delay: 1.7, duration: 1, ease: [0.19, 1, 0.22, 1] }}
           className="mt-10 max-w-2xl"
         >
-          {/* Liquid-glass card: heavy backdrop-blur + low-opacity white
-              tint refracts the rooftop photo behind the lede without
-              flattening it. Specular top sheen and inset highlight
-              mimic the polished-glass edge; grenat hairline keeps the
-              brand signature without breaking the glass illusion. */}
-          {/* bg-white opacity bumped to /45 (and saturate dropped) so
-              the glass keeps its pale "before-image-loads" look even
-              once the rooftop photo arrives behind it — the hue no
-              longer shifts on refresh. */}
-          <div className="relative overflow-hidden rounded-xl bg-white/45 px-6 py-5 shadow-[0_24px_60px_-24px_rgba(20,12,8,0.55),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.06)] ring-1 ring-white/35 backdrop-blur-2xl md:px-7 md:py-6">
+          {/* Liquid-glass card: keep it genuinely transparent (white
+              wash at /15) so the rooftop photo reads through the card
+              and the "glass" effect actually feels like glass. We rely
+              on a heavy backdrop-blur + small saturate boost for the
+              refracted look; readability of the lede is preserved by
+              a subtle dark ink-tone gradient layered behind the text
+              rather than by opacifying the whole pane. */}
+          <div className="relative overflow-hidden rounded-xl bg-white/15 px-6 py-5 shadow-[0_24px_60px_-24px_rgba(20,12,8,0.55),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.06)] ring-1 ring-white/30 backdrop-blur-2xl backdrop-saturate-150 md:px-7 md:py-6">
             {/* specular top sheen */}
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
             {/* warm gold tint in the bottom-right (catches the brand) */}
