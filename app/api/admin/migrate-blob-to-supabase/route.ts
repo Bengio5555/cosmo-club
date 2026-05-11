@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { list } from "@vercel/blob";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -23,142 +24,133 @@ export async function POST(request: NextRequest) {
 
   const origin = new URL(request.url).origin;
   const supabase = createAdminClient();
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
-  // 1. Read the current image config (blob-backed URLs are exposed as
-  //    /api/admin/image-proxy?url=<base64> entries).
-  let config: { pages: Record<string, Record<string, { path?: string }>> };
+  if (!blobToken) {
+    return NextResponse.json(
+      { error: "BLOB_READ_WRITE_TOKEN missing" },
+      { status: 500 },
+    );
+  }
+
+  // 1. List every blob still in the Vercel store. We can't talk to the
+  //    proxy via /api/images-full anymore (that route now reads from
+  //    Supabase) — but the SDK's list() works directly against the
+  //    blob API and is what the legacy /api/images-full used to call.
+  type BlobEntry = {
+    url: string;
+    pathname: string;
+    uploadedAt?: Date | string;
+  };
+  let blobs: BlobEntry[];
   try {
-    const r = await fetch(`${origin}/api/images-full`, {
-      cache: "no-store",
+    const result = await list({
+      prefix: "cosmo-club/images/",
+      token: blobToken,
     });
-    config = await r.json();
+    blobs = result.blobs ?? [];
   } catch (err) {
     return NextResponse.json(
-      { error: "Failed to read images-full", details: String(err) },
+      { error: "Vercel Blob list failed", details: String(err) },
       { status: 500 },
     );
   }
 
   type Result = {
-    page: string;
-    key: string;
+    pathname: string;
     filename?: string;
     publicUrl?: string;
-    status: "ok" | "skip" | "fetch_failed" | "upload_failed";
+    status: "ok" | "fetch_failed" | "upload_failed";
     detail?: string;
   };
   const results: Result[] = [];
 
-  for (const [page, slots] of Object.entries(config.pages ?? {})) {
-    for (const [key, slot] of Object.entries(slots)) {
-      const path = slot.path;
-      if (!path || !path.startsWith("/api/admin/image-proxy")) {
-        results.push({ page, key, status: "skip", detail: "not blob-backed" });
-        continue;
-      }
+  for (const blob of blobs) {
+    const rawFilename = blob.pathname.split("/").pop() || "image.bin";
 
-      // Decode the blob URL out of the proxy URL so we can derive a
-      // sensible filename for the Supabase object.
-      let filename = `${page}__${key}.bin`;
-      try {
-        const u = new URL(`http://x${path}`);
-        const b64 = u.searchParams.get("url");
-        if (b64) {
-          const blobUrl = Buffer.from(b64, "base64").toString("utf-8");
-          const tail = blobUrl.split("/").pop();
-          if (tail) filename = decodeURIComponent(tail);
-        }
-      } catch {
-        /* keep fallback */
-      }
+    // Sanitize: Supabase Storage doesn't love spaces, parentheses, etc.
+    let filename = rawFilename.replace(/[^a-zA-Z0-9._\-]/g, "-");
 
-      // Sanitize: replace any character Supabase Storage doesn't love.
-      filename = filename.replace(/[^a-zA-Z0-9._\-]/g, "-");
+    // 2. Pull the optimized variant from Vercel's image pipeline. The
+    //    proxy still resolves blob URLs server-side, and the optimizer
+    //    streams the result through Vercel's CDN — this is the path
+    //    that's confirmed to still work even with the quota at 100%.
+    const encodedBlobUrl = Buffer.from(blob.url).toString("base64");
+    const proxyPath = `/api/admin/image-proxy?url=${encodedBlobUrl}`;
+    const optimizedUrl = `${origin}/_next/image?url=${encodeURIComponent(
+      proxyPath,
+    )}&w=3840&q=80`;
 
-      // 2. Pull the optimized variant from Vercel's image pipeline. The
-      //    largest variant (w=3840) gives us the best quality we can
-      //    still recover.
-      const optimizedUrl = `${origin}/_next/image?url=${encodeURIComponent(
-        path,
-      )}&w=3840&q=80`;
-      let bytes: ArrayBuffer;
-      let contentType = "image/avif";
-      try {
-        const resp = await fetch(optimizedUrl, {
-          headers: { Accept: "image/avif,image/webp,*/*" },
-        });
-        if (!resp.ok) {
-          results.push({
-            page,
-            key,
-            status: "fetch_failed",
-            detail: `${resp.status} ${resp.statusText}`,
-          });
-          continue;
-        }
-        bytes = await resp.arrayBuffer();
-        contentType = resp.headers.get("content-type") || contentType;
-      } catch (err) {
-        results.push({
-          page,
-          key,
-          status: "fetch_failed",
-          detail: String(err),
-        });
-        continue;
-      }
-
-      // Use the content-type to pick a sensible extension if the
-      // recovered file ends up as AVIF/WebP (highly likely).
-      const extFromCt: Record<string, string> = {
-        "image/avif": "avif",
-        "image/webp": "webp",
-        "image/jpeg": "jpg",
-        "image/png": "png",
-      };
-      const ext = extFromCt[contentType] || "bin";
-      filename = filename.replace(/\.(jpg|jpeg|png|webp|avif)$/i, `.${ext}`);
-      if (!/\.[a-z0-9]+$/i.test(filename)) filename += `.${ext}`;
-
-      // 3. Upload to Supabase Storage. `upsert` lets us re-run safely.
-      const { error } = await supabase.storage
-        .from(BUCKET)
-        .upload(filename, bytes, {
-          contentType,
-          upsert: true,
-        });
-      if (error) {
-        results.push({
-          page,
-          key,
-          filename,
-          status: "upload_failed",
-          detail: error.message,
-        });
-        continue;
-      }
-
-      const { data: pub } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(filename);
-      results.push({
-        page,
-        key,
-        filename,
-        publicUrl: pub.publicUrl,
-        status: "ok",
+    let bytes: ArrayBuffer;
+    let contentType = "image/avif";
+    try {
+      const resp = await fetch(optimizedUrl, {
+        headers: { Accept: "image/avif,image/webp,*/*" },
       });
+      if (!resp.ok) {
+        results.push({
+          pathname: blob.pathname,
+          status: "fetch_failed",
+          detail: `${resp.status} ${resp.statusText}`,
+        });
+        continue;
+      }
+      bytes = await resp.arrayBuffer();
+      contentType = resp.headers.get("content-type") || contentType;
+    } catch (err) {
+      results.push({
+        pathname: blob.pathname,
+        status: "fetch_failed",
+        detail: String(err),
+      });
+      continue;
     }
+
+    const extFromCt: Record<string, string> = {
+      "image/avif": "avif",
+      "image/webp": "webp",
+      "image/jpeg": "jpg",
+      "image/png": "png",
+    };
+    const ext = extFromCt[contentType] || "bin";
+    filename = filename.replace(/\.(jpg|jpeg|png|webp|avif)$/i, `.${ext}`);
+    if (!/\.[a-z0-9]+$/i.test(filename)) filename += `.${ext}`;
+
+    // 3. Upload to Supabase Storage. `upsert` lets us re-run safely.
+    const { error: upErr } = await supabase.storage
+      .from(BUCKET)
+      .upload(filename, bytes, {
+        contentType,
+        upsert: true,
+      });
+    if (upErr) {
+      results.push({
+        pathname: blob.pathname,
+        filename,
+        status: "upload_failed",
+        detail: upErr.message,
+      });
+      continue;
+    }
+
+    const { data: pub } = supabase.storage
+      .from(BUCKET)
+      .getPublicUrl(filename);
+    results.push({
+      pathname: blob.pathname,
+      filename,
+      publicUrl: pub.publicUrl,
+      status: "ok",
+    });
   }
 
   const ok = results.filter((r) => r.status === "ok").length;
   const failed = results.filter(
     (r) => r.status === "fetch_failed" || r.status === "upload_failed",
   ).length;
-  const skipped = results.filter((r) => r.status === "skip").length;
 
   return NextResponse.json({
-    summary: { ok, failed, skipped, total: results.length },
+    summary: { ok, failed, total: results.length },
     results,
   });
 }
