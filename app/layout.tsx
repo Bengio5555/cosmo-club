@@ -33,7 +33,6 @@ export const metadata: Metadata = {
     title: `${site.name} — ${site.tagline}`,
     description: site.description,
   },
-  icons: { icon: "/favicon.ico" },
 };
 
 export const viewport: Viewport = {
