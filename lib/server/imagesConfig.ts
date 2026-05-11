@@ -1,8 +1,9 @@
 import "server-only";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { list } from "@vercel/blob";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+const STORAGE_BUCKET = "cosmoclub-images";
 
 export type ServerImageSlot = {
   path?: string;
@@ -17,15 +18,15 @@ export type ServerImageConfig = {
 };
 
 /**
- * Server-side equivalent of /api/images-full. Use this from server
- * components so the resolved image URL is part of the SSR HTML — no
- * mid-flight flash where the static fallback paints first and is then
- * replaced by the admin upload after the client-side hook resolves.
+ * Loads the static images-config.json and merges in the admin uploads
+ * stored in the public Supabase Storage bucket. We moved off Vercel
+ * Blob to escape the "Advanced Requests" quota — Supabase Storage
+ * objects are served directly from the project's CDN, no proxy and
+ * no per-request authentication cost.
  *
- * Cached for 60s via React's request memo (callers within the same
- * server render share one fetch). The blob list is cheap enough that
- * a longer TTL isn't worth the staleness — admin uploads should land
- * within the next minute at most.
+ * Failure to list/read the bucket is non-fatal: we fall back to the
+ * static JSON config so the public site never breaks on a storage
+ * outage.
  */
 async function loadImagesConfig(): Promise<ServerImageConfig> {
   const configPath = join(process.cwd(), "public", "images-config.json");
@@ -38,46 +39,51 @@ async function loadImagesConfig(): Promise<ServerImageConfig> {
     return { pages: {} };
   }
 
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!blobToken) return config;
+  // Skip the storage merge if Supabase credentials aren't available
+  // (build-time / local dev without env). Public site still gets the
+  // static defaults so nothing breaks.
+  const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const hasKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!hasUrl || !hasKey) return config;
 
   try {
-    const blobs = await list({
-      prefix: "cosmo-club/images/",
-      token: blobToken,
-    });
-    if (!blobs.blobs?.length) return config;
+    const supabase = createAdminClient();
+    const { data: files, error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .list("", { limit: 1000, sortBy: { column: "created_at", order: "asc" } });
+    if (error) throw error;
+    if (!files || files.length === 0) return config;
 
     if (!config.pages.evenements) config.pages.evenements = {};
 
-    const sorted = [...blobs.blobs].sort((a, b) => {
-      const ta = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
-      const tb = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
-      return ta - tb;
-    });
+    for (const file of files) {
+      // .list() returns folders too — skip anything that isn't an image.
+      if (!file.name || file.name === ".emptyFolderPlaceholder") continue;
+      const { data: pub } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(file.name);
+      const publicUrl = pub.publicUrl;
 
-    for (const blob of sorted) {
-      const filename = blob.pathname.split("/").pop() || "";
-      const encodedUrl = Buffer.from(blob.url).toString("base64");
-      const proxyUrl = `/api/admin/image-proxy?url=${encodedUrl}`;
-
-      const prefixMatch = filename.match(/^([^_]+)__([^_]+)__(.+)$/);
+      // Filename convention: `{page}__{key}__{slug}.ext` routes the
+      // image to a specific slot. Anything without that prefix lands
+      // in the events gallery.
+      const prefixMatch = file.name.match(/^([^_]+)__([^_]+)__(.+)$/);
       if (prefixMatch) {
         const [, page, key] = prefixMatch;
         if (!config.pages[page]) config.pages[page] = {};
         const existing = config.pages[page][key] || {};
-        config.pages[page][key] = { ...existing, path: proxyUrl };
+        config.pages[page][key] = { ...existing, path: publicUrl };
         continue;
       }
 
-      const key = filename
+      const key = file.name
         .replace(/\.[^.]+$/, "")
         .replace(/\W+/g, "-")
         .toLowerCase();
       if (!config.pages.evenements[key]) {
         config.pages.evenements[key] = {
-          title: filename.replace(/\.[^.]+$/, ""),
-          path: proxyUrl,
+          title: file.name.replace(/\.[^.]+$/, ""),
+          path: publicUrl,
           orientation: "portrait",
           section: "Galerie Événements",
           label: "Événement",
@@ -85,7 +91,7 @@ async function loadImagesConfig(): Promise<ServerImageConfig> {
       }
     }
   } catch (err) {
-    console.warn("[loadImagesConfig] blob list failed:", err);
+    console.warn("[loadImagesConfig] Supabase Storage list failed:", err);
   }
 
   // Editorial overrides live in `image_overrides` (DB) — see

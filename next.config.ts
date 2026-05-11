@@ -11,21 +11,21 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    // Next.js 16 ships a default localPatterns of
-    // { pathname: "**", search: "" } that rejects local image URLs
-    // carrying a query string. Once we declare *any* localPatterns
-    // entry, the default is dropped — so we must restate both the
-    // permissive default for static `/...` paths AND a dedicated
-    // entry that lets the admin upload proxy URLs through.
+    // Default permissive entry for static `/brand/...` and `/_next/...`
+    // paths (Next.js 16 drops the default once we declare any entry).
     localPatterns: [
-      // Match static paths (`/brand/ai/...`, `/_next/static/...`) with
-      // no query string — the original default behavior.
       { pathname: "/**", search: "" },
-      // Admin uploads served through /api/admin/image-proxy?url=…
-      // (omitting `search` here matches *any* query string because
-      // matchLocalPattern uses strict equality on the property and
-      // skips the check when it's undefined).
+      // Legacy Vercel Blob proxy — kept so existing CDN-cached variants
+      // still resolve while the migration to Supabase is in flight.
       { pathname: "/api/admin/image-proxy" },
+    ],
+    // Allow next/image to optimize Supabase Storage public URLs.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "rqqjndxxjpsdkbtqikyn.supabase.co",
+        pathname: "/storage/v1/object/public/cosmoclub-images/**",
+      },
     ],
   },
 };
