@@ -77,9 +77,10 @@ export async function POST(request: NextRequest) {
     //    that's confirmed to still work even with the quota at 100%.
     const encodedBlobUrl = Buffer.from(blob.url).toString("base64");
     const proxyPath = `/api/admin/image-proxy?url=${encodedBlobUrl}`;
+    // q must match one of next.config's allowed qualities (default [75]).
     const optimizedUrl = `${origin}/_next/image?url=${encodeURIComponent(
       proxyPath,
-    )}&w=3840&q=80`;
+    )}&w=3840&q=75`;
 
     let bytes: ArrayBuffer;
     let contentType = "image/avif";
