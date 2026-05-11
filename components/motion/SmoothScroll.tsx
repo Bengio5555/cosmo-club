@@ -7,7 +7,23 @@ import Lenis from "lenis";
 export function SmoothScroll() {
   const lenisRef = useRef<Lenis | null>(null);
   const isFirstRun = useRef(true);
+  const isPopNav = useRef(false);
   const pathname = usePathname();
+
+  // Track back/forward navigations so the route-change effect can
+  // distinguish them from regular PUSH clicks. PUSH = snap top; POP =
+  // let the browser restore and sync Lenis to whatever scrollY landed
+  // on. Without this, syncing to window.scrollY on PUSH reads the
+  // OLD scroll position because Next.js' window.scrollTo(0) hasn't
+  // necessarily fired before our effect, so Lenis stays mid-page.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onPop = () => {
+      isPopNav.current = true;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -38,10 +54,11 @@ export function SmoothScroll() {
     };
   }, []);
 
-  // On route changes, sync Lenis to wherever the browser ended up:
-  // 0 for fresh PUSH (Next.js scrolls to top), restored Y for POP
-  // back/forward. Skip on first mount and on hash URLs so the native
-  // anchor scroll on cold loads like /bar#cartes isn't clobbered.
+  // PUSH (Link click) → snap Lenis to top so the new page starts at
+  // its header. POP (back/forward) → let the browser restore its
+  // scroll position, then sync Lenis to whatever scrollY ended up
+  // showing. Skip on first mount and on hash URLs so cold loads of
+  // /bar#cartes still get the native anchor scroll.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -49,12 +66,22 @@ export function SmoothScroll() {
     }
     if (typeof window === "undefined") return;
     if (window.location.hash) return;
-    const id = requestAnimationFrame(() => {
-      const target = window.scrollY;
-      const lenis = lenisRef.current;
-      if (lenis) lenis.scrollTo(target, { immediate: true, force: true });
-    });
-    return () => cancelAnimationFrame(id);
+
+    if (isPopNav.current) {
+      isPopNav.current = false;
+      const id = requestAnimationFrame(() => {
+        const lenis = lenisRef.current;
+        if (lenis) lenis.scrollTo(window.scrollY, { immediate: true, force: true });
+      });
+      return () => cancelAnimationFrame(id);
+    }
+
+    const lenis = lenisRef.current;
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true, force: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   return null;
