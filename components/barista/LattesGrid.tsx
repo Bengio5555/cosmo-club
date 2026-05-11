@@ -98,12 +98,10 @@ function LatteCard({
       <div className="relative mb-6 flex items-center justify-center md:mb-10">
         <div className="relative h-48 w-48 overflow-hidden rounded-full md:h-60 md:w-60">
           <Image
-            key={src}
             src={src}
             alt={`Latte ${latte.name}`}
             fill
             sizes="(min-width: 768px) 240px, 192px"
-            loading="lazy"
             className="object-cover"
           />
         </div>

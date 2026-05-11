@@ -53,12 +53,10 @@ export function BottlesSection() {
               {/* Bottle photo */}
               <div className="relative aspect-square w-full overflow-hidden">
                 <Image
-                  key={bottleSrcs[i]}
                   src={bottleSrcs[i]}
                   alt={`Cosmo Club bouteille ${b.format}`}
                   fill
                   sizes="(min-width: 1024px) 320px, (min-width: 768px) 240px, 100vw"
-                  loading="lazy"
                   className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.03]"
                 />
               </div>
