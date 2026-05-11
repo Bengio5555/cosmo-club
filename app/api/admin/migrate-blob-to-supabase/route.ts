@@ -71,38 +71,44 @@ export async function POST(request: NextRequest) {
     // Sanitize: Supabase Storage doesn't love spaces, parentheses, etc.
     let filename = rawFilename.replace(/[^a-zA-Z0-9._\-]/g, "-");
 
-    // 2. Pull the optimized variant from Vercel's image pipeline. The
-    //    proxy still resolves blob URLs server-side, and the optimizer
-    //    streams the result through Vercel's CDN — this is the path
-    //    that's confirmed to still work even with the quota at 100%.
+    // 2. Pull the largest cached variant we can find. Direct calls to
+    //    the proxy now 403 (Vercel Blob quota), but variants that were
+    //    prewarmed earlier still serve from Vercel's CDN. Try the
+    //    Next.js deviceSizes from largest to smallest — first hit wins.
     const encodedBlobUrl = Buffer.from(blob.url).toString("base64");
     const proxyPath = `/api/admin/image-proxy?url=${encodedBlobUrl}`;
-    // q must match one of next.config's allowed qualities (default [75]).
-    const optimizedUrl = `${origin}/_next/image?url=${encodeURIComponent(
-      proxyPath,
-    )}&w=3840&q=75`;
+    const widths = [3840, 2048, 1920, 1200, 1080, 828, 750, 640, 384, 256];
 
-    let bytes: ArrayBuffer;
+    let bytes: ArrayBuffer | null = null;
     let contentType = "image/avif";
-    try {
-      const resp = await fetch(optimizedUrl, {
-        headers: { Accept: "image/avif,image/webp,*/*" },
-      });
-      if (!resp.ok) {
-        results.push({
-          pathname: blob.pathname,
-          status: "fetch_failed",
-          detail: `${resp.status} ${resp.statusText}`,
+    let recoveredWidth: number | null = null;
+    let lastError = "";
+    for (const w of widths) {
+      const optimizedUrl = `${origin}/_next/image?url=${encodeURIComponent(
+        proxyPath,
+      )}&w=${w}&q=75`;
+      try {
+        const resp = await fetch(optimizedUrl, {
+          headers: { Accept: "image/avif,image/webp,*/*" },
         });
-        continue;
+        if (!resp.ok) {
+          lastError = `${resp.status} ${resp.statusText}`;
+          continue;
+        }
+        bytes = await resp.arrayBuffer();
+        contentType = resp.headers.get("content-type") || contentType;
+        recoveredWidth = w;
+        break;
+      } catch (err) {
+        lastError = String(err);
       }
-      bytes = await resp.arrayBuffer();
-      contentType = resp.headers.get("content-type") || contentType;
-    } catch (err) {
+    }
+
+    if (!bytes) {
       results.push({
         pathname: blob.pathname,
         status: "fetch_failed",
-        detail: String(err),
+        detail: `no cached variant — last error: ${lastError}`,
       });
       continue;
     }
@@ -142,6 +148,7 @@ export async function POST(request: NextRequest) {
       filename,
       publicUrl: pub.publicUrl,
       status: "ok",
+      detail: `recovered at w=${recoveredWidth}`,
     });
   }
 
