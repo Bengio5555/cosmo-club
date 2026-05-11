@@ -101,6 +101,20 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
         </Row>
       </Section>
 
+      <Section title="Notifications nouveaux leads">
+        <Field label="Email qui reçoit les nouveaux leads du formulaire">
+          <Input
+            type="email"
+            value={f.lead_notification_email ?? ""}
+            onChange={(v) => upd("lead_notification_email", v)}
+            placeholder="leads@cosmoclub.fr (laisse vide pour utiliser l'email de contact public)"
+          />
+        </Field>
+        <p className="text-[11px] text-neutral-500">
+          À chaque nouveau devis envoyé depuis le formulaire public, une notification arrive sur cette boîte. Si vide, on retombe sur l&apos;email de contact public.
+        </p>
+      </Section>
+
       <Section title="Banque (affichage facture)">
         <Row>
           <Field label="IBAN">

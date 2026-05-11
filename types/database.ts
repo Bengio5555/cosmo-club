@@ -344,6 +344,7 @@ export type Database = {
           id: number
           invoice_due_days: number
           invoice_number_prefix: string
+          lead_notification_email: string | null
           legal_form: string | null
           penalty_rate_text: string | null
           phone: string | null

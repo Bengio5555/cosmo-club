@@ -8,10 +8,32 @@ import type { Database } from "@/types/database";
 export const runtime = "nodejs";
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
-const TO_EMAIL = process.env.DEVIS_TO_EMAIL ?? site.email;
+const TO_EMAIL_ENV = process.env.DEVIS_TO_EMAIL ?? site.email;
 const FROM_EMAIL = process.env.DEVIS_FROM_EMAIL ?? "devis@cosmoclub.fr";
 
 const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;
+
+// Resolve the notification recipient: the value configured by the owner
+// in /dashboard/settings wins, then the DEVIS_TO_EMAIL env var (build-time),
+// then site.email as a last resort. Reads via the admin client so it works
+// even when the lead-submission request has no user session.
+async function resolveLeadNotificationEmail(): Promise<string> {
+  const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const hasKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!hasUrl || !hasKey) return TO_EMAIL_ENV;
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("settings")
+      .select("lead_notification_email")
+      .eq("id", 1)
+      .maybeSingle();
+    const fromDb = data?.lead_notification_email?.trim();
+    return fromDb && fromDb.length > 0 ? fromDb : TO_EMAIL_ENV;
+  } catch {
+    return TO_EMAIL_ENV;
+  }
+}
 
 // Map the form's eventType values to the DB enum. `mariage` / `corporate` /
 // `prive` / `defile` are shared; `autre` is a safe fallback for unknowns.
@@ -190,10 +212,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, dev: true });
   }
 
+  const toEmail = await resolveLeadNotificationEmail();
+
   try {
     await resend.emails.send({
       from: `Cosmo Club Devis <${FROM_EMAIL}>`,
-      to: [TO_EMAIL],
+      to: [toEmail],
       replyTo: data.email,
       subject,
       text: textBody,
