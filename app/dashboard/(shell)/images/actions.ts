@@ -201,7 +201,13 @@ export async function uploadDashboardImage(formData: FormData) {
   }
 
   revalidatePath("/dashboard/images");
-  revalidatePath("/");
+  // Revalidate every public page that pulls from the image config so a
+  // hero/bento/lattes/event-tile change shows up immediately. Without
+  // this, only `/` was revalidated and `/bar-a-cocktails`, `/barista`,
+  // `/evenements` kept serving the previous build's cached HTML.
+  for (const path of ["/", "/bar-a-cocktails", "/barista", "/evenements", "/concept"]) {
+    revalidatePath(path);
+  }
   return { ok: true as const };
 }
 
@@ -253,6 +259,8 @@ export async function deleteDashboardImageByProxy(proxyUrl: string) {
   }
 
   revalidatePath("/dashboard/images");
-  revalidatePath("/");
+  for (const path of ["/", "/bar-a-cocktails", "/barista", "/evenements", "/concept"]) {
+    revalidatePath(path);
+  }
   return { ok: true as const };
 }
