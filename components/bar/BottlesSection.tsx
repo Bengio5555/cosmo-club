@@ -3,14 +3,20 @@
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
 import { bottles } from "@/lib/content/cocktails";
-import bottle20Img from "@/public/brand/ai/bottle-20cl.png";
-import bottle50Img from "@/public/brand/ai/bottle-50cl.png";
-import bottle1LImg from "@/public/brand/ai/bottle-1L.png";
 import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-// Keys must match images-config.json → pages.products.<key>
+// Keys must match images-config.json → pages.products.<key>.
+// Fallbacks are the public paths that the JSON config also points at,
+// so SSR and the post-hydration hook resolve to the *same* URL — no
+// flicker. (Using the Webpack import `.src` would give a hashed
+// `/_next/static/media/...` URL that differs from the JSON entry and
+// triggers a re-fetch on hydration.)
 const bottleSlotKeys = ["bottle-20cl", "bottle-50cl", "bottle-1L"] as const;
-const bottleFallbacks = [bottle20Img.src, bottle50Img.src, bottle1LImg.src];
+const bottleFallbacks = [
+  "/brand/ai/bottle-20cl.png",
+  "/brand/ai/bottle-50cl.png",
+  "/brand/ai/bottle-1L.png",
+];
 
 export function BottlesSection() {
   const config = useImageConfig();
