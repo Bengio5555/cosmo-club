@@ -73,7 +73,7 @@ export function BaristaHero({ heroSrc }: { heroSrc: string }) {
           {/* Liquid-glass card — same treatment as BarHero so the lede
               stays legible on any backdrop crop while keeping the
               editorial premium feel. */}
-          <div className="relative overflow-hidden rounded-xl bg-white/15 px-6 py-5 shadow-[0_24px_60px_-24px_rgba(20,12,8,0.55),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.06)] ring-1 ring-white/30 backdrop-blur-2xl backdrop-saturate-150 md:px-7 md:py-6">
+          <div className="relative overflow-hidden rounded-xl px-6 py-5 shadow-[0_24px_60px_-24px_rgba(20,12,8,0.55),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.06)] ring-1 ring-white/30 backdrop-blur-2xl backdrop-saturate-150 md:px-7 md:py-6">
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
             <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-[color:var(--color-or)]/[0.06]" />
             <span aria-hidden className="absolute left-0 top-0 h-full w-[2px] bg-[color:var(--color-grenat)]/85" />
