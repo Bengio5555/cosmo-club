@@ -11,8 +11,6 @@ import { SplitText } from "@/components/motion/SplitText";
  * static fallback PNG to the admin-uploaded image on first paint.
  */
 export function BaristaHero({ heroSrc }: { heroSrc: string }) {
-  const heroUnoptimized = heroSrc.startsWith("/api/");
-
   return (
     <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
       {/* editorial backdrop */}
@@ -23,7 +21,7 @@ export function BaristaHero({ heroSrc }: { heroSrc: string }) {
           fill
           sizes="100vw"
           priority
-          unoptimized={heroUnoptimized}
+          fetchPriority="high"
           className="object-cover object-center"
         />
         <div

@@ -13,8 +13,6 @@ import { SplitText } from "@/components/motion/SplitText";
  * resolved. SSR-resolving the URL kills the swap.
  */
 export function BarHero({ heroSrc }: { heroSrc: string }) {
-  const heroUnoptimized = heroSrc.startsWith("/api/");
-
   return (
     <section className="relative isolate h-[100svh] min-h-[700px] overflow-hidden bg-[color:var(--color-cream-paper)]">
       {/* backdrop image */}
@@ -25,7 +23,7 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
           fill
           sizes="100vw"
           priority
-          unoptimized={heroUnoptimized}
+          fetchPriority="high"
           className="object-cover object-center"
         />
         {/* léger gradient pour readabilité du texte côté gauche */}

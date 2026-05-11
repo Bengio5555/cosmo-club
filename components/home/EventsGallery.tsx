@@ -97,7 +97,7 @@ export function EventsGallery({
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                unoptimized={typeof tile.src === "string"}
+                loading={i < 2 ? "eager" : "lazy"}
                 className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.04]"
                 style={{ objectPosition: tile.object }}
               />
