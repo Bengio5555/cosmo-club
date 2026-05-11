@@ -1,11 +1,18 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/lib/site";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 export const alt = `${site.name} — ${site.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OG() {
+export default async function OG() {
+  const logoBuffer = await fs.readFile(
+    path.join(process.cwd(), "public/brand/cosmo-logo.png"),
+  );
+  const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -14,54 +21,46 @@ export default function OG() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#ede3c9",
           padding: 80,
-          background:
-            "radial-gradient(circle at 30% 20%, #1a0a0a 0%, #0A0A0A 60%, #000 100%)",
-          color: "#ede3c9",
-          fontFamily: "serif",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div
-            style={{
-              fontSize: 28,
-              letterSpacing: 8,
-              textTransform: "uppercase",
-              color: "#C9A961",
-            }}
-          >
-            Paris · Sur rendez-vous
-          </div>
-          <div
-            style={{
-              fontSize: 140,
-              fontWeight: 900,
-              lineHeight: 0.92,
-              letterSpacing: -4,
-              color: "#8B1A1A",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <span>COSMO</span>
-            <span>CLUB</span>
-          </div>
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoSrc}
+          width={760}
+          height={456}
+          alt={site.name}
+          style={{ objectFit: "contain" }}
+        />
         <div
           style={{
+            marginTop: 32,
             display: "flex",
             flexDirection: "column",
-            gap: 16,
-            borderTop: "1px solid rgba(237, 227, 201, 0.3)",
-            paddingTop: 32,
+            alignItems: "center",
+            gap: 18,
           }}
         >
-          <div style={{ fontSize: 44, fontWeight: 500, color: "#ede3c9" }}>
-            Bar à cocktails &amp; barista événementiel
-          </div>
-          <div style={{ fontSize: 26, color: "rgba(237, 227, 201, 0.7)" }}>
-            Mariages · Corporate · Soirées privées · Paris &amp; Île-de-France
+          <div
+            style={{
+              width: 96,
+              height: 2,
+              background: "#C9A961",
+            }}
+          />
+          <div
+            style={{
+              fontSize: 26,
+              letterSpacing: 8,
+              textTransform: "uppercase",
+              color: "#8B1A1A",
+              fontFamily: "serif",
+            }}
+          >
+            Bar à cocktails &amp; barista événementiel · Paris
           </div>
         </div>
       </div>
