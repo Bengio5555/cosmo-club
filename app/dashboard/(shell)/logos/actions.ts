@@ -1,14 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { put, del } from "@vercel/blob";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+const STORAGE_BUCKET = "cosmoclub-logos";
 
 /**
- * Upload one client logo to Vercel Blob and persist a row in
- * `client_logos`. The form posts a `name` and a `file`. Position
- * defaults to "after the last existing one" so the marquee order
- * stays stable as the owner adds logos.
+ * Upload one client logo to Supabase Storage and persist a row in
+ * `client_logos`. Position defaults to "after the last existing one"
+ * so the marquee order stays stable as new logos are added.
  */
 export async function uploadClientLogo(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
@@ -21,31 +22,34 @@ export async function uploadClientLogo(formData: FormData) {
   if (file.size > 2 * 1024 * 1024)
     return { ok: false as const, error: "Image trop lourde (max 2 Mo)." };
 
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!blobToken)
-    return { ok: false as const, error: "Stockage blob non configuré." };
-
   const ext = file.name.split(".").pop()?.toLowerCase() || "png";
-  const slug = name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 40) || "logo";
+  const slug =
+    name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 40) || "logo";
   const filename = `${slug}-${Date.now()}.${ext}`;
 
-  let blobUrl = "";
+  let publicUrl = "";
   try {
-    const blob = await put(`cosmo-club/client-logos/${filename}`, file, {
-      access: "private",
-      token: blobToken,
-    });
-    blobUrl = blob.url;
+    const adminSupabase = createAdminClient();
+    const buffer = await file.arrayBuffer();
+    const { error: upErr } = await adminSupabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filename, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+    if (upErr) return { ok: false as const, error: upErr.message };
+    publicUrl = adminSupabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename)
+      .data.publicUrl;
   } catch (err) {
     return {
       ok: false as const,
-      error: err instanceof Error ? err.message : "Échec d'upload blob.",
+      error: err instanceof Error ? err.message : "Échec d'upload.",
     };
   }
 
@@ -61,7 +65,7 @@ export async function uploadClientLogo(formData: FormData) {
 
   const { error } = await supabase.from("client_logos").insert({
     name,
-    blob_url: blobUrl,
+    blob_url: publicUrl,
     position: nextPosition,
   });
   if (error) return { ok: false as const, error: error.message };
@@ -72,10 +76,9 @@ export async function uploadClientLogo(formData: FormData) {
 }
 
 /**
- * Hard delete: drops the DB row and removes the underlying blob.
- * Failure on the blob side is logged but doesn't block the row
- * deletion — the marquee never queries the blob directly so a stale
- * file is harmless.
+ * Hard delete: drops the DB row and removes the underlying Storage
+ * object. The Storage delete is best-effort — the public site doesn't
+ * query the bucket directly so a stale file is harmless.
  */
 export async function deleteClientLogo(id: string) {
   const supabase = await createClient();
@@ -89,12 +92,18 @@ export async function deleteClientLogo(id: string) {
   const { error } = await supabase.from("client_logos").delete().eq("id", id);
   if (error) return { ok: false as const, error: error.message };
 
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
-  if (blobToken && row.blob_url) {
+  if (row.blob_url) {
     try {
-      await del(row.blob_url, { token: blobToken });
+      const adminSupabase = createAdminClient();
+      // Storage row only carries the filename — extract from the
+      // public URL (`.../storage/v1/object/public/<bucket>/<filename>`).
+      const parts = String(row.blob_url).split("/");
+      const filename = parts[parts.length - 1];
+      if (filename) {
+        await adminSupabase.storage.from(STORAGE_BUCKET).remove([filename]);
+      }
     } catch (err) {
-      console.warn("[deleteClientLogo] blob del failed:", err);
+      console.warn("[deleteClientLogo] storage remove failed:", err);
     }
   }
 
@@ -121,11 +130,9 @@ export async function moveClientLogo(id: string, direction: "up" | "down") {
   if (idx < 0) return { ok: false as const, error: "Logo introuvable." };
   const swapWith = direction === "up" ? idx - 1 : idx + 1;
   if (swapWith < 0 || swapWith >= rows.length) {
-    return { ok: true as const }; // already at boundary, no-op
+    return { ok: true as const };
   }
 
-  // Renumber sequentially first so we always have a stable ordering
-  // even if the source data was sparse, then swap the two targets.
   const ordered = rows.map((r, i) => ({ id: r.id, position: i }));
   const a = ordered[idx];
   const b = ordered[swapWith];

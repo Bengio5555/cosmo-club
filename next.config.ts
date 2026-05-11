@@ -26,6 +26,11 @@ const nextConfig: NextConfig = {
         hostname: "rqqjndxxjpsdkbtqikyn.supabase.co",
         pathname: "/storage/v1/object/public/cosmoclub-images/**",
       },
+      {
+        protocol: "https",
+        hostname: "rqqjndxxjpsdkbtqikyn.supabase.co",
+        pathname: "/storage/v1/object/public/cosmoclub-logos/**",
+      },
     ],
   },
 };
