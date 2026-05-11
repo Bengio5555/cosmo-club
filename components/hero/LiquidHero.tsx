@@ -15,8 +15,6 @@ import logoSrc from "@/public/brand/cosmo-logo.png";
  * the URL into SSR removes the swap entirely.
  */
 export function LiquidHero({ heroSrc }: { heroSrc: string }) {
-  const heroUnoptimized = heroSrc.startsWith("/api/");
-
   return (
     <section className="relative isolate h-[100svh] min-h-[680px] w-full overflow-hidden bg-[color:var(--color-cream-paper)]">
       {/* ─── Background image ─── */}
@@ -27,7 +25,7 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
           fill
           sizes="100vw"
           priority
-          unoptimized={heroUnoptimized}
+          fetchPriority="high"
           className="object-cover object-center"
         />
       </div>

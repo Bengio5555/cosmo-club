@@ -55,12 +55,16 @@ export async function GET(request: NextRequest) {
     const buffer = await response.arrayBuffer();
     const contentType = response.headers.get("content-type") || "image/png";
 
-    // Return as image with proper headers
+    // Cache-Control: source URLs are content-addressed (blob hash in the
+    // URL), so re-uploads create new URLs — safe to mark immutable for
+    // 1 year. Lets Vercel's CDN absorb all subsequent reads after the
+    // first cold start instead of hitting this serverless function on
+    // every request.
     return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=3600",
+        "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
   } catch (error) {
