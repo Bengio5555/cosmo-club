@@ -7,8 +7,24 @@ import { getAllEventTiles } from "@/lib/server/homeGallery";
 import { getPublicClientLogos } from "@/lib/server/clientLogos";
 
 export const metadata: Metadata = {
-  title: "Événements & références",
-  description: "Mariages, corporate, défilés, soirées privées — les événements signés Cosmo Club.",
+  title: "Événements & références — Mariages, Corporate, Soirées Paris",
+  description:
+    "Portfolio Cosmo Club : mariages, événements corporate, défilés, lancements de marque et soirées privées à Paris. Découvrez nos réalisations signature en bar à cocktails et barista événementiel.",
+  keywords: [
+    "événementiel cocktails Paris",
+    "mariage cocktail Paris",
+    "événementiel corporate Paris",
+    "soirée privée Paris",
+    "défilé cocktail bar",
+    "lancement de marque cocktail",
+  ],
+  alternates: { canonical: "/evenements" },
+  openGraph: {
+    title: "Événements & références — Cosmo Club Paris",
+    description: "Mariages, corporate, soirées privées : nos réalisations événementielles signature.",
+    url: "/evenements",
+    type: "website",
+  },
 };
 
 export default async function Page() {

@@ -24,21 +24,75 @@ export default async function HomePage() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": ["ProfessionalService", "FoodService"],
+    "@id": `${site.url}/#business`,
     name: site.name,
-    image: `${site.url}/og.jpg`,
+    alternateName: site.shortName,
     url: site.url,
-    telephone: site.phone,
+    image: `${site.url}/og.jpg`,
+    logo: `${site.url}/brand/cosmo-logo.png`,
+    description: site.description,
+    telephone: site.phone.replace(/\s/g, ""),
     email: site.email,
     priceRange: "€€€",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Paris",
-      postalCode: "75008",
-      addressCountry: "FR",
+    currenciesAccepted: "EUR",
+    paymentAccepted: ["Cash", "Credit Card", "Bank Transfer"],
+    areaServed: [
+      { "@type": "City", name: "Paris" },
+      { "@type": "AdministrativeArea", name: "Île-de-France" },
+    ],
+    serviceType: [
+      "Bar à cocktails événementiel",
+      "Barista événementiel",
+      "Mixologie événementielle",
+      "Service cocktails mariage",
+      "Service cocktails entreprise",
+    ],
+    knowsAbout: [
+      "Cocktails",
+      "Mixologie",
+      "Barista",
+      "Café de spécialité",
+      "Événementiel premium",
+      "Mariage",
+      "Soirée d'entreprise",
+    ],
+    availableLanguage: ["fr", "en"],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Prestations Cosmo Club",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Bar à cocktails événementiel",
+            url: `${site.url}/bar-a-cocktails`,
+            description:
+              "Bar mobile premium pour mariages, soirées d'entreprise et événements privés à Paris et en Île-de-France.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Service barista événementiel",
+            url: `${site.url}/barista`,
+            description:
+              "Service barista café de spécialité pour vos événements professionnels et privés à Paris.",
+          },
+        },
+      ],
     },
     sameAs: [site.instagram],
-    description: site.description,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: site.phone.replace(/\s/g, ""),
+      email: site.email,
+      contactType: "Devis et réservations",
+      areaServed: "FR",
+      availableLanguage: ["fr", "en"],
+    },
   };
 
   return (

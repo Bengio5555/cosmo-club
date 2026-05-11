@@ -4,9 +4,16 @@ import { DevisWizard } from "@/components/form/DevisWizard";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Devis & contact",
+  title: "Devis & contact — Cosmo Club Paris, bar à cocktails événementiel",
   description:
-    "Demandez un devis pour votre événement — mariage, corporate, soirée privée. Cosmo Club Paris, bar à cocktails et barista événementiel.",
+    "Demandez votre devis sur-mesure en 4 questions, réponse sous 48h. Bar à cocktails et barista événementiel à Paris et en Île-de-France pour mariages, corporate et soirées privées.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Devis & contact — Cosmo Club Paris",
+    description: "Devis sur-mesure en 4 questions, réponse sous 48h.",
+    url: "/contact",
+    type: "website",
+  },
 };
 
 export default function Page() {
