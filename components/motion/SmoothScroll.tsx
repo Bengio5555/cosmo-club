@@ -6,6 +6,7 @@ import Lenis from "lenis";
 
 export function SmoothScroll() {
   const lenisRef = useRef<Lenis | null>(null);
+  const isFirstRun = useRef(true);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -14,12 +15,6 @@ export function SmoothScroll() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     if (prefersReduced) return;
-
-    // Force manual restoration so the browser doesn't fight us when
-    // we reset Lenis on route changes.
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
-    }
 
     const lenis = new Lenis({
       duration: 1.15,
@@ -43,17 +38,23 @@ export function SmoothScroll() {
     };
   }, []);
 
-  // On every route change, snap Lenis (and the window) back to the top
-  // before the new page paints. Without this the Lenis instance keeps
-  // its previous targetScroll and the user lands mid-page or at the
-  // bottom of the new route.
+  // On route changes, sync Lenis to wherever the browser ended up:
+  // 0 for fresh PUSH (Next.js scrolls to top), restored Y for POP
+  // back/forward. Skip on first mount and on hash URLs so the native
+  // anchor scroll on cold loads like /bar#cartes isn't clobbered.
   useEffect(() => {
-    const lenis = lenisRef.current;
-    if (lenis) {
-      lenis.scrollTo(0, { immediate: true, force: true });
-    } else if (typeof window !== "undefined") {
-      window.scrollTo(0, 0);
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
     }
+    if (typeof window === "undefined") return;
+    if (window.location.hash) return;
+    const id = requestAnimationFrame(() => {
+      const target = window.scrollY;
+      const lenis = lenisRef.current;
+      if (lenis) lenis.scrollTo(target, { immediate: true, force: true });
+    });
+    return () => cancelAnimationFrame(id);
   }, [pathname]);
 
   return null;
