@@ -40,6 +40,37 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
+// Organization-level JSON-LD emitted on every page. LLMs and search
+// engines aggregate this across crawls to build their entity graph —
+// keeping it identical on every route reinforces the canonical
+// identity of Cosmo Club Paris.
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": `${site.url}/#organization`,
+  name: site.name,
+  alternateName: site.shortName,
+  url: site.url,
+  logo: `${site.url}/brand/cosmo-logo.png`,
+  description: site.description,
+  email: site.email,
+  telephone: site.phone.replace(/\s/g, ""),
+  areaServed: [
+    { "@type": "City", name: "Paris" },
+    { "@type": "AdministrativeArea", name: "Île-de-France" },
+  ],
+  sameAs: [site.instagram],
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: site.phone.replace(/\s/g, ""),
+    email: site.email,
+    contactType: "Devis et réservations",
+    areaServed: "FR",
+    availableLanguage: ["fr", "en"],
+  },
+  knowsLanguage: ["fr", "en"],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -47,7 +78,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={fontClassName} suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

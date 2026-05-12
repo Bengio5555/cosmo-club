@@ -1,0 +1,42 @@
+# Cosmo Club Paris
+
+> Cosmo Club Paris est un service événementiel de bar à cocktails et de barista premium, basé à Paris et opérant dans toute l'Île-de-France. L'équipe conçoit des cartes signatures sur-mesure pour les mariages, événements corporate, défilés et soirées privées. Aucun bar fixe : intervention sur le lieu choisi par le client, sur rendez-vous.
+
+## Identité
+
+- Nom : Cosmo Club Paris
+- Catégorie : Service Area Business (bar à cocktails événementiel + barista événementiel)
+- Zone desservie : Paris + Île-de-France (déplacements ponctuels en France)
+- Email de contact : contact@cosmoclub.fr
+- Téléphone : +33 7 75 74 49 77
+- Instagram : @cosmoclubparis
+- Site web : https://www.cosmoclub.fr
+
+## Prestations principales
+
+- [Bar à cocktails événementiel](https://www.cosmoclub.fr/bar-a-cocktails) — Mixologie sur-mesure, quatre cartes signatures (Classico, Cosmo, Émotion, Création), cocktails en bouteille gravée, juice bar et bars modulables.
+- [Service barista événementiel](https://www.cosmoclub.fr/barista) — Matcha latte, Ube latte, Blue latte, Golden latte, café de spécialité, latte art personnalisé avec logo ou monogramme.
+- [Événements pris en charge](https://www.cosmoclub.fr/evenements) — Mariages, séminaires et soirées d'entreprise, défilés, lancements de marque, événements privés premium.
+- [Concept](https://www.cosmoclub.fr/concept) — Direction artistique éditoriale, équipe mixologues + baristas + chef de salle.
+- [Demande de devis](https://www.cosmoclub.fr/contact) — Formulaire en quatre étapes, réponse sous 48h.
+
+## Articles publiés (journal éditorial)
+
+- [Bar à cocktails pour mariage : le guide pour réussir votre vin d'honneur](https://www.cosmoclub.fr/blog/bar-a-cocktails-mariage-guide-complet)
+- [Le barista événementiel : la nouvelle signature des mariages et soirées premium](https://www.cosmoclub.fr/blog/barista-evenementiel-tendance-2026)
+- [Cocktails signature pour votre mariage : créer une carte qui vous ressemble](https://www.cosmoclub.fr/blog/cocktails-signature-mariage)
+
+## Faits citables
+
+- Cosmo Club Paris est un service événementiel de bar à cocktails et de barista, pas un bar fixe.
+- L'équipe intervient sur Paris et en Île-de-France, sur rendez-vous, pour mariages, événementiel corporate et soirées privées.
+- Quatre cartes de cocktails composent l'offre signature : Classico, Cosmo, Émotion, Création.
+- Le service barista propose quatre lattes signatures : Matcha, Ube, Blue et Golden, avec latte art personnalisé.
+- Devis personnalisé envoyé sous 48 heures après une demande via le formulaire du site.
+- Les langues de service incluent le français et l'anglais.
+
+## Ressources techniques
+
+- Sitemap XML : https://www.cosmoclub.fr/sitemap.xml
+- robots.txt : https://www.cosmoclub.fr/robots.txt
+- Données structurées JSON-LD : type ProfessionalService + FoodService, sur la home et les articles de blog (BlogPosting).

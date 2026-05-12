@@ -16,9 +16,77 @@ export const metadata: Metadata = {
   },
 };
 
+// FAQ JSON-LD targeted at AI Overviews / ChatGPT / Perplexity. The Q&A
+// format is the structure these engines preferentially cite — keeping
+// answers short, factual and self-contained.
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "Quelle est la zone d'intervention de Cosmo Club Paris ?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text:
+          "Cosmo Club Paris intervient à Paris et dans toute l'Île-de-France pour les mariages, événements corporate, défilés et soirées privées. Des déplacements ponctuels sont possibles dans le reste de la France pour des événements de prestige, étudiés au cas par cas.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Sous quel délai Cosmo Club répond-il à une demande de devis ?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text:
+          "Un devis sur-mesure est envoyé sous 48 heures après la demande, à l'adresse contact@cosmoclub.fr ou via le formulaire en ligne du site cosmoclub.fr.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Quels types d'événements Cosmo Club prend-il en charge ?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text:
+          "Cosmo Club conçoit des prestations bar à cocktails et barista pour les mariages, séminaires et soirées d'entreprise, défilés, lancements de marque et soirées privées premium. Chaque carte est composée sur-mesure pour l'événement.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Cosmo Club propose-t-il des options sans alcool ?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text:
+          "Oui — chaque carte intègre systématiquement des mocktails travaillés au même niveau que les cocktails alcoolisés : créations originales, présentations soignées, jamais du soda coloré.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Cosmo Club Paris a-t-il un bar physique ?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text:
+          "Non, Cosmo Club Paris est un service événementiel mobile, pas un bar fixe. L'équipe se déplace sur le lieu choisi par le client à Paris ou en Île-de-France, sur rendez-vous.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Quelles langues sont parlées par l'équipe Cosmo Club ?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text:
+          "L'équipe Cosmo Club assure le service en français et en anglais, ce qui permet de prendre en charge sereinement les événements internationaux à Paris.",
+      },
+    },
+  ],
+};
+
 export default function Page() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <PageHeader
         eyebrow="Prenons rendez-vous"
         title="Parlons de votre"
