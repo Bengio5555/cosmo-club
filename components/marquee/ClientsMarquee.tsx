@@ -59,12 +59,12 @@ export function ClientsMarquee({
           style={{ animationDuration: "32s" }}
         >
           {useLogos
-            ? // Height-locked, width-natural: every logo renders at
-              // exactly h-10 (40 px) tall, so the dominant uniformity
-              // metric (visual height) is identical across marks. Width
-              // follows each logo's own aspect ratio, with a generous
-              // 220-px cap so very wide marks don't bulldoze the row.
-              // No outer box → no extra padding eating into the gap.
+            ? // Height-locked, width-natural: every logo renders at the
+              // same visual height across the row (the metric the eye
+              // reads as "same size"). Width follows each mark's own
+              // aspect ratio, with a generous cap so very wide logos
+              // don't bulldoze the strip. h-14 on mobile, h-16 from md
+              // up for a more present, premium feel.
               logoBlock!.map((logo, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -72,7 +72,7 @@ export function ClientsMarquee({
                   src={logo.url}
                   alt={logo.name}
                   loading="lazy"
-                  className="h-10 w-auto max-w-[220px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100"
+                  className="h-14 w-auto max-w-[280px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100 md:h-16 md:max-w-[320px]"
                 />
               ))
             : wordBlock!.map((c, i) => (
