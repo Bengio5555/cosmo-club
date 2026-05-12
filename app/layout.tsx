@@ -52,9 +52,16 @@ const organizationJsonLd = {
   alternateName: site.shortName,
   url: site.url,
   logo: `${site.url}/brand/cosmo-logo.png`,
+  image: `${site.url}/opengraph-image`,
   description: site.description,
   email: site.email,
   telephone: site.phone.replace(/\s/g, ""),
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Paris",
+    addressRegion: "Île-de-France",
+    addressCountry: "FR",
+  },
   areaServed: [
     { "@type": "City", name: "Paris" },
     { "@type": "AdministrativeArea", name: "Île-de-France" },
