@@ -58,7 +58,7 @@ export function UniversBento() {
             index="02"
             kicker="Offre signature"
             title="Barista"
-            description="Matcha · Ube · Blue · Golden Latte. Un bar instagrammable, chaud ou glacé."
+            description="Matcha · Ube · Blue · Golden Latte. Un bar chaud ou glacé."
             visual={<LatteVisual src={paths.barista} />}
           />
 
