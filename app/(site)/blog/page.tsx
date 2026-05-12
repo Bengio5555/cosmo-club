@@ -49,7 +49,7 @@ export default async function BlogIndexPage() {
                     className="group block"
                   >
                     {article.cover && (
-                      <div className="aspect-[4/3] overflow-hidden bg-[color:var(--color-cream-paper)]">
+                      <div className="aspect-[4/3] overflow-hidden rounded-lg bg-[color:var(--color-cream-paper)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={article.cover}
