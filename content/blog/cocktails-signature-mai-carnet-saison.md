@@ -13,12 +13,14 @@ keywords:
 tags:
   - "Mixologie"
   - "Carnet de saison"
-cover: "/brand/ai/hero-bar.png"
+cover: "/brand/ai/cocktails-mai/velours-grenat.png"
 ---
 
 Mai est un mois charnière dans nos cartes. Les agrumes d'hiver laissent leur place aux florales fraîches, les épices chaudes s'effacent devant les herbes vivantes. C'est le moment où la mixologie respire — moins de structure, plus de lumière. Voici trois créations que nous servons ce mois-ci en bar privé, écrites pour la saison, à composer comme on lit une partition.
 
 ## L'Effleurée
+
+![L'Effleurée — coupe vintage, gin floral, sureau, concombre, fleur comestible](/brand/ai/cocktails-mai/leffleuree.png)
 
 Un cocktail floral, presque chuchoté. Pensé pour l'apéritif d'un déjeuner en terrasse ou les premières heures d'un mariage de mai.
 
@@ -41,6 +43,8 @@ L'Effleurée ne cherche pas l'effet. Sa structure est intentionnellement minimal
 
 ## Le Velours Grenat
 
+![Le Velours Grenat — tumbler taillé, vodka, framboise, balsamique réduit, poivre rose](/brand/ai/cocktails-mai/velours-grenat.png)
+
 Une création plus dense, plus tenue, pensée pour les fins de journée et les soirées qui s'allongent. Le grenat profond fait écho à notre signature visuelle, mais c'est la complexité aromatique qui retient.
 
 **Composition (verre tumbler bas)**
@@ -62,6 +66,8 @@ Une création plus dense, plus tenue, pensée pour les fins de journée et les s
 Le balsamique réduit est la note que personne n'attend dans un cocktail aux fruits rouges, et c'est précisément ce qui le rend mémorable. Il apporte une longueur acidulée et un fond presque viandé qui contraste avec la rondeur de la framboise. Le poivre rose ferme la bouche par une chaleur légère. Pour les mariages d'automne, nous le déclinons en remplaçant la framboise par la prune.
 
 ## L'Or Solaire
+
+![L'Or Solaire — porcelaine, rhum ambré, espresso, curcuma, cardamome](/brand/ai/cocktails-mai/or-solaire.png)
 
 Une création hybride, à la croisée du bar et du barista. Servie en milieu de soirée, elle réveille les convives qui ont commencé tôt et marque la transition vers la nuit dansante.
 
