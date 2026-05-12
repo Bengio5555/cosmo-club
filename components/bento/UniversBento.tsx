@@ -58,7 +58,13 @@ export function UniversBento() {
             index="02"
             kicker="Offre signature"
             title="Barista"
-            description="Matcha · Ube · Blue · Golden Latte. Un bar chaud ou glacé."
+            description={
+              <>
+                Matcha · Ube · Blue · Golden Latte.
+                <br />
+                Un bar chaud ou glacé.
+              </>
+            }
             visual={<LatteVisual src={paths.barista} />}
           />
 
@@ -92,7 +98,7 @@ function BentoCard({
   index: string;
   kicker: string;
   title: string;
-  description: string;
+  description: React.ReactNode;
   visual: React.ReactNode;
 }) {
   return (
