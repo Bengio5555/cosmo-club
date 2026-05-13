@@ -263,6 +263,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          invited_by: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
@@ -435,7 +436,7 @@ export type Database = {
       quote_status: "brouillon" | "envoye" | "accepte" | "refuse" | "expire"
       staff_role: "barman" | "barista" | "runner" | "chef_de_salle" | "autre"
       stock_direction: "in" | "out"
-      user_role: "owner" | "staff"
+      user_role: "owner" | "admin" | "manager" | "staff" | "compta"
     }
     CompositeTypes: { [_ in never]: never }
   }

@@ -17,8 +17,10 @@ import {
   CalendarDays,
   BookText,
   Wine,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { canAccess, type UserRole } from "@/lib/auth/roles";
 import logoSrc from "@/public/brand/cosmo-logo.avif";
 
 type NavItem = {
@@ -55,13 +57,29 @@ const nav: { section: string; items: NavItem[] }[] = [
       { href: "/dashboard/images", label: "Images site", icon: ImageIcon },
       { href: "/dashboard/home-gallery", label: "Galerie home", icon: ImageIcon },
       { href: "/dashboard/logos", label: "Logos clients", icon: Building2 },
+    ],
+  },
+  {
+    section: "Configuration",
+    items: [
+      { href: "/dashboard/team", label: "Utilisateurs", icon: UserCog },
       { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
     ],
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ role }: { role: UserRole }) {
   const pathname = usePathname();
+
+  // Each section is built from items the current role can actually
+  // access. If the filter removes every item from a section, the whole
+  // section is dropped so we don't render an empty header.
+  const sections = nav
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => canAccess(item.href, role)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950 px-3 py-4 text-neutral-300 md:flex">
@@ -85,7 +103,7 @@ export function Sidebar() {
       </Link>
 
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto text-sm">
-        {nav.map((group) => (
+        {sections.map((group) => (
           <div key={group.section}>
             <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
               {group.section}

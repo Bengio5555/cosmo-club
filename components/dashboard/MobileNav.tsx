@@ -2,19 +2,45 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Inbox, FileText, Receipt, ImageIcon } from "lucide-react";
+import {
+  LayoutDashboard,
+  Inbox,
+  FileText,
+  Receipt,
+  CalendarDays,
+  Contact,
+  Wine,
+  ImageIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { canAccess, type UserRole } from "@/lib/auth/roles";
 
-const tabs = [
+type Tab = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+};
+
+// Mobile bottom nav surfaces the 5 most-used routes. The order is
+// stable; we filter by role and then take the first five so the bar
+// adapts cleanly across roles (staff sees events/cocktails first,
+// compta sees devis/factures, etc.).
+const ALL_TABS: Tab[] = [
   { href: "/dashboard", label: "Board", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/leads", label: "Leads", icon: Inbox },
   { href: "/dashboard/devis", label: "Devis", icon: FileText },
   { href: "/dashboard/factures", label: "Factures", icon: Receipt },
+  { href: "/dashboard/events", label: "Events", icon: CalendarDays },
+  { href: "/dashboard/clients", label: "Clients", icon: Contact },
+  { href: "/dashboard/cocktails", label: "Cocktails", icon: Wine },
   { href: "/dashboard/images", label: "Images", icon: ImageIcon },
 ];
 
-export function MobileNav() {
+export function MobileNav({ role }: { role: UserRole }) {
   const pathname = usePathname();
+  const tabs = ALL_TABS.filter((t) => canAccess(t.href, role)).slice(0, 5);
+
   return (
     <nav className="sticky bottom-0 z-30 flex border-t border-neutral-800 bg-neutral-950/95 backdrop-blur md:hidden">
       {tabs.map((t) => {

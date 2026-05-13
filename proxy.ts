@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/types/database";
+import { rolesForPath, type UserRole } from "@/lib/auth/roles";
 
 /**
  * Next.js 16 proxy (formerly middleware).
@@ -59,6 +60,28 @@ export async function proxy(request: NextRequest) {
     url.pathname = "/dashboard";
     url.searchParams.delete("from");
     return NextResponse.redirect(url);
+  }
+
+  // Role-based access control: every authenticated dashboard navigation
+  // (except the login + auth callback routes) must pass the role check.
+  // The proxy is the single chokepoint, so a user typing /dashboard/factures
+  // directly in the URL bar is filtered here before any page renders.
+  if (isDashboard && !isLogin && !isAuthCallback && user) {
+    const allowed = rolesForPath(pathname);
+    if (allowed.length > 0) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      const role = (profile?.role as UserRole | undefined) ?? null;
+      if (!role || !allowed.includes(role)) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        url.searchParams.set("denied", "1");
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return response;
