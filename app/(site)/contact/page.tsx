@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DevisWizard } from "@/components/form/DevisWizard";
+import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -117,38 +118,44 @@ export default function Page() {
                   <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
                     Email
                   </p>
-                  <a
+                  <TrackedAnchor
+                    event="email_click"
+                    location="contact_page"
                     href={`mailto:${site.email}`}
                     className="mt-1 block font-display text-lg text-[color:var(--color-ink-text)] transition-colors hover:text-[color:var(--color-grenat)]"
                   >
                     {site.email}
-                  </a>
+                  </TrackedAnchor>
                 </div>
 
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
                     Téléphone
                   </p>
-                  <a
+                  <TrackedAnchor
+                    event="phone_click"
+                    location="contact_page"
                     href={`tel:${site.phone}`}
                     className="mt-1 block font-display text-lg text-[color:var(--color-ink-text)] transition-colors hover:text-[color:var(--color-grenat)]"
                   >
                     {site.phoneDisplay}
-                  </a>
+                  </TrackedAnchor>
                 </div>
 
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/70">
                     Instagram
                   </p>
-                  <a
+                  <TrackedAnchor
+                    event="instagram_click"
+                    location="contact_page"
                     href={site.instagram}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-1 inline-flex items-center gap-2 font-display text-lg text-[color:var(--color-ink-text)] hover:text-[color:var(--color-grenat)]"
                   >
                     {site.instagramHandle} <span aria-hidden>↗</span>
-                  </a>
+                  </TrackedAnchor>
                 </div>
               </div>
             </div>

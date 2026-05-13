@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "motion/react";
 import { useState, useCallback } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { devisSchema, stepFields, type DevisInput, eventTypes, offers } from "@/lib/content/devis";
 import { FieldShell, Input, OptionCard, Textarea } from "./fields";
 import { cn } from "@/lib/utils";
@@ -83,6 +84,10 @@ export function DevisWizard() {
           return;
         }
         setStatus("success");
+        // KPI principal du tunnel : un visiteur qui a terminé le wizard
+        // jusqu'à l'envoi avec succès. Donne le vrai taux de conversion
+        // à comparer aux pages vues et aux clics CTA.
+        track("devis_submitted", { event_type: values.eventType ?? "non_renseigne" });
       } catch {
         setStatus("error");
         setServerError("network");
@@ -209,7 +214,11 @@ export function DevisWizard() {
             <p>
               Impossible d&apos;envoyer — réessayez dans un instant ou écrivez-nous directement à
               {" "}
-              <a href="mailto:contact@cosmoclub.fr" className="underline">
+              <a
+                href="mailto:contact@cosmoclub.fr"
+                onClick={() => track("email_click", { location: "devis_wizard_error" })}
+                className="underline"
+              >
                 contact@cosmoclub.fr
               </a>
               .
@@ -602,6 +611,7 @@ function SuccessScreen({ firstName }: { firstName: string }) {
           href="https://www.instagram.com/cosmoclubparis"
           target="_blank"
           rel="noreferrer"
+          onClick={() => track("instagram_click", { location: "devis_wizard_success" })}
           className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-grenat)] px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-grenat)] hover:bg-[color:var(--color-grenat)] hover:text-[color:var(--color-bone)] transition-colors"
         >
           @cosmoclubparis <span aria-hidden>↗</span>

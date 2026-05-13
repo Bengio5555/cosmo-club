@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { track } from "@vercel/analytics";
 import { Logo } from "./Logo";
 import { nav } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -54,6 +55,7 @@ export function Header() {
           <div className="hidden md:block">
             <Link
               href="/contact"
+              onClick={() => track("devis_cta_click", { location: "header_desktop" })}
               className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-[color:var(--color-or)]/40 px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-ink-text)] transition-colors duration-500 hover:text-[color:var(--color-bone)]"
             >
               <span className="absolute inset-0 -z-0 translate-y-full bg-[color:var(--color-grenat)] transition-transform duration-500 ease-[var(--ease-silk)] group-hover:translate-y-0" />
@@ -97,7 +99,10 @@ export function Header() {
           ))}
           <Link
             href="/contact"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              track("devis_cta_click", { location: "header_mobile" });
+              setOpen(false);
+            }}
             className="mt-6 inline-flex items-center gap-3 rounded-full border border-[color:var(--color-or)] px-6 py-3 text-xs uppercase tracking-[0.28em]"
           >
             Demander un devis

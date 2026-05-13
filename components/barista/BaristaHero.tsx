@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { track } from "@vercel/analytics";
 import { SplitText } from "@/components/motion/SplitText";
 
 /**
@@ -105,6 +106,7 @@ export function BaristaHero({ heroSrc }: { heroSrc: string }) {
           </Link>
           <Link
             href="/contact"
+            onClick={() => track("devis_cta_click", { location: "hero_barista" })}
             className="inline-flex items-center gap-3 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.32em] text-[color:var(--color-ink-text)] transition-colors hover:text-[color:var(--color-grenat)]"
           >
             <span className="h-[1px] w-6 bg-current" />

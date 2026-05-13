@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { Reveal } from "@/components/motion/Reveal";
 import { site } from "@/lib/site";
+import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
+import { TrackedNextLink } from "@/components/analytics/TrackedNextLink";
 
 export function CtaDevis() {
   return (
@@ -24,21 +25,25 @@ export function CtaDevis() {
           </p>
 
           <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
+            <TrackedNextLink
+              event="devis_cta_click"
+              location="cta_section_home"
               href="/contact"
               className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[color:var(--color-grenat)] px-10 py-5 text-[12px] uppercase tracking-[0.32em] text-[color:var(--color-bone)] transition-colors duration-500 hover:bg-[color:var(--color-grenat-glow)]"
             >
               <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-[color:var(--color-or)]/30 to-transparent transition-transform duration-[1.3s] ease-[var(--ease-silk)] group-hover:translate-x-full" />
               <span className="relative">Demander un devis</span>
               <span className="relative h-px w-8 bg-current transition-all duration-500 group-hover:w-14" />
-            </Link>
-            <a
+            </TrackedNextLink>
+            <TrackedAnchor
+              event="phone_click"
+              location="cta_section_home"
               href={`tel:${site.phone}`}
               className="inline-flex items-center gap-3 px-4 py-3 text-[12px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/80 hover:text-[color:var(--color-grenat)]"
             >
               <span className="h-px w-6 bg-current" />
               {site.phoneDisplay}
-            </a>
+            </TrackedAnchor>
           </div>
         </Reveal>
       </div>

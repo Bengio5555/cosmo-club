@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { track } from "@vercel/analytics";
 import { site } from "@/lib/site";
 import logoSrc from "@/public/brand/cosmo-logo.png";
 
@@ -110,6 +111,7 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
         >
           <Link
             href="/contact"
+            onClick={() => track("devis_cta_click", { location: "hero_home" })}
             className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[color:var(--color-grenat)] px-8 py-4 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-bone)] transition-colors duration-500 hover:bg-[color:var(--color-grenat-glow)]"
           >
             <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-[color:var(--color-or)]/30 to-transparent transition-transform duration-[1.3s] ease-[var(--ease-silk)] group-hover:translate-x-full" />

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { site, nav } from "@/lib/site";
 import { Logo } from "./Logo";
+import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
+import { TrackedNextLink } from "@/components/analytics/TrackedNextLink";
 
 export function Footer() {
   return (
@@ -39,14 +41,24 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="text-[color:var(--color-espresso)]/70">{site.address.city} — {site.address.detail}</li>
               <li>
-                <a href={`mailto:${site.email}`} className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]">
+                <TrackedAnchor
+                  event="email_click"
+                  location="footer"
+                  href={`mailto:${site.email}`}
+                  className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]"
+                >
                   {site.email}
-                </a>
+                </TrackedAnchor>
               </li>
               <li>
-                <a href={`tel:${site.phone}`} className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]">
+                <TrackedAnchor
+                  event="phone_click"
+                  location="footer"
+                  href={`tel:${site.phone}`}
+                  className="text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]"
+                >
                   {site.phoneDisplay}
-                </a>
+                </TrackedAnchor>
               </li>
             </ul>
           </div>
@@ -55,24 +67,28 @@ export function Footer() {
             <p className="eyebrow">Suivre</p>
             <ul className="space-y-3 text-sm">
               <li>
-                <a
+                <TrackedAnchor
+                  event="instagram_click"
+                  location="footer"
                   href={site.instagram}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 text-[color:var(--color-espresso)] hover:text-[color:var(--color-grenat)]"
                 >
                   Instagram <span aria-hidden>↗</span>
-                </a>
+                </TrackedAnchor>
               </li>
               <li className="text-[color:var(--color-espresso)]/70">{site.instagramHandle}</li>
             </ul>
             <div className="hairline" />
-            <Link
+            <TrackedNextLink
+              event="devis_cta_click"
+              location="footer"
               href="/contact"
               className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-[color:var(--color-grenat)] hover:text-[color:var(--color-grenat-glow)]"
             >
               Demander un devis <span aria-hidden>→</span>
-            </Link>
+            </TrackedNextLink>
           </div>
         </div>
 
