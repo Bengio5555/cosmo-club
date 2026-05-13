@@ -71,8 +71,14 @@ export function ClientsMarquee({
                   key={`${logo.id}-${i}`}
                   src={logo.url}
                   alt={logo.name}
-                  loading="lazy"
-                  className="h-14 w-auto max-w-[280px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100 md:h-16 md:max-w-[320px]"
+                  // Eager load + async decode. The marquee scrolls
+                  // horizontally so iOS Safari was unloading off-screen
+                  // images and re-fetching them on wrap, creating the
+                  // "logos disparaissent" flicker. Eager keeps them
+                  // resident; async decoding prevents jank on paint.
+                  loading="eager"
+                  decoding="async"
+                  className="h-14 w-auto min-w-[120px] max-w-[280px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100 md:h-16 md:min-w-[140px] md:max-w-[320px]"
                 />
               ))
             : wordBlock!.map((c, i) => (
