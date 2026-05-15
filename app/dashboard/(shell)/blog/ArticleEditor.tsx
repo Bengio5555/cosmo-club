@@ -12,6 +12,7 @@ import {
   type ArticleStatus,
 } from "./types";
 import { saveAndContinue, deleteArticle, uploadCover } from "./actions";
+import { AiPanel } from "./AiPanel";
 
 type Props = {
   initial: Partial<ArticleRow> & { id?: string };
@@ -298,6 +299,13 @@ export function ArticleEditor({ initial }: Props) {
               />
             </div>
           </section>
+
+          <AiPanel
+            articleId={initial.id ?? null}
+            initialGmbPost={initial.gmb_post ?? null}
+            initialGmbCoverUrl={initial.gmb_cover_url ?? null}
+            onCoverGenerated={(url) => setCoverUrl(url)}
+          />
 
           <section className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
             <h2 className="text-sm font-semibold text-white">Référencement</h2>

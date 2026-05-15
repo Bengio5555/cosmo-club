@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { canAccess } from "@/lib/auth/roles";
+import {
+  generateGmbPost,
+  generateArticleCover,
+  generateGmbCover,
+} from "@/lib/blog/ai";
 import type { ArticleStatus } from "./types";
 
 const STORAGE_BUCKET = "cosmoclub-articles";
@@ -180,4 +185,155 @@ export async function uploadCover(
   if (upErr) return { ok: false, error: upErr.message };
   const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path);
   return { ok: true, data: { url: pub.publicUrl } };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// AI generation — Phase 2
+// ──────────────────────────────────────────────────────────────────────
+
+type LoadedArticle = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  body_md: string;
+  tags: string[] | null;
+  keywords: string[] | null;
+};
+
+async function loadArticleForAI(
+  id: string,
+): Promise<{ ok: true; article: LoadedArticle } | { ok: false; error: string }> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("articles")
+    .select("id, slug, title, description, body_md, tags, keywords")
+    .eq("id", id)
+    .single();
+  if (error || !data) {
+    return { ok: false, error: error?.message ?? "Article introuvable." };
+  }
+  return { ok: true, article: data as LoadedArticle };
+}
+
+/**
+ * Generate the GMB-ready short rewrite via Claude and persist it on
+ * the article row. The author can then copy it from the editor.
+ */
+export async function generateGmbVersion(
+  id: string,
+): Promise<ActionResult<{ post: string }>> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  const loaded = await loadArticleForAI(id);
+  if (!loaded.ok) return { ok: false, error: loaded.error };
+
+  try {
+    const post = await generateGmbPost(loaded.article);
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("articles")
+      .update({ gmb_post: post })
+      .eq("id", id);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath(`/dashboard/blog/${id}`);
+    return { ok: true, data: { post } };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur Claude inconnue.";
+    return { ok: false, error: msg };
+  }
+}
+
+async function uploadGeneratedImage(
+  slug: string,
+  filenamePrefix: "cover" | "gmb-cover",
+  buf: Buffer,
+  mimeType: string,
+): Promise<{ url: string } | { error: string }> {
+  const safeSlug = (slug || "article").replace(/[^a-z0-9-]/gi, "-").toLowerCase();
+  const ext = mimeType.includes("jpeg") ? "jpg" : "png";
+  const path = `${safeSlug}/${filenamePrefix}-ai-${Date.now()}.${ext}`;
+  const admin = createAdminClient();
+  const { error } = await admin.storage.from(STORAGE_BUCKET).upload(path, buf, {
+    contentType: mimeType,
+    upsert: true,
+  });
+  if (error) return { error: error.message };
+  const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  return { url: pub.publicUrl };
+}
+
+/**
+ * Generate the 4:3 article cover via Gemini, upload to Storage,
+ * persist the public URL on the article row.
+ */
+export async function generateCoverImage(
+  id: string,
+): Promise<ActionResult<{ url: string }>> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  const loaded = await loadArticleForAI(id);
+  if (!loaded.ok) return { ok: false, error: loaded.error };
+
+  try {
+    const result = await generateArticleCover(loaded.article);
+    const uploaded = await uploadGeneratedImage(
+      loaded.article.slug,
+      "cover",
+      result.bytes,
+      result.mimeType,
+    );
+    if ("error" in uploaded) return { ok: false, error: uploaded.error };
+
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("articles")
+      .update({ cover_url: uploaded.url })
+      .eq("id", id);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath(`/dashboard/blog/${id}`);
+    return { ok: true, data: { url: uploaded.url } };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur Gemini inconnue.";
+    return { ok: false, error: msg };
+  }
+}
+
+/**
+ * Generate the 1:1 GMB variant. Stored on gmb_cover_url so we don't
+ * overwrite the site cover if the author already curated it.
+ */
+export async function generateGmbImage(
+  id: string,
+): Promise<ActionResult<{ url: string }>> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  const loaded = await loadArticleForAI(id);
+  if (!loaded.ok) return { ok: false, error: loaded.error };
+
+  try {
+    const result = await generateGmbCover(loaded.article);
+    const uploaded = await uploadGeneratedImage(
+      loaded.article.slug,
+      "gmb-cover",
+      result.bytes,
+      result.mimeType,
+    );
+    if ("error" in uploaded) return { ok: false, error: uploaded.error };
+
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("articles")
+      .update({ gmb_cover_url: uploaded.url })
+      .eq("id", id);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath(`/dashboard/blog/${id}`);
+    return { ok: true, data: { url: uploaded.url } };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur Gemini inconnue.";
+    return { ok: false, error: msg };
+  }
 }
