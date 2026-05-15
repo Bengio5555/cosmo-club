@@ -29,7 +29,7 @@ export default async function BlogIndexPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Le journal"
+        eyebrow="Le Mag"
         title="Inspirations,"
         italicWord="guides & savoir-faire."
         description="Tout ce qu'il faut savoir pour réussir votre mariage, votre événement corporate ou votre soirée privée — par les mixologues et baristas de Cosmo Club."

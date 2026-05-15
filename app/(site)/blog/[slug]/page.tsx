@@ -96,7 +96,7 @@ export default async function ArticlePage({ params }: Props) {
                 href="/blog"
                 className="transition-colors hover:text-[color:var(--color-grenat)]"
               >
-                Le journal
+                Le Mag
               </Link>
             </p>
             <h1 className="font-display text-3xl leading-[1.1] text-balance text-[color:var(--color-ink-text)] sm:text-4xl md:text-5xl">
