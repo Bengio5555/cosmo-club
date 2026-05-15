@@ -1,0 +1,183 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { canAccess } from "@/lib/auth/roles";
+import type { ArticleStatus } from "./types";
+
+const STORAGE_BUCKET = "cosmoclub-articles";
+
+type ActionOk<T = undefined> = { ok: true } & (T extends undefined ? object : { data: T });
+type ActionErr = { ok: false; error: string };
+type ActionResult<T = undefined> = ActionOk<T> | ActionErr;
+
+async function requireBlogAdmin(): Promise<{ userId: string } | { error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const role = profile?.role ?? null;
+  if (!canAccess("/dashboard/blog", role)) {
+    return { error: "Accès refusé pour ce rôle." };
+  }
+  return { userId: user.id };
+}
+
+type ArticlePayload = {
+  slug: string;
+  title: string;
+  description: string;
+  body_md: string;
+  cover_url: string | null;
+  reading_time: string | null;
+  keywords: string[];
+  tags: string[];
+  status: ArticleStatus;
+  publish_at: string;
+};
+
+function readPayload(form: FormData): ArticlePayload {
+  const raw = (key: string) => (form.get(key) ?? "").toString();
+  const csv = (key: string) =>
+    raw(key)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  return {
+    slug: raw("slug").trim(),
+    title: raw("title").trim(),
+    description: raw("description").trim(),
+    body_md: raw("body_md"),
+    cover_url: raw("cover_url").trim() || null,
+    reading_time: raw("reading_time").trim() || null,
+    keywords: csv("keywords"),
+    tags: csv("tags"),
+    status: (raw("status") as ArticleStatus) || "draft",
+    publish_at: raw("publish_at").trim() || new Date().toISOString(),
+  };
+}
+
+function validate(p: ArticlePayload): string | null {
+  if (!p.title) return "Titre manquant.";
+  if (!p.slug) return "Slug manquant.";
+  if (!/^[a-z0-9-]+$/.test(p.slug)) return "Slug invalide (a-z, 0-9, tirets uniquement).";
+  if (!p.description) return "Description manquante.";
+  if (!p.body_md) return "Corps de l'article manquant.";
+  if (!["draft", "scheduled", "published"].includes(p.status)) return "Statut invalide.";
+  return null;
+}
+
+/**
+ * Create or update an article. The admin client bypasses RLS — the
+ * gate above is the auth check.
+ */
+export async function saveArticle(
+  id: string | null,
+  formData: FormData,
+): Promise<ActionResult<{ id: string; slug: string }>> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  const payload = readPayload(formData);
+  const validation = validate(payload);
+  if (validation) return { ok: false, error: validation };
+
+  const admin = createAdminClient();
+  if (id) {
+    const { data, error } = await admin
+      .from("articles")
+      .update(payload)
+      .eq("id", id)
+      .select("id, slug")
+      .single();
+    if (error || !data) return { ok: false, error: error?.message ?? "Mise à jour échouée." };
+    revalidatePath("/dashboard/blog");
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${data.slug}`);
+    revalidatePath(`/blog/${payload.slug}`);
+    return { ok: true, data };
+  }
+
+  const { data, error } = await admin
+    .from("articles")
+    .insert({ ...payload, created_by: gate.userId })
+    .select("id, slug")
+    .single();
+  if (error || !data) return { ok: false, error: error?.message ?? "Création échouée." };
+  revalidatePath("/dashboard/blog");
+  revalidatePath("/blog");
+  revalidatePath(`/blog/${data.slug}`);
+  return { ok: true, data };
+}
+
+/**
+ * Save and redirect — used by the editor form so the page reloads on
+ * the edit URL once the row exists. Returns a string error if
+ * validation fails (the form keeps its state on failure).
+ */
+export async function saveAndContinue(
+  id: string | null,
+  formData: FormData,
+): Promise<string | void> {
+  const result = await saveArticle(id, formData);
+  if (!result.ok) return result.error;
+  redirect(`/dashboard/blog/${result.data.id}`);
+}
+
+export async function deleteArticle(id: string): Promise<ActionResult> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  const admin = createAdminClient();
+  // Fetch slug for revalidation
+  const { data: row } = await admin.from("articles").select("slug").eq("id", id).single();
+  const { error } = await admin.from("articles").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/dashboard/blog");
+  revalidatePath("/blog");
+  if (row?.slug) revalidatePath(`/blog/${row.slug}`);
+  return { ok: true };
+}
+
+/**
+ * Upload a cover image to the cosmoclub-articles bucket. Returns the
+ * public URL so the editor can preview it before the article is saved.
+ */
+export async function uploadCover(
+  articleSlugHint: string,
+  formData: FormData,
+): Promise<ActionResult<{ url: string }>> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Aucun fichier reçu." };
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return { ok: false, error: "Fichier trop volumineux (5 Mo max)." };
+  }
+  const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+  const stamp = Date.now();
+  const safeSlug = (articleSlugHint || "article").replace(/[^a-z0-9-]/gi, "-").toLowerCase();
+  const path = `${safeSlug}/cover-${stamp}.${ext}`;
+
+  const admin = createAdminClient();
+  const buf = Buffer.from(await file.arrayBuffer());
+  const { error: upErr } = await admin.storage.from(STORAGE_BUCKET).upload(path, buf, {
+    contentType: file.type || "image/png",
+    upsert: true,
+  });
+  if (upErr) return { ok: false, error: upErr.message };
+  const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  return { ok: true, data: { url: pub.publicUrl } };
+}

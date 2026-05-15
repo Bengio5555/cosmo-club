@@ -10,6 +10,29 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          description: string
+          body_md: string
+          cover_url: string | null
+          reading_time: string | null
+          keywords: string[]
+          tags: string[]
+          status: Database["public"]["Enums"]["article_status"]
+          publish_at: string
+          gmb_post: string | null
+          gmb_cover_url: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["articles"]["Row"]> & { slug: string; title: string }
+        Update: Partial<Database["public"]["Tables"]["articles"]["Row"]>
+        Relationships: []
+      }
       catalog_items: {
         Row: {
           id: string
@@ -428,6 +451,7 @@ export type Database = {
       next_credit_note_number: { Args: Record<string, never>; Returns: string }
     }
     Enums: {
+      article_status: "draft" | "scheduled" | "published"
       event_status: "a_venir" | "en_cours" | "termine" | "annule"
       event_type: "mariage" | "corporate" | "prive" | "defile" | "lancement" | "autre"
       invoice_status: "brouillon" | "envoye" | "paye" | "en_retard" | "annule"

@@ -39,7 +39,8 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   "/dashboard/stock": ["owner", "admin", "manager", "staff"],
   "/dashboard/staff": ["owner", "admin", "manager"],
 
-  // Site content (vitrine)
+  // Site content (vitrine + éditorial)
+  "/dashboard/blog": ["owner", "admin", "manager"],
   "/dashboard/images": ["owner", "admin"],
   "/dashboard/home-gallery": ["owner", "admin"],
   "/dashboard/logos": ["owner", "admin"],
