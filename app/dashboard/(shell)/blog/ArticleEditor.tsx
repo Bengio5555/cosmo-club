@@ -13,6 +13,8 @@ import {
 } from "./types";
 import { saveAndContinue, deleteArticle, uploadCover } from "./actions";
 import { AiPanel } from "./AiPanel";
+import { BriefPanel } from "./BriefPanel";
+import type { GeneratedArticle } from "@/lib/blog/ai";
 
 type Props = {
   initial: Partial<ArticleRow> & { id?: string };
@@ -60,6 +62,21 @@ export function ArticleEditor({ initial }: Props) {
   const onTitleChange = (next: string) => {
     setTitle(next);
     if (!slugTouched) setSlug(slugify(next));
+  };
+
+  // Populate the editor from an AI-generated draft. Replaces every
+  // field — the brief panel is only available on /new so we never
+  // overwrite an existing in-progress edit.
+  const applyDraft = (draft: GeneratedArticle) => {
+    setTitle(draft.title);
+    setSlug(draft.slug);
+    setSlugTouched(true);
+    setDescription(draft.description);
+    setBodyMd(draft.body_md);
+    setReadingTime(draft.reading_time);
+    setKeywords(draft.keywords.join(", "));
+    setTags(draft.tags.join(", "));
+    setTab("write");
   };
 
   const previewHtml = useMemo(() => {
@@ -225,6 +242,8 @@ export function ArticleEditor({ initial }: Props) {
 
         {/* Right column: metadata + status */}
         <div className="space-y-4">
+          {isNew && <BriefPanel onDraft={applyDraft} />}
+
           <section className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
             <h2 className="text-sm font-semibold text-white">Publication</h2>
 

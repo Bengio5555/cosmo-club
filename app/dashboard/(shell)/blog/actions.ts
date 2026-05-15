@@ -9,6 +9,9 @@ import {
   generateGmbPost,
   generateArticleCover,
   generateGmbCover,
+  generateArticleDraft,
+  type ArticleBrief,
+  type GeneratedArticle,
 } from "@/lib/blog/ai";
 import type { ArticleStatus } from "./types";
 
@@ -334,6 +337,31 @@ export async function generateGmbImage(
     return { ok: true, data: { url: uploaded.url } };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Erreur Gemini inconnue.";
+    return { ok: false, error: msg };
+  }
+}
+
+/**
+ * Generate a full article draft from a brief. Returns the generated
+ * fields so the editor can populate them client-side — does NOT
+ * persist anything to the DB yet (the author may want to tweak
+ * before saving).
+ */
+export async function draftArticleFromBrief(
+  brief: ArticleBrief,
+): Promise<ActionResult<GeneratedArticle>> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  if (!brief.topic || brief.topic.trim().length < 5) {
+    return { ok: false, error: "Décris ton sujet en quelques mots au minimum." };
+  }
+
+  try {
+    const draft = await generateArticleDraft(brief);
+    return { ok: true, data: draft };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur Claude inconnue.";
     return { ok: false, error: msg };
   }
 }
