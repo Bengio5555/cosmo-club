@@ -35,8 +35,11 @@ export function BriefPanel({ onDraft }: Props) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function onGenerate(e: React.FormEvent) {
-    e.preventDefault();
+  function onGenerate() {
+    if (!topic.trim()) {
+      setError("Décris un sujet avant de générer.");
+      return;
+    }
     setError(null);
     startTransition(async () => {
       const result = await draftArticleFromBrief({
@@ -66,10 +69,9 @@ export function BriefPanel({ onDraft }: Props) {
         Décris le sujet, choisis le public et la longueur — Claude rédige titre, chapô, corps, mots-clés, tags dans la voix Le Mag. Tu pourras tout ajuster ensuite.
       </p>
 
-      <form onSubmit={onGenerate} className="mt-4 space-y-3">
+      <div className="mt-4 space-y-3">
         <Field label="Sujet / Angle">
           <textarea
-            required
             rows={2}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
@@ -122,7 +124,8 @@ export function BriefPanel({ onDraft }: Props) {
         </Field>
 
         <button
-          type="submit"
+          type="button"
+          onClick={onGenerate}
           disabled={pending || !topic.trim()}
           className="flex w-full items-center justify-center gap-2 rounded-md bg-amber-500/20 px-4 py-2.5 text-sm font-medium text-amber-100 transition hover:bg-amber-500/30 disabled:opacity-50"
         >
@@ -139,7 +142,7 @@ export function BriefPanel({ onDraft }: Props) {
             {error}
           </div>
         )}
-      </form>
+      </div>
     </section>
   );
 }
