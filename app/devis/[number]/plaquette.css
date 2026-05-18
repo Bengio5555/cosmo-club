@@ -480,7 +480,10 @@ html {
   color: var(--ink);
   font-weight: 500;
 }
-.offer-list li span:last-child {
+/* Only apply the italic-gray "aside" style when the line has 2 spans
+   (i.e. there's actually a quantity to show on the right). Otherwise
+   the single span would inherit it and the title would render gray. */
+.offer-list li span:last-child:not(:only-child) {
   font-family: "Instrument Serif", serif;
   font-style: italic;
   font-size: 13px;
