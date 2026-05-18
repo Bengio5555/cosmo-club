@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Archive,
@@ -12,6 +12,8 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   AlertTriangle,
+  Search,
+  Download,
 } from "lucide-react";
 import type { Tables, Database } from "@/types/database";
 import {
@@ -57,6 +59,17 @@ export function StockTable({
   >(null);
 
   const productsById = new Map(products.map((p) => [p.id, p]));
+
+  // ─── Search filter (client-side, case-insensitive on name + supplier) ───
+  const [search, setSearch] = useState("");
+  const normalized = search.trim().toLowerCase();
+  const filteredProducts = useMemo(() => {
+    if (!normalized) return products;
+    return products.filter((p) => {
+      const haystack = `${p.name} ${p.supplier ?? ""}`.toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }, [products, normalized]);
 
   function submitNew(form: FormData) {
     setErr(null);
@@ -129,24 +142,90 @@ export function StockTable({
     });
   }
 
-  // Group products by category for display.
+  // Group products by category for display. Filtered by the search box.
   const grouped = new Map<Category, Product[]>();
-  for (const p of products) {
+  for (const p of filteredProducts) {
     if (p.archived) continue;
     const arr = grouped.get(p.category) ?? [];
     arr.push(p);
     grouped.set(p.category, arr);
   }
-  const archived = products.filter((p) => p.archived);
+  const archived = filteredProducts.filter((p) => p.archived);
 
   const lowStockCount = products.filter(
     (p) => !p.archived && Number(p.stock_qty) <= Number(p.min_threshold ?? 0),
   ).length;
 
+  // Inventory value (all non-archived products, qty × cost_ht).
+  // Surfaced in the toolbar and exported via the CSV button.
+  const totalValueHt = products
+    .filter((p) => !p.archived && p.cost_ht != null)
+    .reduce(
+      (sum, p) => sum + Number(p.stock_qty ?? 0) * Number(p.cost_ht ?? 0),
+      0,
+    );
+
+  function exportStockCsv() {
+    // BOM so Excel opens UTF-8 cleanly; ; separator = French locale.
+    const header = [
+      "Nom",
+      "Catégorie",
+      "Unité",
+      "Contenu",
+      "Stock",
+      "Coût HT (€)",
+      "Valeur totale HT (€)",
+      "Fournisseur",
+      "Archivé",
+    ].join(";");
+    const rows = products.map((p) => {
+      const qty = Number(p.stock_qty ?? 0);
+      const cost = p.cost_ht != null ? Number(p.cost_ht) : null;
+      const total = cost != null ? qty * cost : null;
+      const content =
+        p.content_per_unit != null
+          ? `${p.content_per_unit} ${p.content_unit ?? ""}`.trim()
+          : "";
+      return [
+        csvEscape(p.name),
+        csvEscape(p.category),
+        csvEscape(p.unit),
+        csvEscape(content),
+        formatNumber(qty),
+        cost != null ? formatNumber(cost) : "",
+        total != null ? formatNumber(total) : "",
+        csvEscape(p.supplier ?? ""),
+        p.archived ? "oui" : "",
+      ].join(";");
+    });
+    const footer = [
+      `"TOTAL valorisation HT (non archivés)"`,
+      "",
+      "",
+      "",
+      "",
+      "",
+      formatNumber(totalValueHt),
+      "",
+      "",
+    ].join(";");
+    const csv = "﻿" + [header, ...rows, "", footer].join("\n");
+    const today = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cosmo-stock-${today}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 text-xs text-neutral-500">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
           <span>
             {products.filter((p) => !p.archived).length} produit
             {products.filter((p) => !p.archived).length > 1 ? "s" : ""}
@@ -156,14 +235,37 @@ export function StockTable({
               <AlertTriangle className="h-3 w-3" /> {lowStockCount} sous seuil
             </span>
           )}
+          <span className="rounded-full border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-[10px] text-neutral-300">
+            Valorisation HT&nbsp;: <strong className="text-neutral-100">{formatEUR(totalValueHt)}</strong>
+          </span>
         </div>
-        <button
-          type="button"
-          onClick={() => setModal("new")}
-          className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)]"
-        >
-          <Plus className="h-3.5 w-3.5" /> Ajouter
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un produit…"
+              className="w-full rounded-md border border-neutral-800 bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={exportStockCsv}
+            title="Exporter la valorisation du stock pour la compta (CSV Excel)"
+            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-200 hover:border-neutral-600"
+          >
+            <Download className="h-3.5 w-3.5" /> Export compta
+          </button>
+          <button
+            type="button"
+            onClick={() => setModal("new")}
+            className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)]"
+          >
+            <Plus className="h-3.5 w-3.5" /> Ajouter
+          </button>
+        </div>
       </div>
 
       {err && (
@@ -274,6 +376,11 @@ export function StockTable({
         {products.length === 0 && (
           <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center text-sm text-neutral-500">
             Aucun produit pour l&apos;instant. Clique « Ajouter » pour commencer.
+          </div>
+        )}
+        {products.length > 0 && grouped.size === 0 && archived.length === 0 && (
+          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center text-sm text-neutral-500">
+            Aucun produit ne correspond à « {search} ».
           </div>
         )}
 
@@ -664,6 +771,18 @@ function AdjustModal({
 
 const inputCls =
   "w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+
+function csvEscape(s: string): string {
+  // CSV cells containing ; " or \n need quoting; embedded quotes get doubled.
+  const needsQuote = /[;"\n]/.test(s);
+  const escaped = s.replace(/"/g, '""');
+  return needsQuote ? `"${escaped}"` : escaped;
+}
+
+function formatNumber(n: number): string {
+  // French decimal comma for direct Excel-FR import.
+  return n.toFixed(2).replace(".", ",");
+}
 
 function Field({
   label,
