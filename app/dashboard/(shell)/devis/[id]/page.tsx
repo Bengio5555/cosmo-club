@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft, ExternalLink, Mail, Phone } from "lucide-react";
 import { DevisEditor } from "./DevisEditor";
-import { listEventImages } from "./actions";
+import { listEventImages, listMoodboardUploads } from "./actions";
 
 type Params = Promise<{ id: string }>;
 
@@ -11,15 +11,17 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: quote }, { data: items }, eventImages] = await Promise.all([
-    supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
-    supabase
-      .from("quote_items")
-      .select("*")
-      .eq("quote_id", id)
-      .order("position", { ascending: true }),
-    listEventImages(),
-  ]);
+  const [{ data: quote }, { data: items }, eventImages, moodboardUploads] =
+    await Promise.all([
+      supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
+      supabase
+        .from("quote_items")
+        .select("*")
+        .eq("quote_id", id)
+        .order("position", { ascending: true }),
+      listEventImages(),
+      listMoodboardUploads(id),
+    ]);
 
   if (!quote) {
     notFound();
@@ -45,6 +47,7 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
         items={items ?? []}
         clientEmail={client?.email ?? null}
         availableImages={eventImages.images}
+        moodboardUploads={moodboardUploads.images}
       />
 
       {client && (

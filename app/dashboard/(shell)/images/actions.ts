@@ -48,6 +48,9 @@ export async function loadDashboardImagesConfig(): Promise<Config> {
       if (!config.pages.evenements) config.pages.evenements = {};
       for (const file of files) {
         if (!file.name || file.name === ".emptyFolderPlaceholder") continue;
+        // Per-devis moodboard uploads — owned by the devis editor, not
+        // part of the public site image manager.
+        if (file.name.startsWith("devis-moodboard__")) continue;
         const { data: pub } = adminSupabase.storage
           .from(STORAGE_BUCKET)
           .getPublicUrl(file.name);

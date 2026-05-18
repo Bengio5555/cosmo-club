@@ -72,11 +72,13 @@ export function DevisEditor({
   items: initialItems,
   clientEmail,
   availableImages,
+  moodboardUploads,
 }: {
   quote: Quote;
   items: QuoteItem[];
   clientEmail?: string | null;
   availableImages: AvailableImage[];
+  moodboardUploads: AvailableImage[];
 }) {
   const router = useRouter();
   const readOnly = quote.status !== "brouillon";
@@ -578,7 +580,9 @@ export function DevisEditor({
               La photo de couverture reste fixe.
             </p>
             <MoodboardPicker
+              quoteId={quote.id}
               available={availableImages}
+              initialUploads={moodboardUploads}
               value={moodboardImages}
               onChange={setMoodboardImages}
               readOnly={readOnly}

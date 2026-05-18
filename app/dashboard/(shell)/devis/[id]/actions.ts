@@ -591,6 +591,131 @@ export async function createInvoiceFromQuote(quoteId: string) {
 }
 
 /**
+ * Filename prefix for moodboard images uploaded directly from a devis
+ * editor. Stored in the same `cosmoclub-images` bucket but excluded
+ * from the public event-gallery listing thanks to the generic
+ * `{page}__{key}__` filter (`devis-moodboard__{quoteId}__…`).
+ */
+function moodboardUploadPrefix(quoteId: string): string {
+  return `devis-moodboard__${quoteId}__`;
+}
+
+/**
+ * Upload a one-off photo for a specific devis's moodboard from the
+ * editor. Lands in the shared bucket with a `devis-moodboard__{id}__`
+ * prefix so it never pollutes the public event gallery.
+ *
+ * Returns the public URL of the freshly uploaded image so the picker
+ * can append it to the selection immediately.
+ */
+export async function uploadMoodboardImage(quoteId: string, formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, error: "Non authentifié" };
+
+  if (!quoteId) return { ok: false as const, error: "Devis manquant." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File))
+    return { ok: false as const, error: "Fichier manquant." };
+  if (!file.type.startsWith("image/"))
+    return { ok: false as const, error: "Le fichier doit être une image." };
+  if (file.size > 10 * 1024 * 1024)
+    return { ok: false as const, error: "Image trop lourde (max 10 Mo)." };
+
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const slug =
+    file.name
+      .replace(/\.[^.]+$/, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 40) || "photo";
+  const filename = `${moodboardUploadPrefix(quoteId)}${slug}-${Date.now()}.${ext}`;
+
+  try {
+    const adminSupabase = createAdminClient();
+    const buffer = await file.arrayBuffer();
+    const { error } = await adminSupabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filename, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+    if (error) return { ok: false as const, error: error.message };
+
+    const { data: pub } = adminSupabase.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(filename);
+    if (!pub?.publicUrl) {
+      return { ok: false as const, error: "URL publique introuvable." };
+    }
+
+    revalidatePath(`/dashboard/devis/${quoteId}`);
+    return {
+      ok: true as const,
+      image: { url: pub.publicUrl, name: slug },
+    };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Échec d'upload.",
+    };
+  }
+}
+
+/**
+ * List the per-devis moodboard uploads (files prefixed with
+ * `devis-moodboard__{quoteId}__`). Returned so the picker can keep
+ * showing them on subsequent edits.
+ */
+export async function listMoodboardUploads(quoteId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, error: "Non authentifié", images: [] };
+
+  try {
+    const adminSupabase = createAdminClient();
+    const { data: files, error } = await adminSupabase.storage
+      .from(STORAGE_BUCKET)
+      .list("", {
+        limit: 1000,
+        sortBy: { column: "created_at", order: "desc" },
+        search: moodboardUploadPrefix(quoteId),
+      });
+    if (error) {
+      return { ok: false as const, error: error.message, images: [] };
+    }
+
+    const prefix = moodboardUploadPrefix(quoteId);
+    const images: { url: string; name: string }[] = [];
+    for (const file of files ?? []) {
+      if (!file.name?.startsWith(prefix)) continue;
+      const { data: pub } = adminSupabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(file.name);
+      if (pub?.publicUrl) {
+        images.push({
+          url: pub.publicUrl,
+          name: file.name.slice(prefix.length).replace(/\.[^.]+$/, ""),
+        });
+      }
+    }
+    return { ok: true as const, images };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Listing échoué.",
+      images: [],
+    };
+  }
+}
+
+/**
  * List images available for the moodboard picker — the event-gallery
  * photos that live in the `cosmoclub-images` Storage bucket without a
  * `{page}__{key}__` prefix (those prefixed ones are slot-targeted
