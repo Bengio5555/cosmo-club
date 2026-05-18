@@ -291,12 +291,6 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
           ))}
         </div>
 
-        <p className="moodboard-caption">
-          Grenat profond, dorures subtiles, lumières basses. Un bar
-          scénographié comme une pièce montée liquide — pensé pour être
-          photographié autant que dégusté.
-        </p>
-
         <div className="page-number">— iii —</div>
       </section>
 
