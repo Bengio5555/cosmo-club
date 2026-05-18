@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import type { Tables, Database } from "@/types/database";
 import {
   deleteStaff,
@@ -33,8 +33,36 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
   const [err, setErr] = useState<string | null>(null);
   const [modal, setModal] = useState<"new" | { edit: Staff } | null>(null);
 
-  const active = staff.filter((s) => !s.archived);
-  const archived = staff.filter((s) => s.archived);
+  // ─── Search + role filter ───────────────────────────────
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<StaffRole | "all">("all");
+  const normalized = search.trim().toLowerCase();
+
+  const visibleStaff = useMemo(() => {
+    return staff.filter((s) => {
+      if (roleFilter !== "all" && s.role !== roleFilter) return false;
+      if (!normalized) return true;
+      const haystack = [
+        s.full_name,
+        s.email ?? "",
+        s.phone ?? "",
+        ROLE_LABEL[s.role],
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }, [staff, roleFilter, normalized]);
+
+  const active = visibleStaff.filter((s) => !s.archived);
+  const archived = visibleStaff.filter((s) => s.archived);
+
+  // Counts per role (on full list, not filtered) for the pill badges.
+  const countByRole = useMemo(() => {
+    const m: Record<string, number> = { all: staff.length };
+    for (const s of staff) m[s.role] = (m[s.role] ?? 0) + 1;
+    return m;
+  }, [staff]);
 
   function submitNew(form: FormData) {
     setErr(null);
@@ -108,18 +136,69 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p className="text-xs text-neutral-500">
           {active.length} actif{active.length > 1 ? "s" : ""}
           {archived.length > 0 && ` · ${archived.length} archivé${archived.length > 1 ? "s" : ""}`}
+          {(roleFilter !== "all" || normalized) && staff.length > 0 && (
+            <span className="ml-1 text-neutral-600">
+              · sur {staff.length} au total
+            </span>
+          )}
         </p>
-        <button
-          type="button"
-          onClick={() => setModal("new")}
-          className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)]"
-        >
-          <Plus className="h-3.5 w-3.5" /> Ajouter
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un membre…"
+              className="w-full rounded-md border border-neutral-800 bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setModal("new")}
+            className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)]"
+          >
+            <Plus className="h-3.5 w-3.5" /> Ajouter
+          </button>
+        </div>
+      </div>
+
+      {/* Role filter pills */}
+      <div className="mb-4 flex flex-wrap items-center gap-1.5">
+        {(
+          [
+            { value: "all" as const, label: "Tous" },
+            ...ROLE_OPTIONS.map((r) => ({ value: r.value, label: r.label })),
+          ]
+        ).map((opt) => {
+          const isActive = roleFilter === opt.value;
+          const count = countByRole[opt.value] ?? 0;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setRoleFilter(opt.value)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                isActive
+                  ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/15 text-white"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-700 hover:text-neutral-200"
+              }`}
+            >
+              {opt.label}
+              <span
+                className={`rounded-full px-1.5 text-[10px] font-mono ${
+                  isActive ? "bg-[color:var(--color-grenat)]/30" : "bg-neutral-800"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {err && (
@@ -132,6 +211,15 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
         {staff.length === 0 ? (
           <div className="p-8 text-center text-sm text-neutral-500">
             Aucun membre d&apos;équipe. Clique « Ajouter » pour commencer.
+          </div>
+        ) : visibleStaff.length === 0 ? (
+          <div className="p-8 text-center text-sm text-neutral-500">
+            Aucun membre ne correspond
+            {normalized ? <> à « <span className="text-neutral-300">{search}</span> »</> : null}
+            {roleFilter !== "all"
+              ? <> dans la catégorie <span className="text-neutral-300">{ROLE_LABEL[roleFilter]}</span></>
+              : null}
+            .
           </div>
         ) : (
           <table className="w-full text-left text-sm">
