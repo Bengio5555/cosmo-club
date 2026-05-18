@@ -19,6 +19,8 @@ import {
   Wine,
   UserCog,
   Newspaper,
+  Truck,
+  Network,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccess, type UserRole } from "@/lib/auth/roles";
@@ -50,6 +52,8 @@ const nav: { section: string; items: NavItem[] }[] = [
       { href: "/dashboard/cocktails", label: "Cocktails", icon: Wine },
       { href: "/dashboard/stock", label: "Stock", icon: Package },
       { href: "/dashboard/staff", label: "Équipe", icon: Users },
+      { href: "/dashboard/providers", label: "Prestataires", icon: Truck },
+      { href: "/dashboard/partners", label: "Partenaires réseau", icon: Network },
     ],
   },
   {

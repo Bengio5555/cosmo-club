@@ -225,6 +225,51 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["leads"]["Row"]>
         Relationships: []
       }
+      partners: {
+        Row: {
+          archived: boolean
+          category: string
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          email_alt: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          position: string | null
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["partners"]["Row"]> & {
+          category: string
+          name: string
+        }
+        Update: Partial<Database["public"]["Tables"]["partners"]["Row"]>
+        Relationships: []
+      }
+      providers: {
+        Row: {
+          archived: boolean
+          category: string
+          company_name: string | null
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          pricing_info: string | null
+          service_type: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["providers"]["Row"]> & {
+          category: string
+        }
+        Update: Partial<Database["public"]["Tables"]["providers"]["Row"]>
+        Relationships: []
+      }
       products: {
         Row: {
           archived: boolean
