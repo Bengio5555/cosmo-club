@@ -361,12 +361,15 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
                   </div>
                   <h3 className="offer-card-title">{sectionName}</h3>
                   <ul className="offer-list">
-                    {(sectionItems ?? []).map((it) => (
-                      <li key={it.id}>
-                        <span>{it.title}</span>
-                        <span>{buildItemAside(it)}</span>
-                      </li>
-                    ))}
+                    {(sectionItems ?? []).map((it) => {
+                      const aside = buildItemAside(it);
+                      return (
+                        <li key={it.id}>
+                          <span>{it.title}</span>
+                          {aside && <span>{aside}</span>}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}
@@ -650,19 +653,19 @@ function buildMarquee(
 }
 
 /**
- * Right-column label of an offer list line: the qty with unit if > 1,
- * or the unit price. Falls back to "inclus".
+ * Right-column label of an offer list line: only the qty with unit
+ * when > 1. We deliberately omit any € amount here — the chiffrage
+ * section is the single place where the client sees prices, so the
+ * "proposition" page stays editorial and not transactional.
  */
 function buildItemAside(it: {
   qty: number | null;
   unit: string | null;
-  unit_price_ht: number | null;
 }): string {
   const qty = it.qty ?? 0;
   if (qty > 1 && it.unit) return `${qty} ${it.unit}`;
   if (qty > 1) return String(qty);
-  if (it.unit_price_ht && it.unit_price_ht > 0) return formatEUR(it.unit_price_ht);
-  return "inclus";
+  return "";
 }
 
 /**
