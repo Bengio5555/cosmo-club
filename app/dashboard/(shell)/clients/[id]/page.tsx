@@ -131,9 +131,15 @@ export default async function ClientDetailPage({
             <p className="text-[11px] uppercase tracking-wide text-neutral-500">
               Client
               {client.company_name && " · B2B"}
+              {client.archived && " · archivé"}
             </p>
             <h1 className="font-display text-2xl text-white md:text-3xl">
               {displayName}
+              {client.archived && (
+                <span className="ml-3 align-middle rounded-full border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+                  Archivé
+                </span>
+              )}
             </h1>
             {client.company_name &&
               (client.first_name || client.last_name) && (
@@ -171,6 +177,7 @@ export default async function ClientDetailPage({
 
           <ClientActions
             clientId={client.id}
+            archived={client.archived}
             hasRefs={
               (leads?.length ?? 0) +
                 (quotes?.length ?? 0) +

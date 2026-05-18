@@ -52,6 +52,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          archived: boolean
           billing_address: string | null
           city: string | null
           company_name: string | null

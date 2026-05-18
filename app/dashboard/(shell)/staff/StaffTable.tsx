@@ -2,9 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArchiveRestore, Loader2, Pencil, Plus, X } from "lucide-react";
+import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import type { Tables, Database } from "@/types/database";
-import { saveNewStaff, saveStaff, toggleStaffArchived, type StaffInput } from "./actions";
+import {
+  deleteStaff,
+  saveNewStaff,
+  saveStaff,
+  toggleStaffArchived,
+  type StaffInput,
+} from "./actions";
 
 type Staff = Tables<"staff">;
 type StaffRole = Database["public"]["Enums"]["staff_role"];
@@ -79,6 +85,22 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
   function toggleArchive(id: string, currentlyArchived: boolean) {
     startTransition(async () => {
       const res = await toggleStaffArchived(id, !currentlyArchived);
+      if (!res.ok) setErr(res.error);
+      else router.refresh();
+    });
+  }
+
+  function doDelete(s: Staff) {
+    if (
+      !window.confirm(
+        `Supprimer définitivement ${s.full_name} ?\nCette action est irréversible. (Si ${s.full_name} est lié à des événements passés, archive plutôt.)`,
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      setErr(null);
+      const res = await deleteStaff(s.id);
       if (!res.ok) setErr(res.error);
       else router.refresh();
     });
@@ -174,6 +196,16 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
                         ) : (
                           <Archive className="h-3.5 w-3.5" />
                         )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => doDelete(s)}
+                        disabled={pending}
+                        className="rounded p-1.5 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                        aria-label="Supprimer"
+                        title="Supprimer définitivement"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </td>

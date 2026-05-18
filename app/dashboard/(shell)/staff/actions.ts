@@ -80,3 +80,25 @@ export async function toggleStaffArchived(id: string, archived: boolean) {
   revalidatePath("/dashboard/staff");
   return { ok: true as const };
 }
+
+/**
+ * Hard delete a staff member. Fails (FK violation) if the person is
+ * still attached to any past event via `event_staff`. In that case the
+ * UI should suggest archiving instead.
+ */
+export async function deleteStaff(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("staff").delete().eq("id", id);
+  if (error) {
+    if (error.code === "23503") {
+      return {
+        ok: false as const,
+        error:
+          "Impossible de supprimer : ce membre est lié à un ou plusieurs événements. Archive-le pour le masquer sans casser l'historique.",
+      };
+    }
+    return { ok: false as const, error: error.message };
+  }
+  revalidatePath("/dashboard/staff");
+  return { ok: true as const };
+}

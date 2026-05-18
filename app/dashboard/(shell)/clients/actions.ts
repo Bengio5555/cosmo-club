@@ -135,6 +135,25 @@ export async function saveClient(id: string, input: ClientInput) {
 }
 
 /**
+ * Soft-archive (or unarchive) a client. The row stays in the database so
+ * historical leads / devis / factures keep their reference — it's just
+ * hidden from the default client list and prompted as "archivé" in the
+ * fiche client. Use this when a client is no longer active but the
+ * history matters (it almost always does for compta).
+ */
+export async function setClientArchived(id: string, archived: boolean) {
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("clients")
+    .update({ archived })
+    .eq("id", id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath("/dashboard/clients");
+  revalidatePath(`/dashboard/clients/${id}`);
+  return { ok: true as const };
+}
+
+/**
  * Delete a client — only if nothing references it. We refuse on any
  * related leads / devis / factures to avoid orphaning historical data.
  * The UI should surface the counts so the owner knows why.

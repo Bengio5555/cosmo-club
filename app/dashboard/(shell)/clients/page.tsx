@@ -4,23 +4,26 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { NewClientButton } from "./NewClientButton";
 
-type SP = Promise<{ q?: string }>;
+type SP = Promise<{ q?: string; archived?: string }>;
 
 export default async function ClientsListPage({
   searchParams,
 }: {
   searchParams: SP;
 }) {
-  const { q } = await searchParams;
+  const { q, archived } = await searchParams;
   const query = (q ?? "").trim();
+  const showArchived = archived === "1";
   const supabase = await createClient();
 
   // Base query — optional search by name/company/email.
+  // Archived clients are hidden by default; surface them when ?archived=1.
   let builder = supabase
     .from("clients")
     .select(
-      "id,first_name,last_name,company_name,email,phone,city,created_at,updated_at",
+      "id,first_name,last_name,company_name,email,phone,city,created_at,updated_at,archived",
     )
+    .eq("archived", showArchived)
     .order("updated_at", { ascending: false })
     .limit(300);
 
@@ -32,6 +35,12 @@ export default async function ClientsListPage({
   }
 
   const { data: clients, error } = await builder;
+
+  // Count archived to surface a "Voir archivés (N)" link.
+  const { count: archivedCount } = await supabase
+    .from("clients")
+    .select("*", { count: "exact", head: true })
+    .eq("archived", true);
 
   // Pull ALL issued invoices in one query and aggregate in JS. Cheap for
   // the <1k rows we'll have; saves a Postgres GROUP BY roundtrip per
@@ -107,7 +116,7 @@ export default async function ClientsListPage({
 
       <form
         method="GET"
-        className="mb-4 flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 p-2.5"
+        className="mb-2 flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 p-2.5"
       >
         <Search className="ml-1 h-3.5 w-3.5 text-neutral-500" />
         <input
@@ -117,9 +126,10 @@ export default async function ClientsListPage({
           placeholder="Rechercher par nom, société, email…"
           className="flex-1 bg-transparent text-sm text-white placeholder:text-neutral-600 focus:outline-none"
         />
+        {showArchived && <input type="hidden" name="archived" value="1" />}
         {query && (
           <Link
-            href="/dashboard/clients"
+            href={showArchived ? "/dashboard/clients?archived=1" : "/dashboard/clients"}
             className="rounded-md border border-transparent px-2 py-1 text-[11px] text-neutral-400 hover:text-white"
           >
             Effacer
@@ -132,6 +142,26 @@ export default async function ClientsListPage({
           Filtrer
         </button>
       </form>
+
+      <div className="mb-4 flex items-center gap-3 text-[11px] text-neutral-500">
+        {showArchived ? (
+          <Link
+            href="/dashboard/clients"
+            className="inline-flex items-center gap-1 rounded-full border border-neutral-800 bg-neutral-900 px-2.5 py-1 text-neutral-300 hover:border-neutral-600"
+          >
+            ← Voir les clients actifs
+          </Link>
+        ) : (
+          (archivedCount ?? 0) > 0 && (
+            <Link
+              href="/dashboard/clients?archived=1"
+              className="inline-flex items-center gap-1 rounded-full border border-neutral-800 bg-neutral-900 px-2.5 py-1 text-neutral-400 hover:border-neutral-600 hover:text-neutral-200"
+            >
+              Voir les archivés · {archivedCount}
+            </Link>
+          )
+        )}
+      </div>
 
       {(sortedClients.length > 0 || query) && (
         <div className="mb-4 grid grid-cols-3 gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-3 text-center">

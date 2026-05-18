@@ -2,15 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FilePlus2, Loader2, Trash2 } from "lucide-react";
-import { createQuoteForClient, deleteClient } from "../actions";
+import { Archive, ArchiveRestore, FilePlus2, Loader2, Trash2 } from "lucide-react";
+import { createQuoteForClient, deleteClient, setClientArchived } from "../actions";
 
 export function ClientActions({
   clientId,
   hasRefs,
+  archived,
 }: {
   clientId: string;
   hasRefs: boolean;
+  archived: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -42,6 +44,18 @@ export function ClientActions({
     });
   }
 
+  function toggleArchive() {
+    startTransition(async () => {
+      setErr(null);
+      const res = await setClientArchived(clientId, !archived);
+      if (!res.ok) {
+        setErr(res.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
   return (
     <div className="flex flex-col items-stretch gap-2 md:items-end">
       <div className="flex flex-wrap gap-2">
@@ -57,6 +71,23 @@ export function ClientActions({
             <FilePlus2 className="h-3 w-3" />
           )}
           Nouveau devis
+        </button>
+        <button
+          type="button"
+          onClick={toggleArchive}
+          disabled={pending}
+          className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white disabled:opacity-60"
+          title={archived ? "Désarchiver" : "Archiver (masquer du listing)"}
+        >
+          {archived ? (
+            <>
+              <ArchiveRestore className="h-3 w-3" /> Désarchiver
+            </>
+          ) : (
+            <>
+              <Archive className="h-3 w-3" /> Archiver
+            </>
+          )}
         </button>
         {!hasRefs && (
           <button
