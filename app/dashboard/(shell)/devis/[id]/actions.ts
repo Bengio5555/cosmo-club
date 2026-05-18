@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
+import { MOODBOARD_MAX } from "./moodboard-config";
+
+const STORAGE_BUCKET = "cosmoclub-images";
 
 type Quote = Database["public"]["Tables"]["quotes"]["Row"];
 type QuoteItemInput = {
@@ -43,6 +47,12 @@ export type SaveQuoteInput = {
    * back to the default offer photo).
    */
   schedule: ScheduleItem[];
+  /**
+   * Owner-picked moodboard images for the plaquette. Each entry is the
+   * public URL of an image living in the `cosmoclub-images` Storage
+   * bucket. Empty array = use the brand-default moodboard.
+   */
+  moodboard_images: string[];
   items: QuoteItemInput[];
 };
 
@@ -58,6 +68,30 @@ function round2(n: number) {
  * - Pads time to HH:MM (handles `9:30` and `09:30`).
  * - Caps to 30 steps so the JSON column stays small.
  */
+/**
+ * Sanitize the moodboard image list before persisting.
+ *  - Drops anything that isn't a string URL.
+ *  - Only accepts http(s) URLs or site-relative paths starting with "/".
+ *  - Deduplicates and caps at MOODBOARD_MAX so the plaquette grid stays
+ *    within the styled range.
+ */
+function sanitizeMoodboard(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of input) {
+    if (typeof raw !== "string") continue;
+    const s = raw.trim();
+    if (!s) continue;
+    if (!/^(https?:\/\/|\/)/.test(s)) continue;
+    if (seen.has(s)) continue;
+    seen.add(s);
+    out.push(s);
+    if (out.length >= MOODBOARD_MAX) break;
+  }
+  return out;
+}
+
 function sanitizeSchedule(input: ScheduleItem[] | undefined): ScheduleItem[] {
   if (!Array.isArray(input)) return [];
   const out: ScheduleItem[] = [];
@@ -201,6 +235,7 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
       commission_rate: commissionRate,
       valid_until: input.valid_until,
       schedule: sanitizeSchedule(input.schedule),
+      moodboard_images: sanitizeMoodboard(input.moodboard_images),
       total_ht: totalHt,
       total_tva: totalTva,
       total_ttc: totalTtc,
@@ -553,6 +588,60 @@ export async function createInvoiceFromQuote(quoteId: string) {
   revalidatePath("/dashboard");
 
   return { ok: true as const, invoiceId: invoice.id, created: true };
+}
+
+/**
+ * List images available for the moodboard picker — the event-gallery
+ * photos that live in the `cosmoclub-images` Storage bucket without a
+ * `{page}__{key}__` prefix (those prefixed ones are slot-targeted
+ * uploads for the public site and don't belong in an event moodboard).
+ *
+ * Returns `{ url, name }[]`, newest first.
+ */
+export async function listEventImages() {
+  // Authenticated owners only — same gate as the rest of the editor.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, error: "Non authentifié", images: [] };
+
+  try {
+    const adminSupabase = createAdminClient();
+    const { data: files, error } = await adminSupabase.storage
+      .from(STORAGE_BUCKET)
+      .list("", {
+        limit: 1000,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+    if (error) {
+      return { ok: false as const, error: error.message, images: [] };
+    }
+
+    const images: { url: string; name: string }[] = [];
+    for (const file of files ?? []) {
+      if (!file.name || file.name === ".emptyFolderPlaceholder") continue;
+      // Skip slot-targeted uploads (page__key__name.ext) — those are
+      // bound to a specific public-site slot, not gallery photos.
+      if (/^[^_]+__[^_]+__/.test(file.name)) continue;
+      const { data: pub } = adminSupabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(file.name);
+      if (pub?.publicUrl) {
+        images.push({
+          url: pub.publicUrl,
+          name: file.name.replace(/\.[^.]+$/, ""),
+        });
+      }
+    }
+    return { ok: true as const, images };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Listing échoué.",
+      images: [],
+    };
+  }
 }
 
 export async function deleteQuote(id: string) {

@@ -12,8 +12,9 @@ type Params = Promise<{ number: string }>;
 // client received in their email.
 const PUBLIC_STATUSES = ["envoye", "accepte", "refuse", "expire"] as const;
 
-// Default moodboard — 8 visuals from the public site. Good enough for a
-// polished first-send; later we can let the owner override per-quote.
+// Default moodboard — 8 visuals from the public site. Used as a
+// fallback when the owner hasn't picked anything from the event
+// gallery via the dashboard editor.
 const MOODBOARD: string[] = [
   "/brand/ai/gallery-event.png",
   "/brand/ai/bento-bar-cocktails.png",
@@ -25,8 +26,12 @@ const MOODBOARD: string[] = [
   "/brand/ai/pastilles.png",
 ];
 
-const DEFAULT_COVER = "/brand/ai/hero-bar-cocktails.png";
+const DEFAULT_COVER = "/brand/devis/cover-cocktail-chili.jpg";
 const DEFAULT_OFFER_IMAGE = "/brand/ai/bento-bar-cocktails.png";
+
+// Cap aligned with the dashboard picker. The moodboard layout adapts
+// (1–8 photos, see plaquette.css `.moodboard-grid--N`).
+const MOODBOARD_MAX = 8;
 
 const DEFAULT_COCKTAILS = [
   "Cosmopolitan",
@@ -152,6 +157,15 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
       ? `${DEFAULT_TOTALS_NOTE}\n\n${settings.penalty_rate_text}`
       : DEFAULT_TOTALS_NOTE;
 
+  // Moodboard: owner-picked images from the event gallery if any,
+  // otherwise the brand default. Capped at MOODBOARD_MAX so the grid
+  // CSS never gets a count it doesn't have a class for.
+  const moodboardImages = sanitizeMoodboard(
+    (quote as { moodboard_images?: unknown }).moodboard_images,
+  );
+  const moodboardToRender =
+    moodboardImages.length > 0 ? moodboardImages : MOODBOARD.slice(0, MOODBOARD_MAX);
+
   return (
     <div className="plaquette-body">
       <NavDots />
@@ -265,8 +279,10 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
           </h2>
         </div>
 
-        <div className="moodboard-grid">
-          {MOODBOARD.slice(0, 8).map((src, i) => (
+        <div
+          className={`moodboard-grid moodboard-grid--${moodboardToRender.length}`}
+        >
+          {moodboardToRender.map((src, i) => (
             <div
               key={i}
               className={`mb-img mb-${i + 1}`}
@@ -369,9 +385,8 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
 
       {/* ============ 05 — PRICING ============ */}
       <section id="chiffrage" className="pricing">
-        <span className="page-mark" style={{ color: "rgba(245,241,232,0.4)" }}>
-          — 05 —
-        </span>
+        <div className="brand-mark">COSMO CLUB</div>
+        <span className="page-mark">— 05 —</span>
 
         <div className="pricing-header">
           <h2>
@@ -468,9 +483,7 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
           </div>
         </div>
 
-        <div className="page-number" style={{ color: "rgba(245,241,232,0.4)" }}>
-          — v —
-        </div>
+        <div className="page-number">— v —</div>
       </section>
 
       {/* ============ 06 — SIGNATURE ============ */}
@@ -685,4 +698,24 @@ function splitTerms(
 function truncate(s: string, max: number): string {
   if (s.length <= max) return s;
   return s.slice(0, max - 1).trimEnd() + "…";
+}
+
+/**
+ * Parse the persisted `moodboard_images` JSONB column into a clean
+ * string[] of URLs. Drops anything that isn't an absolute URL or a
+ * site-relative path; capped at MOODBOARD_MAX so the layout never gets
+ * a count it isn't styled for.
+ */
+function sanitizeMoodboard(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const r of raw) {
+    if (typeof r !== "string") continue;
+    const s = r.trim();
+    if (!s) continue;
+    if (!/^(https?:\/\/|\/)/.test(s)) continue;
+    out.push(s);
+    if (out.length >= MOODBOARD_MAX) break;
+  }
+  return out;
 }

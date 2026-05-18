@@ -25,6 +25,7 @@ import {
   type ScheduleItem,
 } from "./actions";
 import { CatalogPicker, type PickedItem } from "./CatalogPicker";
+import { MoodboardPicker, type AvailableImage } from "./MoodboardPicker";
 import { Receipt, CalendarPlus } from "lucide-react";
 import { createEventFromQuote } from "../../events/actions";
 
@@ -70,10 +71,12 @@ export function DevisEditor({
   quote,
   items: initialItems,
   clientEmail,
+  availableImages,
 }: {
   quote: Quote;
   items: QuoteItem[];
   clientEmail?: string | null;
+  availableImages: AvailableImage[];
 }) {
   const router = useRouter();
   const readOnly = quote.status !== "brouillon";
@@ -103,6 +106,14 @@ export function DevisEditor({
   const [validUntil, setValidUntil] = useState<string>(
     quote.valid_until ? quote.valid_until.slice(0, 10) : "",
   );
+
+  // Picked moodboard images for the plaquette. Stored as JSONB
+  // (string array of public URLs); coerce defensively on load.
+  const [moodboardImages, setMoodboardImages] = useState<string[]>(() => {
+    const raw = (quote as { moodboard_images?: unknown }).moodboard_images;
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((r): r is string => typeof r === "string" && r.trim().length > 0);
+  });
 
   // Run-of-show steps. Stored as JSONB in DB; the column may be null
   // or may contain other shapes if migrated from older data, so we
@@ -203,6 +214,7 @@ export function DevisEditor({
       commission_rate: commissionRateNum,
       valid_until: validUntil || null,
       schedule,
+      moodboard_images: moodboardImages,
       items: items.map((it, i) => ({
         id: it.dbId,
         position: i,
@@ -556,6 +568,20 @@ export function DevisEditor({
               readOnly={readOnly}
               rows={4}
               placeholder="Acompte 30% à la signature, solde 7 jours avant l'événement…"
+            />
+          </Card>
+
+          <Card title="Moodboard de la plaquette">
+            <p className="text-[11px] leading-relaxed text-neutral-500">
+              Choisis jusqu&apos;à 8 photos parmi la galerie événements
+              pour personnaliser le moodboard. Vide = visuels par défaut.
+              La photo de couverture reste fixe.
+            </p>
+            <MoodboardPicker
+              available={availableImages}
+              value={moodboardImages}
+              onChange={setMoodboardImages}
+              readOnly={readOnly}
             />
           </Card>
         </div>

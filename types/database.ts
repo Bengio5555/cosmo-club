@@ -329,6 +329,7 @@ export type Database = {
           intro: string | null
           issue_date: string
           lead_id: string | null
+          moodboard_images: Json
           number: string
           pdf_url: string | null
           refused_at: string | null

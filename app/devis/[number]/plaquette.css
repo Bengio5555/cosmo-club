@@ -382,6 +382,18 @@ html {
 .mb-7 { grid-column: 10 / 13; grid-row: 4 / 6; }
 .mb-8 { grid-column: 6 / 10; grid-row: 5 / 6; }
 
+/* The named .mb-N positions only fit the canonical 8-image layout.
+   For any other count, fall back to a uniform auto-flow grid so the
+   picked images stay balanced regardless of how many were selected. */
+.moodboard-grid:not(.moodboard-grid--8) {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-auto-rows: 280px;
+}
+.moodboard-grid:not(.moodboard-grid--8) .mb-img {
+  grid-column: auto;
+  grid-row: auto;
+}
+
 .moodboard-caption {
   margin-top: 48px;
   max-width: 640px;
@@ -478,8 +490,8 @@ html {
 
 /* ============ PRICING ============ */
 .pricing {
-  background: var(--noir);
-  color: var(--cream);
+  background: var(--cream);
+  color: var(--ink);
   padding: 120px 80px;
   position: relative;
 }
@@ -489,7 +501,7 @@ html {
   align-items: flex-end;
   margin-bottom: 72px;
   padding-bottom: 32px;
-  border-bottom: 1px solid rgba(245, 241, 232, 0.15);
+  border-bottom: 1px solid var(--line);
   gap: 32px;
   flex-wrap: wrap;
 }
@@ -499,16 +511,17 @@ html {
   font-weight: 300;
   line-height: 1;
   letter-spacing: -0.03em;
+  color: var(--ink);
 }
 .pricing-header h2 em {
   font-style: italic;
-  color: var(--gold);
+  color: var(--grenat);
 }
 .pricing-badge {
   font-family: "Instrument Serif", serif;
   font-style: italic;
   font-size: 16px;
-  color: var(--gold);
+  color: var(--grenat);
   text-align: right;
   line-height: 1.4;
 }
@@ -519,7 +532,7 @@ html {
   font-size: 10px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: rgba(245, 241, 232, 0.6);
+  color: var(--muted);
   margin-bottom: 8px;
 }
 .price-table {
@@ -531,20 +544,20 @@ html {
   font-family: "Instrument Serif", serif;
   font-style: italic;
   font-size: 18px;
-  color: var(--gold);
+  color: var(--grenat);
   letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(201, 169, 97, 0.3);
+  border-bottom: 1px solid rgba(139, 26, 26, 0.25);
 }
 .price-table td {
   padding: 16px 0;
-  border-bottom: 1px solid rgba(245, 241, 232, 0.1);
+  border-bottom: 1px solid var(--line);
   font-size: 15px;
   vertical-align: top;
 }
 .price-table td:nth-child(1) { width: 45%; }
 .price-table td:nth-child(1) strong {
   font-weight: 500;
-  color: var(--cream);
+  color: var(--ink);
   display: block;
   margin-bottom: 4px;
 }
@@ -552,12 +565,12 @@ html {
   font-family: "Instrument Serif", serif;
   font-style: italic;
   font-size: 13px;
-  color: rgba(245, 241, 232, 0.5);
+  color: var(--ink-soft);
 }
 .price-table td:nth-child(2),
 .price-table td:nth-child(3) {
   text-align: right;
-  color: rgba(245, 241, 232, 0.7);
+  color: var(--ink-soft);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
@@ -566,7 +579,7 @@ html {
   text-align: right;
   font-family: "Fraunces", serif;
   font-size: 17px;
-  color: var(--cream);
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 .totals-block {
@@ -579,7 +592,7 @@ html {
   font-family: "Instrument Serif", serif;
   font-size: 14px;
   font-style: italic;
-  color: rgba(245, 241, 232, 0.6);
+  color: var(--ink-soft);
   line-height: 1.7;
   padding-top: 8px;
   white-space: pre-wrap;
@@ -590,6 +603,7 @@ html {
 .totals-table tr td {
   padding: 10px 0;
   font-size: 14px;
+  color: var(--ink);
 }
 .totals-table tr td:last-child {
   text-align: right;
@@ -597,21 +611,21 @@ html {
   font-variant-numeric: tabular-nums;
 }
 .totals-table tr.total-final {
-  border-top: 1px solid var(--gold);
-  border-bottom: 1px solid var(--gold);
+  border-top: 1px solid var(--grenat);
+  border-bottom: 1px solid var(--grenat);
 }
 .totals-table tr.total-final td {
   padding: 24px 0;
   font-family: "Fraunces", serif;
   font-size: 32px;
-  color: var(--gold);
+  color: var(--grenat);
   font-weight: 400;
 }
 .deposit-block {
   margin-top: 32px;
   padding: 24px 32px;
-  background: rgba(201, 169, 97, 0.08);
-  border: 1px solid rgba(201, 169, 97, 0.25);
+  background: rgba(139, 26, 26, 0.06);
+  border: 1px solid rgba(139, 26, 26, 0.25);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -621,12 +635,12 @@ html {
   font-family: "Instrument Serif", serif;
   font-style: italic;
   font-size: 16px;
-  color: var(--gold);
+  color: var(--grenat);
 }
 .deposit-block span:last-child {
   font-family: "Fraunces", serif;
   font-size: 22px;
-  color: var(--cream);
+  color: var(--ink);
 }
 
 /* ============ SIGNATURE ============ */

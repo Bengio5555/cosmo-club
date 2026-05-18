@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft, ExternalLink, Mail, Phone } from "lucide-react";
 import { DevisEditor } from "./DevisEditor";
+import { listEventImages } from "./actions";
 
 type Params = Promise<{ id: string }>;
 
@@ -10,13 +11,14 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: quote }, { data: items }] = await Promise.all([
+  const [{ data: quote }, { data: items }, eventImages] = await Promise.all([
     supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
     supabase
       .from("quote_items")
       .select("*")
       .eq("quote_id", id)
       .order("position", { ascending: true }),
+    listEventImages(),
   ]);
 
   if (!quote) {
@@ -42,6 +44,7 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
         quote={quote}
         items={items ?? []}
         clientEmail={client?.email ?? null}
+        availableImages={eventImages.images}
       />
 
       {client && (
