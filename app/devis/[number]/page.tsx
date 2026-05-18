@@ -487,7 +487,7 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
 
         <div className="sig-wrap">
           <h2 className="sig-title">
-            On <em>scelle ça</em> ensemble ?
+            Et si nous <em>donnions vie</em> à ce projet ensemble ?
           </h2>
 
           <div className="terms">
