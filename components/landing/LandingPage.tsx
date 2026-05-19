@@ -116,7 +116,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
       />
 
       {/* ─── Hero ────────────────────────────────────────────── */}
-      <section className="relative isolate overflow-hidden bg-[color:var(--color-noir)] text-[color:var(--color-bone)]">
+      <section className="relative isolate overflow-hidden bg-[color:var(--color-ink-text)] text-[color:var(--color-bone)]">
         <Image
           src={config.heroSrc}
           alt={config.h1}
@@ -220,7 +220,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
       </section>
 
       {/* ─── Timeline ────────────────────────────────────────── */}
-      <section className="bg-[color:var(--color-noir)] py-24 text-[color:var(--color-bone)] md:py-32">
+      <section className="bg-[color:var(--color-ink-text)] py-24 text-[color:var(--color-bone)] md:py-32">
         <div className="mx-auto max-w-[1400px] px-6 md:px-10">
           <Reveal>
             <p className="eyebrow mb-6 text-[color:var(--color-bone)]/70">

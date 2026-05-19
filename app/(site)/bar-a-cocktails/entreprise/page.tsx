@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
+import { getImagePath } from "@/lib/server/imagesConfig";
 
 const SLUG = "/bar-a-cocktails/entreprise";
+const FALLBACK_HERO = "/brand/ai/hero-bar.png";
 
 export const metadata: Metadata = {
   title: "Bar à cocktails entreprise Paris — Soirée corporate, séminaire",
@@ -34,7 +36,7 @@ const config: LandingConfig = {
   h1Accent: "Cocktails",
   subtitle:
     "Lancement de marque, soirée corporate, séminaire, cocktail de fin d'année. Mixologie événementielle premium à Paris et en Île-de-France, brandée à vos couleurs.",
-  heroSrc: "/brand/ai/hero-bar.png",
+  heroSrc: FALLBACK_HERO,
   intro: [
     "Un événement d'entreprise réussi laisse une trace. Pas un buffet anonyme et trois bouteilles sur une nappe : un bar visuel, une carte travaillée, un service qui valorise vos invités et porte votre marque.",
     "Cosmo Club intervient pour les lancements produit, soirées corporate, conventions, séminaires et cocktails de fin d'année dans Paris et en Île-de-France. Nous travaillons aussi bien avec les directions communication, marketing, RH, qu'avec les agences événementielles partenaires.",
@@ -135,6 +137,7 @@ const config: LandingConfig = {
   },
 };
 
-export default function EntreprisePage() {
-  return <LandingPage config={config} />;
+export default async function EntreprisePage() {
+  const heroSrc = await getImagePath("bar-a-cocktails-entreprise", "hero", FALLBACK_HERO);
+  return <LandingPage config={{ ...config, heroSrc }} />;
 }

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
+import { getImagePath } from "@/lib/server/imagesConfig";
 
 const SLUG = "/bar-a-cocktails/anniversaire";
+const FALLBACK_HERO = "/brand/ai/bento-bar-cocktails.png";
 
 export const metadata: Metadata = {
   title: "Bar à cocktails anniversaire Paris — 30, 40, 50 ans et +",
@@ -34,7 +36,7 @@ const config: LandingConfig = {
   h1Accent: "cocktails",
   subtitle:
     "30, 40, 50 ans ou plus : transformez votre anniversaire en moment marquant. Mixologie événementielle, cartes signature et scénographie sur mesure à Paris.",
-  heroSrc: "/brand/ai/bento-bar-cocktails.png",
+  heroSrc: FALLBACK_HERO,
   intro: [
     "Un anniversaire qu'on retient, ce n'est pas un buffet de plus — c'est un moment construit. Le bar à cocktails Cosmo Club s'installe au centre de votre soirée et devient le rituel partagé : on commande, on goûte, on discute, on revient.",
     "Que vous fêtiez vos 30 ans dans un loft, vos 40 ans dans un appartement haussmannien, ou vos 50 ans dans une salle privée, nous adaptons la prestation au lieu, au nombre d'invités et à l'ambiance que vous voulez créer.",
@@ -135,6 +137,7 @@ const config: LandingConfig = {
   },
 };
 
-export default function AnniversairePage() {
-  return <LandingPage config={config} />;
+export default async function AnniversairePage() {
+  const heroSrc = await getImagePath("bar-a-cocktails-anniversaire", "hero", FALLBACK_HERO);
+  return <LandingPage config={{ ...config, heroSrc }} />;
 }

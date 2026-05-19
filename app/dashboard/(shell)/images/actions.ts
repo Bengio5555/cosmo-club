@@ -208,7 +208,18 @@ export async function uploadDashboardImage(formData: FormData) {
   // hero/bento/lattes/event-tile change shows up immediately. Without
   // this, only `/` was revalidated and `/bar-a-cocktails`, `/barista`,
   // `/evenements` kept serving the previous build's cached HTML.
-  for (const path of ["/", "/bar-a-cocktails", "/barista", "/evenements", "/concept"]) {
+  for (const path of [
+    "/",
+    "/bar-a-cocktails",
+    "/bar-a-cocktails/mariage",
+    "/bar-a-cocktails/anniversaire",
+    "/bar-a-cocktails/entreprise",
+    "/barman-prive-paris",
+    "/animation-cocktail-paris",
+    "/barista",
+    "/evenements",
+    "/concept",
+  ]) {
     revalidatePath(path);
   }
   return { ok: true as const };
@@ -262,7 +273,18 @@ export async function deleteDashboardImageByProxy(proxyUrl: string) {
   }
 
   revalidatePath("/dashboard/images");
-  for (const path of ["/", "/bar-a-cocktails", "/barista", "/evenements", "/concept"]) {
+  for (const path of [
+    "/",
+    "/bar-a-cocktails",
+    "/bar-a-cocktails/mariage",
+    "/bar-a-cocktails/anniversaire",
+    "/bar-a-cocktails/entreprise",
+    "/barman-prive-paris",
+    "/animation-cocktail-paris",
+    "/barista",
+    "/evenements",
+    "/concept",
+  ]) {
     revalidatePath(path);
   }
   return { ok: true as const };

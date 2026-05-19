@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
+import { getImagePath } from "@/lib/server/imagesConfig";
 
 const SLUG = "/bar-a-cocktails/mariage";
+const FALLBACK_HERO = "/brand/ai/hero-bar-cocktails.png";
 
 export const metadata: Metadata = {
   title: "Bar à cocktails mariage Paris — Mixologie événementielle",
@@ -33,7 +35,7 @@ const config: LandingConfig = {
   h1Accent: "cocktails",
   subtitle:
     "Mixologie événementielle haut de gamme pour votre mariage à Paris et en Île-de-France. Cartes signature, bar scénographié, mocktails pour tous.",
-  heroSrc: "/brand/ai/hero-bar-cocktails.png",
+  heroSrc: FALLBACK_HERO,
   intro: [
     "Le bar à cocktails marque la bascule. Quand les invités passent du cocktail debout à la piste de danse, le bar devient le cœur visuel et social de la soirée — celui qu'on photographie, qu'on partage, qu'on revit en story.",
     "Nous concevons ce moment avec vous. Cartes pensées comme une signature, scénographie modulée selon votre lieu, mixologues formés à recevoir, mocktails à la hauteur de tous les invités. Une prestation qui se voit, se goûte, et reste en mémoire bien après les noces.",
@@ -134,6 +136,7 @@ const config: LandingConfig = {
   },
 };
 
-export default function MariagePage() {
-  return <LandingPage config={config} />;
+export default async function MariagePage() {
+  const heroSrc = await getImagePath("bar-a-cocktails-mariage", "hero", FALLBACK_HERO);
+  return <LandingPage config={{ ...config, heroSrc }} />;
 }

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
+import { getImagePath } from "@/lib/server/imagesConfig";
 
 const SLUG = "/barman-prive-paris";
+const FALLBACK_HERO = "/brand/ai/hero-bar-cocktails.png";
 
 export const metadata: Metadata = {
   title: "Barman privé Paris — Service mixologue à domicile et événement",
@@ -33,7 +35,7 @@ const config: LandingConfig = {
   h1Accent: "barman",
   subtitle:
     "Mixologue professionnel à domicile à Paris et en Île-de-France. Carte signature, équipement complet, service du début à la fin — vous restez côté invités.",
-  heroSrc: "/brand/ai/hero-bar-cocktails.png",
+  heroSrc: FALLBACK_HERO,
   intro: [
     "Un barman privé, ce n'est pas un serveur qui ouvre des bouteilles. C'est un professionnel formé à la mixologie, qui prend en main votre soirée, anime le bar, gère le service, et libère votre maîtresse de maison ou maître de maison de toute la logistique boissons.",
     "Cosmo Club met à votre disposition des mixologues sélectionnés pour leur technique et leur posture, pour vos dîners privés, anniversaires à domicile, soirées entre amis, événements familiaux ou réceptions à enjeu.",
@@ -134,6 +136,7 @@ const config: LandingConfig = {
   },
 };
 
-export default function BarmanPrivePage() {
-  return <LandingPage config={config} />;
+export default async function BarmanPrivePage() {
+  const heroSrc = await getImagePath("barman-prive-paris", "hero", FALLBACK_HERO);
+  return <LandingPage config={{ ...config, heroSrc }} />;
 }

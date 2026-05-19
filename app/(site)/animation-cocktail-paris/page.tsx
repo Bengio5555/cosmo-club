@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
+import { getImagePath } from "@/lib/server/imagesConfig";
 
 const SLUG = "/animation-cocktail-paris";
+const FALLBACK_HERO = "/brand/ai/bento-bar-cocktails.png";
 
 export const metadata: Metadata = {
   title: "Animation cocktail Paris — Atelier mixologie et masterclass",
@@ -34,7 +36,7 @@ const config: LandingConfig = {
   h1Accent: "mixologie",
   subtitle:
     "Apprenez à composer vos cocktails avec un mixologue professionnel. À domicile, en entreprise, pour un EVJF, un EVG ou un team building.",
-  heroSrc: "/brand/ai/bento-bar-cocktails.png",
+  heroSrc: FALLBACK_HERO,
   intro: [
     "Un atelier cocktail réussi, c'est plus qu'une démonstration : c'est un moment partagé, technique, fun, qui transforme vos invités en mixologues d'un soir. Chaque participant repart avec des recettes qu'il saura refaire.",
     "Cosmo Club anime des ateliers mixologie à Paris et en Île-de-France : à domicile pour un anniversaire, un EVJF, un EVG, en entreprise pour un team building, ou dans nos lieux partenaires. Tout est calibré selon votre profil de groupe et votre niveau.",
@@ -135,6 +137,7 @@ const config: LandingConfig = {
   },
 };
 
-export default function AnimationPage() {
-  return <LandingPage config={config} />;
+export default async function AnimationPage() {
+  const heroSrc = await getImagePath("animation-cocktail-paris", "hero", FALLBACK_HERO);
+  return <LandingPage config={{ ...config, heroSrc }} />;
 }

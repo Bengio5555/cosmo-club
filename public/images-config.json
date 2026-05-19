@@ -22,6 +22,46 @@
         "section": "Bento"
       }
     },
+    "bar-a-cocktails-mariage": {
+      "hero": {
+        "title": "Hero — Mariage",
+        "path": "/brand/ai/hero-bar-cocktails.png",
+        "orientation": "landscape",
+        "section": "Landing Mariage"
+      }
+    },
+    "bar-a-cocktails-anniversaire": {
+      "hero": {
+        "title": "Hero — Anniversaire",
+        "path": "/brand/ai/bento-bar-cocktails.png",
+        "orientation": "landscape",
+        "section": "Landing Anniversaire"
+      }
+    },
+    "bar-a-cocktails-entreprise": {
+      "hero": {
+        "title": "Hero — Entreprise",
+        "path": "/brand/ai/hero-bar.png",
+        "orientation": "landscape",
+        "section": "Landing Entreprise"
+      }
+    },
+    "barman-prive-paris": {
+      "hero": {
+        "title": "Hero — Barman privé",
+        "path": "/brand/ai/hero-bar-cocktails.png",
+        "orientation": "landscape",
+        "section": "Landing Barman privé"
+      }
+    },
+    "animation-cocktail-paris": {
+      "hero": {
+        "title": "Hero — Atelier mixologie",
+        "path": "/brand/ai/bento-bar-cocktails.png",
+        "orientation": "landscape",
+        "section": "Landing Atelier"
+      }
+    },
     "barista": {
       "hero": {
         "title": "Hero Barista",
