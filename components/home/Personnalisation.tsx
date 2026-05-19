@@ -12,7 +12,6 @@ type Tuile = {
   num: string;
   title: string;
   text: string;
-  symbol: string;
   defaultImage: string;
 };
 
@@ -22,7 +21,6 @@ const tuilesDefault: Tuile[] = [
     num: "01",
     title: "Glaçons",
     text: "Logo, fleurs comestibles, fruits ou or fin — gravés dans la glace.",
-    symbol: "◈",
     defaultImage: "/brand/ai/glaçons.png",
   },
   {
@@ -30,7 +28,6 @@ const tuilesDefault: Tuile[] = [
     num: "02",
     title: "Pastilles",
     text: "Des disques comestibles qui flottent à la surface — logo ou motif.",
-    symbol: "◉",
     defaultImage: "/brand/ai/pastilles.png",
   },
   {
@@ -38,7 +35,6 @@ const tuilesDefault: Tuile[] = [
     num: "03",
     title: "Toppings fruit",
     text: "Fruits frais sculptés aux initiales ou aux lettres de votre marque.",
-    symbol: "✱",
     defaultImage: "/brand/ai/pastilles.png",
   },
   {
@@ -46,7 +42,6 @@ const tuilesDefault: Tuile[] = [
     num: "04",
     title: "Pochoirs",
     text: "Sur la mousse des lattes, saupoudré au cacao ou au curcuma.",
-    symbol: "◇",
     defaultImage: "/brand/ai/glaçons.png",
   },
   {
@@ -54,7 +49,6 @@ const tuilesDefault: Tuile[] = [
     num: "05",
     title: "Mélangeurs",
     text: "Stirrers personnalisés — bois, cristal, laiton, porte vos lettres.",
-    symbol: "│",
     defaultImage: "/brand/ai/pastilles.png",
   },
   {
@@ -62,7 +56,6 @@ const tuilesDefault: Tuile[] = [
     num: "06",
     title: "Dessous de verre",
     text: "Feutre, liège, marbre — votre motif, votre matière, votre touche.",
-    symbol: "◯",
     defaultImage: "/brand/ai/glaçons.png",
   },
 ];
@@ -127,15 +120,9 @@ function _Section(tuiles: (Tuile & { backgroundImage: string })[]) {
               backgroundPosition: "center",
             }}
           >
-            <div className="flex items-start justify-between">
+            <div className="flex items-start">
               <span className="font-display text-xs tracking-[0.3em] text-[color:var(--color-grenat)]">
                 {t.num}
-              </span>
-              <span
-                aria-hidden
-                className="font-display text-5xl text-[color:var(--color-or-deep)]/60 transition-all duration-700 group-hover:text-[color:var(--color-grenat)] group-hover:rotate-12"
-              >
-                {t.symbol}
               </span>
             </div>
             <div>
