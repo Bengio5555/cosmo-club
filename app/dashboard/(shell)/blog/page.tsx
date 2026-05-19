@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_LABEL, STATUS_TONE, type ArticleStatus } from "./types";
+import { GenerateAllCoversButton } from "./GenerateAllCoversButton";
 
 export default async function BlogAdminPage() {
   const supabase = await createClient();
@@ -9,6 +10,8 @@ export default async function BlogAdminPage() {
     .from("articles")
     .select("id, slug, title, description, status, publish_at, cover_url, updated_at")
     .order("publish_at", { ascending: false });
+
+  const missingCovers = (data ?? []).filter((a) => !a.cover_url).length;
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
@@ -19,13 +22,16 @@ export default async function BlogAdminPage() {
             Articles éditoriaux publiés sur cosmoclub.fr/blog. Brouillons, planifications et version GMB en un seul endroit.
           </p>
         </div>
-        <Link
-          href="/dashboard/blog/new"
-          className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200"
-        >
-          <Plus className="h-4 w-4" />
-          Nouvel article
-        </Link>
+        <div className="flex flex-col items-end gap-3">
+          <Link
+            href="/dashboard/blog/new"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200"
+          >
+            <Plus className="h-4 w-4" />
+            Nouvel article
+          </Link>
+          <GenerateAllCoversButton missingCount={missingCovers} />
+        </div>
       </header>
 
       {error && (

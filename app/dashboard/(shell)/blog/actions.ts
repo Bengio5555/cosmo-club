@@ -305,6 +305,74 @@ export async function generateCoverImage(
 }
 
 /**
+ * Batch-generate covers for every article that doesn't have one yet.
+ * Sequential to avoid hammering Gemini and to keep error reporting clean.
+ * Returns one entry per article processed so the UI can show what worked.
+ */
+export async function generateMissingCovers(): Promise<
+  ActionResult<{
+    generated: { id: string; slug: string; url: string }[];
+    failed: { id: string; slug: string; error: string }[];
+    skipped: number;
+  }>
+> {
+  const gate = await requireBlogAdmin();
+  if ("error" in gate) return { ok: false, error: gate.error };
+
+  const admin = createAdminClient();
+  const { data: targets, error: readErr } = await admin
+    .from("articles")
+    .select("id, slug")
+    .is("cover_url", null)
+    .order("publish_at", { ascending: false });
+  if (readErr) return { ok: false, error: readErr.message };
+
+  const generated: { id: string; slug: string; url: string }[] = [];
+  const failed: { id: string; slug: string; error: string }[] = [];
+  const skipped = 0;
+
+  for (const target of targets ?? []) {
+    const loaded = await loadArticleForAI(target.id);
+    if (!loaded.ok) {
+      failed.push({ id: target.id, slug: target.slug, error: loaded.error });
+      continue;
+    }
+    try {
+      const result = await generateArticleCover(loaded.article);
+      const uploaded = await uploadGeneratedImage(
+        loaded.article.slug,
+        "cover",
+        result.bytes,
+        result.mimeType,
+      );
+      if ("error" in uploaded) {
+        failed.push({ id: target.id, slug: target.slug, error: uploaded.error });
+        continue;
+      }
+      const { error: upErr } = await admin
+        .from("articles")
+        .update({ cover_url: uploaded.url })
+        .eq("id", target.id);
+      if (upErr) {
+        failed.push({ id: target.id, slug: target.slug, error: upErr.message });
+        continue;
+      }
+      generated.push({ id: target.id, slug: target.slug, url: uploaded.url });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erreur Gemini inconnue.";
+      failed.push({ id: target.id, slug: target.slug, error: msg });
+    }
+  }
+
+  revalidatePath("/dashboard/blog");
+  for (const g of generated) {
+    revalidatePath(`/dashboard/blog/${g.id}`);
+  }
+  revalidatePath("/blog");
+  return { ok: true, data: { generated, failed, skipped } };
+}
+
+/**
  * Generate the 1:1 GMB variant. Stored on gmb_cover_url so we don't
  * overwrite the site cover if the author already curated it.
  */
