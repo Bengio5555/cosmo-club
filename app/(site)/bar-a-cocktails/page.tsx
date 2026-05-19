@@ -34,21 +34,26 @@ export const metadata: Metadata = {
   },
 };
 
+const BOTTLE_FALLBACKS: Array<[string, string]> = [
+  ["bottle-20cl", "/brand/ai/bottle-20cl.png"],
+  ["bottle-50cl", "/brand/ai/bottle-50cl.png"],
+  ["bottle-1L", "/brand/ai/bottle-1L.png"],
+];
+
 export default async function Page() {
-  // Resolve the hero URL server-side so the SSR HTML already points at
-  // the admin-uploaded image — kills the static→admin flash.
-  const heroSrc = await getImagePath(
-    "bar-a-cocktails",
-    "hero",
-    heroBarImg.src,
-  );
+  // Resolve every image URL server-side so the SSR HTML already points
+  // at the admin-uploaded versions — kills the static→admin flash.
+  const [heroSrc, ...bottleSrcs] = await Promise.all([
+    getImagePath("bar-a-cocktails", "hero", heroBarImg.src),
+    ...BOTTLE_FALLBACKS.map(([key, fb]) => getImagePath("products", key, fb)),
+  ]);
   return (
     <>
       <BarHero heroSrc={heroSrc} />
       <MixologieIntro />
       <StickyCartes />
       <ShotsSection />
-      <BottlesSection />
+      <BottlesSection bottleSrcs={bottleSrcs} />
       <AlcoholFreeSection />
       <BarsSection />
       <IntentLinks />

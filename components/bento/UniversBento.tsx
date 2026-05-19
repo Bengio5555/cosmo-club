@@ -3,17 +3,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
-import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-const DEFAULT_BENTO_BAR = "/brand/ai/bento-bar-cocktails.png";
-const DEFAULT_BENTO_BARISTA = "/brand/ai/bento-barista.png";
-
-export function UniversBento() {
-  const config = useImageConfig();
-  const paths = {
-    bar: pickPath(config, "bar-a-cocktails", "bento", DEFAULT_BENTO_BAR),
-    barista: pickPath(config, "barista", "bento", DEFAULT_BENTO_BARISTA),
-  };
+// SSR-resolved image URLs are passed in via the `paths` prop. We used
+// to read them through useImageConfig (a client hook), which painted
+// the static fallback before swapping to the admin upload on hydration
+// — a visible flash. The parent HomePage now resolves both URLs in
+// its server render and hands them down.
+export function UniversBento({
+  paths,
+}: {
+  paths: { bar: string; barista: string };
+}) {
 
   return (
     <section

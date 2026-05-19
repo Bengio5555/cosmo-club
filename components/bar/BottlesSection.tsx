@@ -3,27 +3,12 @@
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
 import { bottles } from "@/lib/content/cocktails";
-import { useImageConfig, pickPath } from "@/lib/hooks/useImageConfig";
 
-// Keys must match images-config.json → pages.products.<key>.
-// Fallbacks are the public paths that the JSON config also points at,
-// so SSR and the post-hydration hook resolve to the *same* URL — no
-// flicker. (Using the Webpack import `.src` would give a hashed
-// `/_next/static/media/...` URL that differs from the JSON entry and
-// triggers a re-fetch on hydration.)
-const bottleSlotKeys = ["bottle-20cl", "bottle-50cl", "bottle-1L"] as const;
-const bottleFallbacks = [
-  "/brand/ai/bottle-20cl.png",
-  "/brand/ai/bottle-50cl.png",
-  "/brand/ai/bottle-1L.png",
-];
-
-export function BottlesSection() {
-  const config = useImageConfig();
-  const bottleSrcs = bottleSlotKeys.map((k, i) =>
-    pickPath(config, "products", k, bottleFallbacks[i]),
-  );
-
+// Bottle image URLs are now resolved server-side and passed in.
+// Earlier this lived in useImageConfig (client hook) which fetched
+// the config post-hydration and caused the static PNG fallbacks to
+// flash before being replaced. SSR-resolving them removes the swap.
+export function BottlesSection({ bottleSrcs }: { bottleSrcs: string[] }) {
   return (
     <section className="relative overflow-hidden bg-[color:var(--color-cream)] py-20 md:py-28">
       <div

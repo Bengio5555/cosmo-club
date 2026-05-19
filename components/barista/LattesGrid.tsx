@@ -3,34 +3,16 @@
 import { Reveal } from "@/components/motion/Reveal";
 import Image from "next/image";
 import { lattes, type Latte } from "@/lib/content/barista";
-import matchaImg from "@/public/brand/ai/latte-matcha.png";
-import ubeImg from "@/public/brand/ai/latte-ube.png";
-import blueImg from "@/public/brand/ai/latte-blue.png";
-import goldenImg from "@/public/brand/ai/latte-golden.png";
-import { useImageConfig, pickPath, type ImageConfig } from "@/lib/hooks/useImageConfig";
 
-// Latte id → config slot key (must match images-config.json → pages.lattes.*)
-const slotKey: Record<Latte["id"], string> = {
-  matcha: "latte-matcha",
-  ube: "latte-ube",
-  blue: "latte-blue",
-  golden: "latte-golden",
-};
-
-const latteFallbacks: Record<Latte["id"], string> = {
-  matcha: matchaImg.src,
-  ube: ubeImg.src,
-  blue: blueImg.src,
-  golden: goldenImg.src,
-};
-
-function resolveLatteSrc(config: ImageConfig | null, id: Latte["id"]): string {
-  return pickPath(config, "lattes", slotKey[id], latteFallbacks[id]);
-}
-
-export function LattesGrid() {
-  const config = useImageConfig();
-
+// Latte image URLs are resolved server-side in app/(site)/barista/page.tsx
+// and passed in via `lattePaths`. The previous useImageConfig client
+// hook implementation swapped the static fallback PNGs for the admin
+// uploads on hydration, which read as a flicker on every visit.
+export function LattesGrid({
+  lattePaths,
+}: {
+  lattePaths: Record<Latte["id"], string>;
+}) {
   return (
     <section id="lattes" className="relative bg-[color:var(--color-cream)] py-20 md:py-28">
       <div
@@ -64,7 +46,7 @@ export function LattesGrid() {
               key={l.id}
               latte={l}
               delay={i * 120}
-              src={resolveLatteSrc(config, l.id)}
+              src={lattePaths[l.id]}
             />
           ))}
         </div>

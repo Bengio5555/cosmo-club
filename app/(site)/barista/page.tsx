@@ -6,6 +6,10 @@ import { IdentitySection } from "@/components/barista/IdentitySection";
 import { InstagrammableSection } from "@/components/barista/InstagrammableSection";
 import { CtaDevis } from "@/components/home/CtaDevis";
 import heroBaristaImg from "@/public/brand/ai/hero-barista.png";
+import matchaImg from "@/public/brand/ai/latte-matcha.png";
+import ubeImg from "@/public/brand/ai/latte-ube.png";
+import blueImg from "@/public/brand/ai/latte-blue.png";
+import goldenImg from "@/public/brand/ai/latte-golden.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
 
 export const metadata: Metadata = {
@@ -32,11 +36,26 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const heroSrc = await getImagePath("barista", "hero", heroBaristaImg.src);
+  // All latte URLs resolved server-side so the admin-uploaded photos
+  // ship in the SSR HTML — no swap from the static AI fallback after
+  // hydration. Same pattern as the BaristaHero.
+  const [heroSrc, matchaSrc, ubeSrc, blueSrc, goldenSrc] = await Promise.all([
+    getImagePath("barista", "hero", heroBaristaImg.src),
+    getImagePath("lattes", "latte-matcha", matchaImg.src),
+    getImagePath("lattes", "latte-ube", ubeImg.src),
+    getImagePath("lattes", "latte-blue", blueImg.src),
+    getImagePath("lattes", "latte-golden", goldenImg.src),
+  ]);
+  const lattePaths = {
+    matcha: matchaSrc,
+    ube: ubeSrc,
+    blue: blueSrc,
+    golden: goldenSrc,
+  };
   return (
     <>
       <BaristaHero heroSrc={heroSrc} />
-      <LattesGrid />
+      <LattesGrid lattePaths={lattePaths} />
       <StandsSection />
       <IdentitySection />
       <InstagrammableSection />

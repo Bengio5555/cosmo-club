@@ -26,7 +26,14 @@ export default async function HomePage() {
   // Resolve every dynamic image URL server-side so the admin-uploaded
   // versions are in the SSR HTML from the start — no flash of the
   // static fallback while a client hook fetches the config.
-  const [heroSrc, clientLogos, galleryTiles, persoEntries] = await Promise.all([
+  const [
+    heroSrc,
+    clientLogos,
+    galleryTiles,
+    persoEntries,
+    bentoBarSrc,
+    bentoBaristaSrc,
+  ] = await Promise.all([
     getImagePath("home", "hero", heroHomeImg.src),
     getPublicClientLogos(),
     getHomeGalleryTiles(),
@@ -36,8 +43,11 @@ export default async function HomePage() {
         return [key, path] as const;
       }),
     ),
+    getImagePath("bar-a-cocktails", "bento", "/brand/ai/bento-bar-cocktails.png"),
+    getImagePath("barista", "bento", "/brand/ai/bento-barista.png"),
   ]);
   const persoPaths = Object.fromEntries(persoEntries);
+  const bentoPaths = { bar: bentoBarSrc, barista: bentoBaristaSrc };
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -121,7 +131,7 @@ export default async function HomePage() {
       <LiquidHero heroSrc={heroSrc} />
       <CocktailMarquee />
       <BaristaMarquee />
-      <UniversBento />
+      <UniversBento paths={bentoPaths} />
       <ConceptManifesto />
       <ClientsMarquee logos={clientLogos} />
       <Personnalisation paths={persoPaths} />
