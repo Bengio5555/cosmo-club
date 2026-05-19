@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { PublicClientLogo } from "@/lib/server/clientLogos";
 
 const FALLBACK_CLIENTS = [
@@ -60,27 +61,29 @@ export function ClientsMarquee({
         >
           {useLogos
             ? // Height-locked, width-natural: every logo renders at the
-              // same visual height across the row (the metric the eye
-              // reads as "same size"). Width follows each mark's own
-              // aspect ratio, with a generous cap so very wide logos
-              // don't bulldoze the strip. h-14 on mobile, h-16 from md
-              // up for a more present, premium feel.
-              logoBlock!.map((logo, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={`${logo.id}-${i}`}
-                  src={logo.url}
-                  alt={logo.name}
-                  // Eager load + async decode. The marquee scrolls
-                  // horizontally so iOS Safari was unloading off-screen
-                  // images and re-fetching them on wrap, creating the
-                  // "logos disparaissent" flicker. Eager keeps them
-                  // resident; async decoding prevents jank on paint.
-                  loading="eager"
-                  decoding="async"
-                  className="h-14 w-auto min-w-[120px] max-w-[280px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100 md:h-16 md:min-w-[140px] md:max-w-[320px]"
-                />
-              ))
+              // same visual height across the row. We use Next's <Image>
+              // so the source 4000×2262 PNGs get downscaled to the actual
+              // ~80px display height (≈99×56 device pixels) — was a 5+ MB
+              // payload waste before. Eager only for the first window
+              // (above-the-fold), the rest lazy as they scroll into view.
+              logoBlock!.map((logo, i) => {
+                const isFirstWindow = i < (logos.length || 6);
+                return (
+                  <Image
+                    key={`${logo.id}-${i}`}
+                    src={logo.url}
+                    alt={logo.name}
+                    width={320}
+                    height={80}
+                    sizes="(min-width: 768px) 160px, 120px"
+                    quality={80}
+                    priority={isFirstWindow}
+                    loading={isFirstWindow ? "eager" : "lazy"}
+                    unoptimized={false}
+                    className="h-14 w-auto min-w-[120px] max-w-[280px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100 md:h-16 md:min-w-[140px] md:max-w-[320px]"
+                  />
+                );
+              })
             : wordBlock!.map((c, i) => (
                 <span
                   key={i}

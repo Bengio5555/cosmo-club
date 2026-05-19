@@ -87,6 +87,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={fontClassName} suppressHydrationWarning>
+      <head>
+        {/* Preconnect to Supabase Storage — every public page pulls
+            covers, gallery tiles and logos from there. Saves ~300 ms on
+            LCP by warming up TLS before the first image request. */}
+        <link
+          rel="preconnect"
+          href="https://rqqjndxxjpsdkbtqikyn.supabase.co"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://rqqjndxxjpsdkbtqikyn.supabase.co" />
+      </head>
       <body>
         <script
           type="application/ld+json"

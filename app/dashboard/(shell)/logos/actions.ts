@@ -42,6 +42,7 @@ export async function uploadClientLogo(formData: FormData) {
       .upload(filename, buffer, {
         contentType: file.type,
         upsert: false,
+        cacheControl: "31536000",
       });
     if (upErr) return { ok: false as const, error: upErr.message };
     publicUrl = adminSupabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename)

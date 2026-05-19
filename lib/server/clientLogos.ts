@@ -26,10 +26,14 @@ export async function getPublicClientLogos(): Promise<PublicClientLogo[]> {
       console.warn("[getPublicClientLogos]", error.message);
       return [];
     }
+    // Skip the /api/admin/image-proxy hop and serve directly from
+    // Supabase Storage. The proxy was a relic from the Vercel Blob
+    // migration and forced every logo through a Next.js route handler,
+    // which broke <Image> optimization and caching.
     return (data ?? []).map((row) => ({
       id: row.id,
       name: row.name,
-      url: `/api/admin/image-proxy?url=${Buffer.from(row.blob_url).toString("base64")}`,
+      url: row.blob_url,
     }));
   } catch (err) {
     console.warn("[getPublicClientLogos] thrown:", err);

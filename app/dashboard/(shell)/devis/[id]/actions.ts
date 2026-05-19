@@ -643,6 +643,7 @@ export async function uploadMoodboardImage(quoteId: string, formData: FormData) 
       .upload(filename, buffer, {
         contentType: file.type,
         upsert: false,
+        cacheControl: "31536000",
       });
     if (error) return { ok: false as const, error: error.message };
 

@@ -184,6 +184,7 @@ export async function uploadCover(
   const { error: upErr } = await admin.storage.from(STORAGE_BUCKET).upload(path, buf, {
     contentType: file.type || "image/png",
     upsert: true,
+    cacheControl: "31536000",
   });
   if (upErr) return { ok: false, error: upErr.message };
   const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path);
@@ -252,15 +253,26 @@ async function uploadGeneratedImage(
   slug: string,
   filenamePrefix: "cover" | "gmb-cover",
   buf: Buffer,
-  mimeType: string,
+  _mimeType: string,
 ): Promise<{ url: string } | { error: string }> {
   const safeSlug = (slug || "article").replace(/[^a-z0-9-]/gi, "-").toLowerCase();
-  const ext = mimeType.includes("jpeg") ? "jpg" : "png";
-  const path = `${safeSlug}/${filenamePrefix}-ai-${Date.now()}.${ext}`;
+
+  // Re-encode the Gemini PNG (~1.4 MB each) as WebP and constrain the
+  // longest side to 1600 px. Quality 78 is a sweet spot — drops the
+  // weight ~80% with no visible loss on editorial photo-realistic
+  // covers. 4:3 (site) and 1:1 (GMB) ratios are preserved.
+  const sharp = (await import("sharp")).default;
+  const optimized = await sharp(buf, { failOn: "none" })
+    .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 78, effort: 5 })
+    .toBuffer();
+
+  const path = `${safeSlug}/${filenamePrefix}-ai-${Date.now()}.webp`;
   const admin = createAdminClient();
-  const { error } = await admin.storage.from(STORAGE_BUCKET).upload(path, buf, {
-    contentType: mimeType,
+  const { error } = await admin.storage.from(STORAGE_BUCKET).upload(path, optimized, {
+    contentType: "image/webp",
     upsert: true,
+    cacheControl: "31536000", // 1 year — assets are content-hashed via timestamp
   });
   if (error) return { error: error.message };
   const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path);

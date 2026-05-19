@@ -192,6 +192,7 @@ export async function uploadDashboardImage(formData: FormData) {
       .upload(filename, buffer, {
         contentType: file.type,
         upsert: true,
+        cacheControl: "31536000",
       });
     if (error) {
       return { ok: false as const, error: error.message };
