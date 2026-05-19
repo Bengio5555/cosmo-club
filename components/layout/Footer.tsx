@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer className="relative border-t border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream-paper)] pt-20 pb-10">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <div className="grid gap-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
+        <div className="grid gap-14 md:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr]">
           <div className="space-y-6">
             <Logo />
             <p className="max-w-xs text-sm leading-relaxed text-[color:var(--color-espresso)]/70">
@@ -33,6 +33,37 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Prestations" className="space-y-4">
+            <p className="eyebrow">Prestations</p>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <Link href="/bar-a-cocktails/mariage" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
+                  Mariage
+                </Link>
+              </li>
+              <li>
+                <Link href="/bar-a-cocktails/anniversaire" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
+                  Anniversaire
+                </Link>
+              </li>
+              <li>
+                <Link href="/bar-a-cocktails/entreprise" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
+                  Entreprise
+                </Link>
+              </li>
+              <li>
+                <Link href="/barman-prive-paris" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
+                  Barman privé
+                </Link>
+              </li>
+              <li>
+                <Link href="/animation-cocktail-paris" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
+                  Atelier mixologie
+                </Link>
+              </li>
             </ul>
           </nav>
 

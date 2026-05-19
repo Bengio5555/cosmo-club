@@ -15,6 +15,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: `${base}`, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
     { url: `${base}/bar-a-cocktails`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/bar-a-cocktails/mariage`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/bar-a-cocktails/anniversaire`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/bar-a-cocktails/entreprise`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/barman-prive-paris`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${base}/animation-cocktail-paris`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
     { url: `${base}/barista`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/evenements`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },

@@ -6,6 +6,7 @@ import { ShotsSection } from "@/components/bar/ShotsSection";
 import { BottlesSection } from "@/components/bar/BottlesSection";
 import { AlcoholFreeSection } from "@/components/bar/AlcoholFreeSection";
 import { BarsSection } from "@/components/bar/BarsSection";
+import { IntentLinks } from "@/components/landing/IntentLinks";
 import { CtaDevis } from "@/components/home/CtaDevis";
 import heroBarImg from "@/public/brand/ai/hero-bar.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
@@ -50,6 +51,7 @@ export default async function Page() {
       <BottlesSection />
       <AlcoholFreeSection />
       <BarsSection />
+      <IntentLinks />
       <CtaDevis />
     </>
   );
