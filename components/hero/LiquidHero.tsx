@@ -65,29 +65,32 @@ export function LiquidHero({ heroSrc }: { heroSrc: string }) {
           Cocktails · Barista · Événementiel
         </motion.p>
 
-        {/* Logo lockup (accessible h1 hidden for SR) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1.1, ease: [0.19, 1, 0.22, 1] }}
-          className="relative flex flex-col items-center"
-        >
+        {/* Logo lockup (accessible h1 hidden for SR).
+            The LCP element MUST paint immediately — we drop the
+            motion wrapper that previously hid the logo behind a
+            1.6 s opacity fade. The motion still applies to the
+            decorative underline below so the entrance feels alive. */}
+        <div className="relative flex flex-col items-center">
           <h1 className="sr-only">Cosmo Club Paris</h1>
           <Image
             src={logoSrc}
             alt="Cosmo Club Paris"
             priority
+            fetchPriority="high"
             // High-res PNG source — let next/image generate the per-
             // viewport AVIF/WebP variants so each device gets a crisp
             // build instead of the same heavy file.
             sizes="(min-width: 1024px) 560px, (min-width: 640px) 460px, 80vw"
             className="h-auto w-[80vw] max-w-[560px] select-none sm:w-[70vw] md:w-[58vw] lg:w-[42vw]"
           />
-          <div
+          <motion.div
             aria-hidden
-            className="mx-auto mt-4 h-px w-40 bg-gradient-to-r from-transparent via-[color:var(--color-or-deep)]/80 to-transparent"
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ delay: 0.8, duration: 1, ease: [0.19, 1, 0.22, 1] }}
+            className="mx-auto mt-4 h-px w-40 origin-center bg-gradient-to-r from-transparent via-[color:var(--color-or-deep)]/80 to-transparent"
           />
-        </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
