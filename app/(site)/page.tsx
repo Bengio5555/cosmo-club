@@ -13,14 +13,31 @@ import { getImagePath } from "@/lib/server/imagesConfig";
 import { getPublicClientLogos } from "@/lib/server/clientLogos";
 import { getHomeGalleryTiles } from "@/lib/server/homeGallery";
 
+const PERSONNALISATION_FALLBACKS: Record<string, string> = {
+  glacons: "/brand/ai/glaçons.png",
+  pastilles: "/brand/ai/pastilles.png",
+  "toppings-fruit": "/brand/ai/pastilles.png",
+  pochoirs: "/brand/ai/glaçons.png",
+  melangeurs: "/brand/ai/pastilles.png",
+  "dessous-de-verre": "/brand/ai/glaçons.png",
+};
+
 export default async function HomePage() {
-  // Resolve the hero URL server-side so the admin-uploaded image (if
-  // any) is in the SSR HTML — no flash from the static fallback.
-  const [heroSrc, clientLogos, galleryTiles] = await Promise.all([
+  // Resolve every dynamic image URL server-side so the admin-uploaded
+  // versions are in the SSR HTML from the start — no flash of the
+  // static fallback while a client hook fetches the config.
+  const [heroSrc, clientLogos, galleryTiles, persoEntries] = await Promise.all([
     getImagePath("home", "hero", heroHomeImg.src),
     getPublicClientLogos(),
     getHomeGalleryTiles(),
+    Promise.all(
+      Object.entries(PERSONNALISATION_FALLBACKS).map(async ([key, fallback]) => {
+        const path = await getImagePath("personnalisation", key, fallback);
+        return [key, path] as const;
+      }),
+    ),
   ]);
+  const persoPaths = Object.fromEntries(persoEntries);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -107,7 +124,7 @@ export default async function HomePage() {
       <UniversBento />
       <ConceptManifesto />
       <ClientsMarquee logos={clientLogos} />
-      <Personnalisation />
+      <Personnalisation paths={persoPaths} />
       <EventsGallery tiles={galleryTiles} showSeeMore />
       <CtaDevis />
     </>

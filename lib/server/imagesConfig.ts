@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -123,8 +124,13 @@ async function loadImagesConfig(): Promise<ServerImageConfig> {
   return config;
 }
 
+// React.cache dedupes the work inside a single render request. Multiple
+// server components calling getImagePath() during the same SSR pass
+// will share one Supabase list + DB overrides fetch instead of N.
+const cachedLoad = cache(loadImagesConfig);
+
 export async function getImagesConfig(): Promise<ServerImageConfig> {
-  return loadImagesConfig();
+  return cachedLoad();
 }
 
 /** One-shot lookup with fallback. Mirrors `pickPath` in the client hook. */
@@ -133,6 +139,6 @@ export async function getImagePath(
   key: string,
   fallback: string,
 ): Promise<string> {
-  const config = await loadImagesConfig();
+  const config = await cachedLoad();
   return config.pages?.[page]?.[key]?.path || fallback;
 }
