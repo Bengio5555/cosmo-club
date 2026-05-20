@@ -717,7 +717,14 @@ function TopBar({
         )}
 
         <a
-          href={`/factures/${invoice.number}`}
+          // Public PDF URL — factures post-IDOR ont un access_token requis
+          // dans le querystring, sinon 404. Les anciennes factures
+          // (access_token = null) gardent un lien nu.
+          href={
+            (invoice as { access_token?: string | null }).access_token
+              ? `/factures/${invoice.number}?t=${(invoice as { access_token?: string | null }).access_token}`
+              : `/factures/${invoice.number}`
+          }
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"

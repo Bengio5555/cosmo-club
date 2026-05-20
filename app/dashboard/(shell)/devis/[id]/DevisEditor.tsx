@@ -1036,7 +1036,14 @@ function TopBar({
         )}
 
         <a
-          href={`/devis/${quote.number}`}
+          // Public plaquette URL — devis post-IDOR ont un access_token
+          // requis dans le querystring, sinon la route renvoie 404.
+          // Les anciens devis (access_token = null) gardent un lien nu.
+          href={
+            (quote as { access_token?: string | null }).access_token
+              ? `/devis/${quote.number}?t=${(quote as { access_token?: string | null }).access_token}`
+              : `/devis/${quote.number}`
+          }
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
