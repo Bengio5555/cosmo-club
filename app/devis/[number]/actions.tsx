@@ -218,7 +218,7 @@ async function sendAcceptanceEmails(o: {
     (settings as { company_name?: string | null } | null)?.company_name ||
     "Cosmo Club Paris";
   const origin =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://cosmo-club.vercel.app";
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
   const link = `${origin}/devis/${o.quoteNumber}`;
 
   const dateLabel = new Date(o.signedAt).toLocaleString("fr-FR", {

@@ -389,7 +389,7 @@ export async function sendDevis(
 
   try {
     const resend = new Resend(apiKey);
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://cosmo-club.vercel.app";
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
     const link = `${origin}/devis/${quote.number}`;
     const firstName =
       (client as { first_name?: string | null }).first_name ?? "";

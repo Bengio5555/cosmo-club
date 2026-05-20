@@ -269,7 +269,7 @@ export async function sendInvoice(id: string) {
 
   try {
     const resend = new Resend(apiKey);
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://cosmo-club.vercel.app";
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
     const link = `${origin}/factures/${invoice.number}`;
     const firstName = (client as { first_name?: string | null }).first_name ?? "";
     const companyName = legalSnapshot?.company_name || "Cosmo Club Paris";
@@ -494,7 +494,7 @@ export async function sendInvoiceReminder(id: string) {
   try {
     const resend = new Resend(apiKey);
     const origin =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://cosmo-club.vercel.app";
+      process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
     const link = `${origin}/factures/${invoice.number}`;
     const firstName =
       (client as { first_name?: string | null }).first_name ?? "";

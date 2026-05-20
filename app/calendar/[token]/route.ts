@@ -93,7 +93,7 @@ export async function GET(
   }
 
   const origin =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://cosmo-club.vercel.app";
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
 
   const icsEvents: IcsEvent[] = (events ?? []).map((e) => {
     // Defaults: 18:00 → end of day if no times set. Most prestations
