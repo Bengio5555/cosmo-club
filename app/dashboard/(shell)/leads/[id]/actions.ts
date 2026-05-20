@@ -36,11 +36,13 @@ export async function updateLead(
  * Convert a lead into a draft devis:
  * - upsert a client row (by email when available)
  * - create a quote row linked to the lead + client
- * - mark the lead as `devis_envoye` (will be refined when the devis is
- *   actually sent)
+ * - mark the lead as `contacte` (devis being drafted)
  *
- * Redirects to the new quote edit page. The editor itself is built in
- * the next sprint — for now the route renders a placeholder.
+ * The lead is bumped to `devis_envoye` only when sendDevis() actually
+ * fires the email, and to `gagne` / `perdu` when the quote is
+ * accepted / refused. See app/dashboard/(shell)/devis/[id]/actions.ts.
+ *
+ * Redirects to the new quote edit page.
  */
 export async function convertLeadToQuote(leadId: string) {
   const supabase = await createClient();
@@ -111,11 +113,11 @@ export async function convertLeadToQuote(leadId: string) {
     return { ok: false as const, error: qErr?.message ?? "Création devis échouée" };
   }
 
-  // 4. Move the lead into the "devis envoyé" pipeline stage + link to the
-  //    client if it wasn't already.
+  // 4. Move the lead into the "contacté" pipeline stage + link to the
+  //    client. The bump to "devis_envoye" happens later in sendDevis().
   await supabase
     .from("leads")
-    .update({ status: "devis_envoye", client_id: clientId })
+    .update({ status: "contacte", client_id: clientId })
     .eq("id", lead.id);
 
   revalidatePath(`/dashboard/leads/${leadId}`);

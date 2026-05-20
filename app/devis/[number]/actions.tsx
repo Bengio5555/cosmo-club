@@ -53,7 +53,7 @@ export async function acceptDevis(input: AcceptDevisInput) {
 
   const { data: q } = await supabase
     .from("quotes")
-    .select("id,status,number,client_id,subject,total_ttc")
+    .select("id,status,number,client_id,subject,total_ttc,lead_id")
     .eq("id", input.quoteId)
     .maybeSingle();
   if (!q) return { ok: false as const, error: "Devis introuvable" };
@@ -78,6 +78,13 @@ export async function acceptDevis(input: AcceptDevisInput) {
     })
     .eq("id", input.quoteId);
   if (error) return { ok: false as const, error: error.message };
+
+  // Mirror on the lead: signed devis = lead won.
+  if (q.lead_id) {
+    await supabase.from("leads").update({ status: "gagne" }).eq("id", q.lead_id);
+    revalidatePath("/dashboard/leads");
+    revalidatePath(`/dashboard/leads/${q.lead_id}`);
+  }
 
   // Block on the email step. Earlier we ran it fire-and-forget but
   // Vercel kills the serverless invocation as soon as the server
@@ -114,7 +121,7 @@ export async function refuseDevis(id: string) {
   const supabase = createAdminClient();
   const { data: q } = await supabase
     .from("quotes")
-    .select("id,status,number")
+    .select("id,status,number,lead_id")
     .eq("id", id)
     .maybeSingle();
   if (!q) return { ok: false as const, error: "Devis introuvable" };
@@ -126,6 +133,13 @@ export async function refuseDevis(id: string) {
     .update({ status: "refuse", refused_at: new Date().toISOString() })
     .eq("id", id);
   if (error) return { ok: false as const, error: error.message };
+
+  // Mirror on the lead: refused devis = lead lost.
+  if (q.lead_id) {
+    await supabase.from("leads").update({ status: "perdu" }).eq("id", q.lead_id);
+    revalidatePath("/dashboard/leads");
+    revalidatePath(`/dashboard/leads/${q.lead_id}`);
+  }
 
   revalidatePath(`/devis/${q.number}`);
   revalidatePath(`/dashboard/devis/${id}`);

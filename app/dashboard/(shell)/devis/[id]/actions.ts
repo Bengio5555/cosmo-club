@@ -265,7 +265,7 @@ export async function setQuoteStatus(
   const supabase = await createClient();
   const { data: q, error } = await supabase
     .from("quotes")
-    .select("id,status")
+    .select("id,status,lead_id")
     .eq("id", id)
     .maybeSingle();
   if (error || !q) {
@@ -292,6 +292,26 @@ export async function setQuoteStatus(
 
   const { error: upErr } = await supabase.from("quotes").update(patch).eq("id", id);
   if (upErr) return { ok: false as const, error: upErr.message };
+
+  // Mirror the quote transition on the linked lead so the CRM
+  // pipeline stays in sync. We don't downgrade on `brouillon` resets —
+  // the user may be just fixing a typo and we shouldn't undo signals.
+  if (q.lead_id) {
+    const leadStatusMap: Partial<Record<Quote["status"], "devis_envoye" | "gagne" | "perdu">> = {
+      envoye: "devis_envoye",
+      accepte: "gagne",
+      refuse: "perdu",
+    };
+    const nextLeadStatus = leadStatusMap[nextStatus];
+    if (nextLeadStatus) {
+      await supabase
+        .from("leads")
+        .update({ status: nextLeadStatus })
+        .eq("id", q.lead_id);
+      revalidatePath("/dashboard/leads");
+      revalidatePath(`/dashboard/leads/${q.lead_id}`);
+    }
+  }
 
   revalidatePath(`/dashboard/devis/${id}`);
   revalidatePath("/dashboard/devis");
@@ -334,7 +354,7 @@ export async function sendDevis(
   const supabase = await createClient();
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
-    .select("id,status,number,subject,client_id")
+    .select("id,status,number,subject,client_id,lead_id")
     .eq("id", id)
     .maybeSingle();
   if (qErr || !quote) {
@@ -361,6 +381,17 @@ export async function sendDevis(
     .update({ status: "envoye", sent_at: new Date().toISOString() })
     .eq("id", id);
   if (upErr) return { ok: false as const, error: upErr.message };
+
+  // Bump the linked lead into the "devis_envoyé" pipeline stage so the
+  // CRM dashboard reflects reality without a manual click.
+  if (quote.lead_id) {
+    await supabase
+      .from("leads")
+      .update({ status: "devis_envoye" })
+      .eq("id", quote.lead_id);
+    revalidatePath("/dashboard/leads");
+    revalidatePath(`/dashboard/leads/${quote.lead_id}`);
+  }
 
   // Revalidate right away so the UI reflects the new state even if the
   // email send fails.
