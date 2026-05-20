@@ -197,7 +197,7 @@ async function sendAcceptanceEmails(o: {
     supabase
       .from("quotes")
       .select(
-        "number,subject,issue_date,event_date,event_location,guests_count,tva_rate,commission_rate,deposit_rate,total_ht,total_tva,total_ttc,client_id",
+        "number,subject,issue_date,event_date,event_location,guests_count,tva_rate,commission_rate,deposit_rate,total_ht,total_tva,total_ttc,client_id,access_token",
       )
       .eq("id", o.quoteId)
       .maybeSingle(),
@@ -233,7 +233,11 @@ async function sendAcceptanceEmails(o: {
     "Cosmo Club Paris";
   const origin =
     process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
-  const link = `${origin}/devis/${o.quoteNumber}`;
+  const accessToken = (quote as { access_token?: string | null } | null)
+    ?.access_token;
+  const link = accessToken
+    ? `${origin}/devis/${o.quoteNumber}?t=${accessToken}`
+    : `${origin}/devis/${o.quoteNumber}`;
 
   const dateLabel = new Date(o.signedAt).toLocaleString("fr-FR", {
     dateStyle: "long",

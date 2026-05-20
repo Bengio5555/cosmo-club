@@ -96,6 +96,7 @@ export type Database = {
       }
       invoices: {
         Row: {
+          access_token: string | null
           archived_pdf_url: string | null
           client_id: string | null
           created_at: string
@@ -361,6 +362,7 @@ export type Database = {
       }
       quotes: {
         Row: {
+          access_token: string | null
           accepted_at: string | null
           cgv_accepted_at: string | null
           cgv_version: string | null

@@ -5,6 +5,7 @@ import { formatDateFR, formatEUR } from "@/lib/format";
 import "./invoice.css";
 
 type Params = Promise<{ number: string }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 // Drafts stay private; anything beyond is accessible via the URL in the
 // email. Same model as the devis plaquette.
@@ -37,8 +38,16 @@ type LegalSnapshot = {
   penalty_rate_text?: string | null;
 };
 
-export default async function InvoicePage({ params }: { params: Params }) {
+export default async function InvoicePage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const { number } = await params;
+  const sp = await searchParams;
+  const providedToken = typeof sp.t === "string" ? sp.t : null;
   const supabase = createAdminClient();
 
   const { data: invoice } = await supabase
@@ -51,6 +60,15 @@ export default async function InvoicePage({ params }: { params: Params }) {
     !invoice ||
     !PUBLIC_STATUSES.includes(invoice.status as (typeof PUBLIC_STATUSES)[number])
   ) {
+    notFound();
+  }
+
+  // IDOR guard: factures émises après l'activation du token ont un
+  // access_token NOT NULL. Sans le bon token dans ?t=, on 404 plutôt
+  // que 403 pour ne pas confirmer l'existence du numéro.
+  // Les anciennes factures (access_token IS NULL) restent accessibles
+  // par numéro seul — sinon on casse les liens email déjà envoyés.
+  if (invoice.access_token && invoice.access_token !== providedToken) {
     notFound();
   }
 

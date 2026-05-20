@@ -106,6 +106,11 @@ export async function convertLeadToQuote(leadId: string) {
       guests_count: lead.guests_count,
       subject: lead.company ? `Devis — ${lead.company}` : lead.event_type ? `Devis — ${lead.event_type}` : "Nouveau devis",
       intro: lead.message,
+      // IDOR protection: random token required in the public URL
+      // (/devis/[number]?t=<token>). Voir actions.ts > sendDevis pour
+      // l'inclusion dans le lien email, et app/devis/[number]/page.tsx
+      // pour la validation côté SSR.
+      access_token: crypto.randomUUID(),
     })
     .select("id,number")
     .single();

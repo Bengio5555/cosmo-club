@@ -193,7 +193,7 @@ export async function sendInvoice(id: string) {
   const supabase = await createClient();
   const { data: invoice, error: iErr } = await supabase
     .from("invoices")
-    .select("id,status,number,subject,client_id,due_date")
+    .select("id,status,number,subject,client_id,due_date,access_token")
     .eq("id", id)
     .maybeSingle();
   if (iErr || !invoice) {
@@ -270,7 +270,9 @@ export async function sendInvoice(id: string) {
   try {
     const resend = new Resend(apiKey);
     const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
-    const link = `${origin}/factures/${invoice.number}`;
+    const link = invoice.access_token
+      ? `${origin}/factures/${invoice.number}?t=${invoice.access_token}`
+      : `${origin}/factures/${invoice.number}`;
     const firstName = (client as { first_name?: string | null }).first_name ?? "";
     const companyName = legalSnapshot?.company_name || "Cosmo Club Paris";
     const subjectLine = invoice.subject || `Facture ${invoice.number}`;
@@ -360,6 +362,9 @@ export async function createCreditNote(
       is_credit_note: true,
       source_invoice_id: src.id,
       credit_note_reason: reason,
+      // IDOR protection: les avoirs sont aussi consultables en public
+      // via /factures/[number] — mêmes besoins d'isolation.
+      access_token: crypto.randomUUID(),
     })
     .select("id")
     .single();
@@ -415,7 +420,7 @@ export async function sendInvoiceReminder(id: string) {
   const { data: invoice, error: iErr } = await supabase
     .from("invoices")
     .select(
-      "id,status,number,subject,client_id,due_date,total_ttc,is_credit_note,legal_snapshot,reminder_count",
+      "id,status,number,subject,client_id,due_date,total_ttc,is_credit_note,legal_snapshot,reminder_count,access_token",
     )
     .eq("id", id)
     .maybeSingle();
@@ -495,7 +500,9 @@ export async function sendInvoiceReminder(id: string) {
     const resend = new Resend(apiKey);
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
-    const link = `${origin}/factures/${invoice.number}`;
+    const link = invoice.access_token
+      ? `${origin}/factures/${invoice.number}?t=${invoice.access_token}`
+      : `${origin}/factures/${invoice.number}`;
     const firstName =
       (client as { first_name?: string | null }).first_name ?? "";
     const subjectLine =

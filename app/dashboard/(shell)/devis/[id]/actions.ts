@@ -369,7 +369,7 @@ export async function sendDevis(
   const supabase = await createClient();
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
-    .select("id,status,number,subject,client_id,lead_id")
+    .select("id,status,number,subject,client_id,lead_id,access_token")
     .eq("id", id)
     .maybeSingle();
   if (qErr || !quote) {
@@ -436,7 +436,13 @@ export async function sendDevis(
   try {
     const resend = new Resend(apiKey);
     const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
-    const link = `${origin}/devis/${quote.number}`;
+    // Public plaquette URL — append the access token so the SSR
+    // route accepts the request. Devis legacy sans token reçoivent
+    // un lien nu (resterait OK côté route mais ne devrait jamais
+    // arriver pour un devis fraîchement créé).
+    const link = quote.access_token
+      ? `${origin}/devis/${quote.number}?t=${quote.access_token}`
+      : `${origin}/devis/${quote.number}`;
     const firstName =
       (client as { first_name?: string | null }).first_name ?? "";
     const companyName =
@@ -592,6 +598,8 @@ export async function createInvoiceFromQuote(quoteId: string) {
       total_ht: quote.total_ht,
       total_tva: quote.total_tva,
       total_ttc: quote.total_ttc,
+      // IDOR protection: random token required in /factures/[number]?t=<token>.
+      access_token: crypto.randomUUID(),
     })
     .select("id")
     .single();

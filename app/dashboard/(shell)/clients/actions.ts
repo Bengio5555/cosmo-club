@@ -219,6 +219,10 @@ export async function createQuoteForClient(clientId: string) {
       client_id: client.id,
       status: "brouillon",
       subject: `Devis — ${display}`,
+      // IDOR protection: random token required in the public URL
+      // (/devis/[number]?t=<token>). Anciens devis sans token restent
+      // accessibles par numéro seul (legacy bypass dans la route).
+      access_token: crypto.randomUUID(),
     })
     .select("id")
     .single();

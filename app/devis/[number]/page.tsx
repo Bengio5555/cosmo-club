@@ -7,6 +7,7 @@ import { NavDots } from "./NavDots";
 import "./plaquette.css";
 
 type Params = Promise<{ number: string }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 // Drafts stay private; anything beyond it is viewable via the URL the
 // client received in their email.
@@ -82,8 +83,16 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-export default async function DevisPlaquettePage({ params }: { params: Params }) {
+export default async function DevisPlaquettePage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const { number } = await params;
+  const sp = await searchParams;
+  const providedToken = typeof sp.t === "string" ? sp.t : null;
   const supabase = createAdminClient();
 
   const { data: quote } = await supabase
@@ -93,6 +102,17 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
     .maybeSingle();
 
   if (!quote || !PUBLIC_STATUSES.includes(quote.status as (typeof PUBLIC_STATUSES)[number])) {
+    notFound();
+  }
+
+  // IDOR guard: les devis créés après l'activation du token ont un
+  // access_token NOT NULL. Sans token dans l'URL ou token incorrect,
+  // on renvoie un 404 (404 plutôt que 403 pour ne pas confirmer
+  // l'existence du numéro à un attaquant qui itère).
+  // Les devis legacy (access_token IS NULL) restent accessibles par
+  // numéro seul — sinon on casserait tous les liens email déjà
+  // envoyés avant le déploiement de cette protection.
+  if (quote.access_token && quote.access_token !== providedToken) {
     notFound();
   }
 
