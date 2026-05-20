@@ -40,6 +40,13 @@ export type SaveQuoteInput = {
    * Formula: factor = 1 / (1 − rate/100); displayed_total_ht = subtotal × factor.
    */
   commission_rate: number;
+  /**
+   * Acompte demandé à la signature, fraction entre 0 et 1.
+   * 0.30 = 30 %. Persisté tel quel sur quotes.deposit_rate et utilisé
+   * par la plaquette publique pour afficher le bloc "Acompte" et par
+   * les emails de confirmation à la signature.
+   */
+  deposit_rate: number;
   valid_until: string | null;
   /**
    * Run-of-show steps ("14:00 — Livraison"). Persisted as JSONB on
@@ -216,6 +223,13 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
   const commissionRate = Number.isFinite(input.commission_rate)
     ? Math.min(99, Math.max(0, input.commission_rate))
     : 0;
+  // Acompte: clamp to [0, 1]. The DB has a CHECK constraint so an out-
+  // of-range value would 500 the save anyway; we clamp here to keep
+  // the user input forgiving (negative numbers, accidental 30 instead
+  // of 0.30, etc).
+  const depositRate = Number.isFinite(input.deposit_rate)
+    ? Math.min(1, Math.max(0, input.deposit_rate))
+    : 0.3;
   const totalHt = round2(subtotalHt * commissionFactor(commissionRate));
   const totalTva = round2((totalHt * tvaRate) / 100);
   const totalTtc = round2(totalHt + totalTva);
@@ -233,6 +247,7 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
       guests_count: input.guests_count,
       tva_rate: tvaRate,
       commission_rate: commissionRate,
+      deposit_rate: depositRate,
       valid_until: input.valid_until,
       schedule: sanitizeSchedule(input.schedule),
       moodboard_images: sanitizeMoodboard(input.moodboard_images),

@@ -197,7 +197,7 @@ async function sendAcceptanceEmails(o: {
     supabase
       .from("quotes")
       .select(
-        "number,subject,issue_date,event_date,event_location,guests_count,tva_rate,commission_rate,total_ht,total_tva,total_ttc,client_id",
+        "number,subject,issue_date,event_date,event_location,guests_count,tva_rate,commission_rate,deposit_rate,total_ht,total_tva,total_ttc,client_id",
       )
       .eq("id", o.quoteId)
       .maybeSingle(),
@@ -333,6 +333,11 @@ async function sendAcceptanceEmails(o: {
   // ─── Two distinct emails: one to the client, one to Cosmo ──
   const resend = new Resend(apiKey);
 
+  // Per-quote acompte rate (fraction 0..1 → integer percent).
+  const depositPct = Math.round(
+    Math.min(1, Math.max(0, Number(quote?.deposit_rate ?? 0.3))) * 100,
+  );
+
   // 1. Client confirmation
   if (client?.email) {
     try {
@@ -350,6 +355,7 @@ async function sendAcceptanceEmails(o: {
           link,
           firstName: client.first_name ?? null,
           hasPdf: !!pdfBase64,
+          depositPct,
         }),
         attachments: baseAttachments,
       });
@@ -390,6 +396,7 @@ async function sendAcceptanceEmails(o: {
         clientEmail: client?.email ?? null,
         clientPhone:
           (client as { phone?: string | null } | null)?.phone ?? null,
+        depositPct,
       }),
       attachments: baseAttachments,
     });
@@ -433,6 +440,7 @@ function buildClientHtml(o: {
   link: string;
   firstName: string | null;
   hasPdf: boolean;
+  depositPct: number;
 }) {
   const greeting = o.firstName ? `Bonjour ${escape(o.firstName)},` : "Bonjour,";
   return `
@@ -456,7 +464,7 @@ function buildClientHtml(o: {
 
     <p style="font-size:13px; line-height:1.6; margin-top:18px;">
       Prochaine étape&nbsp;: notre équipe revient vers vous pour le règlement
-      de l&apos;acompte (50&nbsp;%) et le calage final.
+      de l&apos;acompte (${o.depositPct}&nbsp;%) et le calage final.
     </p>
     <p style="font-size:13px;">Plaquette consultable en ligne&nbsp;: <a href="${o.link}" style="color:#c9a961;">${o.link}</a></p>
 
@@ -481,6 +489,7 @@ function buildOwnerHtml(o: {
   link: string;
   clientEmail: string | null;
   clientPhone: string | null;
+  depositPct: number;
 }) {
   return `
 <!doctype html><html><body style="font-family: ui-sans-serif,system-ui,sans-serif; background:#0a0a0a; color:#e9e2d0; padding:24px;">
@@ -494,7 +503,7 @@ function buildOwnerHtml(o: {
       <strong>${formatEUR(o.quoteTotalTtc)}</strong> TTC.
     </p>
     <p style="font-size:14px; line-height:1.6;">
-      Action&nbsp;: déclencher la demande d&apos;acompte (50&nbsp;%) et caler
+      Action&nbsp;: déclencher la demande d&apos;acompte (${o.depositPct}&nbsp;%) et caler
       la prestation.
     </p>
 

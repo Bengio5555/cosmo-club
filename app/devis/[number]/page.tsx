@@ -44,25 +44,28 @@ const DEFAULT_COCKTAILS = [
   "Old Fashioned",
 ];
 
-// Default FR terms when quote.terms is empty.
-const DEFAULT_TERMS: { label: string; text: string }[] = [
-  {
-    label: "Validité",
-    text: "Cette proposition est valable 30 jours à compter de sa date d'émission. Au-delà, un réajustement tarifaire pourra s'appliquer selon la disponibilité.",
-  },
-  {
-    label: "Acompte",
-    text: "Un acompte de 30 % est demandé à la signature pour confirmer la réservation de la date. Le solde est réglé à J-7.",
-  },
-  {
-    label: "Annulation",
-    text: "En cas d'annulation à plus de 30 jours de l'événement, 50 % de l'acompte est remboursé. Entre 30 et 15 jours, 25 %. Moins de 15 jours, l'acompte est conservé.",
-  },
-  {
-    label: "Modifications",
-    text: "Les ajustements mineurs de carte ou d'effectif (±10 %) sont acceptés jusqu'à J-10 sans surcoût.",
-  },
-];
+// Default FR terms when quote.terms is empty. The "Acompte" line is
+// generated dynamically from quote.deposit_rate at render time.
+function defaultTerms(depositPct: number): { label: string; text: string }[] {
+  return [
+    {
+      label: "Validité",
+      text: "Cette proposition est valable 30 jours à compter de sa date d'émission. Au-delà, un réajustement tarifaire pourra s'appliquer selon la disponibilité.",
+    },
+    {
+      label: "Acompte",
+      text: `Un acompte de ${depositPct} % est demandé à la signature pour confirmer la réservation de la date. Le solde est réglé à J-7.`,
+    },
+    {
+      label: "Annulation",
+      text: "En cas d'annulation à plus de 30 jours de l'événement, 50 % de l'acompte est remboursé. Entre 30 et 15 jours, 25 %. Moins de 15 jours, l'acompte est conservé.",
+    },
+    {
+      label: "Modifications",
+      text: "Les ajustements mineurs de carte ou d'effectif (±10 %) sont acceptés jusqu'à J-10 sans surcoût.",
+    },
+  ];
+}
 
 // Default note shown under the totals when settings don't provide one.
 const DEFAULT_TOTALS_NOTE =
@@ -131,13 +134,21 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
 
   const letterHook = buildLetterHook(clientDisplayName);
 
-  const terms = splitTerms(quote.terms) ?? DEFAULT_TERMS;
+  // Acompte: per-quote rate stored as a fraction (0..1) on the DB.
+  // Defensive coerce + clamp in case of legacy rows. The UI displays
+  // the integer percentage so "0.30" becomes "30 %".
+  const depositRate = Math.min(
+    1,
+    Math.max(0, Number((quote as { deposit_rate?: number }).deposit_rate ?? 0.3)),
+  );
+  const depositPct = Math.round(depositRate * 100);
+  const terms = splitTerms(quote.terms) ?? defaultTerms(depositPct);
 
   const validUntilLabel = quote.valid_until
     ? `Valable jusqu'au ${formatDateFR(quote.valid_until)}`
     : "Valable 30 jours à compter de l'émission";
 
-  const deposit = round2(quote.total_ttc * 0.3);
+  const deposit = round2(quote.total_ttc * depositRate);
 
   // Gross-up factor when an agency commission is in play. We persist
   // base prices on quote_items and apply the multiplier at render so
@@ -474,7 +485,7 @@ export default async function DevisPlaquettePage({ params }: { params: Params })
             </table>
 
             <div className="deposit-block">
-              <span>Acompte à la signature (30 %)</span>
+              <span>Acompte à la signature ({depositPct} %)</span>
               <span>{formatEUR(deposit)}</span>
             </div>
           </div>

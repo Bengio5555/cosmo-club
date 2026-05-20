@@ -98,6 +98,12 @@ export function DevisEditor({
     quote.guests_count != null ? String(quote.guests_count) : "",
   );
   const [tvaRate, setTvaRate] = useState<string>(String(quote.tva_rate ?? 20));
+  // Acompte stocké en fraction (0..1) en DB. L'éditeur expose le %
+  // (0..100) pour rester aligné sur le langage métier ("30 %").
+  const [depositPct, setDepositPct] = useState<string>(() => {
+    const raw = Number(quote.deposit_rate ?? 0.3);
+    return String(Math.round(raw * 100));
+  });
   const initialCommission = Number(quote.commission_rate ?? 0);
   const [commissionEnabled, setCommissionEnabled] = useState(
     initialCommission > 0,
@@ -214,6 +220,7 @@ export function DevisEditor({
       guests_count: guestsCount ? Number(guestsCount) : null,
       tva_rate: tvaNum,
       commission_rate: commissionRateNum,
+      deposit_rate: Math.min(1, Math.max(0, (Number(depositPct) || 0) / 100)),
       valid_until: validUntil || null,
       schedule,
       moodboard_images: moodboardImages,
@@ -681,6 +688,30 @@ export function DevisEditor({
                 wedding planner…) prend une commission sur l&apos;affaire.
               </p>
             )}
+          </div>
+
+          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+              Acompte à la signature
+            </p>
+            <label className="flex items-center gap-2">
+              <input
+                type="number"
+                value={depositPct}
+                onChange={(e) => setDepositPct(e.target.value)}
+                min="0"
+                max="100"
+                step="1"
+                disabled={readOnly}
+                className="w-20 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+              />
+              <span className="text-sm text-neutral-400">% du Total TTC</span>
+            </label>
+            <p className="mt-2 text-[11px] leading-relaxed text-neutral-500">
+              Affiché en bloc &laquo;&nbsp;Acompte&nbsp;&raquo; sur la
+              plaquette et repris dans les emails de confirmation. 30&nbsp;%
+              par défaut, 40-50&nbsp;% recommandé sur les gros tickets.
+            </p>
           </div>
 
           <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
