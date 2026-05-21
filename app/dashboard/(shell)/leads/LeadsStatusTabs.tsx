@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTransition, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Database } from "@/types/database";
 
 type LeadStatus = Database["public"]["Enums"]["lead_status"];
@@ -23,6 +26,14 @@ const ACTIVE_TONE: Record<LeadStatus | "all", string> = {
   perdu: "bg-neutral-700/40 text-neutral-300",
 };
 
+/**
+ * Client-side tab switcher. Previous version used <Link> which felt
+ * sluggish (full SSR re-render with no visual feedback). Now we:
+ *   - Use router.replace inside useTransition so the navigation is
+ *     non-blocking and we can show a loading indicator
+ *   - Optimistically highlight the clicked tab before SSR responds,
+ *     so the UI feels instant even when the DB query is slow
+ */
 export function LeadsStatusTabs({
   activeStatus,
   counts,
@@ -32,32 +43,59 @@ export function LeadsStatusTabs({
   counts: Record<LeadStatus | "all", number>;
   preserve: { q?: string; type?: string };
 }) {
-  // Helper to build hrefs that keep the search query + event type
-  // filters alive when the user switches between tabs.
-  function hrefFor(value: LeadStatus | "all") {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  // Optimistic state: tracks the tab the user just clicked so we can
+  // highlight it before the server returns. Cleared when activeStatus
+  // catches up (via the parent re-render).
+  const [optimistic, setOptimistic] = useState<string | null>(null);
+
+  // The current "rendered" active value: optimistic first, then real.
+  const currentActive = optimistic ?? activeStatus;
+
+  function go(value: LeadStatus | "all") {
+    const targetStatus = value === "all" ? "" : value;
+    if (targetStatus === activeStatus) return;
+    setOptimistic(targetStatus);
     const params = new URLSearchParams();
-    if (value !== "all") params.set("status", value);
+    if (targetStatus) params.set("status", targetStatus);
     if (preserve.q) params.set("q", preserve.q);
     if (preserve.type) params.set("type", preserve.type);
     const qs = params.toString();
-    return qs ? `/dashboard/leads?${qs}` : "/dashboard/leads";
+    const href = qs ? `/dashboard/leads?${qs}` : "/dashboard/leads";
+    startTransition(() => {
+      router.replace(href, { scroll: false });
+    });
+  }
+
+  // Once the parent re-render lands with the new activeStatus, clear
+  // the optimistic override so future clicks aren't stuck on it.
+  if (optimistic !== null && optimistic === activeStatus) {
+    setOptimistic(null);
   }
 
   return (
-    <div className="-mx-1 flex flex-wrap gap-1 rounded-lg border border-neutral-800 bg-neutral-950/60 p-1">
+    <div
+      className={
+        "-mx-1 flex flex-wrap gap-1 rounded-lg border border-neutral-800 bg-neutral-950/60 p-1 transition-opacity " +
+        (pending ? "opacity-70" : "")
+      }
+      aria-busy={pending}
+    >
       {TABS.map((t) => {
         const isActive =
-          t.value === "all" ? activeStatus === "" : activeStatus === t.value;
+          t.value === "all" ? currentActive === "" : currentActive === t.value;
         const tone = isActive
           ? ACTIVE_TONE[t.value]
           : "text-neutral-400 hover:bg-neutral-900 hover:text-white";
         return (
-          <Link
+          <button
             key={t.value}
-            href={hrefFor(t.value)}
-            scroll={false}
+            type="button"
+            onClick={() => go(t.value)}
+            disabled={pending}
             className={
-              "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
+              "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-wait " +
               tone
             }
           >
@@ -72,7 +110,7 @@ export function LeadsStatusTabs({
             >
               {counts[t.value] ?? 0}
             </span>
-          </Link>
+          </button>
         );
       })}
     </div>

@@ -36,14 +36,16 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
     );
   }
 
-  const { data: leads, error } = await query.limit(200);
-
-  // Compteurs par statut pour les onglets de filtre rapide.
-  // Une seule requête lit toute la table (~quelques centaines de
-  // lignes au plus, donc négligeable) et on agrège côté JS.
-  const { data: allStatuses } = await supabase
-    .from("leads")
-    .select("status");
+  // Liste filtrée + compteurs par statut en parallèle pour gagner
+  // un roundtrip réseau. Les comptes ignorent le filtre status (sinon
+  // les pilules afficheraient 0 partout sauf l'active), mais
+  // respectent le filtre type/recherche s'il y en a un — comme ça
+  // les compteurs reflètent vraiment "combien il y aurait dans cette
+  // catégorie en gardant ma recherche".
+  const [{ data: leads, error }, { data: allStatuses }] = await Promise.all([
+    query.limit(200),
+    supabase.from("leads").select("status"),
+  ]);
   const counts: Record<LeadStatus | "all", number> = {
     all: allStatuses?.length ?? 0,
     nouveau: 0,
