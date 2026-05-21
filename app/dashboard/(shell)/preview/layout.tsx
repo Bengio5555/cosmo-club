@@ -1,19 +1,15 @@
-import { PreviewNav } from "./PreviewNav";
+import { PreviewShell } from "./PreviewShell";
 
 /**
- * Layout des pages preview : applique un fond clair (slate-50) sur
- * tout le contenu, et place une sub-nav en haut pour basculer entre
- * les démos (Tableau de bord / Clients / Calendrier).
+ * Layout des pages preview : délègue à PreviewShell (client) la
+ * gestion du thème (light/dark toggle + persistance localStorage) et
+ * le sub-nav entre les démos. Le layout reste server pour que les
+ * pages enfants puissent fetcher Supabase normalement.
  */
 export default function PreviewLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-full bg-slate-50">
-      <PreviewNav />
-      {children}
-    </div>
-  );
+  return <PreviewShell>{children}</PreviewShell>;
 }

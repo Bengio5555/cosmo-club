@@ -39,10 +39,14 @@ const MONTH_LABELS = [
 ];
 
 const STATUS_TONE: Record<string, string> = {
-  a_venir: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  en_cours: "bg-amber-50 text-amber-700 ring-amber-600/20",
-  termine: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-  brouillon: "bg-slate-100 text-slate-600 ring-slate-300/40",
+  a_venir:
+    "bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/30",
+  en_cours:
+    "bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/30",
+  termine:
+    "bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30",
+  brouillon:
+    "bg-slate-100 text-slate-600 ring-slate-300/40 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -117,22 +121,22 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
         {/* Header */}
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Aperçu design · shadcn / Zenith style
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
               Calendrier
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-400">
               {MONTH_LABELS[cursor.getMonth()]} {cursor.getFullYear()} ·{" "}
               {monthEventCount} événement{monthEventCount > 1 ? "s" : ""}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+            <button className="rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
               Exporter ICS
             </button>
-            <button className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800">
+            <button className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
               <Plus className="h-4 w-4" />
               Nouvel événement
             </button>
@@ -144,34 +148,34 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
           <div className="flex items-center gap-2">
             <button
               onClick={prev}
-              className="rounded-md border border-slate-300 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50"
+              className="rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 p-2 text-slate-600 shadow-sm hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700"
               aria-label="Mois précédent"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               onClick={next}
-              className="rounded-md border border-slate-300 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50"
+              className="rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 p-2 text-slate-600 shadow-sm hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700"
               aria-label="Mois suivant"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
             <button
               onClick={goToday}
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              className="rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               Aujourd&apos;hui
             </button>
           </div>
-          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-1 shadow-sm">
             {["Mois", "Semaine", "Jour", "Liste"].map((v, i) => (
               <button
                 key={v}
                 className={
                   "rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
                   (i === 0
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
+                    ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white")
                 }
               >
                 {v}
@@ -183,13 +187,13 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
         {/* Grid + side panel */}
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
           {/* Month grid */}
-          <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
             {/* Weekday header */}
-            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
+            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
               {WEEKDAY_LABELS.map((w) => (
                 <div
                   key={w}
-                  className="px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-slate-500"
+                  className="px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400"
                 >
                   {w}
                 </div>
@@ -208,11 +212,11 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
                     key={i}
                     onClick={() => setSelectedDate(key)}
                     className={
-                      "flex min-h-[100px] flex-col items-stretch gap-1 border-b border-r border-slate-100 p-2 text-left transition-colors hover:bg-slate-50 " +
+                      "flex min-h-[100px] flex-col items-stretch gap-1 border-b border-r border-slate-100 dark:border-slate-800 p-2 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 " +
                       (i % 7 === 6 ? "border-r-0 " : "") +
                       (i >= 35 ? "border-b-0 " : "") +
-                      (inMonth ? "" : "bg-slate-50/50 text-slate-400 ") +
-                      (isSelected ? "ring-2 ring-inset ring-slate-900/30 " : "")
+                      (inMonth ? "" : "bg-slate-50/50 text-slate-400 dark:bg-slate-900/40 dark:text-slate-600 ") +
+                      (isSelected ? "ring-2 ring-inset ring-slate-900/30 dark:ring-slate-100/30 " : "")
                     }
                   >
                     <div className="flex items-center justify-between">
@@ -220,16 +224,16 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
                         className={
                           "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium tabular-nums " +
                           (isToday
-                            ? "bg-slate-900 text-white"
+                            ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                             : inMonth
-                              ? "text-slate-700"
-                              : "text-slate-400")
+                              ? "text-slate-700 dark:text-slate-300"
+                              : "text-slate-400 dark:text-slate-600")
                         }
                       >
                         {cell.date.getDate()}
                       </span>
                       {events.length > 2 && (
-                        <span className="text-[10px] font-medium text-slate-400">
+                        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
                           +{events.length - 2}
                         </span>
                       )}
@@ -260,14 +264,14 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
           </div>
 
           {/* Side panel — selected day details */}
-          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="border-b border-slate-100 pb-4">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+          <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5 shadow-sm">
+            <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {new Date(selectedDate).toLocaleDateString("fr-FR", {
                   weekday: "long",
                 })}
               </p>
-              <h3 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+              <h3 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
                 {new Date(selectedDate).toLocaleDateString("fr-FR", {
                   day: "numeric",
                   month: "long",
@@ -280,7 +284,7 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
             </div>
             <div className="mt-4 space-y-3">
               {selectedEvents.length === 0 ? (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   Aucun événement ce jour. Cliquez sur{" "}
                   <span className="font-medium">+ Nouvel événement</span> pour
                   en programmer un.
@@ -292,10 +296,10 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
                   return (
                     <div
                       key={e.id}
-                      className="rounded-md border border-slate-200 p-3 hover:bg-slate-50"
+                      className="rounded-md border border-slate-200 p-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-slate-900">{e.title}</p>
+                        <p className="font-medium text-slate-900 dark:text-slate-100">{e.title}</p>
                         <span
                           className={
                             "inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset " +
@@ -305,10 +309,10 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
                           {STATUS_LABEL[e.status] ?? e.status}
                         </span>
                       </div>
-                      <div className="mt-2 space-y-1 text-xs text-slate-600">
+                      <div className="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-400">
                         {(e.start_time || e.end_time) && (
                           <div className="flex items-center gap-1.5">
-                            <Clock className="h-3 w-3 text-slate-400" />
+                            <Clock className="h-3 w-3 text-slate-400 dark:text-slate-500" />
                             <span>
                               {e.start_time?.slice(0, 5) ?? "—"}
                               {e.end_time ? ` – ${e.end_time.slice(0, 5)}` : ""}
@@ -317,13 +321,13 @@ export function PreviewCalendar({ events }: { events: EventRow[] }) {
                         )}
                         {e.location && (
                           <div className="flex items-center gap-1.5">
-                            <MapPin className="h-3 w-3 text-slate-400" />
+                            <MapPin className="h-3 w-3 text-slate-400 dark:text-slate-500" />
                             <span>{e.location}</span>
                           </div>
                         )}
                         {e.guests_count != null && (
                           <div className="flex items-center gap-1.5">
-                            <Users className="h-3 w-3 text-slate-400" />
+                            <Users className="h-3 w-3 text-slate-400 dark:text-slate-500" />
                             <span>{e.guests_count} invités</span>
                           </div>
                         )}

@@ -148,20 +148,20 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
             <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
               Aperçu design · shadcn / Zenith style
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
               Clients
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-600">
               Gérez vos clients, suivez le CA cumulé et leurs dernières
               prestations.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50">
+            <button className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
               <Download className="h-4 w-4" />
               Exporter
             </button>
-            <button className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800">
+            <button className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
               <Plus className="h-4 w-4" />
               Nouveau client
             </button>
@@ -170,7 +170,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
 
         {/* Tabs row */}
         <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-1 shadow-sm">
             {TABS.map((t) => {
               const active = tab === t.value;
               return (
@@ -180,15 +180,15 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
                   className={
                     "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors " +
                     (active
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
+                      ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:hover:text-white dark:text-slate-400 dark:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-white")
                   }
                 >
                   <span>{t.label}</span>
                   <span
                     className={
                       "rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums " +
-                      (active ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600")
+                      (active ? "bg-white/15 text-white dark:bg-slate-900/30 dark:text-slate-900" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300")
                     }
                   >
                     {counts[t.value]}
@@ -200,37 +200,37 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
 
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-600" />
               <input
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Filtrer les clients…"
-                className="w-72 rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-100"
+                className="w-72 rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 dark:text-slate-600 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-slate-500 dark:focus:ring-slate-700"
               />
             </div>
-            <button className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+            <button className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
               <Columns3 className="h-4 w-4" />
               Colonnes
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+              <ChevronDown className="h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </button>
           </div>
         </div>
 
         {/* Selection banner */}
         {selected.size > 0 && (
-          <div className="mt-4 flex items-center justify-between rounded-md border border-slate-300 bg-slate-100 px-4 py-2 text-sm text-slate-700 shadow-sm">
+          <div className="mt-4 flex items-center justify-between rounded-md border border-slate-300 bg-slate-100 px-4 py-2 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-300 shadow-sm">
             <span>
               <strong className="font-semibold">{selected.size}</strong>{" "}
               {selected.size > 1 ? "clients sélectionnés" : "client sélectionné"}
             </span>
             <div className="flex items-center gap-2">
-              <button className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
+              <button className="rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
                 Archiver
               </button>
               <button
                 onClick={() => setSelected(new Set())}
-                className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
+                className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 dark:hover:text-white dark:text-slate-400 dark:hover:text-white"
               >
                 Annuler
               </button>
@@ -239,9 +239,9 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
         )}
 
         {/* Table */}
-        <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-medium text-slate-500">
+            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
               <tr>
                 <th className="w-10 px-4 py-3">
                   <button
@@ -249,8 +249,8 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
                     className={
                       "flex h-4 w-4 items-center justify-center rounded border transition-colors " +
                       (allVisibleSelected
-                        ? "border-slate-900 bg-slate-900"
-                        : "border-slate-300 hover:border-slate-400")
+                        ? "border-slate-900 bg-slate-900 dark:border-slate-100 dark:bg-slate-100"
+                        : "border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500")
                     }
                     aria-label="Tout sélectionner"
                   >
@@ -263,7 +263,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
                 <th className="px-4 py-3">
                   <button
                     onClick={() => toggleSort("orders")}
-                    className="inline-flex items-center gap-1 hover:text-slate-900"
+                    className="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-white"
                   >
                     Commandes
                     <ArrowUpDown className="h-3 w-3" />
@@ -272,7 +272,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
                 <th className="px-4 py-3">
                   <button
                     onClick={() => toggleSort("ca")}
-                    className="inline-flex items-center gap-1 hover:text-slate-900"
+                    className="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-white"
                   >
                     CA cumulé
                     <ArrowUpDown className="h-3 w-3" />
@@ -281,7 +281,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
                 <th className="hidden px-4 py-3 lg:table-cell">
                   <button
                     onClick={() => toggleSort("lastDate")}
-                    className="inline-flex items-center gap-1 hover:text-slate-900"
+                    className="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-white"
                   >
                     Dernière activité
                     <ArrowUpDown className="h-3 w-3" />
@@ -294,7 +294,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
               {filtered.map((c) => (
                 <tr
                   key={c.id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
                 >
                   <td className="px-4 py-3">
                     <button
@@ -302,8 +302,8 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
                       className={
                         "flex h-4 w-4 items-center justify-center rounded border transition-colors " +
                         (selected.has(c.id)
-                          ? "border-slate-900 bg-slate-900"
-                          : "border-slate-300 hover:border-slate-400")
+                          ? "border-slate-900 bg-slate-900 dark:border-slate-100 dark:bg-slate-100"
+                          : "border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500")
                       }
                     >
                       {selected.has(c.id) && <Check className="h-3 w-3 text-white" />}
@@ -315,51 +315,51 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
                         {initials(c)}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-slate-900">
+                        <p className="truncate font-medium text-slate-900 dark:text-slate-100">
                           {c.company_name || fullName(c)}
                         </p>
                         {c.company_name && (
-                          <p className="truncate text-xs text-slate-500">{fullName(c)}</p>
+                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">{fullName(c)}</p>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="hidden px-4 py-3 text-slate-600 md:table-cell">
+                  <td className="hidden px-4 py-3 text-slate-600 dark:text-slate-400 md:table-cell">
                     {c.email ? (
                       <span className="text-sm">{c.email}</span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-400 dark:text-slate-600">—</span>
                     )}
                   </td>
-                  <td className="hidden px-4 py-3 text-slate-600 lg:table-cell">
-                    {c.city || <span className="text-slate-400">—</span>}
+                  <td className="hidden px-4 py-3 text-slate-600 dark:text-slate-400 lg:table-cell">
+                    {c.city || <span className="text-slate-400 dark:text-slate-600">—</span>}
                   </td>
                   <td className="px-4 py-3">
                     {c.orders > 0 ? (
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30">
                         {c.orders}
                       </span>
                     ) : c.quotes > 0 ? (
-                      <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                      <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/30">
                         {c.quotes} devis
                       </span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-400 dark:text-slate-600">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 font-medium tabular-nums text-slate-900">
+                  <td className="px-4 py-3 font-medium tabular-nums text-slate-900 dark:text-slate-100">
                     {c.ca > 0 ? (
                       formatEUR(c.ca)
                     ) : (
-                      <span className="font-normal text-slate-400">—</span>
+                      <span className="font-normal text-slate-400 dark:text-slate-600">—</span>
                     )}
                   </td>
-                  <td className="hidden px-4 py-3 text-sm text-slate-500 lg:table-cell">
+                  <td className="hidden px-4 py-3 text-sm text-slate-500 dark:text-slate-400 lg:table-cell">
                     {formatDate(c.lastDate)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
-                      className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                      className="rounded-md p-1 text-slate-400 dark:text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                       aria-label="Actions"
                     >
                       <MoreHorizontal className="h-4 w-4" />
@@ -369,7 +369,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-500">
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
                     Aucun client pour ces filtres.
                   </td>
                 </tr>
@@ -378,7 +378,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
           </table>
 
           {/* Pagination footer */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
             <span>
               {filtered.length} client{filtered.length > 1 ? "s" : ""} affiché
               {filtered.length > 1 ? "s" : ""}
@@ -386,11 +386,11 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
             <div className="flex items-center gap-1">
               <button
                 disabled
-                className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-400 disabled:opacity-50"
+                className="rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-400 dark:text-slate-600 disabled:opacity-50"
               >
                 Précédent
               </button>
-              <button className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
+              <button className="rounded-md border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
                 Suivant
               </button>
             </div>
@@ -398,7 +398,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
         </div>
 
         {/* Footnote */}
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
           Démo de design — aucune action n&apos;est persistée. Si tu valides,
           on migre les pages réelles dans ce style.
         </p>

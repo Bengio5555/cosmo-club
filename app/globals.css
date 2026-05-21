@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Active la classe `.dark` comme déclencheur du variant `dark:` —
+   utilisé pour l'instant uniquement par les pages preview (toggle
+   light/dark dans le sub-nav). Le sélecteur inclut le nœud lui-même
+   ET ses descendants, donc poser la classe sur un parent suffit. */
+@custom-variant dark (&:is(.dark, .dark *));
+
 @theme {
   /* ─── Colors ───────────────────────────────────── */
   /* 100% cream palette — 5 nuances subtiles, pas de dark/chocolat.
