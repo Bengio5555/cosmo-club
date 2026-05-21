@@ -22,7 +22,6 @@ import {
   Truck,
   Network,
   MessageSquareText,
-  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccess, type UserRole } from "@/lib/auth/roles";
@@ -73,7 +72,6 @@ const nav: { section: string; items: NavItem[] }[] = [
     items: [
       { href: "/dashboard/team", label: "Utilisateurs", icon: UserCog },
       { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
-      { href: "/dashboard/preview", label: "Aperçu UI", icon: Sparkles, badge: "PREVIEW" },
     ],
   },
 ];

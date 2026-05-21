@@ -51,7 +51,6 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   // Configuration
   "/dashboard/settings": ["owner", "admin"],
   "/dashboard/team": ["owner", "admin"],
-  "/dashboard/preview": ["owner", "admin"],
 };
 
 /**
