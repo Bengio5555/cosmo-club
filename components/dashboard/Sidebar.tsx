@@ -92,12 +92,13 @@ export function Sidebar({ role }: { role: UserRole }) {
     .filter((group) => group.items.length > 0);
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950 px-3 py-4 text-neutral-300 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-3 py-4 text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-neutral-300 md:flex">
       {/*
         sticky + top-0 + h-screen : la sidebar reste figée à gauche
         quand l'utilisateur scrolle dans le contenu principal. Le
         scroll interne (overflow-y-auto sur <nav>) prend le relais si
         la liste de liens devient plus haute que le viewport.
+        Couleurs theme-aware : white/slate light, neutral dark.
       */}
       <Link
         href="/dashboard"
@@ -113,7 +114,7 @@ export function Sidebar({ role }: { role: UserRole }) {
           unoptimized
           className="h-6 w-auto select-none"
         />
-        <span className="ml-auto text-[10px] uppercase tracking-widest text-neutral-500">
+        <span className="ml-auto text-[10px] uppercase tracking-widest text-slate-400 dark:text-neutral-500">
           Admin
         </span>
       </Link>
@@ -121,7 +122,7 @@ export function Sidebar({ role }: { role: UserRole }) {
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto text-sm">
         {sections.map((group) => (
           <div key={group.section}>
-            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-neutral-500">
               {group.section}
             </p>
             <ul className="space-y-0.5">
@@ -138,8 +139,8 @@ export function Sidebar({ role }: { role: UserRole }) {
                       className={cn(
                         "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
                         active
-                          ? "bg-neutral-800 text-white"
-                          : "text-neutral-400 hover:bg-neutral-900 hover:text-white",
+                          ? "bg-slate-100 text-slate-900 dark:bg-neutral-800 dark:text-white"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white",
                       )}
                     >
                       <Icon className="h-4 w-4" />
@@ -158,8 +159,12 @@ export function Sidebar({ role }: { role: UserRole }) {
         ))}
       </nav>
 
-      <div className="mt-4 border-t border-neutral-800 pt-3 text-[11px] text-neutral-500">
-        <Link href="/" className="hover:text-neutral-300" target="_blank">
+      <div className="mt-4 border-t border-slate-200 pt-3 text-[11px] text-slate-500 dark:border-neutral-800 dark:text-neutral-500">
+        <Link
+          href="/"
+          className="hover:text-slate-700 dark:hover:text-neutral-300"
+          target="_blank"
+        >
           ↗ Voir le site public
         </Link>
       </div>
