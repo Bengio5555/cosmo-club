@@ -69,23 +69,23 @@ export function PaymentsSection({
   }
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
           Encaissements
         </p>
         {canEdit && !adding && (
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700"
+            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700"
           >
             <Plus className="h-3 w-3" /> Paiement
           </button>
         )}
       </div>
 
-      <div className="mb-4 grid grid-cols-3 gap-3 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-center">
+      <div className="mb-4 grid grid-cols-3 gap-3 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-3 text-center">
         <Stat label="Total TTC" value={formatEUR(totalTtc)} />
         <Stat label="Encaissé" value={formatEUR(paid)} tone="ok" />
         <Stat
@@ -110,7 +110,7 @@ export function PaymentsSection({
       {adding && canEdit && (
         <form
           action={handleAdd}
-          className="mb-3 space-y-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3"
+          className="mb-3 space-y-2 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-3"
         >
           <div className="grid gap-2 md:grid-cols-[minmax(0,120px)_minmax(0,140px)_minmax(0,1fr)]">
             <Field label="Montant">
@@ -121,7 +121,7 @@ export function PaymentsSection({
                 required
                 autoFocus
                 defaultValue={remaining > 0 ? remaining : undefined}
-                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </Field>
             <Field label="Date">
@@ -130,14 +130,14 @@ export function PaymentsSection({
                 type="date"
                 required
                 defaultValue={new Date().toISOString().slice(0, 10)}
-                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </Field>
             <Field label="Moyen">
               <select
                 name="method"
                 defaultValue="virement"
-                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
               >
                 {METHODS.map((m) => (
                   <option key={m} value={m}>
@@ -154,14 +154,14 @@ export function PaymentsSection({
                 name="reference"
                 type="text"
                 placeholder="N° virement, chèque…"
-                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </Field>
             <Field label="Notes (optionnelles)">
               <input
                 name="notes"
                 type="text"
-                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </Field>
           </div>
@@ -178,7 +178,7 @@ export function PaymentsSection({
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
             >
               Annuler
             </button>
@@ -187,26 +187,26 @@ export function PaymentsSection({
       )}
 
       {payments.length === 0 ? (
-        <p className="py-3 text-center text-xs text-slate-500 dark:text-neutral-500">
+        <p className="py-3 text-center text-xs text-slate-500 dark:text-slate-500">
           Aucun paiement enregistré.
         </p>
       ) : (
-        <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
+        <ul className="divide-y divide-slate-100 dark:divide-slate-900">
           {payments.map((p) => (
             <li
               key={p.id}
               className="flex items-center justify-between gap-3 py-2 text-sm"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-slate-700 dark:text-neutral-200">
+                <p className="text-slate-700 dark:text-slate-200">
                   <span className="font-medium">{formatEUR(p.amount)}</span>
                   {p.method && (
-                    <span className="ml-2 text-xs text-slate-500 dark:text-neutral-500">
+                    <span className="ml-2 text-xs text-slate-500 dark:text-slate-500">
                       · {p.method}
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+                <p className="text-[11px] text-slate-500 dark:text-slate-500">
                   {formatDateFR(p.paid_on)}
                   {p.reference ? ` · réf. ${p.reference}` : ""}
                   {p.notes ? ` · ${p.notes}` : ""}
@@ -216,7 +216,7 @@ export function PaymentsSection({
                 <button
                   type="button"
                   onClick={() => handleRemove(p.id)}
-                  className="rounded p-1.5 text-slate-500 dark:text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                  className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
                   aria-label="Supprimer"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -246,10 +246,10 @@ function Stat({
       ? "text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
       ? "text-amber-700 dark:text-amber-300"
-      : "text-slate-900 dark:text-neutral-100";
+      : "text-slate-900 dark:text-slate-100";
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <p className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {label}
       </p>
       <p className={`mt-0.5 text-sm font-semibold ${toneCls}`}>{value}</p>
@@ -260,7 +260,7 @@ function Stat({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {label}
       </span>
       {children}

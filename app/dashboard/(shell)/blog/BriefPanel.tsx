@@ -65,7 +65,7 @@ export function BriefPanel({ onDraft }: Props) {
         <Wand2 className="h-4 w-4 text-amber-400" />
         Générer l'article avec l'IA
       </h2>
-      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-400">
+      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
         Décris le sujet, choisis le public et la longueur — Claude rédige titre, chapô, corps, mots-clés, tags dans la voix Le Mag. Tu pourras tout ajuster ensuite.
       </p>
 
@@ -76,7 +76,7 @@ export function BriefPanel({ onDraft }: Props) {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder='Ex: « Pourquoi le vin d&apos;honneur devient le moment-pivot d&apos;un mariage parisien — et comment penser sa carte cocktails en conséquence »'
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
           />
         </Field>
 
@@ -85,7 +85,7 @@ export function BriefPanel({ onDraft }: Props) {
             <select
               value={persona}
               onChange={(e) => setPersona(e.target.value as ArticlePersona)}
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
             >
               {PERSONAS.map((p) => (
                 <option key={p.value} value={p.value}>
@@ -93,7 +93,7 @@ export function BriefPanel({ onDraft }: Props) {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[10px] text-slate-500 dark:text-neutral-500">
+            <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-500">
               {PERSONAS.find((p) => p.value === persona)?.hint}
             </p>
           </Field>
@@ -102,7 +102,7 @@ export function BriefPanel({ onDraft }: Props) {
             <select
               value={length}
               onChange={(e) => setLength(e.target.value as ArticleLength)}
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
             >
               {LENGTHS.map((l) => (
                 <option key={l.value} value={l.value}>
@@ -119,7 +119,7 @@ export function BriefPanel({ onDraft }: Props) {
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             placeholder="bar à cocktails mariage, vin d'honneur Paris"
-            className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+            className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
           />
         </Field>
 
@@ -150,7 +150,7 @@ export function BriefPanel({ onDraft }: Props) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-neutral-500">
+      <span className="block text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500">
         {label}
       </span>
       <div className="mt-1">{children}</div>

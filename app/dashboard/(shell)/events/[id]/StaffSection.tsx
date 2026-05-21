@@ -116,11 +116,11 @@ export function StaffSection({
   }, 0);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Équipe</h2>
-          <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+          <p className="text-[11px] text-slate-500 dark:text-slate-500">
             {assignments.length} assigné{assignments.length > 1 ? "s" : ""}
             {totalHoursPlanned > 0 && ` · ${totalHoursPlanned}h prévues`}
             {totalCost > 0 && ` · ${totalCost.toFixed(2)} € paie estimée`}
@@ -131,7 +131,7 @@ export function StaffSection({
             type="button"
             onClick={() => setAdding(true)}
             disabled={pending || available.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700 disabled:opacity-50"
           >
             <UserPlus className="h-3 w-3" /> Assigner
           </button>
@@ -145,11 +145,11 @@ export function StaffSection({
       )}
 
       {staffOptions.length === 0 && (
-        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-slate-500 dark:text-neutral-400">
+        <div className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-3 text-xs text-slate-500 dark:text-slate-400">
           Aucun membre d&apos;équipe dans la base.{" "}
           <Link
             href="/dashboard/staff"
-            className="text-slate-700 dark:text-neutral-200 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white"
+            className="text-slate-700 dark:text-slate-200 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white"
           >
             Ajoute d&apos;abord tes barmen / baristas →
           </Link>
@@ -159,7 +159,7 @@ export function StaffSection({
       {adding && staffOptions.length > 0 && (
         <form
           action={handleAssign}
-          className="mb-3 space-y-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3"
+          className="mb-3 space-y-2 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-3"
         >
           <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_80px_100px]">
             <Field label="Membre">
@@ -202,7 +202,7 @@ export function StaffSection({
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
             >
               Annuler
             </button>
@@ -219,13 +219,13 @@ export function StaffSection({
       )}
 
       {assignments.length === 0 ? (
-        <p className="py-3 text-center text-xs text-slate-500 dark:text-neutral-500">
+        <p className="py-3 text-center text-xs text-slate-500 dark:text-slate-500">
           {staffOptions.length > 0 && !adding
             ? "Aucun membre assigné pour l'instant."
             : ""}
         </p>
       ) : (
-        <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
+        <ul className="divide-y divide-slate-100 dark:divide-slate-900">
           {assignments.map((a) => {
             const staff = staffById.get(a.staff_id);
             const rate = a.rate_override ?? Number(staff?.hourly_rate ?? 0);
@@ -241,12 +241,12 @@ export function StaffSection({
                     <p className="text-sm font-medium text-slate-900 dark:text-white">
                       {staff?.full_name ?? "—"}
                       {staff?.role && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+                        <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-500">
                           {ROLE_LABEL[staff.role]}
                         </span>
                       )}
                     </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-slate-500">
                       <span>{a.hours_planned}h prévues</span>
                       {allowHoursDone && (
                         <>
@@ -279,7 +279,7 @@ export function StaffSection({
                       )}
                     </div>
                     {a.notes && (
-                      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500 line-clamp-2">
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500 line-clamp-2">
                         {a.notes}
                       </p>
                     )}
@@ -289,7 +289,7 @@ export function StaffSection({
                       type="button"
                       onClick={() => remove(a.staff_id)}
                       disabled={pending}
-                      className="rounded p-1.5 text-slate-500 dark:text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                      className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
                       aria-label="Retirer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -338,13 +338,13 @@ function AssignmentField({
       }}
       placeholder={label}
       disabled={disabled}
-      className="w-16 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5 text-[11px] text-slate-700 dark:text-neutral-200 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+      className="w-16 rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-1.5 py-0.5 text-[11px] text-slate-700 dark:text-slate-200 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
     />
   );
 }
 
 const inputCls =
-  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({
   label,
@@ -355,7 +355,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {label}
       </span>
       {children}

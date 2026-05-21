@@ -23,9 +23,9 @@ export function TeamTable({
   currentUserId: string | null;
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
+    <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
       <table className="w-full text-sm">
-        <thead className="border-b border-slate-200 dark:border-neutral-800 bg-slate-100 dark:bg-neutral-900/50 text-left text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-neutral-500">
+        <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/50 text-left text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500">
           <tr>
             <th className="px-4 py-3">Email</th>
             <th className="px-4 py-3">Rôle</th>
@@ -36,7 +36,7 @@ export function TeamTable({
         <tbody className="divide-y divide-neutral-800">
           {members.length === 0 && (
             <tr>
-              <td colSpan={4} className="px-4 py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
+              <td colSpan={4} className="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-500">
                 Aucun utilisateur pour le moment.
               </td>
             </tr>
@@ -88,12 +88,12 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
   }
 
   return (
-    <tr className="text-slate-700 dark:text-neutral-200">
+    <tr className="text-slate-700 dark:text-slate-200">
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="truncate">{member.email}</span>
           {isSelf && (
-            <span className="rounded-full bg-slate-200 dark:bg-neutral-800 px-2 py-0.5 text-[10px] text-slate-500 dark:text-neutral-400">
+            <span className="rounded-full bg-slate-200 dark:bg-slate-800 px-2 py-0.5 text-[10px] text-slate-500 dark:text-slate-400">
               vous
             </span>
           )}
@@ -102,13 +102,13 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
       </td>
       <td className="px-4 py-3">
         {locked ? (
-          <span className="text-slate-500 dark:text-neutral-400">{ROLE_LABEL[member.role]}</span>
+          <span className="text-slate-500 dark:text-slate-400">{ROLE_LABEL[member.role]}</span>
         ) : (
           <select
             value={role}
             disabled={pending}
             onChange={(e) => onRoleChange(e.target.value as UserRole)}
-            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-xs text-slate-900 dark:text-white focus:border-neutral-600 focus:outline-none disabled:opacity-60"
+            className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-white focus:border-neutral-600 focus:outline-none disabled:opacity-60"
           >
             {ROLES_SELECTABLE.map((r) => (
               <option key={r} value={r}>
@@ -118,7 +118,7 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
           </select>
         )}
       </td>
-      <td className="px-4 py-3 hidden md:table-cell text-xs text-slate-500 dark:text-neutral-500">
+      <td className="px-4 py-3 hidden md:table-cell text-xs text-slate-500 dark:text-slate-500">
         {new Date(member.created_at).toLocaleDateString("fr-FR", {
           day: "numeric",
           month: "short",
@@ -127,7 +127,7 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
       </td>
       <td className="px-4 py-3 text-right">
         {locked ? (
-          <span className="text-[10px] text-slate-400 dark:text-neutral-600">—</span>
+          <span className="text-[10px] text-slate-400 dark:text-slate-600">—</span>
         ) : (
           <button
             type="button"

@@ -56,7 +56,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
     <div className="px-4 py-6 md:px-8 md:py-8">
       <Link
         href="/dashboard/leads"
-        className="mb-4 inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
+        className="mb-4 inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-white"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Toutes les demandes
       </Link>
@@ -65,15 +65,15 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
         <div>
           <div className="mb-2 flex items-center gap-3">
             <StatusBadge status={lead.status} />
-            <span className="text-[11px] text-slate-500 dark:text-neutral-500">
+            <span className="text-[11px] text-slate-500 dark:text-slate-500">
               Reçu {formatDateFR(lead.created_at, { withTime: true })}
             </span>
           </div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
-            {lead.contact_name || <span className="text-slate-500 dark:text-neutral-500">Sans nom</span>}
+            {lead.contact_name || <span className="text-slate-500 dark:text-slate-500">Sans nom</span>}
           </h1>
           {lead.company && (
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{lead.company}</p>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{lead.company}</p>
           )}
         </div>
       </header>
@@ -83,32 +83,32 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
         <section className="space-y-4">
           <Card title="Demande">
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              <dt className="text-xs text-slate-500 dark:text-neutral-500">Type</dt>
+              <dt className="text-xs text-slate-500 dark:text-slate-500">Type</dt>
               <dd className="text-right">
                 <EventTypeLabel value={lead.event_type} />
               </dd>
 
-              <dt className="text-xs text-slate-500 dark:text-neutral-500">Date événement</dt>
-              <dd className="text-right text-slate-700 dark:text-neutral-200">
+              <dt className="text-xs text-slate-500 dark:text-slate-500">Date événement</dt>
+              <dd className="text-right text-slate-700 dark:text-slate-200">
                 {lead.event_date
                   ? formatDateFR(lead.event_date)
                   : rawDate(lead.raw_payload) ?? "—"}
               </dd>
 
-              <dt className="text-xs text-slate-500 dark:text-neutral-500">Lieu</dt>
-              <dd className="text-right text-slate-700 dark:text-neutral-200">
+              <dt className="text-xs text-slate-500 dark:text-slate-500">Lieu</dt>
+              <dd className="text-right text-slate-700 dark:text-slate-200">
                 {rawLocation(lead.raw_payload) ?? "—"}
               </dd>
 
-              <dt className="text-xs text-slate-500 dark:text-neutral-500">Invités</dt>
-              <dd className="text-right text-slate-700 dark:text-neutral-200">
+              <dt className="text-xs text-slate-500 dark:text-slate-500">Invités</dt>
+              <dd className="text-right text-slate-700 dark:text-slate-200">
                 {lead.guests_count ?? "—"}
               </dd>
 
               {lead.budget_estimate != null && (
                 <>
-                  <dt className="text-xs text-slate-500 dark:text-neutral-500">Budget estimé</dt>
-                  <dd className="text-right text-slate-700 dark:text-neutral-200">
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Budget estimé</dt>
+                  <dd className="text-right text-slate-700 dark:text-slate-200">
                     {lead.budget_estimate} €
                   </dd>
                 </>
@@ -116,11 +116,11 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
             </dl>
 
             {lead.message && (
-              <div className="mt-4 border-t border-slate-100 dark:border-neutral-900 pt-4">
-                <p className="mb-1 text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+              <div className="mt-4 border-t border-slate-100 dark:border-slate-900 pt-4">
+                <p className="mb-1 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-500">
                   Message
                 </p>
-                <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-neutral-200">
+                <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">
                   {lead.message}
                 </p>
               </div>
@@ -132,7 +132,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               {lead.contact_email && (
                 <Row icon={Mail} label="Email">
                   <a
-                    className="text-slate-700 dark:text-neutral-200 transition-colors hover:text-slate-900 dark:hover:text-white"
+                    className="text-slate-700 dark:text-slate-200 transition-colors hover:text-slate-900 dark:hover:text-white"
                     href={`mailto:${lead.contact_email}`}
                   >
                     {lead.contact_email}
@@ -142,7 +142,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               {lead.contact_phone && (
                 <Row icon={Phone} label="Téléphone">
                   <a
-                    className="text-slate-700 dark:text-neutral-200 transition-colors hover:text-slate-900 dark:hover:text-white"
+                    className="text-slate-700 dark:text-slate-200 transition-colors hover:text-slate-900 dark:hover:text-white"
                     href={`tel:${lead.contact_phone}`}
                   >
                     {lead.contact_phone}
@@ -151,12 +151,12 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               )}
               {lead.company && (
                 <Row icon={Building2} label="Entreprise">
-                  <span className="text-slate-700 dark:text-neutral-200">{lead.company}</span>
+                  <span className="text-slate-700 dark:text-slate-200">{lead.company}</span>
                 </Row>
               )}
               {(lead.event_date || rawDate(lead.raw_payload)) && (
                 <Row icon={Calendar} label="Date">
-                  <span className="text-slate-700 dark:text-neutral-200">
+                  <span className="text-slate-700 dark:text-slate-200">
                     {lead.event_date
                       ? formatDateFR(lead.event_date)
                       : rawDate(lead.raw_payload)}
@@ -165,7 +165,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               )}
               {lead.guests_count != null && (
                 <Row icon={Users} label="Invités">
-                  <span className="text-slate-700 dark:text-neutral-200">{lead.guests_count}</span>
+                  <span className="text-slate-700 dark:text-slate-200">{lead.guests_count}</span>
                 </Row>
               )}
             </dl>
@@ -178,7 +178,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
                   <li key={q.id} className="flex items-center justify-between gap-2">
                     <Link
                       href={`/dashboard/devis/${q.id}`}
-                      className="text-slate-700 dark:text-neutral-200 transition-colors hover:text-slate-900 dark:hover:text-white"
+                      className="text-slate-700 dark:text-slate-200 transition-colors hover:text-slate-900 dark:hover:text-white"
                     >
                       {q.number}
                     </Link>
@@ -203,8 +203,8 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {title}
       </p>
       {children}
@@ -223,8 +223,8 @@ function Row({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <Icon className="h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-neutral-500" />
-      <span className="w-24 text-xs text-slate-500 dark:text-neutral-500">{label}</span>
+      <Icon className="h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-slate-500" />
+      <span className="w-24 text-xs text-slate-500 dark:text-slate-500">{label}</span>
       <span className="flex-1">{children}</span>
     </div>
   );

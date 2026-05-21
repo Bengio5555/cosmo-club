@@ -25,9 +25,9 @@ export default async function LeadsPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-3xl">
             Demandes
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Leads entrants depuis le site (formulaire{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[12px] text-slate-700 dark:bg-neutral-800 dark:text-neutral-400">
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[12px] text-slate-700 dark:bg-slate-800 dark:text-slate-400">
               /contact
             </code>
             ).

@@ -315,7 +315,7 @@ export default async function DashboardHome() {
     <div className="min-w-0 max-w-full px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-neutral-500">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-500">
             {new Date().toLocaleDateString("fr-FR", {
               weekday: "long",
               day: "numeric",
@@ -330,7 +330,7 @@ export default async function DashboardHome() {
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/leads"
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white dark:shadow-none"
+            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white dark:shadow-none"
           >
             Voir les demandes
           </Link>
@@ -468,13 +468,13 @@ export default async function DashboardHome() {
       {/* ─── Two-column main body ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Factures à encaisser */}
-        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-white">
                 Factures à encaisser
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500">
                 {invoicesWithRemaining.length} ouverte
                 {invoicesWithRemaining.length > 1 ? "s" : ""} ·{" "}
                 {formatEUR(totalRemaining)}
@@ -482,17 +482,17 @@ export default async function DashboardHome() {
             </div>
             <Link
               href="/dashboard/factures"
-              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {topUnpaid.length === 0 ? (
-            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-500">
               Tout est à jour ✓
             </p>
           ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-900">
               {topUnpaid.map((inv) => {
                 const paid = paidByInvoice.get(inv.id) ?? 0;
                 const remaining =
@@ -501,17 +501,17 @@ export default async function DashboardHome() {
                 return (
                   <li
                     key={inv.id}
-                    className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-neutral-900"
+                    className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-900"
                   >
                     <Link
                       href={`/dashboard/factures/${inv.id}`}
                       className="min-w-0 flex-1"
                     >
                       <p className="flex items-center gap-2 text-sm">
-                        <span className="font-medium text-slate-900 dark:text-neutral-100">
+                        <span className="font-medium text-slate-900 dark:text-slate-100">
                           {inv.number}
                         </span>
-                        <span className="truncate text-xs text-slate-500 dark:text-neutral-500">
+                        <span className="truncate text-xs text-slate-500 dark:text-slate-500">
                           · {clientName(inv.client_id)}
                         </span>
                       </p>
@@ -520,7 +520,7 @@ export default async function DashboardHome() {
                           className={
                             overdue
                               ? "text-red-600 dark:text-red-300"
-                              : "text-slate-500 dark:text-neutral-500"
+                              : "text-slate-500 dark:text-slate-500"
                           }
                         >
                           {inv.due_date ? (
@@ -556,30 +556,30 @@ export default async function DashboardHome() {
         </section>
 
         {/* Prochains événements (7 jours) */}
-        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-white">
                 Prochains événements
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500">
                 7 jours à venir · {(upcomingEvents ?? []).length} prévu
                 {(upcomingEvents ?? []).length > 1 ? "s" : ""}
               </p>
             </div>
             <Link
               href="/dashboard/events"
-              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(upcomingEvents ?? []).length === 0 ? (
-            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-500">
               Pas d&apos;événement prévu cette semaine.
             </p>
           ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-900">
               {(upcomingEvents ?? []).map((ev) => {
                 const staffCount = staffCountByEvent.get(ev.id) ?? 0;
                 const noStaff = staffCount === 0 && ev.status !== "annule";
@@ -592,14 +592,14 @@ export default async function DashboardHome() {
                 return (
                   <li
                     key={ev.id}
-                    className="px-6 py-3 hover:bg-slate-50 dark:hover:bg-neutral-900"
+                    className="px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-900"
                   >
                     <Link
                       href={`/dashboard/events/${ev.id}`}
                       className="flex items-center gap-3"
                     >
-                      <div className="shrink-0 inline-flex h-10 w-10 flex-col items-center justify-center rounded-md border border-slate-200 bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900">
-                        <span className="text-[9px] uppercase text-slate-500 dark:text-neutral-500">
+                      <div className="shrink-0 inline-flex h-10 w-10 flex-col items-center justify-center rounded-md border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
+                        <span className="text-[9px] uppercase text-slate-500 dark:text-slate-500">
                           {new Date(ev.date).toLocaleDateString("fr-FR", {
                             month: "short",
                           })}
@@ -617,7 +617,7 @@ export default async function DashboardHome() {
                             <StatusBadge status={ev.status} />
                           </span>
                         </div>
-                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 dark:text-neutral-500">
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 dark:text-slate-500">
                           {ev.start_time && (
                             <span className="inline-flex items-center gap-1">
                               <Clock className="h-3 w-3" />
@@ -636,7 +636,7 @@ export default async function DashboardHome() {
                         <div className="flex items-center justify-end gap-1.5">
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noStaff ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
+                              noStaff ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-slate-400"
                             }`}
                             title="Staff assignés"
                           >
@@ -645,7 +645,7 @@ export default async function DashboardHome() {
                           </span>
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noCocktails ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
+                              noCocktails ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-slate-400"
                             }`}
                             title="Cocktails au menu"
                           >
@@ -654,7 +654,7 @@ export default async function DashboardHome() {
                           </span>
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noStock ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
+                              noStock ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-slate-400"
                             }`}
                             title="Produits réservés"
                           >
@@ -680,13 +680,13 @@ export default async function DashboardHome() {
       {/* ─── Activity feeds: leads + movements ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Demandes récentes */}
-        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-white">
                 Demandes récentes
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500">
                 {(recentLeads ?? []).length} dernier
                 {(recentLeads ?? []).length > 1 ? "s" : ""} lead
                 {(recentLeads ?? []).length > 1 ? "s" : ""}
@@ -694,17 +694,17 @@ export default async function DashboardHome() {
             </div>
             <Link
               href="/dashboard/leads"
-              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(recentLeads ?? []).length === 0 ? (
-            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-500">
               Aucune demande pour l&apos;instant.
             </p>
           ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-900">
               {(recentLeads ?? []).map((l) => {
                 const fallback = l.contact_email ?? "?";
                 const display = l.contact_name || fallback;
@@ -718,16 +718,16 @@ export default async function DashboardHome() {
                   <li key={l.id}>
                     <Link
                       href={`/dashboard/leads/${l.id}`}
-                      className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-neutral-900"
+                      className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900"
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-semibold text-slate-900 dark:text-white">
                         {initials || "?"}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">
+                        <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
                           {display}
                         </p>
-                        <p className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
+                        <p className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-500">
                           <span>
                             {formatDateFR(l.created_at, { withTime: true })}
                           </span>
@@ -744,33 +744,33 @@ export default async function DashboardHome() {
         </section>
 
         {/* Mouvements stock */}
-        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-white">
                 Mouvements stock récents
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500">
                 Entrées / sorties produits
               </p>
             </div>
             <Link
               href="/dashboard/stock"
-              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(recentMovements ?? []).length === 0 ? (
-            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-slate-500">
               Pas de mouvement pour l&apos;instant.
             </p>
           ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-900">
               {(recentMovements ?? []).map((m) => (
                 <li
                   key={m.id}
-                  className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-neutral-900"
+                  className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-900"
                 >
                   <span
                     className={
@@ -786,7 +786,7 @@ export default async function DashboardHome() {
                       <ArrowDownCircle className="h-3.5 w-3.5" />
                     )}
                   </span>
-                  <span className="flex-1 truncate text-sm text-slate-900 dark:text-neutral-100">
+                  <span className="flex-1 truncate text-sm text-slate-900 dark:text-slate-100">
                     {productsMap.get(m.product_id) ?? "—"}
                   </span>
                   <span
@@ -795,7 +795,7 @@ export default async function DashboardHome() {
                     {m.direction === "in" ? "+" : "−"}
                     {Number(m.qty)}
                   </span>
-                  <span className="text-[10px] text-slate-400 dark:text-neutral-600">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-600">
                     {formatDateFR(m.created_at, { withTime: true })}
                   </span>
                 </li>
@@ -807,7 +807,7 @@ export default async function DashboardHome() {
 
       {/* ─── Quick actions ─── */}
       <section className="mt-6">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-neutral-400">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
           <Zap className="h-3.5 w-3.5" /> Accès rapide
         </h2>
         <div className="grid gap-3 md:grid-cols-3">
@@ -860,14 +860,14 @@ function HeroKpi({
       ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
         ? "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-700 dark:text-amber-300"
-        : "bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300";
+        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
   return (
     <Link
       href={href}
-      className="group block min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none dark:hover:bg-neutral-900"
+      className="group block min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none dark:hover:bg-slate-900"
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-neutral-500">
+        <p className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-500">
           {label}
         </p>
         <span
@@ -886,7 +886,7 @@ function HeroKpi({
         {value}
       </p>
       {hint && (
-        <p className="mt-1 truncate text-[11px] text-slate-500 dark:text-neutral-500">
+        <p className="mt-1 truncate text-[11px] text-slate-500 dark:text-slate-500">
           {hint}
         </p>
       )}
@@ -906,13 +906,13 @@ function QuickCard({
   return (
     <Link
       href={href}
-      className="group rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+      className="group rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none dark:hover:border-slate-700 dark:hover:bg-slate-900"
     >
       <p className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
         {title}
-        <ArrowRight className="h-3.5 w-3.5 text-slate-400 transition-transform group-hover:translate-x-0.5 dark:text-neutral-500" />
+        <ArrowRight className="h-3.5 w-3.5 text-slate-400 transition-transform group-hover:translate-x-0.5 dark:text-slate-500" />
       </p>
-      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">
+      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
         {desc}
       </p>
     </Link>

@@ -43,7 +43,7 @@ export default async function CoursesPage({
   } = data;
 
   return (
-    <div className="courses-body bg-slate-100 dark:bg-neutral-900">
+    <div className="courses-body bg-slate-100 dark:bg-slate-900">
       <div className="courses-toolbar no-print">
         <div className="left">
           <Link

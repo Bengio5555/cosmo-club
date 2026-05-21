@@ -80,14 +80,14 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
       {/* Upload form */}
       <form
         onSubmit={submit}
-        className="space-y-4 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5"
+        className="space-y-4 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-5"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
           Ajouter un logo
         </p>
 
         <label className="block">
-          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
             Nom du client
           </span>
           <input
@@ -95,12 +95,12 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="ex. Chanel"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
             Fichier
           </span>
           <input
@@ -108,9 +108,9 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
             type="file"
             accept="image/png,image/svg+xml,image/jpeg,image/webp"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-xs text-slate-600 dark:text-neutral-300 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-neutral-100 hover:file:bg-neutral-700"
+            className="block w-full text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-neutral-100 hover:file:bg-neutral-700"
           />
-          <span className="mt-1 block text-[10px] text-slate-500 dark:text-neutral-500">
+          <span className="mt-1 block text-[10px] text-slate-500 dark:text-slate-500">
             PNG ou SVG transparent recommandé. 2 Mo max.
           </span>
         </label>
@@ -142,12 +142,12 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
       </form>
 
       {/* Existing logos */}
-      <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
-        <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-5">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
           Logos actuels ({logos.length})
         </p>
         {logos.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-500 dark:text-neutral-500">
+          <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-500">
             Aucun logo pour le moment. Le marquee public reprend la liste
             de noms par défaut tant qu&apos;aucun logo n&apos;est uploadé.
           </p>
@@ -156,7 +156,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
             {logos.map((logo, idx) => (
               <li
                 key={logo.id}
-                className="flex flex-col gap-3 rounded-lg border border-slate-200 dark:border-neutral-800/80 bg-slate-100 dark:bg-neutral-900/40 p-4"
+                className="flex flex-col gap-3 rounded-lg border border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-slate-900/40 p-4"
               >
                 <div className="flex h-20 items-center justify-center rounded-md bg-[color:var(--color-cream)] p-3">
                   {/* Same sizing rule as the public marquee — 48 px tall,
@@ -179,7 +179,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
                       onClick={() => move(logo.id, "up")}
                       disabled={idx === 0 || pending}
                       aria-label="Monter"
-                      className="rounded p-1 text-slate-500 dark:text-neutral-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
+                      className="rounded p-1 text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
                     >
                       <ChevronUp className="h-3.5 w-3.5" />
                     </button>
@@ -188,7 +188,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
                       onClick={() => move(logo.id, "down")}
                       disabled={idx === logos.length - 1 || pending}
                       aria-label="Descendre"
-                      className="rounded p-1 text-slate-500 dark:text-neutral-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
+                      className="rounded p-1 text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
                     >
                       <ChevronDown className="h-3.5 w-3.5" />
                     </button>

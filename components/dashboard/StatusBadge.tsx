@@ -32,12 +32,12 @@ const palette: Record<string, { cls: string; label: string }> = {
     label: "Gagné",
   },
   perdu: {
-    cls: "border-slate-300 bg-slate-100 text-slate-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400",
+    cls: "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
     label: "Perdu",
   },
   // quotes / invoices
   brouillon: {
-    cls: "border-slate-300 bg-slate-100 text-slate-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+    cls: "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
     label: "Brouillon",
   },
   envoye: {
@@ -53,7 +53,7 @@ const palette: Record<string, { cls: string; label: string }> = {
     label: "Refusé",
   },
   expire: {
-    cls: "border-slate-300 bg-slate-100 text-slate-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400",
+    cls: "border-slate-300 bg-slate-100 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
     label: "Expiré",
   },
   paye: {
@@ -65,7 +65,7 @@ const palette: Record<string, { cls: string; label: string }> = {
     label: "En retard",
   },
   annule: {
-    cls: "border-slate-300 bg-slate-100 text-slate-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400",
+    cls: "border-slate-300 bg-slate-100 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
     label: "Annulé",
   },
   // events
@@ -86,7 +86,7 @@ const palette: Record<string, { cls: string; label: string }> = {
 export function StatusBadge({ status }: { status: AnyStatus }) {
   const p =
     palette[status] || {
-      cls: "border-slate-300 bg-slate-100 text-slate-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400",
+      cls: "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
       label: status,
     };
   return (

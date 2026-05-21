@@ -9,7 +9,7 @@ export default async function DashboardImagesPage() {
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
           Images du site
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Remplace les visuels publics — hero, bento, cocktails, lattes,
           galerie événements. Choisis une page, sélectionne un slot,
           puis dépose une nouvelle image.

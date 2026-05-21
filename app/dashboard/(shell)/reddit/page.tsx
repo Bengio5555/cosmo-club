@@ -53,7 +53,7 @@ export default async function RedditMonitorPage({
           <h1 className="font-display text-3xl text-slate-900 dark:text-white md:text-4xl">
             Reddit — veille &amp; brouillons
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
             Threads francophones interceptés sur nos mots-clés (mariage, EVJF,
             atelier mixologie, barman privé…). Pour chaque thread, Claude
             rédige un brouillon de réponse 200-300 mots dans le ton Reddit.

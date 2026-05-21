@@ -30,7 +30,7 @@ export default async function DevisListPage() {
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
           Devis
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Plaquette PowerPoint-style + envoi email — éditeur dans le prochain sprint.
         </p>
       </header>
@@ -41,10 +41,10 @@ export default async function DevisListPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
         {quotes && quotes.length > 0 ? (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-neutral-800 dark:bg-transparent dark:text-neutral-500">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-transparent dark:text-slate-500">
               <tr>
                 <th className="px-3 py-2.5 font-medium md:px-4">Numéro</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Client</th>
@@ -71,7 +71,7 @@ export default async function DevisListPage() {
                 return (
                   <tr
                     key={q.id}
-                    className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900"
+                    className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-slate-900 dark:hover:bg-slate-900"
                   >
                     <td className="px-3 py-3 md:px-4">
                       <Link
@@ -80,23 +80,23 @@ export default async function DevisListPage() {
                       >
                         {q.number}
                       </Link>
-                      <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-500">
                         Émis {formatDateFR(q.issue_date)}
                       </p>
                     </td>
-                    <td className="px-3 py-3 text-slate-700 dark:text-slate-700 dark:text-neutral-200 md:px-4">
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-700 dark:text-slate-200 md:px-4">
                       {who}
                     </td>
                     <td className="hidden px-3 py-3 md:table-cell md:px-4">
                       <EventTypeLabel value={q.event_type} />
                     </td>
-                    <td className="hidden px-3 py-3 text-xs text-slate-600 dark:text-neutral-300 md:table-cell md:px-4">
+                    <td className="hidden px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:table-cell md:px-4">
                       {formatDateFR(q.event_date)}
                     </td>
                     <td className="px-3 py-3 md:px-4">
                       <StatusBadge status={q.status} />
                     </td>
-                    <td className="px-3 py-3 text-right font-medium text-slate-900 dark:text-slate-700 dark:text-neutral-200 md:px-4">
+                    <td className="px-3 py-3 text-right font-medium text-slate-900 dark:text-slate-700 dark:text-slate-200 md:px-4">
                       {formatEUR(q.total_ttc)}
                     </td>
                   </tr>
@@ -105,11 +105,11 @@ export default async function DevisListPage() {
             </tbody>
           </table>
         ) : (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-500">
             Aucun devis. Convertis une{" "}
             <Link
               href="/dashboard/leads"
-              className="text-slate-700 underline hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white"
+              className="text-slate-700 underline hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
             >
               demande
             </Link>{" "}

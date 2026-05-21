@@ -20,7 +20,7 @@ export function Topbar({ email }: { email: string | null }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/90 md:px-6">
+    <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 md:px-6">
       {/* Mobile brand */}
       <Link
         href="/dashboard"
@@ -36,7 +36,7 @@ export function Topbar({ email }: { email: string | null }) {
           unoptimized
           className="h-[22px] w-auto select-none"
         />
-        <span className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-neutral-500">
+        <span className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-500">
           Admin
         </span>
       </Link>
@@ -45,7 +45,7 @@ export function Topbar({ email }: { email: string | null }) {
 
       <div className="flex items-center gap-3">
         {email && (
-          <span className="hidden text-xs text-slate-500 dark:text-neutral-500 md:inline">
+          <span className="hidden text-xs text-slate-500 dark:text-slate-500 md:inline">
             {email}
           </span>
         )}
@@ -54,7 +54,7 @@ export function Topbar({ email }: { email: string | null }) {
           onClick={toggle}
           aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
           title={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
-          className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-1.5 text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
+          className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-1.5 text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white"
         >
           {theme === "dark" ? (
             <Sun className="h-3.5 w-3.5" />
@@ -65,7 +65,7 @@ export function Topbar({ email }: { email: string | null }) {
         <button
           type="button"
           onClick={handleLogout}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white"
         >
           <LogOut className="h-3.5 w-3.5" />
           Déconnexion

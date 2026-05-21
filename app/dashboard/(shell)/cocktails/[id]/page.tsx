@@ -38,10 +38,10 @@ export default async function CocktailDetailPage({
 
   return (
     <>
-      <div className="border-b border-slate-100 dark:border-neutral-900 px-4 pt-6 md:px-8">
+      <div className="border-b border-slate-100 dark:border-slate-900 px-4 pt-6 md:px-8">
         <Link
           href="/dashboard/cocktails"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Toutes les recettes
         </Link>

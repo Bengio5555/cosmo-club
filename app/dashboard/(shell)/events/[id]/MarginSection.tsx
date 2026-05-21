@@ -17,9 +17,9 @@ import type { EventMargin } from "@/lib/server/eventMargin";
 export function MarginSection({ margin }: { margin: EventMargin | null }) {
   if (!margin || (margin.basis === "none" && margin.revenueNetHt === 0)) {
     return (
-      <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-5">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Rentabilité</h2>
-        <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
           Pas encore de devis lié ni de réservation stock — la marge se
           calculera dès qu&apos;un devis est rattaché ou qu&apos;une
           réservation est saisie.
@@ -36,11 +36,11 @@ export function MarginSection({ margin }: { margin: EventMargin | null }) {
     : "border-red-500/30 bg-red-500/5";
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-5">
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Rentabilité</h2>
-          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-neutral-500">
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-500">
             {margin.basis === "actual"
               ? "Calcul réel — basé sur les mouvements stock OUT et heures effectuées."
               : margin.basis === "projected"
@@ -53,13 +53,13 @@ export function MarginSection({ margin }: { margin: EventMargin | null }) {
       <div className={`mt-4 flex items-center gap-3 rounded-lg border p-4 ${accentBg}`}>
         <Icon className={`h-5 w-5 ${accent}`} />
         <div className="flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Marge nette
           </p>
           <p className={`mt-0.5 font-display text-2xl ${accent}`}>
             {formatEUR(margin.marginHt)}
             {margin.marginPct != null && (
-              <span className="ml-2 text-base font-normal text-slate-500 dark:text-neutral-400">
+              <span className="ml-2 text-base font-normal text-slate-500 dark:text-slate-400">
                 ({margin.marginPct.toFixed(1)} %)
               </span>
             )}
@@ -128,18 +128,18 @@ function Line({
   muted?: boolean;
 }) {
   const valueCls = muted
-    ? "text-slate-500 dark:text-neutral-500"
+    ? "text-slate-500 dark:text-slate-500"
     : tone === "cost"
       ? "text-amber-700 dark:text-amber-300/90"
       : "text-emerald-700 dark:text-emerald-300";
   return (
-    <li className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-neutral-900 pb-2 last:border-b-0 last:pb-0">
+    <li className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-900 pb-2 last:border-b-0 last:pb-0">
       <div className="flex min-w-0 items-start gap-2">
-        <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-neutral-500" />
+        <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-slate-500" />
         <div className="min-w-0">
-          <p className="text-slate-700 dark:text-neutral-200">{label}</p>
+          <p className="text-slate-700 dark:text-slate-200">{label}</p>
           {hint && (
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-neutral-500">{hint}</p>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-500">{hint}</p>
           )}
         </div>
       </div>

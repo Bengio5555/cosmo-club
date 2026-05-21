@@ -53,13 +53,13 @@ export function CalendarView({
   const weekdays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
       {/* Header row */}
-      <div className="grid grid-cols-7 border-b border-slate-100 dark:border-neutral-900 bg-white dark:bg-neutral-950/80 text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950/80 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {weekdays.map((w) => (
           <div
             key={w}
-            className="border-r border-slate-100 dark:border-neutral-900 px-2 py-2 text-center last:border-r-0"
+            className="border-r border-slate-100 dark:border-slate-900 px-2 py-2 text-center last:border-r-0"
           >
             {w}
           </div>
@@ -79,9 +79,9 @@ export function CalendarView({
           return (
             <div
               key={key}
-              className={`relative min-h-[96px] border-b border-r border-slate-100 dark:border-neutral-900 p-1.5 transition-colors [&:nth-child(7n)]:border-r-0 ${
-                isCurrentMonth ? "bg-white dark:bg-neutral-950/60" : "bg-white dark:bg-neutral-950/30"
-              } ${dayEvents.length > 0 ? "hover:bg-slate-100 dark:hover:bg-neutral-900" : ""}`}
+              className={`relative min-h-[96px] border-b border-r border-slate-100 dark:border-slate-900 p-1.5 transition-colors [&:nth-child(7n)]:border-r-0 ${
+                isCurrentMonth ? "bg-white dark:bg-slate-950/60" : "bg-white dark:bg-slate-950/30"
+              } ${dayEvents.length > 0 ? "hover:bg-slate-100 dark:hover:bg-slate-900" : ""}`}
             >
               <div className="mb-1 flex items-center justify-between">
                 <span
@@ -89,14 +89,14 @@ export function CalendarView({
                     isToday
                       ? "bg-[color:var(--color-grenat)] text-[color:var(--color-bone)] px-1.5"
                       : isCurrentMonth
-                      ? "text-slate-700 dark:text-neutral-200"
-                      : "text-slate-400 dark:text-neutral-600"
+                      ? "text-slate-700 dark:text-slate-200"
+                      : "text-slate-400 dark:text-slate-600"
                   }`}
                 >
                   {d.date.getDate()}
                 </span>
                 {dayEvents.length > 0 && isCurrentMonth && (
-                  <span className="text-[9px] text-slate-500 dark:text-neutral-500">
+                  <span className="text-[9px] text-slate-500 dark:text-slate-500">
                     {dayEvents.length}
                   </span>
                 )}
@@ -120,7 +120,7 @@ export function CalendarView({
                   </li>
                 ))}
                 {hidden > 0 && (
-                  <li className="px-1.5 text-[10px] text-slate-500 dark:text-neutral-500">
+                  <li className="px-1.5 text-[10px] text-slate-500 dark:text-slate-500">
                     +{hidden} autre{hidden > 1 ? "s" : ""}
                   </li>
                 )}
@@ -142,7 +142,7 @@ function pillCls(status: EventStatus): string {
     case "termine":
       return "bg-emerald-500/15 text-emerald-200 border border-emerald-500/30";
     case "annule":
-      return "bg-slate-200 dark:bg-neutral-800 text-slate-500 dark:text-neutral-500 border border-slate-300 dark:border-neutral-700";
+      return "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-500 border border-slate-300 dark:border-slate-700";
   }
 }
 

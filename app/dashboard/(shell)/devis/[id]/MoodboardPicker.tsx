@@ -80,10 +80,10 @@ export function MoodboardPicker({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-500">
         <span>
           Photos sélectionnées pour le moodboard ·{" "}
-          <span className="text-slate-600 dark:text-neutral-300">
+          <span className="text-slate-600 dark:text-slate-300">
             {value.length} / {MOODBOARD_MAX}
           </span>
         </span>
@@ -92,7 +92,7 @@ export function MoodboardPicker({
             <button
               type="button"
               onClick={() => onChange([])}
-              className="text-[11px] text-slate-500 dark:text-neutral-400 underline-offset-2 hover:text-slate-900 dark:hover:text-white hover:underline"
+              className="text-[11px] text-slate-500 dark:text-slate-400 underline-offset-2 hover:text-slate-900 dark:hover:text-white hover:underline"
             >
               Tout désélectionner
             </button>
@@ -102,7 +102,7 @@ export function MoodboardPicker({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-2.5 py-1 text-[11px] text-slate-700 dark:text-neutral-200 hover:border-slate-400 dark:hover:border-neutral-600 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-[11px] text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 disabled:opacity-60"
             >
               {pending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -129,11 +129,11 @@ export function MoodboardPicker({
       )}
 
       {isEmpty ? (
-        <p className="flex items-center gap-2 py-2 text-xs text-slate-500 dark:text-neutral-500">
+        <p className="flex items-center gap-2 py-2 text-xs text-slate-500 dark:text-slate-500">
           <ImageOff className="h-3.5 w-3.5" />
           Aucune photo disponible. Uploade-en une depuis le bouton
           ci-dessus ou ajoute des visuels dans l&apos;onglet{" "}
-          <span className="text-slate-600 dark:text-neutral-300">Images</span>.
+          <span className="text-slate-600 dark:text-slate-300">Images</span>.
         </p>
       ) : (
         <>
@@ -184,7 +184,7 @@ function ImageGrid({
 }) {
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {label}
       </p>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
@@ -202,7 +202,7 @@ function ImageGrid({
               className={`group relative aspect-square overflow-hidden rounded-md border transition-all ${
                 isSelected
                   ? "border-[color:var(--color-grenat)] ring-2 ring-[color:var(--color-grenat)]/40"
-                  : "border-slate-200 dark:border-neutral-800 hover:border-slate-400 dark:hover:border-neutral-600"
+                  : "border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600"
               } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
             >
               <Image

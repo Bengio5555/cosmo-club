@@ -19,7 +19,7 @@ export default async function TeamPage() {
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">Utilisateurs</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Invitez vos collaborateurs et attribuez-leur un rôle. Chaque rôle
           déverrouille un ensemble précis de pages du dashboard.
         </p>
@@ -51,16 +51,16 @@ export default async function TeamPage() {
 function RolesLegend() {
   const order: UserRole[] = ["owner", "admin", "manager", "staff", "compta"];
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
       <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Les rôles</h2>
-      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
+      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500">
         Périmètre d'accès résumé. Le propriétaire ne peut pas être modifié.
       </p>
       <dl className="mt-4 space-y-3 text-xs">
         {order.map((r) => (
           <div key={r}>
-            <dt className="font-semibold text-slate-700 dark:text-neutral-200">{ROLE_LABEL[r]}</dt>
-            <dd className="mt-0.5 text-slate-500 dark:text-neutral-500">{ROLE_DESCRIPTION[r]}</dd>
+            <dt className="font-semibold text-slate-700 dark:text-slate-200">{ROLE_LABEL[r]}</dt>
+            <dd className="mt-0.5 text-slate-500 dark:text-slate-500">{ROLE_DESCRIPTION[r]}</dd>
           </div>
         ))}
       </dl>

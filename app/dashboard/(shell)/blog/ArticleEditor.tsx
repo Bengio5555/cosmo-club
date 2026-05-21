@@ -80,7 +80,7 @@ export function ArticleEditor({ initial }: Props) {
   };
 
   const previewHtml = useMemo(() => {
-    if (!bodyMd) return "<p class='text-slate-500 dark:text-neutral-500'>Aucun contenu à prévisualiser.</p>";
+    if (!bodyMd) return "<p class='text-slate-500 dark:text-slate-500'>Aucun contenu à prévisualiser.</p>";
     return marked.parse(bodyMd) as string;
   }, [bodyMd]);
 
@@ -148,7 +148,7 @@ export function ArticleEditor({ initial }: Props) {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             {isNew ? "Nouvel article" : "Édition"}
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             {isNew
               ? "Composez le brouillon, choisissez sa date, publiez quand vous voulez."
               : `Statut actuel : ${STATUS_LABEL[status]}.`}
@@ -169,7 +169,7 @@ export function ArticleEditor({ initial }: Props) {
           <button
             type="submit"
             disabled={pending || uploading}
-            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-neutral-200 disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
             {pending ? "Enregistrement…" : "Enregistrer"}
@@ -193,7 +193,7 @@ export function ArticleEditor({ initial }: Props) {
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder="Le titre éditorial de l'article"
-              className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-base font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-base font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
             />
           </Field>
 
@@ -204,12 +204,12 @@ export function ArticleEditor({ initial }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Phrase courte qui décrit l'article. Sert de méta description et de chapeau sur la liste."
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
             />
           </Field>
 
-          <div className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-neutral-800 px-3 py-2">
+          <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-3 py-2">
               <div className="flex gap-1">
                 <TabButton active={tab === "write"} onClick={() => setTab("write")}>
                   Rédaction
@@ -219,7 +219,7 @@ export function ArticleEditor({ initial }: Props) {
                   Aperçu
                 </TabButton>
               </div>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-neutral-500">
+              <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500">
                 Markdown
               </span>
             </div>
@@ -229,7 +229,7 @@ export function ArticleEditor({ initial }: Props) {
                 onChange={(e) => setBodyMd(e.target.value)}
                 rows={26}
                 placeholder={`## Section\n\nVotre prose ici, en markdown.\n\n- Listes\n- **gras**\n- *italique*\n- [liens](/url)`}
-                className="block w-full resize-y rounded-b-md bg-transparent px-4 py-3 font-mono text-sm leading-relaxed text-slate-900 dark:text-neutral-100 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:outline-none"
+                className="block w-full resize-y rounded-b-md bg-transparent px-4 py-3 font-mono text-sm leading-relaxed text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none"
               />
             ) : (
               <div
@@ -244,7 +244,7 @@ export function ArticleEditor({ initial }: Props) {
         <div className="space-y-4">
           {isNew && <BriefPanel onDraft={applyDraft} />}
 
-          <section className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+          <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Publication</h2>
 
             <div className="mt-4 space-y-3">
@@ -252,7 +252,7 @@ export function ArticleEditor({ initial }: Props) {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as ArticleStatus)}
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>
@@ -260,7 +260,7 @@ export function ArticleEditor({ initial }: Props) {
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500">
                   <span className={`mr-1 inline-flex rounded-full px-2 py-0.5 text-[10px] ${STATUS_TONE[status]}`}>
                     {STATUS_LABEL[status]}
                   </span>
@@ -275,15 +275,15 @@ export function ArticleEditor({ initial }: Props) {
                   type="datetime-local"
                   value={publishAt}
                   onChange={(e) => setPublishAt(e.target.value)}
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+          <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Image de couverture</h2>
-            <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500">
               4:3 idéal, 5 Mo max. PNG/JPG/WEBP.
             </p>
             <div className="mt-3 space-y-3">
@@ -292,10 +292,10 @@ export function ArticleEditor({ initial }: Props) {
                 <img
                   src={coverUrl}
                   alt=""
-                  className="aspect-[4/3] w-full rounded-md border border-slate-200 dark:border-neutral-800 object-cover"
+                  className="aspect-[4/3] w-full rounded-md border border-slate-200 dark:border-slate-800 object-cover"
                 />
               )}
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 dark:border-neutral-700 px-3 py-2.5 text-xs text-slate-600 dark:text-neutral-300 transition hover:border-neutral-500 hover:text-slate-900 dark:hover:text-white">
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 dark:border-slate-700 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-300 transition hover:border-neutral-500 hover:text-slate-900 dark:hover:text-white">
                 <Upload className="h-3.5 w-3.5" />
                 {uploading ? "Upload…" : coverUrl ? "Remplacer l'image" : "Choisir une image"}
                 <input
@@ -314,7 +314,7 @@ export function ArticleEditor({ initial }: Props) {
                 value={coverUrl}
                 onChange={(e) => setCoverUrl(e.target.value)}
                 placeholder="/brand/ai/... ou URL https"
-                className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
               />
             </div>
           </section>
@@ -326,7 +326,7 @@ export function ArticleEditor({ initial }: Props) {
             onCoverGenerated={(url) => setCoverUrl(url)}
           />
 
-          <section className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+          <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Référencement</h2>
             <div className="mt-4 space-y-3">
               <Field label="Slug (URL)">
@@ -339,9 +339,9 @@ export function ArticleEditor({ initial }: Props) {
                     setSlugTouched(true);
                   }}
                   placeholder="cocktails-signature-mai-carnet-saison"
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
                 />
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500">
                   /blog/{slug || "votre-slug"}
                 </p>
               </Field>
@@ -352,7 +352,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={readingTime}
                   onChange={(e) => setReadingTime(e.target.value)}
                   placeholder="6 min"
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
 
@@ -362,7 +362,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
                   placeholder="cocktail mariage Paris, mixologie événementiel"
-                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
 
@@ -372,7 +372,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder="Mariage, Guide"
-                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
             </div>
@@ -386,7 +386,7 @@ export function ArticleEditor({ initial }: Props) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-neutral-500">
+      <span className="block text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500">
         {label}
       </span>
       <div className="mt-1">{children}</div>
@@ -409,8 +409,8 @@ function TabButton({
       onClick={onClick}
       className={`rounded px-3 py-1 text-xs transition ${
         active
-          ? "bg-slate-200 dark:bg-neutral-800 text-slate-900 dark:text-white"
-          : "text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white"
+          ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white"
+          : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
       }`}
     >
       {children}

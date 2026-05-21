@@ -52,10 +52,10 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
 
   return (
     <>
-      <div className="border-b border-slate-100 dark:border-neutral-900 px-4 pt-6 md:px-8">
+      <div className="border-b border-slate-100 dark:border-slate-900 px-4 pt-6 md:px-8">
         <Link
           href="/dashboard/factures"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Toutes les factures
         </Link>
@@ -82,11 +82,11 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
           </div>
         )}
 
-      <div className="border-t border-slate-100 dark:border-neutral-900 px-4 py-6 md:px-8">
+      <div className="border-t border-slate-100 dark:border-slate-900 px-4 py-6 md:px-8">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           {client && (
             <div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
                 Client
               </p>
               <p className="text-sm font-medium text-slate-900 dark:text-white">
@@ -99,13 +99,13 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
               </p>
               {client.company_name &&
                 (client.first_name || client.last_name) && (
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">{client.company_name}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{client.company_name}</p>
                 )}
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 {client.email && (
                   <a
                     href={`mailto:${client.email}`}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white"
                   >
                     <Mail className="h-3 w-3" /> {client.email}
                   </a>
@@ -113,7 +113,7 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
                 {client.phone && (
                   <a
                     href={`tel:${client.phone}`}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white"
                   >
                     <Phone className="h-3 w-3" /> {client.phone}
                   </a>
@@ -124,12 +124,12 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
 
           {invoice.quote_id && (
             <div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
                 Devis source
               </p>
               <Link
                 href={`/dashboard/devis/${invoice.quote_id}`}
-                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
+                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 transition-colors hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white"
               >
                 <FileText className="h-3.5 w-3.5" />
                 Voir le devis original

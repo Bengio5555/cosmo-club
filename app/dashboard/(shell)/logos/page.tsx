@@ -23,7 +23,7 @@ export default async function LogosPage() {
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
           Logos clients
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Logos affichés dans la bande défilante « Ils nous ont fait
           confiance » sur la page d&apos;accueil. Tous les logos sont
           rendus à la même hauteur (48 px) pour un rendu harmonieux —

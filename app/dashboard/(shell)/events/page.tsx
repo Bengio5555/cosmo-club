@@ -46,16 +46,16 @@ function ViewSwitcher({ currentView }: { currentView: "list" | "calendar" }) {
   const base =
     "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors";
   return (
-    <div className="inline-flex gap-1 rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/80 p-1 text-xs">
+    <div className="inline-flex gap-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 p-1 text-xs">
       <Link
         href="/dashboard/events?view=list"
-        className={`${base} ${currentView === "list" ? "bg-slate-200 dark:bg-neutral-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-neutral-400 hover:text-neutral-200"}`}
+        className={`${base} ${currentView === "list" ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-neutral-200"}`}
       >
         <List className="h-3 w-3" /> Liste
       </Link>
       <Link
         href="/dashboard/events?view=calendar"
-        className={`${base} ${currentView === "calendar" ? "bg-slate-200 dark:bg-neutral-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-neutral-400 hover:text-neutral-200"}`}
+        className={`${base} ${currentView === "calendar" ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-neutral-200"}`}
       >
         <LayoutGrid className="h-3 w-3" /> Calendrier
       </Link>
@@ -94,7 +94,7 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             Événements
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Vue mensuelle — clique sur un événement pour ouvrir sa fiche.
           </p>
         </div>
@@ -106,7 +106,7 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
         <div className="inline-flex items-center gap-2">
           <Link
             href={`/dashboard/events?view=calendar&m=${monthKey(prev)}`}
-            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1.5 text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
+            className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 p-1.5 text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white"
             aria-label="Mois précédent"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -119,7 +119,7 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
           </p>
           <Link
             href={`/dashboard/events?view=calendar&m=${monthKey(next)}`}
-            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1.5 text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
+            className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 p-1.5 text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white"
             aria-label="Mois suivant"
           >
             <ChevronRight className="h-4 w-4" />
@@ -127,7 +127,7 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
           {!isCurrentMonth && (
             <Link
               href="/dashboard/events?view=calendar"
-              className="ml-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 dark:text-neutral-200 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
+              className="ml-1 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-slate-300 dark:hover:border-slate-700"
             >
               Aujourd&apos;hui
             </Link>
@@ -143,11 +143,11 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
 
       <CalendarView monthDate={monthDate} events={events ?? []} />
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-neutral-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-500">
         <LegendDot cls="bg-sky-500/15 border border-sky-500/30" label="À venir" />
         <LegendDot cls="bg-amber-500/15 border border-amber-500/40" label="En cours" />
         <LegendDot cls="bg-emerald-500/15 border border-emerald-500/30" label="Terminé" />
-        <LegendDot cls="bg-slate-200 dark:bg-neutral-800 border border-slate-300 dark:border-neutral-700" label="Annulé" />
+        <LegendDot cls="bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" label="Annulé" />
       </div>
     </div>
   );
@@ -288,7 +288,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             Événements
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Pilotage opérationnel : briefings, staff assigné, stock réservé,
             clôture → mouvements OUT automatiques.
           </p>
@@ -298,11 +298,11 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
 
       <div className="mb-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
         <ViewSwitcher currentView="list" />
-        <div className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-1 text-xs">
+        <div className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-1 text-xs">
           <FilterLink currentWhen={whenEffective} value="upcoming" label="À venir" />
           <FilterLink currentWhen={whenEffective} value="past" label="Passés" />
           <FilterLink currentWhen={whenEffective} value="all" label="Tous" />
-          <div className="mx-1 w-px bg-slate-200 dark:bg-neutral-800" />
+          <div className="mx-1 w-px bg-slate-200 dark:bg-slate-800" />
           <FilterLink
             currentStatus={status}
             value={undefined}
@@ -336,9 +336,9 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
         {events && events.length > 0 ? (
-          <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-900">
             {events.map((ev) => {
               const client = ev.client_id ? clientsMap.get(ev.client_id) : null;
               const clientName =
@@ -368,11 +368,11 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                 <li key={ev.id}>
                   <Link
                     href={`/dashboard/events/${ev.id}`}
-                    className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-slate-100 dark:hover:bg-neutral-900 md:flex-row md:items-center md:gap-4 md:px-5"
+                    className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-slate-100 dark:hover:bg-slate-900 md:flex-row md:items-center md:gap-4 md:px-5"
                   >
                     <div className="shrink-0">
-                      <div className="inline-flex h-12 w-12 flex-col items-center justify-center rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-center">
-                        <span className="text-[9px] uppercase text-slate-500 dark:text-neutral-500">
+                      <div className="inline-flex h-12 w-12 flex-col items-center justify-center rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 text-center">
+                        <span className="text-[9px] uppercase text-slate-500 dark:text-slate-500">
                           {new Date(ev.date).toLocaleDateString("fr-FR", {
                             month: "short",
                           })}
@@ -387,7 +387,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                         {ev.title}
                         <StatusBadge status={ev.status} />
                       </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-neutral-500">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-500">
                         <span className="flex items-center gap-1">
                           <CalendarDays className="h-3 w-3" />
                           {formatDateFR(ev.date)}
@@ -408,24 +408,24 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                     </div>
                     <div className="flex shrink-0 gap-4 text-right text-xs">
                       <div>
-                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-neutral-600">
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-600">
                           Client
                         </p>
-                        <p className="text-slate-700 dark:text-neutral-200">{clientName}</p>
+                        <p className="text-slate-700 dark:text-slate-200">{clientName}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-neutral-600">
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-600">
                           Staff
                         </p>
-                        <p className="text-slate-700 dark:text-neutral-200">{staffCount}</p>
+                        <p className="text-slate-700 dark:text-slate-200">{staffCount}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-neutral-600">
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-600">
                           Cocktails
                         </p>
                         <p
                           className={
-                            cocktailsDue ? "text-amber-700 dark:text-amber-300" : "text-slate-700 dark:text-neutral-200"
+                            cocktailsDue ? "text-amber-700 dark:text-amber-300" : "text-slate-700 dark:text-slate-200"
                           }
                         >
                           {cocktailCount}
@@ -437,12 +437,12 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                         )}
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-neutral-600">
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-600">
                           Stock
                         </p>
                         <p
                           className={
-                            stockDue ? "text-amber-700 dark:text-amber-300" : "text-slate-700 dark:text-neutral-200"
+                            stockDue ? "text-amber-700 dark:text-amber-300" : "text-slate-700 dark:text-slate-200"
                           }
                         >
                           {stockCount}
@@ -454,7 +454,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                         )}
                       </div>
                       <div className="min-w-[64px]">
-                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-neutral-600">
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-600">
                           Marge
                         </p>
                         {margin && margin.basis !== "none" ? (
@@ -472,19 +472,19 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                                 ? `${margin.marginPct.toFixed(0)} %`
                                 : "—"}
                             </p>
-                            <p className="mt-0.5 text-[10px] text-slate-500 dark:text-neutral-500">
+                            <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-500">
                               {margin.marginHt >= 0
                                 ? formatEUR(margin.marginHt)
                                 : `−${formatEUR(-margin.marginHt)}`}
                               {margin.basis === "projected" && (
-                                <span className="ml-1 italic text-slate-400 dark:text-neutral-600">
+                                <span className="ml-1 italic text-slate-400 dark:text-slate-600">
                                   estim.
                                 </span>
                               )}
                             </p>
                           </>
                         ) : (
-                          <p className="text-slate-400 dark:text-neutral-600">—</p>
+                          <p className="text-slate-400 dark:text-slate-600">—</p>
                         )}
                       </div>
                     </div>
@@ -494,7 +494,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
             })}
           </ul>
         ) : (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-500">
             Aucun événement{" "}
             {whenEffective === "upcoming"
               ? "à venir"
@@ -504,7 +504,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
             . Crée-en depuis un{" "}
             <Link
               href="/dashboard/devis"
-              className="text-slate-600 dark:text-neutral-300 underline"
+              className="text-slate-600 dark:text-slate-300 underline"
             >
               devis accepté
             </Link>{" "}
@@ -547,7 +547,7 @@ function FilterLink({
       className={`inline-flex items-center rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
         isActive
           ? "bg-[color:var(--color-grenat)]/20 text-[color:var(--color-grenat-glow)]"
-          : "text-slate-500 dark:text-neutral-400 hover:text-neutral-200"
+          : "text-slate-500 dark:text-slate-400 hover:text-neutral-200"
       }`}
     >
       {label}

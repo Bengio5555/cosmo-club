@@ -509,7 +509,7 @@ export function DevisEditor({
                   onClick={() =>
                     setSchedule((prev) => [...prev, { time: "", label: "" }])
                   }
-                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1 text-[11px] text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1 text-[11px] text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white"
                 >
                   + Ajouter une étape
                 </button>
@@ -540,12 +540,12 @@ export function DevisEditor({
             }
           >
             {grouped.length === 0 ? (
-              <p className="py-6 text-center text-sm text-slate-500 dark:text-neutral-500">
+              <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-500">
                 Aucune prestation.{" "}
                 {!readOnly && (
                   <button
                     onClick={() => addItem(DEFAULT_SECTIONS[0])}
-                    className="text-slate-600 dark:text-neutral-300 underline"
+                    className="text-slate-600 dark:text-slate-300 underline"
                   >
                     Ajouter la première ligne
                   </button>
@@ -581,7 +581,7 @@ export function DevisEditor({
           </Card>
 
           <Card title="Moodboard de la plaquette">
-            <p className="text-[11px] leading-relaxed text-slate-500 dark:text-neutral-500">
+            <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
               Choisis jusqu&apos;à 8 photos parmi la galerie événements
               pour personnaliser le moodboard. Vide = visuels par défaut.
               La photo de couverture reste fixe.
@@ -599,16 +599,16 @@ export function DevisEditor({
 
         {/* ─── Right sidebar: totals + meta ──────────────────── */}
         <aside className="space-y-5">
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Totaux
             </p>
             <dl className="space-y-1.5 text-sm">
               {commissionRateNum > 0 ? (
                 <>
                   <div className="flex justify-between">
-                    <dt className="text-slate-500 dark:text-neutral-500">Sous-total HT</dt>
-                    <dd className="text-slate-700 dark:text-neutral-200">{formatEUR(subtotalHt)}</dd>
+                    <dt className="text-slate-500 dark:text-slate-500">Sous-total HT</dt>
+                    <dd className="text-slate-700 dark:text-slate-200">{formatEUR(subtotalHt)}</dd>
                   </div>
                   <div className="flex justify-between text-amber-700 dark:text-amber-300/90">
                     <dt>Apporteur ({commissionRateNum}%)</dt>
@@ -617,11 +617,11 @@ export function DevisEditor({
                 </>
               ) : null}
               <div className="flex justify-between">
-                <dt className="text-slate-500 dark:text-neutral-500">Total HT</dt>
-                <dd className="font-medium text-slate-900 dark:text-neutral-100">{formatEUR(totalHt)}</dd>
+                <dt className="text-slate-500 dark:text-slate-500">Total HT</dt>
+                <dd className="font-medium text-slate-900 dark:text-slate-100">{formatEUR(totalHt)}</dd>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <dt className="flex items-center gap-2 text-slate-500 dark:text-neutral-500">
+                <dt className="flex items-center gap-2 text-slate-500 dark:text-slate-500">
                   TVA
                   <input
                     type="number"
@@ -630,22 +630,22 @@ export function DevisEditor({
                     min="0"
                     onChange={(e) => setTvaRate(e.target.value)}
                     disabled={tvaDisabled}
-                    className="w-14 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5 text-right text-xs text-slate-900 dark:text-neutral-100 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                    className="w-14 rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-1.5 py-0.5 text-right text-xs text-slate-900 dark:text-slate-100 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
                   />
                   %
                 </dt>
-                <dd className="text-slate-700 dark:text-neutral-200">{formatEUR(totalTva)}</dd>
+                <dd className="text-slate-700 dark:text-slate-200">{formatEUR(totalTva)}</dd>
               </div>
-              <div className="flex justify-between border-t border-slate-200 dark:border-neutral-800 pt-2 text-base font-semibold">
-                <dt className="text-slate-600 dark:text-neutral-300">Total TTC</dt>
+              <div className="flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2 text-base font-semibold">
+                <dt className="text-slate-600 dark:text-slate-300">Total TTC</dt>
                 <dd className="text-slate-900 dark:text-white">{formatEUR(totalTtc)}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
             <label className="flex items-center justify-between gap-3">
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
                 Apporteur d&apos;affaires
               </span>
               <input
@@ -658,7 +658,7 @@ export function DevisEditor({
             </label>
             {commissionEnabled ? (
               <>
-                <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-neutral-500">
+                <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
                   Majoration appliquée pour reverser la commission sans
                   rogner sur la marge. Formule&nbsp;: prix ÷ (1 − x%).
                 </p>
@@ -671,9 +671,9 @@ export function DevisEditor({
                     max="99"
                     step="0.5"
                     disabled={readOnly}
-                    className="w-20 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                    className="w-20 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
                   />
-                  <span className="text-sm text-slate-600 dark:text-neutral-400">% de commission</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">% de commission</span>
                 </label>
                 <div className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200/90">
                   À reverser à l&apos;apporteur&nbsp;:
@@ -683,15 +683,15 @@ export function DevisEditor({
                 </div>
               </>
             ) : (
-              <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-neutral-500">
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
                 Active pour majorer le devis quand un apporteur (agence,
                 wedding planner…) prend une commission sur l&apos;affaire.
               </p>
             )}
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Acompte à la signature
             </p>
             <label className="flex items-center gap-2">
@@ -703,19 +703,19 @@ export function DevisEditor({
                 max="100"
                 step="1"
                 disabled={readOnly}
-                className="w-20 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                className="w-20 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
               />
-              <span className="text-sm text-slate-600 dark:text-neutral-400">% du Total TTC</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">% du Total TTC</span>
             </label>
-            <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-neutral-500">
+            <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
               Affiché en bloc &laquo;&nbsp;Acompte&nbsp;&raquo; sur la
               plaquette et repris dans les emails de confirmation. 30&nbsp;%
               par défaut, 40-50&nbsp;% recommandé sur les gros tickets.
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Validité
             </p>
             <LabeledInput
@@ -727,8 +727,8 @@ export function DevisEditor({
             />
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 text-xs text-slate-500 dark:text-neutral-500">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5 text-xs text-slate-500 dark:text-slate-500">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Workflow
             </p>
             <ul className="space-y-1 leading-relaxed">
@@ -808,11 +808,11 @@ function SendDevisDialog({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-2xl"
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-neutral-900 px-5 py-4">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-900 px-5 py-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Figer & envoyer
             </p>
             <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
@@ -824,7 +824,7 @@ function SendDevisDialog({
             onClick={onCancel}
             disabled={pending}
             aria-label="Fermer"
-            className="rounded-md p-1 text-slate-500 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
+            className="rounded-md p-1 text-slate-500 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
           >
             ×
           </button>
@@ -832,10 +832,10 @@ function SendDevisDialog({
 
         <div className="space-y-4 px-5 py-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Destinataire principal
             </p>
-            <p className="mt-1 text-sm text-slate-700 dark:text-neutral-200">
+            <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
               {clientEmail ? (
                 clientEmail
               ) : (
@@ -848,7 +848,7 @@ function SendDevisDialog({
           </div>
 
           <label className="block">
-            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Copie (optionnel)
             </span>
             <input
@@ -857,9 +857,9 @@ function SendDevisDialog({
               onChange={(e) => setCcRaw(e.target.value)}
               placeholder="apporteur@agence.com, autre@client.com"
               autoFocus
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
             />
-            <span className="mt-1 block text-[10px] text-slate-500 dark:text-neutral-500">
+            <span className="mt-1 block text-[10px] text-slate-500 dark:text-slate-500">
               Sépare plusieurs adresses par une virgule. Max 5.
             </span>
           </label>
@@ -871,12 +871,12 @@ function SendDevisDialog({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-neutral-900 px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-900 px-5 py-3">
           <button
             type="button"
             onClick={onCancel}
             disabled={pending}
-            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700 disabled:opacity-50"
+            className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 disabled:opacity-50"
           >
             Annuler
           </button>
@@ -927,13 +927,13 @@ function TopBar({
   onCreateEvent: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
+    <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-slate-900 pb-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+        <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-500">
           Devis
         </p>
         <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">{quote.number}</h1>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-500">
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-500">
           <StatusPill status={quote.status} />
           {quote.sent_at && <span>Envoyé le {new Date(quote.sent_at).toLocaleDateString("fr-FR")}</span>}
           {quote.accepted_at && <span>Accepté le {new Date(quote.accepted_at).toLocaleDateString("fr-FR")}</span>}
@@ -948,7 +948,7 @@ function TopBar({
               type="button"
               onClick={onSave}
               disabled={pending || !dirty}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 transition-colors hover:border-slate-300 dark:hover:border-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
               {dirty ? "Enregistrer" : "Enregistré"}
@@ -1007,7 +1007,7 @@ function TopBar({
               type="button"
               onClick={onRefuse}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-neutral-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-neutral-200 transition-colors hover:bg-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-neutral-700"
             >
               <XCircle className="h-3 w-3" /> Refusé
             </button>
@@ -1015,7 +1015,7 @@ function TopBar({
               type="button"
               onClick={onReopen}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700"
             >
               <Undo2 className="h-3 w-3" /> Rouvrir
             </button>
@@ -1029,7 +1029,7 @@ function TopBar({
             type="button"
             onClick={onReopen}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700"
           >
             <Undo2 className="h-3 w-3" /> Rouvrir en brouillon
           </button>
@@ -1046,7 +1046,7 @@ function TopBar({
           }
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700"
         >
           <Eye className="h-3 w-3" /> Plaquette
         </a>
@@ -1058,11 +1058,11 @@ function TopBar({
 /* ─── Status pill (local, matches dashboard StatusBadge palette) ─── */
 function StatusPill({ status }: { status: QuoteStatus }) {
   const map: Record<QuoteStatus, { cls: string; label: string }> = {
-    brouillon: { cls: "border-slate-300 dark:border-neutral-700 bg-slate-200 dark:bg-neutral-800 text-slate-600 dark:text-neutral-300", label: "Brouillon" },
+    brouillon: { cls: "border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300", label: "Brouillon" },
     envoye: { cls: "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-200", label: "Envoyé" },
     accepte: { cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200", label: "Accepté" },
     refuse: { cls: "border-rose-500/40 bg-rose-500/10 text-rose-200", label: "Refusé" },
-    expire: { cls: "border-slate-300 dark:border-neutral-700 bg-slate-200 dark:bg-neutral-800 text-slate-500 dark:text-neutral-400", label: "Expiré" },
+    expire: { cls: "border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400", label: "Expiré" },
   };
   const p = map[status];
   return (
@@ -1084,9 +1084,9 @@ function Card({
   action?: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
           {title}
         </p>
         {action}
@@ -1117,7 +1117,7 @@ function LabeledInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {label}
       </span>
       <input
@@ -1126,7 +1126,7 @@ function LabeledInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );
@@ -1147,14 +1147,14 @@ function LabeledSelect({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {label}
       </span>
       <select
         value={value}
         disabled={readOnly}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -1183,7 +1183,7 @@ function LabeledTextarea({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
         {label}
       </span>
       <textarea
@@ -1192,7 +1192,7 @@ function LabeledTextarea({
         placeholder={placeholder}
         rows={rows}
         readOnly={readOnly}
-        className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );
@@ -1218,7 +1218,7 @@ function ScheduleEditor({
 
   if (steps.length === 0) {
     return (
-      <p className="py-2 text-xs text-slate-500 dark:text-neutral-500">
+      <p className="py-2 text-xs text-slate-500 dark:text-slate-500">
         {readOnly
           ? "Aucun planning défini."
           : "Détaille le déroulé : livraison, arrivée invités, fin de prestation, rangement…"}
@@ -1231,14 +1231,14 @@ function ScheduleEditor({
       {steps.map((step, idx) => (
         <li
           key={idx}
-          className="flex items-center gap-2 rounded-md border border-slate-200 dark:border-neutral-800/80 bg-slate-100 dark:bg-neutral-900/40 px-2 py-1.5"
+          className="flex items-center gap-2 rounded-md border border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-slate-900/40 px-2 py-1.5"
         >
           <input
             type="time"
             value={step.time}
             onChange={(e) => patch(idx, { time: e.target.value })}
             readOnly={readOnly}
-            className="w-[88px] rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+            className="w-[88px] rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
           />
           <input
             type="text"
@@ -1246,14 +1246,14 @@ function ScheduleEditor({
             onChange={(e) => patch(idx, { label: e.target.value })}
             placeholder="Étape (ex. Arrivée invités)"
             readOnly={readOnly}
-            className="min-w-0 flex-1 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+            className="min-w-0 flex-1 rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
           />
           {!readOnly && (
             <button
               type="button"
               onClick={() => remove(idx)}
               aria-label="Supprimer l'étape"
-              className="shrink-0 rounded p-1 text-slate-500 dark:text-neutral-500 hover:text-red-300"
+              className="shrink-0 rounded p-1 text-slate-500 dark:text-slate-500 hover:text-red-300"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -1286,16 +1286,16 @@ function SectionBlock({
   const sectionTotal = items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-neutral-800/80 bg-slate-100 dark:bg-neutral-900/40">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-200 dark:border-neutral-800/60 px-3 py-2">
-        <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
+    <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-slate-900/40">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/60 px-3 py-2">
+        <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
           {name}
         </p>
-        <p className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-neutral-500">
+        <p className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-500">
           {formatEUR(sectionTotal)}
         </p>
       </div>
-      <div className="divide-y divide-slate-100 dark:divide-neutral-900">
+      <div className="divide-y divide-slate-100 dark:divide-slate-900">
         {items.map((it) => (
           <ItemRow
             key={it.localId}
@@ -1307,11 +1307,11 @@ function SectionBlock({
         ))}
       </div>
       {!readOnly && (
-        <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 dark:border-neutral-800/60 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 dark:border-slate-800/60 px-3 py-2">
           <button
             type="button"
             onClick={onAddLine}
-            className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
+            className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-white"
           >
             <Plus className="h-3 w-3" /> Ajouter une ligne
           </button>
@@ -1343,7 +1343,7 @@ function ItemRow({
   const total = Math.max(0, subtotal - discount);
   return (
     <div className="grid gap-2 px-3 py-2.5 md:grid-cols-[minmax(0,1fr)_56px_60px_84px_72px] md:items-start md:gap-2 lg:grid-cols-[16px_minmax(0,1fr)_60px_64px_92px_88px] lg:gap-3">
-      <div className="mt-2 hidden text-slate-400 dark:text-neutral-600 lg:block">
+      <div className="mt-2 hidden text-slate-400 dark:text-slate-600 lg:block">
         <GripVertical className="h-3.5 w-3.5" />
       </div>
 
@@ -1354,7 +1354,7 @@ function ItemRow({
           onChange={(e) => onPatch({ title: e.target.value })}
           placeholder="Intitulé de la prestation"
           readOnly={readOnly}
-          className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
         <textarea
           value={item.description}
@@ -1362,11 +1362,11 @@ function ItemRow({
           placeholder="Description (optionnelle)"
           rows={1}
           readOnly={readOnly}
-          className="w-full resize-y rounded-md border border-slate-200 dark:border-neutral-800/70 bg-slate-100 dark:bg-neutral-900/60 px-2.5 py-1.5 text-xs text-slate-600 dark:text-neutral-300 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          className="w-full resize-y rounded-md border border-slate-200 dark:border-slate-800/70 bg-slate-100 dark:bg-slate-900/60 px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
         <label
           className={`inline-flex items-center gap-1.5 text-[11px] ${
-            discount > 0 ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-500"
+            discount > 0 ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-slate-500"
           }`}
         >
           <span className="uppercase tracking-wide">Remise</span>
@@ -1380,7 +1380,7 @@ function ItemRow({
               onPatch({ discount_ht: Number(e.target.value) || 0 })
             }
             readOnly={readOnly}
-            className="w-20 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5 text-right text-[11px] text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+            className="w-20 rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-1.5 py-0.5 text-right text-[11px] text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
           />
           <span>€ HT</span>
         </label>
@@ -1393,7 +1393,7 @@ function ItemRow({
         value={item.qty}
         onChange={(e) => onPatch({ qty: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
 
       <input
@@ -1402,7 +1402,7 @@ function ItemRow({
         onChange={(e) => onPatch({ unit: e.target.value })}
         placeholder="unité"
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-sm text-slate-600 dark:text-neutral-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
 
       <input
@@ -1412,11 +1412,11 @@ function ItemRow({
         value={item.unit_price_ht}
         onChange={(e) => onPatch({ unit_price_ht: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
 
       <div className="flex items-center justify-end gap-2 md:flex-col md:items-end md:gap-1 md:pt-1">
-        <span className="text-xs font-medium text-slate-600 dark:text-neutral-300 md:text-[11px]">
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-300 md:text-[11px]">
           {formatEUR(total)}
         </span>
         {discount > 0 && (
@@ -1428,7 +1428,7 @@ function ItemRow({
           <button
             type="button"
             onClick={onRemove}
-            className="rounded text-slate-500 dark:text-neutral-500 transition-colors hover:text-red-300"
+            className="rounded text-slate-500 dark:text-slate-500 transition-colors hover:text-red-300"
             aria-label="Supprimer la ligne"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -1460,7 +1460,7 @@ function AddSectionButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1 text-[11px] uppercase tracking-wide text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
+        className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1 text-[11px] uppercase tracking-wide text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white"
       >
         <Plus className="h-3 w-3" /> Section
       </button>
@@ -1477,7 +1477,7 @@ function AddSectionButton({
             onAdd(s);
             setOpen(false);
           }}
-          className="rounded-full border border-slate-200 dark:border-neutral-800 px-2.5 py-0.5 text-[11px] text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-400 dark:hover:border-neutral-600"
+          className="rounded-full border border-slate-200 dark:border-slate-800 px-2.5 py-0.5 text-[11px] text-slate-600 dark:text-slate-300 transition-colors hover:border-slate-400 dark:hover:border-slate-600"
         >
           {s}
         </button>
@@ -1496,18 +1496,18 @@ function AddSectionButton({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nouveau"
-          className="w-28 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-[11px] text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+          className="w-28 rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-[11px] text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
         />
         <button
           type="submit"
-          className="rounded bg-slate-200 dark:bg-neutral-800 px-2 py-1 text-[11px] text-slate-900 dark:text-neutral-100 hover:bg-neutral-700"
+          className="rounded bg-slate-200 dark:bg-slate-800 px-2 py-1 text-[11px] text-slate-900 dark:text-slate-100 hover:bg-neutral-700"
         >
           OK
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-[11px] text-slate-500 dark:text-neutral-500 hover:text-neutral-300"
+          className="text-[11px] text-slate-500 dark:text-slate-500 hover:text-neutral-300"
         >
           ×
         </button>

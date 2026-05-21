@@ -36,12 +36,12 @@ export function AiPanel({
 
   if (!articleId) {
     return (
-      <section className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+      <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
           <Sparkles className="h-4 w-4 text-amber-400" />
           Génération IA
         </h2>
-        <p className="mt-2 text-[11px] text-slate-500 dark:text-neutral-500">
+        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-500">
           Enregistre une première fois l'article pour activer la génération IA (cover, version GMB, cover GMB carrée).
         </p>
       </section>
@@ -84,12 +84,12 @@ export function AiPanel({
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+    <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
         <Sparkles className="h-4 w-4 text-amber-400" />
         Génération IA
       </h2>
-      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
+      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500">
         Cover éditoriale, version courte pour Google Business, cover carrée GMB. Voix Le Mag, DNA visuelle Cosmo Club.
       </p>
 
@@ -100,7 +100,7 @@ export function AiPanel({
       )}
 
       {/* Cover article (site) */}
-      <div className="mt-4 space-y-2 rounded-md border border-slate-200 dark:border-neutral-800 p-3">
+      <div className="mt-4 space-y-2 rounded-md border border-slate-200 dark:border-slate-800 p-3">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium text-slate-900 dark:text-white">Cover article (site)</p>
           <button
@@ -117,13 +117,13 @@ export function AiPanel({
             {busyId === "cover" ? "Génération…" : "Générer"}
           </button>
         </div>
-        <p className="text-[10px] text-slate-500 dark:text-neutral-500">
+        <p className="text-[10px] text-slate-500 dark:text-slate-500">
           4:3 dans la palette grenat / cream / or / noir. Remplace la cover actuelle.
         </p>
       </div>
 
       {/* GMB text */}
-      <div className="mt-3 space-y-2 rounded-md border border-slate-200 dark:border-neutral-800 p-3">
+      <div className="mt-3 space-y-2 rounded-md border border-slate-200 dark:border-slate-800 p-3">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium text-slate-900 dark:text-white">Version GMB (texte)</p>
           <button
@@ -145,15 +145,15 @@ export function AiPanel({
           onChange={(e) => setGmbPost(e.target.value)}
           rows={8}
           placeholder="Le post optimisé pour Google Business apparaîtra ici. Tu peux l'éditer avant de copier."
-          className="block w-full resize-y rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-[12px] leading-relaxed text-slate-900 dark:text-neutral-100 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+          className="block w-full resize-y rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-[12px] leading-relaxed text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
         />
-        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-500">
+        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-500">
           <span>{gmbPost.length} / 1500 caractères (limite GBP)</span>
           <button
             type="button"
             disabled={!gmbPost}
             onClick={copyGmb}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-2.5 py-1 text-slate-700 dark:text-neutral-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-neutral-800 disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-slate-700 dark:text-slate-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-40"
           >
             {copied ? (
               <>
@@ -171,7 +171,7 @@ export function AiPanel({
       </div>
 
       {/* GMB cover (square) */}
-      <div className="mt-3 space-y-2 rounded-md border border-slate-200 dark:border-neutral-800 p-3">
+      <div className="mt-3 space-y-2 rounded-md border border-slate-200 dark:border-slate-800 p-3">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium text-slate-900 dark:text-white">Cover GMB (1:1)</p>
           <button
@@ -194,21 +194,21 @@ export function AiPanel({
             <img
               src={gmbCover}
               alt="Cover GMB"
-              className="aspect-square w-full rounded-md border border-slate-200 dark:border-neutral-800 object-cover"
+              className="aspect-square w-full rounded-md border border-slate-200 dark:border-slate-800 object-cover"
             />
             <a
               href={gmbCover}
               download={`gmb-cover-${articleId.slice(0, 8)}.png`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-2.5 py-1.5 text-[11px] text-slate-700 dark:text-neutral-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-neutral-800"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1.5 text-[11px] text-slate-700 dark:text-slate-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-slate-800"
             >
               <Download className="h-3 w-3" />
               Télécharger pour GBP
             </a>
           </>
         )}
-        <p className="text-[10px] text-slate-500 dark:text-neutral-500">
+        <p className="text-[10px] text-slate-500 dark:text-slate-500">
           Carrée, même DNA visuelle. À uploader dans le post Google Business avec le texte.
         </p>
       </div>
