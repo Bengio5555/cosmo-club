@@ -34,15 +34,18 @@ const STATUS_TABS: { value: LeadStatus | "all"; label: string }[] = [
   { value: "perdu", label: "Perdu" },
 ];
 
-// Pill coloring per status — same palette as StatusBadge.
+// Pill coloring per status — same palette as StatusBadge. The "all"
+// tab is the primary/dark variant (inverted between modes: dark bg +
+// white text in light, light bg + dark text in dark) — the others
+// keep the pastel-on-coloured-text identity of each status.
 const ACTIVE_TONE: Record<LeadStatus | "all", string> = {
-  all: "bg-slate-900 text-slate-900 dark:text-white dark:bg-slate-800",
+  all: "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900",
   nouveau:
     "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-200",
   contacte:
     "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200",
   devis_envoye:
-    "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-700 dark:text-violet-200",
+    "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-200",
   gagne:
     "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-200",
   perdu:
