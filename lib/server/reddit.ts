@@ -14,29 +14,58 @@ import "server-only";
 const USER_AGENT =
   "web:fr.cosmoclub.lead-monitor:v1.0 (by /u/cosmoclubparis)";
 
-// Subreddits Cosmo Club targets — francophones, audience event/wedding.
-// Add r/EVJF / r/EVG if they gain traction (small but specific).
+// Subreddits francophones susceptibles d'héberger des discussions sur
+// nos services. La liste est large parce que la communauté Reddit FR
+// sur les sujets event/wedding est éclatée — r/Mariage compte mais
+// les régionales (r/paris, r/lyon…) et r/AskMeuf récupèrent aussi des
+// posts d'organisatrices d'EVJF / 30 ans / mariage.
+// Note : Reddit est case-insensitive sur les noms de sub, donc
+// "mariage" matche aussi r/Mariage (et inversement).
 export const TRACKED_SUBREDDITS = [
-  "mariage",
+  // Communautés généralistes FR
   "france",
   "AskFrance",
-  "paris",
+  "AskMeuf",
+  "rance",
+  // Communautés event-spécifiques
+  "mariage",
   "EVJF",
+  "EVG",
+  // Métropoles FR (clients potentiels qui cherchent local)
+  "paris",
+  "lyon",
+  "marseille",
+  "bordeaux",
+  "Toulouse",
+  "Nantes",
+  "rouen",
+  "Quimper",
+  // Adjacents (photographes, lifestyle…)
+  "Photographie",
 ] as const;
 
-// Mots-clés alignés sur les pages d'intent du site (mariage, anniversaire,
-// entreprise, barman privé, animation cocktail). Le matching est fait par
-// Reddit côté search, donc tolérant aux accents. Pas de stopwords ici —
-// chaque mot-clé est une phrase autonome.
+// Mots-clés alignés sur les pages d'intent du site. Notes importantes :
+//   - Reddit search ne fait pas de matching exact par défaut.
+//     "bar à cocktails" donne 0 résultats car "à" est ignoré comme
+//     stop-word et la recherche devient implicite (AND bar AND cocktails).
+//     Les guillemets force le matching de la phrase exacte.
+//   - On évite les accents quand on peut (Reddit search tolère mal les
+//     diacritiques sur les anciens index).
+//   - Les mots-clés sont volontairement courts et précis pour ne pas
+//     ramener des centaines de threads bruyants.
 export const TRACKED_KEYWORDS = [
-  "bar à cocktails",
-  "barman privé",
-  "atelier mixologie",
+  '"bar à cocktails"',
+  '"barman privé"',
+  '"atelier mixologie"',
+  '"vin d\'honneur"',
+  '"animation cocktail"',
+  '"atelier cocktail"',
+  '"cocktail mariage"',
+  '"barman mariage"',
+  '"team building" cocktail',
   "EVJF cocktail",
-  "team building cocktail",
-  "vin d'honneur",
-  "animation cocktail",
-  "barista événementiel",
+  "EVG cocktail",
+  "mixologue Paris",
 ] as const;
 
 export type RedditThread = {
@@ -75,42 +104,46 @@ type RedditSearchResponse = {
 };
 
 /**
- * Search a single subreddit for a single keyword. Returns up to 10
- * threads from the last month, sorted by newest first.
+ * Search across ALL of Reddit for a single keyword, then keep only
+ * results from our tracked subreddits. Returns up to 25 threads from
+ * the last year, sorted by newest first.
  *
- * Reddit silently rate-limits when we hammer too fast (~60 req/min
- * unauthenticated). The caller sequences requests, so we don't need
- * an internal throttler.
+ * Why global search + post-filter rather than per-subreddit search:
+ *   - Reddit's restrict_sr endpoint is unreliable on small French
+ *     subreddits (r/mariage, r/EVJF) and often returns 0 for valid
+ *     queries.
+ *   - Global search is the most stable endpoint and matches the
+ *     mental model of "what would a redditor see if they searched".
+ *   - We only consume threads in TRACKED_SUBREDDITS_LC after the call,
+ *     so the noise from other subs is dropped.
+ *
+ * Time window = "year" because the French event-services subreddits
+ * are low-traffic; restricting to "month" can return literally zero
+ * results for half the keywords.
  */
-async function searchSubreddit(
-  subreddit: string,
-  keyword: string,
-): Promise<RedditThread[]> {
+async function searchGlobal(keyword: string): Promise<RedditThread[]> {
   const params = new URLSearchParams({
     q: keyword,
-    restrict_sr: "true",
     sort: "new",
-    t: "month",
-    limit: "10",
+    t: "year",
+    limit: "25",
   });
-  const url = `https://www.reddit.com/r/${subreddit}/search.json?${params.toString()}`;
+  const url = `https://www.reddit.com/search.json?${params.toString()}`;
 
   let res: Response;
   try {
     res = await fetch(url, {
       headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
-      // Reddit JSON peut être servi via CDN, on demande explicitement
-      // pas de cache Next côté serveur — on veut les derniers threads.
       cache: "no-store",
     });
   } catch (err) {
-    console.warn(`[reddit] fetch failed for r/${subreddit} "${keyword}":`, err);
+    console.warn(`[reddit] fetch failed for "${keyword}":`, err);
     return [];
   }
 
   if (!res.ok) {
     console.warn(
-      `[reddit] r/${subreddit} "${keyword}" returned HTTP ${res.status}`,
+      `[reddit] "${keyword}" returned HTTP ${res.status} (likely rate-limited or blocked)`,
     );
     return [];
   }
@@ -118,14 +151,21 @@ async function searchSubreddit(
   const json = (await res.json()) as RedditSearchResponse;
   const children = json.data?.children ?? [];
 
-  return children
+  // Post-filter on subreddit (lowercase compare — Reddit normalizes
+  // subreddit names but the search response returns the canonical case).
+  const subsLc = new Set(
+    TRACKED_SUBREDDITS.map((s) => s.toLowerCase()),
+  );
+
+  const matches = children
     .map((c) => c.data)
     .filter((d): d is NonNullable<typeof d> => !!d)
     .filter((d) => !d.over_18 && !d.stickied)
     .filter((d) => d.name && d.title && d.permalink && d.created_utc)
+    .filter((d) => d.subreddit && subsLc.has(String(d.subreddit).toLowerCase()))
     .map((d): RedditThread => ({
       reddit_id: String(d.name),
-      subreddit: String(d.subreddit ?? subreddit),
+      subreddit: String(d.subreddit),
       title: String(d.title),
       url: String(d.url ?? `https://www.reddit.com${d.permalink}`),
       permalink: `https://www.reddit.com${d.permalink}`,
@@ -136,30 +176,36 @@ async function searchSubreddit(
       posted_at: new Date(Number(d.created_utc) * 1000).toISOString(),
       matched_keyword: keyword,
     }));
+
+  console.log(
+    `[reddit] "${keyword}": ${children.length} raw / ${matches.length} after sub filter`,
+  );
+  return matches;
 }
 
 /**
- * Sweep all tracked subreddits × all tracked keywords. Dedups by
- * reddit_id (a thread that matches "EVJF cocktail" AND "atelier
- * mixologie" only appears once — first match wins).
+ * Sweep all tracked keywords on Reddit's global search and filter to
+ * our tracked subreddits. Dedups by reddit_id (a thread that matches
+ * multiple keywords only appears once — first match wins).
  *
- * Sequential on purpose to stay under Reddit's unauth rate limit
- * without bookkeeping. ~5 subs × 8 keywords = 40 calls, each <500ms,
- * so the full sweep finishes in ~20 seconds.
+ * ~10 keywords × 1 global call each = 10 calls, sequential. Total
+ * sweep time ~10 seconds. Well under Reddit's unauth rate ceiling.
  */
 export async function fetchAllRedditMatches(): Promise<RedditThread[]> {
   const seen = new Map<string, RedditThread>();
 
-  for (const subreddit of TRACKED_SUBREDDITS) {
-    for (const keyword of TRACKED_KEYWORDS) {
-      const threads = await searchSubreddit(subreddit, keyword);
-      for (const t of threads) {
-        if (!seen.has(t.reddit_id)) {
-          seen.set(t.reddit_id, t);
-        }
+  for (const keyword of TRACKED_KEYWORDS) {
+    const threads = await searchGlobal(keyword);
+    for (const t of threads) {
+      if (!seen.has(t.reddit_id)) {
+        seen.set(t.reddit_id, t);
       }
     }
   }
+
+  console.log(
+    `[reddit] sweep done: ${seen.size} unique threads across ${TRACKED_KEYWORDS.length} keywords`,
+  );
 
   return Array.from(seen.values()).sort(
     (a, b) => Date.parse(b.posted_at) - Date.parse(a.posted_at),
