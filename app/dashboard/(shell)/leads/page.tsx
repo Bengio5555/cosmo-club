@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import { LeadsToolbar } from "./LeadsToolbar";
+import { LeadsStatusTabs } from "./LeadsStatusTabs";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { formatDateFR } from "@/lib/format";
@@ -37,6 +38,24 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
 
   const { data: leads, error } = await query.limit(200);
 
+  // Compteurs par statut pour les onglets de filtre rapide.
+  // Une seule requête lit toute la table (~quelques centaines de
+  // lignes au plus, donc négligeable) et on agrège côté JS.
+  const { data: allStatuses } = await supabase
+    .from("leads")
+    .select("status");
+  const counts: Record<LeadStatus | "all", number> = {
+    all: allStatuses?.length ?? 0,
+    nouveau: 0,
+    contacte: 0,
+    devis_envoye: 0,
+    gagne: 0,
+    perdu: 0,
+  };
+  for (const row of allStatuses ?? []) {
+    counts[row.status as LeadStatus] += 1;
+  }
+
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
@@ -48,7 +67,15 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
         </div>
       </header>
 
-      <LeadsToolbar initial={{ status: status ?? "", q: q ?? "", type: type ?? "" }} />
+      <LeadsStatusTabs
+        activeStatus={status ?? ""}
+        counts={counts}
+        preserve={{ q, type }}
+      />
+
+      <div className="mt-3">
+        <LeadsToolbar initial={{ status: status ?? "", q: q ?? "", type: type ?? "" }} />
+      </div>
 
       {error && (
         <div className="mt-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">

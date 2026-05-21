@@ -4,6 +4,11 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState, useTransition, useEffect } from "react";
 import { Search } from "lucide-react";
 
+// Le statut est passé via la prop initial (pour rester aligné avec
+// l'URL après un clic sur un onglet status) mais n'est plus éditable
+// ici — les onglets LeadsStatusTabs au-dessus s'en chargent. On le
+// conserve en interne uniquement pour reconstruire la querystring
+// quand on tape dans la search bar ou qu'on change le type.
 type Filters = { status: string; q: string; type: string };
 
 export function LeadsToolbar({ initial }: { initial: Filters }) {
@@ -11,6 +16,12 @@ export function LeadsToolbar({ initial }: { initial: Filters }) {
   const pathname = usePathname();
   const [, startTransition] = useTransition();
   const [filters, setFilters] = useState<Filters>(initial);
+
+  // Resync if the parent props change — e.g. clicking a status tab
+  // updates `initial.status`, we must mirror that into local state.
+  useEffect(() => {
+    setFilters(initial);
+  }, [initial]);
 
   // Sync URL when filters change (debounced for the search input).
   useEffect(() => {
@@ -45,19 +56,6 @@ export function LeadsToolbar({ initial }: { initial: Filters }) {
           className="w-full rounded-md border border-neutral-800 bg-neutral-950 py-2 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
         />
       </div>
-
-      <select
-        value={filters.status}
-        onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
-        className="rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
-      >
-        <option value="">Tous statuts</option>
-        <option value="nouveau">Nouveau</option>
-        <option value="contacte">Contacté</option>
-        <option value="devis_envoye">Devis envoyé</option>
-        <option value="gagne">Gagné</option>
-        <option value="perdu">Perdu</option>
-      </select>
 
       <select
         value={filters.type}
