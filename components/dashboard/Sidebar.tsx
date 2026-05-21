@@ -92,7 +92,13 @@ export function Sidebar({ role }: { role: UserRole }) {
     .filter((group) => group.items.length > 0);
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950 px-3 py-4 text-neutral-300 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950 px-3 py-4 text-neutral-300 md:flex">
+      {/*
+        sticky + top-0 + h-screen : la sidebar reste figée à gauche
+        quand l'utilisateur scrolle dans le contenu principal. Le
+        scroll interne (overflow-y-auto sur <nav>) prend le relais si
+        la liste de liens devient plus haute que le viewport.
+      */}
       <Link
         href="/dashboard"
         aria-label="Cosmo Club — tableau de bord"

@@ -140,7 +140,7 @@ export function PreviewClientsTable({ clients }: { clients: ClientRow[] }) {
   }
 
   return (
-    <div className="min-h-full bg-slate-50 px-6 py-6 md:px-10 md:py-8">
+    <div className="px-6 py-6 md:px-10 md:py-8">
       <div className="mx-auto max-w-[1400px]">
         {/* Page header */}
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
