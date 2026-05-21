@@ -219,23 +219,37 @@ export default async function ClientsListPage({
                     <td className="px-3 py-3 md:px-4">
                       <Link
                         href={`/dashboard/clients/${c.id}`}
-                        className="inline-flex items-center gap-2 font-medium text-slate-900 transition-colors hover:text-[color:var(--color-grenat)] dark:text-white dark:hover:text-[color:var(--color-grenat-glow)]"
+                        className="flex items-center gap-3"
                       >
-                        {displayName}
-                        {isB2B && (
-                          <span className="rounded-full border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400">
-                            B2B
-                          </span>
-                        )}
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[10px] font-semibold text-white">
+                          {(displayName
+                            .split(/\s+/)
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .map((w) => w[0]?.toUpperCase() ?? "")
+                            .join("") || "?")}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="inline-flex items-center gap-2 font-medium text-slate-900 transition-colors hover:text-[color:var(--color-grenat)] dark:text-white dark:hover:text-[color:var(--color-grenat-glow)]">
+                            <span className="truncate">{displayName}</span>
+                            {isB2B && (
+                              <span className="rounded-full border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400">
+                                B2B
+                              </span>
+                            )}
+                          </p>
+                          {isB2B && (c.first_name || c.last_name) && (
+                            <p className="truncate text-[11px] text-slate-500 dark:text-neutral-500">
+                              {[c.first_name, c.last_name]
+                                .filter(Boolean)
+                                .join(" ")}
+                            </p>
+                          )}
+                          <p className="truncate text-[11px] text-slate-500 dark:text-neutral-500 md:hidden">
+                            {c.email ?? c.phone ?? "—"}
+                          </p>
+                        </div>
                       </Link>
-                      {isB2B && (c.first_name || c.last_name) && (
-                        <p className="text-[11px] text-slate-500 dark:text-neutral-500">
-                          {[c.first_name, c.last_name].filter(Boolean).join(" ")}
-                        </p>
-                      )}
-                      <p className="text-[11px] text-slate-500 dark:text-neutral-500 md:hidden">
-                        {c.email ?? c.phone ?? "—"}
-                      </p>
                     </td>
                     <td className="hidden px-3 py-3 text-xs text-slate-600 dark:text-neutral-300 md:table-cell md:px-4">
                       {c.email && <div>{c.email}</div>}

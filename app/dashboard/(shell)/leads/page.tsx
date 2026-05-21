@@ -22,18 +22,21 @@ export default async function LeadsPage() {
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-3xl">
             Demandes
           </h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
             Leads entrants depuis le site (formulaire{" "}
-            <code className="text-neutral-500">/contact</code>).
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[12px] text-slate-700 dark:bg-neutral-800 dark:text-neutral-400">
+              /contact
+            </code>
+            ).
           </p>
         </div>
       </header>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           Erreur de chargement : {error.message}
         </div>
       )}

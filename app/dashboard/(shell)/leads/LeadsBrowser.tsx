@@ -203,26 +203,45 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
               </tr>
             </thead>
             <tbody>
-              {visible.map((l) => (
+              {visible.map((l) => {
+                const display =
+                  l.contact_name || l.contact_email || l.company || "?";
+                const initials = display
+                  .split(/[\s.@-]+/)
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((w) => w[0]?.toUpperCase() ?? "")
+                  .join("") || "?";
+                return (
                 <tr
                   key={l.id}
                   className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900"
                 >
                   <td className="px-3 py-3 md:px-4">
-                    <Link href={`/dashboard/leads/${l.id}`} className="block">
-                      <p className="font-medium text-slate-900 dark:text-white">
-                        {l.contact_name || (
-                          <span className="text-slate-400 dark:text-neutral-500">—</span>
-                        )}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-neutral-400">
-                        {l.contact_email}
-                      </p>
-                      {l.company && (
-                        <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
-                          {l.company}
+                    <Link
+                      href={`/dashboard/leads/${l.id}`}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[10px] font-semibold text-white">
+                        {initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900 dark:text-white">
+                          {l.contact_name || (
+                            <span className="text-slate-400 dark:text-neutral-500">
+                              —
+                            </span>
+                          )}
                         </p>
-                      )}
+                        <p className="truncate text-xs text-slate-500 dark:text-neutral-400">
+                          {l.contact_email}
+                        </p>
+                        {l.company && (
+                          <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-500">
+                            {l.company}
+                          </p>
+                        )}
+                      </div>
                     </Link>
                   </td>
                   <td className="px-3 py-3 md:px-4">
@@ -247,7 +266,8 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                     {formatDateFR(l.created_at, { withTime: true })}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         ) : (
