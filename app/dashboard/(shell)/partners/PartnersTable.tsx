@@ -120,7 +120,7 @@ export function PartnersTable({ partners }: { partners: Partner[] }) {
   return (
     <>
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-slate-500 dark:text-neutral-500">
           {visible.filter((p) => !p.archived).length} contact(s) actif(s)
           {archived.length > 0 && ` · ${archived.length} archivé(s)`}
           {(cat !== "all" || normalized) && partners.length > 0 && (
@@ -135,7 +135,7 @@ export function PartnersTable({ partners }: { partners: Partner[] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Nom, société, contact, email…"
-              className="w-full rounded-md border border-neutral-800 bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-72"
+              className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-72"
             />
           </div>
           <button
@@ -168,11 +168,11 @@ export function PartnersTable({ partners }: { partners: Partner[] }) {
           <Empty>Aucun résultat.</Empty>
         ) : (
           grouped.map(([catName, list]) => (
-            <div key={catName} className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+            <div key={catName} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
               <div className="border-b border-neutral-800 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
                 {catName} · {list.length}
               </div>
-              <ul className="divide-y divide-neutral-900">
+              <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
                 {list.map((p) => (
                   <PartnerRow
                     key={p.id}
@@ -189,11 +189,11 @@ export function PartnersTable({ partners }: { partners: Partner[] }) {
         )}
 
         {archived.length > 0 && (
-          <details className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+          <details className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
             <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 hover:text-neutral-300">
               Archivés · {archived.length}
             </summary>
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {archived.map((p) => (
                 <PartnerRow
                   key={p.id}
@@ -254,7 +254,7 @@ function PartnerRow({
     <li className={`flex flex-col gap-2 px-4 py-3 ${p.archived ? "opacity-50" : ""} md:flex-row md:items-center md:gap-3`}>
       <div className="min-w-0 flex-1">
         <p className="font-medium text-white">{p.name}</p>
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-slate-500 dark:text-neutral-500">
           {p.contact_name}
           {p.contact_name && p.position ? " · " : ""}
           {p.position}
@@ -264,7 +264,7 @@ function PartnerRow({
         {p.email && (
           <a
             href={`mailto:${p.email}`}
-            className="inline-flex items-center gap-1 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-neutral-300 hover:border-neutral-700 hover:text-white"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
           >
             <Mail className="h-3 w-3" /> {p.email}
           </a>
@@ -272,7 +272,7 @@ function PartnerRow({
         {p.email_alt && (
           <a
             href={`mailto:${p.email_alt}`}
-            className="inline-flex items-center gap-1 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-neutral-300 hover:border-neutral-700 hover:text-white"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
             title="Email secondaire"
           >
             <Mail className="h-3 w-3 opacity-60" /> {p.email_alt}
@@ -281,7 +281,7 @@ function PartnerRow({
         {p.phone && (
           <a
             href={`tel:${p.phone.replace(/\s/g, "")}`}
-            className="inline-flex items-center gap-1 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-neutral-300 hover:border-neutral-700 hover:text-white"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
           >
             <Phone className="h-3 w-3" /> {p.phone}
           </a>
@@ -338,7 +338,7 @@ function CatPill({
 
 function Empty({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center text-sm text-neutral-500">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
       {children}
     </div>
   );
@@ -437,7 +437,7 @@ function PartnerModal({
           </Field>
 
           <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-900 pt-4">
-            <button type="button" onClick={onClose} disabled={pending} className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700">
+            <button type="button" onClick={onClose} disabled={pending} className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700">
               Annuler
             </button>
             <button type="submit" disabled={pending} className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:opacity-60">
@@ -452,12 +452,12 @@ function PartnerModal({
 }
 
 const input =
-  "w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       {children}

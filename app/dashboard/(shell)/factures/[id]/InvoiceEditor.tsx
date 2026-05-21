@@ -305,7 +305,7 @@ export function InvoiceEditor({
       />
 
       {isCreditNote && sourceInvoice && (
-        <div className="mt-3 rounded-md border border-violet-500/30 bg-violet-500/5 px-3 py-2 text-xs text-violet-200 flex items-center justify-between gap-3">
+        <div className="mt-3 rounded-md border border-violet-500/30 bg-violet-500/5 px-3 py-2 text-xs text-violet-700 dark:text-violet-200 flex items-center justify-between gap-3">
           <span>
             Avoir rattaché à la facture{" "}
             <Link
@@ -320,7 +320,7 @@ export function InvoiceEditor({
       )}
 
       {!isCreditNote && creditNotes.length > 0 && (
-        <div className="mt-3 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300">
+        <div className="mt-3 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 mb-1">
             Avoirs émis
           </p>
@@ -332,11 +332,11 @@ export function InvoiceEditor({
                   className="inline-flex items-center gap-1.5 text-neutral-200 hover:text-white"
                 >
                   <ExternalLink className="h-3 w-3" /> {cn.number}
-                  <span className="text-[10px] uppercase tracking-wide text-neutral-500">
+                  <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                     · {cn.status}
                   </span>
                 </Link>
-                <span className="font-medium text-violet-200">
+                <span className="font-medium text-violet-700 dark:text-violet-200">
                   {formatEUR(Number(cn.total_ttc))}
                 </span>
               </li>
@@ -417,7 +417,7 @@ export function InvoiceEditor({
               </p>
             ) : (
               <>
-                <div className="divide-y divide-neutral-900">
+                <div className="divide-y divide-slate-100 dark:divide-neutral-900">
                   {items.map((it) => (
                     <ItemRow
                       key={it.localId}
@@ -456,14 +456,14 @@ export function InvoiceEditor({
         </div>
 
         <aside className="space-y-5">
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
               Totaux
             </p>
             <dl className="space-y-1.5 text-sm">
               <div className="flex justify-between">
                 <dt className="text-neutral-500">Total HT</dt>
-                <dd className="font-medium text-neutral-100">{formatEUR(totalHt)}</dd>
+                <dd className="font-medium text-slate-900 dark:text-neutral-100">{formatEUR(totalHt)}</dd>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <dt className="flex items-center gap-2 text-neutral-500">
@@ -475,7 +475,7 @@ export function InvoiceEditor({
                     min="0"
                     onChange={(e) => setTvaRate(e.target.value)}
                     disabled={readOnly}
-                    className="w-14 rounded border border-neutral-800 bg-neutral-900 px-1.5 py-0.5 text-right text-xs text-neutral-100 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                    className="w-14 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5 text-right text-xs text-neutral-100 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
                   />
                   %
                 </dt>
@@ -483,12 +483,12 @@ export function InvoiceEditor({
               </div>
               <div className="flex justify-between border-t border-neutral-800 pt-2 text-base font-semibold">
                 <dt className="text-neutral-300">Total TTC</dt>
-                <dd className="text-white">{formatEUR(totalTtc)}</dd>
+                <dd className="text-slate-900 dark:text-white">{formatEUR(totalTtc)}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 text-xs text-neutral-500">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 text-xs text-slate-500 dark:text-neutral-500">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
               Workflow
             </p>
@@ -542,7 +542,7 @@ export function InvoiceEditor({
                 type="button"
                 onClick={() => setCreditModal(false)}
                 disabled={pending}
-                className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
               >
                 Annuler
               </button>
@@ -602,8 +602,8 @@ function TopBar({
         <p className="text-[11px] uppercase tracking-wide text-neutral-500">
           {invoice.is_credit_note ? "Avoir" : "Facture"}
         </p>
-        <h1 className="font-display text-2xl text-white md:text-3xl">{invoice.number}</h1>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+        <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">{invoice.number}</h1>
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-500">
           <StatusPill status={invoice.status} />
           {invoice.sent_at && (
             <span>Émise le {new Date(invoice.sent_at).toLocaleDateString("fr-FR")}</span>
@@ -612,7 +612,7 @@ function TopBar({
             <span>Payée le {new Date(invoice.paid_at).toLocaleDateString("fr-FR")}</span>
           )}
           {(invoice.reminder_count ?? 0) > 0 && invoice.last_reminded_at && (
-            <span className="text-amber-300/80">
+            <span className="text-amber-700 dark:text-amber-300/80">
               · {invoice.reminder_count} relance{(invoice.reminder_count ?? 0) > 1 ? "s" : ""} · dernière le{" "}
               {new Date(invoice.last_reminded_at).toLocaleDateString("fr-FR")}
             </span>
@@ -627,7 +627,7 @@ function TopBar({
               type="button"
               onClick={onSave}
               disabled={pending || !dirty}
-              className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
               {dirty ? "Enregistrer" : "Enregistré"}
@@ -686,7 +686,7 @@ function TopBar({
               type="button"
               onClick={onCancel}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
             >
               <Ban className="h-3 w-3" /> Annuler
             </button>
@@ -710,7 +710,7 @@ function TopBar({
             type="button"
             onClick={onOpenCreditNote}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-violet-500/40 bg-violet-500/10 px-3 py-2 text-xs font-semibold text-violet-200 transition-colors hover:bg-violet-500/20 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md border border-violet-500/40 bg-violet-500/10 px-3 py-2 text-xs font-semibold text-violet-700 dark:text-violet-200 transition-colors hover:bg-violet-500/20 disabled:opacity-60"
           >
             <RotateCcw className="h-3 w-3" /> Avoir
           </button>
@@ -727,7 +727,7 @@ function TopBar({
           }
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
         >
           <Eye className="h-3 w-3" /> {invoice.is_credit_note ? "Avoir PDF" : "Facture PDF"}
         </a>
@@ -739,7 +739,7 @@ function TopBar({
 function StatusPill({ status }: { status: InvoiceStatus }) {
   const map: Record<InvoiceStatus, { cls: string; label: string }> = {
     brouillon: { cls: "border-neutral-700 bg-neutral-800 text-neutral-300", label: "Brouillon" },
-    envoye: { cls: "border-violet-500/40 bg-violet-500/10 text-violet-200", label: "Envoyée" },
+    envoye: { cls: "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-200", label: "Envoyée" },
     paye: { cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200", label: "Payée" },
     en_retard: { cls: "border-red-500/50 bg-red-500/15 text-red-300", label: "En retard" },
     annule: { cls: "border-neutral-700 bg-neutral-800 text-neutral-400", label: "Annulée" },
@@ -756,7 +756,7 @@ function StatusPill({ status }: { status: InvoiceStatus }) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
         {title}
       </p>
@@ -795,7 +795,7 @@ function LabeledInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
-        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );
@@ -827,7 +827,7 @@ function LabeledTextarea({
         placeholder={placeholder}
         rows={rows}
         readOnly={readOnly}
-        className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );
@@ -857,7 +857,7 @@ function ItemRow({
           onChange={(e) => onPatch({ title: e.target.value })}
           placeholder="Intitulé de la prestation"
           readOnly={readOnly}
-          className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
         <textarea
           value={item.description}
@@ -875,7 +875,7 @@ function ItemRow({
         value={item.qty}
         onChange={(e) => onPatch({ qty: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <input
         type="text"
@@ -883,7 +883,7 @@ function ItemRow({
         onChange={(e) => onPatch({ unit: e.target.value })}
         placeholder="unité"
         readOnly={readOnly}
-        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-sm text-neutral-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <input
         type="number"
@@ -892,7 +892,7 @@ function ItemRow({
         value={item.unit_price_ht}
         onChange={(e) => onPatch({ unit_price_ht: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <div className="flex items-center justify-end gap-2 md:flex-col md:items-end md:gap-1 md:pt-1">
         <span className="text-xs font-medium text-neutral-300 md:text-[11px]">

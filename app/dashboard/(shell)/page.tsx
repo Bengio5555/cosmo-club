@@ -389,7 +389,7 @@ export default async function DashboardHome() {
       {/* ─── Alerts band ─── */}
       {hasAlerts && (
         <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/5">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-300" />
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-700 dark:text-amber-300" />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
               Points d&apos;attention
@@ -542,7 +542,7 @@ export default async function DashboardHome() {
                     </Link>
                     <div className="flex shrink-0 items-center gap-2">
                       <span
-                        className={`text-sm font-medium tabular-nums ${overdue ? "text-red-700 dark:text-red-300" : "text-amber-700 dark:text-amber-300"}`}
+                        className={`text-sm font-medium tabular-nums ${overdue ? "text-red-700 dark:text-red-300" : "text-amber-700 dark:text-amber-700 dark:text-amber-300"}`}
                       >
                         {formatEUR(remaining)}
                       </span>
@@ -636,7 +636,7 @@ export default async function DashboardHome() {
                         <div className="flex items-center justify-end gap-1.5">
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noStaff ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
+                              noStaff ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
                             }`}
                             title="Staff assignés"
                           >
@@ -645,7 +645,7 @@ export default async function DashboardHome() {
                           </span>
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noCocktails ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
+                              noCocktails ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
                             }`}
                             title="Cocktails au menu"
                           >
@@ -654,7 +654,7 @@ export default async function DashboardHome() {
                           </span>
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noStock ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
+                              noStock ? "text-amber-700 dark:text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
                             }`}
                             title="Produits réservés"
                           >
@@ -776,7 +776,7 @@ export default async function DashboardHome() {
                     className={
                       "flex h-7 w-7 shrink-0 items-center justify-center rounded-md " +
                       (m.direction === "in"
-                        ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300"
+                        ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-700 dark:text-emerald-300"
                         : "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-300")
                     }
                   >
@@ -790,7 +790,7 @@ export default async function DashboardHome() {
                     {productsMap.get(m.product_id) ?? "—"}
                   </span>
                   <span
-                    className={`text-sm font-medium tabular-nums ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}
+                    className={`text-sm font-medium tabular-nums ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}
                   >
                     {m.direction === "in" ? "+" : "−"}
                     {Number(m.qty)}
@@ -857,9 +857,9 @@ function HeroKpi({
   // Couleur du cercle d'icône — porte le sens (ok/pending/neutral)
   const iconWrapCls =
     tone === "ok"
-      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300"
+      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-        ? "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300"
+        ? "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-700 dark:text-amber-300"
         : "bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300";
   return (
     <Link

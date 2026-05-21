@@ -80,7 +80,7 @@ export function MoodboardPicker({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-500">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
         <span>
           Photos sélectionnées pour le moodboard ·{" "}
           <span className="text-neutral-300">
@@ -129,7 +129,7 @@ export function MoodboardPicker({
       )}
 
       {isEmpty ? (
-        <p className="flex items-center gap-2 py-2 text-xs text-neutral-500">
+        <p className="flex items-center gap-2 py-2 text-xs text-slate-500 dark:text-neutral-500">
           <ImageOff className="h-3.5 w-3.5" />
           Aucune photo disponible. Uploade-en une depuis le bouton
           ci-dessus ou ajoute des visuels dans l&apos;onglet{" "}

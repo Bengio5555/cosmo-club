@@ -76,7 +76,7 @@ export function BriefPanel({ onDraft }: Props) {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder='Ex: « Pourquoi le vin d&apos;honneur devient le moment-pivot d&apos;un mariage parisien — et comment penser sa carte cocktails en conséquence »'
-            className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
           />
         </Field>
 
@@ -85,7 +85,7 @@ export function BriefPanel({ onDraft }: Props) {
             <select
               value={persona}
               onChange={(e) => setPersona(e.target.value as ArticlePersona)}
-              className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
             >
               {PERSONAS.map((p) => (
                 <option key={p.value} value={p.value}>
@@ -93,7 +93,7 @@ export function BriefPanel({ onDraft }: Props) {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[10px] text-neutral-500">
+            <p className="mt-1 text-[10px] text-slate-500 dark:text-neutral-500">
               {PERSONAS.find((p) => p.value === persona)?.hint}
             </p>
           </Field>
@@ -102,7 +102,7 @@ export function BriefPanel({ onDraft }: Props) {
             <select
               value={length}
               onChange={(e) => setLength(e.target.value as ArticleLength)}
-              className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
             >
               {LENGTHS.map((l) => (
                 <option key={l.value} value={l.value}>
@@ -119,7 +119,7 @@ export function BriefPanel({ onDraft }: Props) {
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             placeholder="bar à cocktails mariage, vin d'honneur Paris"
-            className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+            className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
           />
         </Field>
 

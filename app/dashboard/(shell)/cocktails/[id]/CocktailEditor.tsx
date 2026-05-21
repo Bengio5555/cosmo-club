@@ -203,7 +203,7 @@ export function CocktailEditor({
           <p className="text-[11px] uppercase tracking-wide text-neutral-500">
             Recette {cocktail.archived && "· Archivée"}
           </p>
-          <h1 className="font-display text-2xl text-white md:text-3xl">
+          <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
             {cocktail.name}
           </h1>
         </div>
@@ -213,7 +213,7 @@ export function CocktailEditor({
             type="button"
             onClick={save}
             disabled={pending || !dirty}
-            className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {pending ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -228,7 +228,7 @@ export function CocktailEditor({
             type="button"
             onClick={toggleArchive}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
           >
             {cocktail.archived ? (
               <>
@@ -283,7 +283,7 @@ export function CocktailEditor({
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 placeholder="Base, amertume, acidité, garniture…"
-                className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </label>
           </Card>
@@ -292,7 +292,7 @@ export function CocktailEditor({
         {/* Ingredients */}
         <Card title="Ingrédients">
           {productOptions.length === 0 && (
-            <div className="rounded-md border border-neutral-800 bg-neutral-900/60 p-3 text-xs text-neutral-400">
+            <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-neutral-400">
               Aucun produit dans le stock.{" "}
               <Link
                 href="/dashboard/stock"
@@ -304,7 +304,7 @@ export function CocktailEditor({
           )}
 
           {items.length === 0 && productOptions.length > 0 ? (
-            <p className="py-3 text-center text-xs text-neutral-500">
+            <p className="py-3 text-center text-xs text-slate-500 dark:text-neutral-500">
               Aucun ingrédient.{" "}
               <button
                 type="button"
@@ -330,7 +330,7 @@ export function CocktailEditor({
                       onChange={(e) =>
                         patchIngredient(i.localId, { product_id: e.target.value })
                       }
-                      className="rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                      className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
                     >
                       <option value="">— Choisir un produit —</option>
                       {Array.from(grouped.entries()).map(([cat, list]) => (
@@ -356,9 +356,9 @@ export function CocktailEditor({
                           qty: Number(e.target.value) || 0,
                         })
                       }
-                      className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                      className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
                     />
-                    <span className="text-[11px] text-neutral-500">
+                    <span className="text-[11px] text-slate-500 dark:text-neutral-500">
                       {contentUnit}
                     </span>
                     <button
@@ -411,7 +411,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
         {title}
       </p>
@@ -440,7 +440,7 @@ function LabeledInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
       />
     </label>
   );

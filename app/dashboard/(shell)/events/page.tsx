@@ -91,10 +91,10 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             Événements
           </h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
             Vue mensuelle — clique sur un événement pour ouvrir sa fiche.
           </p>
         </div>
@@ -106,7 +106,7 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
         <div className="inline-flex items-center gap-2">
           <Link
             href={`/dashboard/events?view=calendar&m=${monthKey(prev)}`}
-            className="rounded-md border border-neutral-800 bg-neutral-900 p-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
             aria-label="Mois précédent"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -119,7 +119,7 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
           </p>
           <Link
             href={`/dashboard/events?view=calendar&m=${monthKey(next)}`}
-            className="rounded-md border border-neutral-800 bg-neutral-900 p-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
             aria-label="Mois suivant"
           >
             <ChevronRight className="h-4 w-4" />
@@ -127,7 +127,7 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
           {!isCurrentMonth && (
             <Link
               href="/dashboard/events?view=calendar"
-              className="ml-1 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-[11px] font-semibold text-neutral-200 transition-colors hover:border-neutral-700"
+              className="ml-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-[11px] font-semibold text-neutral-200 transition-colors hover:border-neutral-700"
             >
               Aujourd&apos;hui
             </Link>
@@ -136,14 +136,14 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {error.message}
         </div>
       )}
 
       <CalendarView monthDate={monthDate} events={events ?? []} />
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-neutral-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-neutral-500">
         <LegendDot cls="bg-sky-500/15 border border-sky-500/30" label="À venir" />
         <LegendDot cls="bg-amber-500/15 border border-amber-500/40" label="En cours" />
         <LegendDot cls="bg-emerald-500/15 border border-emerald-500/30" label="Terminé" />
@@ -285,10 +285,10 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             Événements
           </h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
             Pilotage opérationnel : briefings, staff assigné, stock réservé,
             clôture → mouvements OUT automatiques.
           </p>
@@ -298,7 +298,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
 
       <div className="mb-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
         <ViewSwitcher currentView="list" />
-        <div className="flex flex-wrap gap-1 rounded-xl border border-neutral-800 bg-neutral-950/60 p-1 text-xs">
+        <div className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-1 text-xs">
           <FilterLink currentWhen={whenEffective} value="upcoming" label="À venir" />
           <FilterLink currentWhen={whenEffective} value="past" label="Passés" />
           <FilterLink currentWhen={whenEffective} value="all" label="Tous" />
@@ -331,14 +331,14 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {error.message}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
         {events && events.length > 0 ? (
-          <ul className="divide-y divide-neutral-900">
+          <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
             {events.map((ev) => {
               const client = ev.client_id ? clientsMap.get(ev.client_id) : null;
               const clientName =
@@ -371,7 +371,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                     className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-neutral-900 md:flex-row md:items-center md:gap-4 md:px-5"
                   >
                     <div className="shrink-0">
-                      <div className="inline-flex h-12 w-12 flex-col items-center justify-center rounded-md border border-neutral-800 bg-neutral-900 text-center">
+                      <div className="inline-flex h-12 w-12 flex-col items-center justify-center rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-center">
                         <span className="text-[9px] uppercase text-neutral-500">
                           {new Date(ev.date).toLocaleDateString("fr-FR", {
                             month: "short",
@@ -387,7 +387,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                         {ev.title}
                         <StatusBadge status={ev.status} />
                       </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-neutral-500">
                         <span className="flex items-center gap-1">
                           <CalendarDays className="h-3 w-3" />
                           {formatDateFR(ev.date)}
@@ -425,7 +425,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                         </p>
                         <p
                           className={
-                            cocktailsDue ? "text-amber-300" : "text-neutral-200"
+                            cocktailsDue ? "text-amber-700 dark:text-amber-300" : "text-neutral-200"
                           }
                         >
                           {cocktailCount}
@@ -442,7 +442,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                         </p>
                         <p
                           className={
-                            stockDue ? "text-amber-300" : "text-neutral-200"
+                            stockDue ? "text-amber-700 dark:text-amber-300" : "text-neutral-200"
                           }
                         >
                           {stockCount}
@@ -464,15 +464,15 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                                 margin.marginHt < 0
                                   ? "text-red-300"
                                   : margin.marginPct != null && margin.marginPct < 30
-                                    ? "text-amber-300"
-                                    : "text-emerald-300"
+                                    ? "text-amber-700 dark:text-amber-300"
+                                    : "text-emerald-700 dark:text-emerald-300"
                               }
                             >
                               {margin.marginPct != null
                                 ? `${margin.marginPct.toFixed(0)} %`
                                 : "—"}
                             </p>
-                            <p className="mt-0.5 text-[10px] text-neutral-500">
+                            <p className="mt-0.5 text-[10px] text-slate-500 dark:text-neutral-500">
                               {margin.marginHt >= 0
                                 ? formatEUR(margin.marginHt)
                                 : `−${formatEUR(-margin.marginHt)}`}
@@ -494,7 +494,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
             })}
           </ul>
         ) : (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucun événement{" "}
             {whenEffective === "upcoming"
               ? "à venir"

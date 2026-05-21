@@ -18,15 +18,15 @@ export default async function TeamPage() {
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-white md:text-3xl">Utilisateurs</h1>
-        <p className="mt-1 text-sm text-neutral-400">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">Utilisateurs</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
           Invitez vos collaborateurs et attribuez-leur un rôle. Chaque rôle
           déverrouille un ensemble précis de pages du dashboard.
         </p>
       </header>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {error.message}
         </div>
       )}
@@ -53,7 +53,7 @@ function RolesLegend() {
   return (
     <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
       <h2 className="text-sm font-semibold text-white">Les rôles</h2>
-      <p className="mt-1 text-[11px] text-neutral-500">
+      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
         Périmètre d'accès résumé. Le propriétaire ne peut pas être modifié.
       </p>
       <dl className="mt-4 space-y-3 text-xs">

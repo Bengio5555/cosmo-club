@@ -88,9 +88,9 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
   }
 
   return (
-    <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
       <div className="mb-4 flex items-start gap-3">
-        <div className="rounded-md border border-neutral-800 bg-neutral-900 p-2 text-neutral-300">
+        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2 text-neutral-300">
           <Calendar className="h-4 w-4" />
         </div>
         <div>
@@ -108,7 +108,7 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
       {token && url ? (
         <>
           <label className="block">
-            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Lien d&apos;abonnement
             </span>
             <div className="flex flex-wrap gap-2">
@@ -116,19 +116,19 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
                 readOnly
                 value={url}
                 onFocus={(e) => e.currentTarget.select()}
-                className="min-w-0 flex-1 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 font-mono text-xs text-neutral-200 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 font-mono text-xs text-neutral-200 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={copy}
-                className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
               >
                 <Copy className="h-3 w-3" /> {copied ? "Copié ✓" : "Copier"}
               </button>
             </div>
           </label>
 
-          <details className="mt-4 rounded-md border border-neutral-800 bg-neutral-900/50 px-3 py-2 text-xs">
+          <details className="mt-4 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/50 px-3 py-2 text-xs">
             <summary className="cursor-pointer font-semibold text-neutral-200">
               Comment ajouter à Google Agenda&nbsp;?
             </summary>
@@ -164,7 +164,7 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
               type="button"
               onClick={rotate}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white disabled:opacity-50"
             >
               <RefreshCw className="h-3 w-3" /> Régénérer le lien
             </button>

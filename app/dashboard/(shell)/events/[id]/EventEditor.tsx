@@ -161,10 +161,10 @@ export function EventEditor({
           <p className="text-[11px] uppercase tracking-wide text-neutral-500">
             Événement · {statusLabel(event.status)}
           </p>
-          <h1 className="font-display text-2xl text-white md:text-3xl">
+          <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
             {event.title}
           </h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-500">
             <span className="inline-flex items-center gap-1">
               <CalendarDays className="h-3 w-3" />
               {formatDateFR(event.date)}
@@ -181,7 +181,7 @@ export function EventEditor({
               type="button"
               onClick={save}
               disabled={pending || !dirty}
-              className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -208,7 +208,7 @@ export function EventEditor({
                 type="button"
                 onClick={cancelEvent}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
               >
                 <Ban className="h-3 w-3" /> Annuler
               </button>
@@ -237,7 +237,7 @@ export function EventEditor({
                 type="button"
                 onClick={cancelEvent}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
               >
                 <Ban className="h-3 w-3" /> Annuler
               </button>
@@ -259,7 +259,7 @@ export function EventEditor({
       )}
 
       {readOnly && (
-        <div className="mt-3 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-400">
+        <div className="mt-3 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 px-3 py-2 text-xs text-neutral-400">
           {event.status === "termine"
             ? "Événement clôturé. Les informations sont figées — consulte pour archive."
             : "Événement annulé."}
@@ -306,7 +306,7 @@ export function EventEditor({
               onChange={setLocation}
               readOnly={readOnly}
               placeholder="Adresse ou nom du site"
-              inputClassName="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+              inputClassName="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
             />
           </label>
           <LabeledInput
@@ -329,7 +329,7 @@ export function EventEditor({
               rows={10}
               readOnly={readOnly}
               placeholder="Setup bar, carte cocktails, contraintes lieu, contact staff sur place, coupure courant vers 00h…"
-              className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+              className="w-full resize-y rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
             />
           </label>
         </div>
@@ -439,21 +439,21 @@ function CloseEventDialog({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {reservations.length === 0 ? (
-            <div className="rounded-md border border-neutral-800 bg-neutral-900/40 px-3 py-4 text-center text-xs text-neutral-400">
+            <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/40 px-3 py-4 text-center text-xs text-neutral-400">
               Aucun produit réservé pour cet événement. La clôture
               n&apos;écrira aucun mouvement de stock.
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-[10px] uppercase tracking-wide text-neutral-500">
+                <tr className="text-left text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                   <th className="pb-2 font-medium">Produit</th>
                   <th className="pb-2 text-right font-medium">Sortie</th>
                   <th className="pb-2 text-right font-medium">Retour</th>
                   <th className="pb-2 text-right font-medium">Consommé</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-900">
+              <tbody className="divide-y divide-slate-100 dark:divide-neutral-900">
                 {reservations.map((r) => {
                   const raw = returns[r.product_id] ?? "";
                   const ret = Math.min(
@@ -481,7 +481,7 @@ function CloseEventDialog({
                           }
                           placeholder="0"
                           disabled={pending}
-                          className="w-20 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-right text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                          className="w-20 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
                         />
                       </td>
                       <td className="py-2 text-right text-neutral-200">
@@ -513,7 +513,7 @@ function CloseEventDialog({
             type="button"
             onClick={onCancel}
             disabled={pending}
-            className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700 disabled:opacity-50"
+            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700 disabled:opacity-50"
           >
             Annuler
           </button>
@@ -591,7 +591,7 @@ function LabeledInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
-        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );

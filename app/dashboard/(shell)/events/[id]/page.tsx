@@ -251,7 +251,7 @@ export default async function EventDetailPage({
                 </p>
                 <Link
                   href={`/dashboard/clients/${client.id}`}
-                  className="group inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="group inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
                 >
                   <User className="h-3.5 w-3.5" />
                   {client.company_name ||
@@ -266,7 +266,7 @@ export default async function EventDetailPage({
                   {client.email && (
                     <a
                       href={`mailto:${client.email}`}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 hover:border-neutral-700 hover:text-white"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
                     >
                       <Mail className="h-3 w-3" /> {client.email}
                     </a>
@@ -274,7 +274,7 @@ export default async function EventDetailPage({
                   {client.phone && (
                     <a
                       href={`tel:${client.phone}`}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 hover:border-neutral-700 hover:text-white"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
                     >
                       <Phone className="h-3 w-3" /> {client.phone}
                     </a>
@@ -289,7 +289,7 @@ export default async function EventDetailPage({
                 </p>
                 <Link
                   href={`/dashboard/devis/${quote.id}`}
-                  className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
                 >
                   <FileText className="h-3.5 w-3.5" />
                   {quote.number}

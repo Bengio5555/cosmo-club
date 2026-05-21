@@ -105,7 +105,7 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
                 {client.email && (
                   <a
                     href={`mailto:${client.email}`}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
                   >
                     <Mail className="h-3 w-3" /> {client.email}
                   </a>
@@ -113,7 +113,7 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
                 {client.phone && (
                   <a
                     href={`tel:${client.phone}`}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
                   >
                     <Phone className="h-3 w-3" /> {client.phone}
                   </a>
@@ -129,7 +129,7 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
               </p>
               <Link
                 href={`/dashboard/devis/${invoice.quote_id}`}
-                className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
               >
                 <FileText className="h-3.5 w-3.5" />
                 Voir le devis original

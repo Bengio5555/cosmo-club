@@ -38,7 +38,7 @@ export function InviteForm() {
         <Mail className="h-4 w-4 text-neutral-400" />
         Inviter un collaborateur
       </h2>
-      <p className="mt-1 text-[11px] text-neutral-500">
+      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
         Email + rôle. Une invitation lui sera envoyée immédiatement.
       </p>
 
@@ -53,7 +53,7 @@ export function InviteForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="prenom.nom@exemple.fr"
-            className="mt-1 block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
           />
         </div>
 
@@ -64,7 +64,7 @@ export function InviteForm() {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
-            className="mt-1 block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-neutral-600 focus:outline-none"
+            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
           >
             {ROLES_SELECTABLE.map((r) => (
               <option key={r} value={r}>

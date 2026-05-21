@@ -96,11 +96,11 @@ export function StockSection({
   }
 
   return (
-    <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-white">Stock réservé</h2>
-          <p className="text-[11px] text-neutral-500">
+          <p className="text-[11px] text-slate-500 dark:text-neutral-500">
             {reservations.length} ligne{reservations.length > 1 ? "s" : ""}
             {eventStatus === "termine"
               ? " · déduit du stock à la clôture"
@@ -128,7 +128,7 @@ export function StockSection({
       )}
 
       {productOptions.length === 0 && (
-        <div className="rounded-md border border-neutral-800 bg-neutral-900/60 p-3 text-xs text-neutral-400">
+        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-neutral-400">
           Aucun produit dans le stock.{" "}
           <Link
             href="/dashboard/stock"
@@ -142,7 +142,7 @@ export function StockSection({
       {adding && productOptions.length > 0 && (
         <form
           action={handleAdd}
-          className="mb-3 space-y-2 rounded-md border border-neutral-800 bg-neutral-900/60 p-3"
+          className="mb-3 space-y-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3"
         >
           <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_90px]">
             <Field label="Produit">
@@ -175,7 +175,7 @@ export function StockSection({
             </Field>
           </div>
           {picked && picked.stock_qty === 0 && (
-            <p className="flex items-center gap-1 text-[11px] text-amber-300">
+            <p className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-300">
               <AlertTriangle className="h-3 w-3" /> Stock à 0 — réappro à prévoir.
             </p>
           )}
@@ -186,7 +186,7 @@ export function StockSection({
                 setAdding(false);
                 setPickedProduct("");
               }}
-              className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -203,7 +203,7 @@ export function StockSection({
       )}
 
       {reservations.length === 0 ? (
-        <p className="py-3 text-center text-xs text-neutral-500">
+        <p className="py-3 text-center text-xs text-slate-500 dark:text-neutral-500">
           {productOptions.length > 0 && !adding
             ? "Aucune réservation pour l'instant."
             : ""}
@@ -217,7 +217,7 @@ export function StockSection({
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
                   {CATEGORY_LABEL[cat]}
                 </p>
-                <ul className="divide-y divide-neutral-900 rounded-md border border-neutral-800 bg-neutral-900/40">
+                <ul className="divide-y divide-slate-100 dark:divide-neutral-900 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/40">
                   {grouped.get(cat)!.map((r) => {
                     const product = productsById.get(r.product_id);
                     if (!product) return null;
@@ -235,11 +235,11 @@ export function StockSection({
                           onCommit={(v) => patch(r.product_id, Number(v))}
                           disabled={readOnly || pending}
                         />
-                        <span className="w-10 text-[11px] text-neutral-500">
+                        <span className="w-10 text-[11px] text-slate-500 dark:text-neutral-500">
                           {product.unit}
                         </span>
                         <span
-                          className={`w-24 text-right text-[11px] ${short ? "text-amber-300" : "text-neutral-500"}`}
+                          className={`w-24 text-right text-[11px] ${short ? "text-amber-700 dark:text-amber-300" : "text-neutral-500"}`}
                         >
                           {short && <AlertTriangle className="inline h-3 w-3 mr-1" />}
                           stock {product.stock_qty}
@@ -265,7 +265,7 @@ export function StockSection({
       )}
 
       {eventStatus === "termine" && reservations.length > 0 && (
-        <p className="mt-3 text-[11px] text-neutral-500">
+        <p className="mt-3 text-[11px] text-slate-500 dark:text-neutral-500">
           ✓ Stocks déduits automatiquement à la clôture (mouvements OUT visibles
           dans{" "}
           <Link
@@ -305,13 +305,13 @@ function ReservationQtyField({
         if (e.key === "Enter") (e.target as HTMLInputElement).blur();
       }}
       disabled={disabled}
-      className="w-16 rounded border border-neutral-800 bg-neutral-900 px-2 py-1 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+      className="w-16 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
     />
   );
 }
 
 const inputCls =
-  "w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({
   label,
@@ -322,7 +322,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       {children}

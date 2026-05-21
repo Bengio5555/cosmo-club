@@ -17,8 +17,8 @@ export default async function BlogAdminPage() {
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">Le Mag</h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">Le Mag</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
             Articles éditoriaux publiés sur cosmoclub.fr/blog. Brouillons, planifications et version GMB en un seul endroit.
           </p>
         </div>
@@ -35,7 +35,7 @@ export default async function BlogAdminPage() {
       </header>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {error.message}
         </div>
       )}
@@ -53,7 +53,7 @@ export default async function BlogAdminPage() {
           <tbody className="divide-y divide-neutral-800">
             {(data ?? []).length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-xs text-neutral-500">
+                <td colSpan={4} className="px-4 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
                   Aucun article pour le moment. Crée le premier via "Nouvel article".
                 </td>
               </tr>
@@ -66,7 +66,7 @@ export default async function BlogAdminPage() {
                     className="block hover:text-white"
                   >
                     <div className="font-medium">{a.title}</div>
-                    <div className="mt-0.5 truncate text-[11px] text-neutral-500">
+                    <div className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-neutral-500">
                       /blog/{a.slug}
                     </div>
                   </Link>
@@ -83,7 +83,7 @@ export default async function BlogAdminPage() {
                     year: "numeric",
                   })}
                 </td>
-                <td className="px-4 py-3 hidden lg:table-cell text-xs text-neutral-500">
+                <td className="px-4 py-3 hidden lg:table-cell text-xs text-slate-500 dark:text-neutral-500">
                   {new Date(a.updated_at).toLocaleDateString("fr-FR")}
                 </td>
               </tr>

@@ -17,9 +17,9 @@ import type { EventMargin } from "@/lib/server/eventMargin";
 export function MarginSection({ margin }: { margin: EventMargin | null }) {
   if (!margin || (margin.basis === "none" && margin.revenueNetHt === 0)) {
     return (
-      <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-5">
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
         <h2 className="text-sm font-semibold text-white">Rentabilité</h2>
-        <p className="mt-2 text-xs text-neutral-500">
+        <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
           Pas encore de devis lié ni de réservation stock — la marge se
           calculera dès qu&apos;un devis est rattaché ou qu&apos;une
           réservation est saisie.
@@ -30,17 +30,17 @@ export function MarginSection({ margin }: { margin: EventMargin | null }) {
 
   const positive = margin.marginHt >= 0;
   const Icon = positive ? TrendingUp : TrendingDown;
-  const accent = positive ? "text-emerald-300" : "text-red-300";
+  const accent = positive ? "text-emerald-700 dark:text-emerald-300" : "text-red-300";
   const accentBg = positive
     ? "border-emerald-500/30 bg-emerald-500/5"
     : "border-red-500/30 bg-red-500/5";
 
   return (
-    <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-sm font-semibold text-white">Rentabilité</h2>
-          <p className="mt-0.5 text-[11px] text-neutral-500">
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-neutral-500">
             {margin.basis === "actual"
               ? "Calcul réel — basé sur les mouvements stock OUT et heures effectuées."
               : margin.basis === "projected"
@@ -130,8 +130,8 @@ function Line({
   const valueCls = muted
     ? "text-neutral-500"
     : tone === "cost"
-      ? "text-amber-300/90"
-      : "text-emerald-300";
+      ? "text-amber-700 dark:text-amber-300/90"
+      : "text-emerald-700 dark:text-emerald-300";
   return (
     <li className="flex items-start justify-between gap-3 border-b border-neutral-900 pb-2 last:border-b-0 last:pb-0">
       <div className="flex min-w-0 items-start gap-2">
@@ -139,7 +139,7 @@ function Line({
         <div className="min-w-0">
           <p className="text-neutral-200">{label}</p>
           {hint && (
-            <p className="mt-0.5 text-[11px] text-neutral-500">{hint}</p>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-neutral-500">{hint}</p>
           )}
         </div>
       </div>

@@ -42,7 +42,7 @@ const ACTIVE_TONE: Record<LeadStatus | "all", string> = {
   contacte:
     "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200",
   devis_envoye:
-    "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-200",
+    "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-700 dark:text-violet-200",
   gagne:
     "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-200",
   perdu:
@@ -247,7 +247,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                   <td className="px-3 py-3 md:px-4">
                     <EventTypeLabel value={l.event_type} />
                   </td>
-                  <td className="px-3 py-3 text-xs text-slate-600 dark:text-neutral-300 md:px-4">
+                  <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-600 dark:text-neutral-300 md:px-4">
                     {l.event_date ? (
                       formatDateFR(l.event_date)
                     ) : (

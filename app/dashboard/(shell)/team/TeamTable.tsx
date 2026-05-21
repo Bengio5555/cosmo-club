@@ -36,7 +36,7 @@ export function TeamTable({
         <tbody className="divide-y divide-neutral-800">
           {members.length === 0 && (
             <tr>
-              <td colSpan={4} className="px-4 py-6 text-center text-xs text-neutral-500">
+              <td colSpan={4} className="px-4 py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
                 Aucun utilisateur pour le moment.
               </td>
             </tr>
@@ -98,7 +98,7 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
             </span>
           )}
         </div>
-        {error && <p className="mt-1 text-[10px] text-red-400">{error}</p>}
+        {error && <p className="mt-1 text-[10px] text-red-600 dark:text-red-400">{error}</p>}
       </td>
       <td className="px-4 py-3">
         {locked ? (
@@ -108,7 +108,7 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
             value={role}
             disabled={pending}
             onChange={(e) => onRoleChange(e.target.value as UserRole)}
-            className="rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-xs text-white focus:border-neutral-600 focus:outline-none disabled:opacity-60"
+            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-xs text-white focus:border-neutral-600 focus:outline-none disabled:opacity-60"
           >
             {ROLES_SELECTABLE.map((r) => (
               <option key={r} value={r}>
@@ -118,7 +118,7 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
           </select>
         )}
       </td>
-      <td className="px-4 py-3 hidden md:table-cell text-xs text-neutral-500">
+      <td className="px-4 py-3 hidden md:table-cell text-xs text-slate-500 dark:text-neutral-500">
         {new Date(member.created_at).toLocaleDateString("fr-FR", {
           day: "numeric",
           month: "short",

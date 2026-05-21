@@ -65,15 +65,15 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
         <div>
           <div className="mb-2 flex items-center gap-3">
             <StatusBadge status={lead.status} />
-            <span className="text-[11px] text-neutral-500">
+            <span className="text-[11px] text-slate-500 dark:text-neutral-500">
               Reçu {formatDateFR(lead.created_at, { withTime: true })}
             </span>
           </div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             {lead.contact_name || <span className="text-neutral-500">Sans nom</span>}
           </h1>
           {lead.company && (
-            <p className="mt-1 text-sm text-neutral-400">{lead.company}</p>
+            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{lead.company}</p>
           )}
         </div>
       </header>
@@ -83,31 +83,31 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
         <section className="space-y-4">
           <Card title="Demande">
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              <dt className="text-xs text-neutral-500">Type</dt>
+              <dt className="text-xs text-slate-500 dark:text-neutral-500">Type</dt>
               <dd className="text-right">
                 <EventTypeLabel value={lead.event_type} />
               </dd>
 
-              <dt className="text-xs text-neutral-500">Date événement</dt>
+              <dt className="text-xs text-slate-500 dark:text-neutral-500">Date événement</dt>
               <dd className="text-right text-neutral-200">
                 {lead.event_date
                   ? formatDateFR(lead.event_date)
                   : rawDate(lead.raw_payload) ?? "—"}
               </dd>
 
-              <dt className="text-xs text-neutral-500">Lieu</dt>
+              <dt className="text-xs text-slate-500 dark:text-neutral-500">Lieu</dt>
               <dd className="text-right text-neutral-200">
                 {rawLocation(lead.raw_payload) ?? "—"}
               </dd>
 
-              <dt className="text-xs text-neutral-500">Invités</dt>
+              <dt className="text-xs text-slate-500 dark:text-neutral-500">Invités</dt>
               <dd className="text-right text-neutral-200">
                 {lead.guests_count ?? "—"}
               </dd>
 
               {lead.budget_estimate != null && (
                 <>
-                  <dt className="text-xs text-neutral-500">Budget estimé</dt>
+                  <dt className="text-xs text-slate-500 dark:text-neutral-500">Budget estimé</dt>
                   <dd className="text-right text-neutral-200">
                     {lead.budget_estimate} €
                   </dd>
@@ -117,10 +117,10 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
 
             {lead.message && (
               <div className="mt-4 border-t border-neutral-900 pt-4">
-                <p className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
+                <p className="mb-1 text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                   Message
                 </p>
-                <p className="whitespace-pre-wrap text-sm text-neutral-200">
+                <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-neutral-200">
                   {lead.message}
                 </p>
               </div>
@@ -203,7 +203,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
         {title}
       </p>
@@ -224,7 +224,7 @@ function Row({
   return (
     <div className="flex items-center gap-3">
       <Icon className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
-      <span className="w-24 text-xs text-neutral-500">{label}</span>
+      <span className="w-24 text-xs text-slate-500 dark:text-neutral-500">{label}</span>
       <span className="flex-1">{children}</span>
     </div>
   );

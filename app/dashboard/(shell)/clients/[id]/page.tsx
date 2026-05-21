@@ -133,7 +133,7 @@ export default async function ClientDetailPage({
               {client.company_name && " · B2B"}
               {client.archived && " · archivé"}
             </p>
-            <h1 className="font-display text-2xl text-white md:text-3xl">
+            <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
               {displayName}
               {client.archived && (
                 <span className="ml-3 align-middle rounded-full border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
@@ -143,7 +143,7 @@ export default async function ClientDetailPage({
             </h1>
             {client.company_name &&
               (client.first_name || client.last_name) && (
-                <p className="mt-1 text-sm text-neutral-400">
+                <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
                   Contact :{" "}
                   {[client.first_name, client.last_name]
                     .filter(Boolean)
@@ -154,7 +154,7 @@ export default async function ClientDetailPage({
               {client.email && (
                 <a
                   href={`mailto:${client.email}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
                 >
                   <Mail className="h-3 w-3" /> {client.email}
                 </a>
@@ -162,13 +162,13 @@ export default async function ClientDetailPage({
               {client.phone && (
                 <a
                   href={`tel:${client.phone}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
                 >
                   <Phone className="h-3 w-3" /> {client.phone}
                 </a>
               )}
               {client.city && (
-                <span className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-400">
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-400">
                   <MapPin className="h-3 w-3" /> {client.city}
                 </span>
               )}
@@ -213,7 +213,7 @@ export default async function ClientDetailPage({
 
         <div className="space-y-5">
           {/* Devis */}
-          <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+          <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
                 <FileText className="h-3.5 w-3.5 text-neutral-500" />
@@ -226,16 +226,16 @@ export default async function ClientDetailPage({
               </h2>
             </div>
             {quotes && quotes.length > 0 ? (
-              <ul className="divide-y divide-neutral-900 text-sm">
+              <ul className="divide-y divide-slate-100 dark:divide-neutral-900 text-sm">
                 {quotes.map((q) => (
                   <li key={q.id} className="flex items-center gap-3 py-2.5">
                     <Link
                       href={`/dashboard/devis/${q.id}`}
-                      className="font-medium text-neutral-100 transition-colors hover:text-white"
+                      className="font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-white"
                     >
                       {q.number}
                     </Link>
-                    <div className="min-w-0 flex-1 text-xs text-neutral-500">
+                    <div className="min-w-0 flex-1 text-xs text-slate-500 dark:text-neutral-500">
                       {formatDateFR(q.issue_date)}
                       {q.event_date && ` · événement ${formatDateFR(q.event_date)}`}
                     </div>
@@ -247,14 +247,14 @@ export default async function ClientDetailPage({
                 ))}
               </ul>
             ) : (
-              <p className="py-3 text-center text-xs text-neutral-500">
+              <p className="py-3 text-center text-xs text-slate-500 dark:text-neutral-500">
                 Aucun devis pour l&apos;instant.
               </p>
             )}
           </section>
 
           {/* Factures */}
-          <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+          <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
                 <Receipt className="h-3.5 w-3.5 text-neutral-500" />
@@ -265,7 +265,7 @@ export default async function ClientDetailPage({
               </h2>
             </div>
             {invoices && invoices.length > 0 ? (
-              <ul className="divide-y divide-neutral-900 text-sm">
+              <ul className="divide-y divide-slate-100 dark:divide-neutral-900 text-sm">
                 {invoices.map((inv) => {
                   const paid = paidByInvoice.get(inv.id) ?? 0;
                   const remaining = inv.is_credit_note
@@ -275,16 +275,16 @@ export default async function ClientDetailPage({
                     <li key={inv.id} className="flex items-center gap-3 py-2.5">
                       <Link
                         href={`/dashboard/factures/${inv.id}`}
-                        className="inline-flex items-center gap-1.5 font-medium text-neutral-100 transition-colors hover:text-white"
+                        className="inline-flex items-center gap-1.5 font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-white"
                       >
                         {inv.number}
                         {inv.is_credit_note && (
-                          <span className="rounded-full border border-violet-500/40 bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-200">
+                          <span className="rounded-full border border-violet-500/40 bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-200">
                             Avoir
                           </span>
                         )}
                       </Link>
-                      <div className="min-w-0 flex-1 text-xs text-neutral-500">
+                      <div className="min-w-0 flex-1 text-xs text-slate-500 dark:text-neutral-500">
                         {formatDateFR(inv.issue_date)}
                         {!inv.is_credit_note && remaining > 0 && (
                           <span className="ml-2 text-amber-400">
@@ -300,7 +300,7 @@ export default async function ClientDetailPage({
                       </div>
                       <StatusBadge status={inv.status} />
                       <span
-                        className={`w-24 text-right font-medium ${inv.is_credit_note ? "text-violet-200" : "text-neutral-200"}`}
+                        className={`w-24 text-right font-medium ${inv.is_credit_note ? "text-violet-700 dark:text-violet-200" : "text-neutral-200"}`}
                       >
                         {formatEUR(inv.total_ttc)}
                       </span>
@@ -309,7 +309,7 @@ export default async function ClientDetailPage({
                 })}
               </ul>
             ) : (
-              <p className="py-3 text-center text-xs text-neutral-500">
+              <p className="py-3 text-center text-xs text-slate-500 dark:text-neutral-500">
                 Aucune facture émise.
               </p>
             )}
@@ -317,7 +317,7 @@ export default async function ClientDetailPage({
 
           {/* Paiements */}
           {paymentsForClient.length > 0 && (
-            <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
                 <CalendarDays className="h-3.5 w-3.5 text-neutral-500" />
                 Encaissements
@@ -325,17 +325,17 @@ export default async function ClientDetailPage({
                   · {paymentsForClient.length}
                 </span>
               </h2>
-              <ul className="divide-y divide-neutral-900 text-sm">
+              <ul className="divide-y divide-slate-100 dark:divide-neutral-900 text-sm">
                 {paymentsForClient.map((p) => {
                   const inv = (invoices ?? []).find(
                     (i) => i.id === p.invoice_id,
                   );
                   return (
                     <li key={p.id} className="flex items-center gap-3 py-2">
-                      <span className="font-medium text-emerald-300">
+                      <span className="font-medium text-emerald-700 dark:text-emerald-300">
                         {formatEUR(Number(p.amount))}
                       </span>
-                      <div className="min-w-0 flex-1 text-xs text-neutral-500">
+                      <div className="min-w-0 flex-1 text-xs text-slate-500 dark:text-neutral-500">
                         {formatDateFR(p.paid_on)}
                         {p.method && ` · ${p.method}`}
                         {p.reference && ` · réf. ${p.reference}`}
@@ -357,7 +357,7 @@ export default async function ClientDetailPage({
 
           {/* Leads (historique demande initiale) */}
           {leads && leads.length > 0 && (
-            <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
                 <Inbox className="h-3.5 w-3.5 text-neutral-500" />
                 Demandes initiales
@@ -365,7 +365,7 @@ export default async function ClientDetailPage({
                   · {leads.length}
                 </span>
               </h2>
-              <ul className="divide-y divide-neutral-900 text-sm">
+              <ul className="divide-y divide-slate-100 dark:divide-neutral-900 text-sm">
                 {leads.map((l) => (
                   <li key={l.id} className="flex items-center gap-3 py-2">
                     <Link
@@ -374,7 +374,7 @@ export default async function ClientDetailPage({
                     >
                       {formatDateFR(l.created_at)}
                     </Link>
-                    <div className="min-w-0 flex-1 text-xs text-neutral-500">
+                    <div className="min-w-0 flex-1 text-xs text-slate-500 dark:text-neutral-500">
                       {l.event_type && <span>{l.event_type}</span>}
                       {l.event_date && ` · ${formatDateFR(l.event_date)}`}
                       {l.guests_count && ` · ${l.guests_count} pers.`}
@@ -402,13 +402,13 @@ function StatCard({
 }) {
   const toneCls =
     tone === "ok"
-      ? "text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-300"
+      ? "text-amber-700 dark:text-amber-300"
       : "text-neutral-100";
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3">
-      <p className="text-[10px] uppercase tracking-wide text-neutral-500">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-3">
+      <p className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </p>
       <p className={`mt-1 text-lg font-semibold ${toneCls}`}>{value}</p>

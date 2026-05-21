@@ -45,7 +45,7 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
 
   if (tiles.length === 0) {
     return (
-      <p className="rounded-md border border-neutral-800 bg-neutral-950/60 p-6 text-sm text-neutral-400">
+      <p className="rounded-md border border-neutral-800 bg-neutral-950/60 p-6 text-sm text-slate-600 dark:text-neutral-400">
         Aucune photo dans la page « evenements ». Va d&apos;abord en
         ajouter dans{" "}
         <a href="/admin" className="underline hover:text-white">
@@ -151,7 +151,7 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
                   className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors disabled:opacity-50 ${
                     tile.selected
                       ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/15 text-[color:var(--color-grenat-glow)]"
-                      : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700 hover:text-white"
+                      : "border-neutral-800 bg-neutral-900 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
                   }`}
                 >
                   <Star

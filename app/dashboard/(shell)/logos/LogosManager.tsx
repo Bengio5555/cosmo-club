@@ -80,7 +80,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
       {/* Upload form */}
       <form
         onSubmit={submit}
-        className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-950/60 p-5"
+        className="space-y-4 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5"
       >
         <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
           Ajouter un logo
@@ -95,7 +95,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="ex. Chanel"
-            className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
           />
         </label>
 
@@ -110,7 +110,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             className="block w-full text-xs text-neutral-300 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-neutral-100 hover:file:bg-neutral-700"
           />
-          <span className="mt-1 block text-[10px] text-neutral-500">
+          <span className="mt-1 block text-[10px] text-slate-500 dark:text-neutral-500">
             PNG ou SVG transparent recommandé. 2 Mo max.
           </span>
         </label>
@@ -142,7 +142,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
       </form>
 
       {/* Existing logos */}
-      <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-5">
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
         <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
           Logos actuels ({logos.length})
         </p>
@@ -197,7 +197,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
                       onClick={() => remove(logo.id, logo.name)}
                       disabled={pending}
                       aria-label="Supprimer"
-                      className="rounded p-1 text-red-400 hover:text-red-300 disabled:opacity-30"
+                      className="rounded p-1 text-red-600 dark:text-red-400 hover:text-red-300 disabled:opacity-30"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

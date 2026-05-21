@@ -145,10 +145,10 @@ export function ArticleEditor({ initial }: Props) {
     <form onSubmit={onSubmit} className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             {isNew ? "Nouvel article" : "Édition"}
           </h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
             {isNew
               ? "Composez le brouillon, choisissez sa date, publiez quand vous voulez."
               : `Statut actuel : ${STATUS_LABEL[status]}.`}
@@ -178,7 +178,7 @@ export function ArticleEditor({ initial }: Props) {
       </header>
 
       {serverError && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {serverError}
         </div>
       )}
@@ -193,7 +193,7 @@ export function ArticleEditor({ initial }: Props) {
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder="Le titre éditorial de l'article"
-              className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-base font-medium text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-base font-medium text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
             />
           </Field>
 
@@ -204,7 +204,7 @@ export function ArticleEditor({ initial }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Phrase courte qui décrit l'article. Sert de méta description et de chapeau sur la liste."
-              className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
             />
           </Field>
 
@@ -252,7 +252,7 @@ export function ArticleEditor({ initial }: Props) {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as ArticleStatus)}
-                  className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>
@@ -260,7 +260,7 @@ export function ArticleEditor({ initial }: Props) {
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-[11px] text-neutral-500">
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
                   <span className={`mr-1 inline-flex rounded-full px-2 py-0.5 text-[10px] ${STATUS_TONE[status]}`}>
                     {STATUS_LABEL[status]}
                   </span>
@@ -275,7 +275,7 @@ export function ArticleEditor({ initial }: Props) {
                   type="datetime-local"
                   value={publishAt}
                   onChange={(e) => setPublishAt(e.target.value)}
-                  className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
             </div>
@@ -283,7 +283,7 @@ export function ArticleEditor({ initial }: Props) {
 
           <section className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
             <h2 className="text-sm font-semibold text-white">Image de couverture</h2>
-            <p className="mt-1 text-[11px] text-neutral-500">
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
               4:3 idéal, 5 Mo max. PNG/JPG/WEBP.
             </p>
             <div className="mt-3 space-y-3">
@@ -314,7 +314,7 @@ export function ArticleEditor({ initial }: Props) {
                 value={coverUrl}
                 onChange={(e) => setCoverUrl(e.target.value)}
                 placeholder="/brand/ai/... ou URL https"
-                className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
               />
             </div>
           </section>
@@ -339,9 +339,9 @@ export function ArticleEditor({ initial }: Props) {
                     setSlugTouched(true);
                   }}
                   placeholder="cocktails-signature-mai-carnet-saison"
-                  className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
                 />
-                <p className="mt-1 text-[11px] text-neutral-500">
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
                   /blog/{slug || "votre-slug"}
                 </p>
               </Field>
@@ -352,7 +352,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={readingTime}
                   onChange={(e) => setReadingTime(e.target.value)}
                   placeholder="6 min"
-                  className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
 
@@ -362,7 +362,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
                   placeholder="cocktail mariage Paris, mixologie événementiel"
-                  className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
 
@@ -372,7 +372,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder="Mariage, Guide"
-                  className="block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
                 />
               </Field>
             </div>

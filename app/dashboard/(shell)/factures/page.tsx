@@ -221,13 +221,13 @@ export default async function InvoicesListPage({
                       >
                         {inv.number}
                         {inv.is_credit_note && (
-                          <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-200">
+                          <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-700 dark:text-violet-200">
                             Avoir
                           </span>
                         )}
                       </Link>
                     </td>
-                    <td className="px-3 py-3 text-slate-700 dark:text-neutral-200 md:px-4">{who}</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-700 dark:text-neutral-200 md:px-4">{who}</td>
                     <td className="hidden px-3 py-3 text-xs text-slate-500 dark:text-neutral-400 md:table-cell md:px-4">
                       {formatDateFR(inv.issue_date)}
                     </td>
@@ -235,7 +235,7 @@ export default async function InvoicesListPage({
                       {inv.due_date ? (
                         <span className={overdue ? "text-red-600 dark:text-red-300" : "text-slate-500 dark:text-neutral-400"}>
                           {formatDateFR(inv.due_date)}
-                          {overdue && <span className="ml-1 text-red-600 dark:text-red-400">(en retard)</span>}
+                          {overdue && <span className="ml-1 text-red-600 dark:text-red-600 dark:text-red-400">(en retard)</span>}
                         </span>
                       ) : (
                         <span className="text-slate-400 dark:text-neutral-500">—</span>
@@ -249,7 +249,7 @@ export default async function InvoicesListPage({
                     <td
                       className={`px-3 py-3 text-right font-medium md:px-4 ${
                         inv.is_credit_note
-                          ? "text-violet-700 dark:text-violet-200"
+                          ? "text-violet-700 dark:text-violet-700 dark:text-violet-200"
                           : "text-slate-900 dark:text-neutral-200"
                       }`}
                     >
@@ -259,13 +259,13 @@ export default async function InvoicesListPage({
                       {inv.is_credit_note ? (
                         <span className="text-xs text-slate-400 dark:text-neutral-600">—</span>
                       ) : remaining <= 0 ? (
-                        <span className="text-xs text-emerald-700 dark:text-emerald-300">Soldé</span>
+                        <span className="text-xs text-emerald-700 dark:text-emerald-700 dark:text-emerald-300">Soldé</span>
                       ) : (
                         <span
                           className={`text-xs font-medium ${
                             overdue
                               ? "text-red-600 dark:text-red-300"
-                              : "text-amber-700 dark:text-amber-300"
+                              : "text-amber-700 dark:text-amber-700 dark:text-amber-300"
                           }`}
                         >
                           {formatEUR(remaining)}
@@ -306,9 +306,9 @@ function Stat({
 }) {
   const toneCls =
     tone === "ok"
-      ? "text-emerald-700 dark:text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-700 dark:text-amber-300"
+      ? "text-amber-700 dark:text-amber-700 dark:text-amber-300"
       : "text-slate-900 dark:text-neutral-100";
   return (
     <div>

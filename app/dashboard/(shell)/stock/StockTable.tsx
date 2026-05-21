@@ -225,7 +225,7 @@ export function StockTable({
   return (
     <>
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-neutral-500">
           <span>
             {products.filter((p) => !p.archived).length} produit
             {products.filter((p) => !p.archived).length > 1 ? "s" : ""}
@@ -235,7 +235,7 @@ export function StockTable({
               <AlertTriangle className="h-3 w-3" /> {lowStockCount} sous seuil
             </span>
           )}
-          <span className="rounded-full border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-[10px] text-neutral-300">
+          <span className="rounded-full border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-0.5 text-[10px] text-neutral-300">
             Valorisation HT&nbsp;: <strong className="text-neutral-100">{formatEUR(totalValueHt)}</strong>
           </span>
         </div>
@@ -247,7 +247,7 @@ export function StockTable({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un produit…"
-              className="w-full rounded-md border border-neutral-800 bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
+              className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
             />
           </div>
           <button
@@ -278,7 +278,7 @@ export function StockTable({
         {CATEGORIES.filter((c) => grouped.has(c.value)).map((c) => (
           <div
             key={c.value}
-            className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60"
+            className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none"
           >
             <div className="border-b border-neutral-800 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
               {c.label}
@@ -291,22 +291,22 @@ export function StockTable({
                   return (
                     <tr
                       key={p.id}
-                      className="border-t border-neutral-900 transition-colors hover:bg-neutral-900"
+                      className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900"
                     >
                       <td className="px-3 py-3 md:px-4">
                         <p className="font-medium text-white">{p.name}</p>
                         {p.supplier && (
-                          <p className="text-[11px] text-neutral-500">
+                          <p className="text-[11px] text-slate-500 dark:text-neutral-500">
                             {p.supplier}
                           </p>
                         )}
                       </td>
-                      <td className="px-3 py-3 text-xs text-neutral-400 md:px-4">
+                      <td className="px-3 py-3 text-xs text-slate-500 dark:text-neutral-400 md:px-4">
                         {p.unit}
                       </td>
                       <td className="px-3 py-3 text-right md:px-4">
                         <span
-                          className={`font-medium ${low ? "text-amber-300" : "text-neutral-200"}`}
+                          className={`font-medium ${low ? "text-amber-700 dark:text-amber-300" : "text-neutral-200"}`}
                         >
                           {Number(p.stock_qty)}
                         </span>
@@ -341,7 +341,7 @@ export function StockTable({
                             }
                             disabled={pending}
                             title="Sortie stock"
-                            className="rounded p-1.5 text-red-400 transition-colors hover:bg-red-500/10"
+                            className="rounded p-1.5 text-red-600 dark:text-red-400 transition-colors hover:bg-red-500/10"
                           >
                             <ArrowDownCircle className="h-3.5 w-3.5" />
                           </button>
@@ -374,22 +374,22 @@ export function StockTable({
         ))}
 
         {products.length === 0 && (
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center text-sm text-neutral-500">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucun produit pour l&apos;instant. Clique « Ajouter » pour commencer.
           </div>
         )}
         {products.length > 0 && grouped.size === 0 && archived.length === 0 && (
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center text-sm text-neutral-500">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucun produit ne correspond à « {search} ».
           </div>
         )}
 
         {archived.length > 0 && (
-          <details className="rounded-xl border border-neutral-800 bg-neutral-950/60">
+          <details className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
             <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 hover:text-neutral-300">
               Archivés · {archived.length}
             </summary>
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {archived.map((p) => (
                 <li
                   key={p.id}
@@ -412,11 +412,11 @@ export function StockTable({
 
         {/* Movement log */}
         {movements.length > 0 && (
-          <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+          <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
               Historique des mouvements · 50 dernières
             </p>
-            <ul className="divide-y divide-neutral-900 text-sm">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900 text-sm">
               {movements.map((m) => {
                 const product = productsById.get(m.product_id);
                 return (
@@ -424,18 +424,18 @@ export function StockTable({
                     {m.direction === "in" ? (
                       <ArrowUpCircle className="h-3.5 w-3.5 text-emerald-400" />
                     ) : (
-                      <ArrowDownCircle className="h-3.5 w-3.5 text-red-400" />
+                      <ArrowDownCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
                     )}
                     <span className="font-medium text-neutral-200">
                       {product?.name ?? "—"}
                     </span>
                     <span
-                      className={`font-medium ${m.direction === "in" ? "text-emerald-300" : "text-red-300"}`}
+                      className={`font-medium ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-300" : "text-red-300"}`}
                     >
                       {m.direction === "in" ? "+" : "−"}
                       {Number(m.qty)}
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-xs text-neutral-500">
+                    <span className="min-w-0 flex-1 truncate text-xs text-slate-500 dark:text-neutral-500">
                       {m.reason || (m.event_id ? "clôture événement" : "—")}
                     </span>
                     <span className="text-[11px] text-neutral-600">
@@ -660,7 +660,7 @@ function ProductModal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -703,7 +703,7 @@ function AdjustModal({
             <h2 className="mt-1 font-display text-lg text-white">
               {product.name}
             </h2>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
               Stock actuel : {product.stock_qty} {product.unit}
             </p>
           </div>
@@ -746,7 +746,7 @@ function AdjustModal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -770,7 +770,7 @@ function AdjustModal({
 }
 
 const inputCls =
-  "w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function csvEscape(s: string): string {
   // CSV cells containing ; " or \n need quoting; embedded quotes get doubled.
@@ -793,7 +793,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       {children}

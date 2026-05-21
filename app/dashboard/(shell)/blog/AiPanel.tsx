@@ -41,7 +41,7 @@ export function AiPanel({
           <Sparkles className="h-4 w-4 text-amber-400" />
           Génération IA
         </h2>
-        <p className="mt-2 text-[11px] text-neutral-500">
+        <p className="mt-2 text-[11px] text-slate-500 dark:text-neutral-500">
           Enregistre une première fois l'article pour activer la génération IA (cover, version GMB, cover GMB carrée).
         </p>
       </section>
@@ -89,7 +89,7 @@ export function AiPanel({
         <Sparkles className="h-4 w-4 text-amber-400" />
         Génération IA
       </h2>
-      <p className="mt-1 text-[11px] text-neutral-500">
+      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
         Cover éditoriale, version courte pour Google Business, cover carrée GMB. Voix Le Mag, DNA visuelle Cosmo Club.
       </p>
 
@@ -117,7 +117,7 @@ export function AiPanel({
             {busyId === "cover" ? "Génération…" : "Générer"}
           </button>
         </div>
-        <p className="text-[10px] text-neutral-500">
+        <p className="text-[10px] text-slate-500 dark:text-neutral-500">
           4:3 dans la palette grenat / cream / or / noir. Remplace la cover actuelle.
         </p>
       </div>
@@ -145,9 +145,9 @@ export function AiPanel({
           onChange={(e) => setGmbPost(e.target.value)}
           rows={8}
           placeholder="Le post optimisé pour Google Business apparaîtra ici. Tu peux l'éditer avant de copier."
-          className="block w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-[12px] leading-relaxed text-neutral-100 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+          className="block w-full resize-y rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-[12px] leading-relaxed text-neutral-100 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
         />
-        <div className="flex items-center justify-between text-[10px] text-neutral-500">
+        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-500">
           <span>{gmbPost.length} / 1500 caractères (limite GBP)</span>
           <button
             type="button"
@@ -208,7 +208,7 @@ export function AiPanel({
             </a>
           </>
         )}
-        <p className="text-[10px] text-neutral-500">
+        <p className="text-[10px] text-slate-500 dark:text-neutral-500">
           Carrée, même DNA visuelle. À uploader dans le post Google Business avec le texte.
         </p>
       </div>

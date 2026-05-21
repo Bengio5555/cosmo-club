@@ -57,14 +57,14 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
   return (
     <div className="sticky top-16 space-y-4">
       {/* Status */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4">
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
           Statut
         </p>
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as Lead["status"])}
-          className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-[color:var(--color-grenat)] focus:outline-none"
         >
           {STATUS_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -75,7 +75,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
       </div>
 
       {/* Internal notes */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4">
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
           Notes internes
         </p>
@@ -84,7 +84,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
           onChange={(e) => setNotes(e.target.value)}
           rows={5}
           placeholder="Détails, points à vérifier, pricing indicatif…"
-          className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+          className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
         />
       </div>
 

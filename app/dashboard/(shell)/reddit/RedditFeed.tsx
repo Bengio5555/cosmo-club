@@ -85,7 +85,7 @@ export function RedditFeed({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex gap-1 rounded-lg border border-neutral-800 bg-neutral-900 p-1">
+        <div className="flex gap-1 rounded-lg border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1">
           {tabs.map((t) => {
             const active = t.value === activeFilter;
             return (
@@ -137,7 +137,7 @@ function EmptyState({ filter }: { filter: Filter }) {
   return (
     <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-950/60 p-10 text-center">
       <Inbox className="mx-auto h-8 w-8 text-neutral-600" />
-      <p className="mt-3 text-sm text-neutral-400">
+      <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">
         {filter === "pending"
           ? "Aucun thread à traiter pour l'instant. Lance « Rafraîchir Reddit » pour scanner les nouveaux posts."
           : filter === "answered"
@@ -242,7 +242,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
             <ExternalLink className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
           </a>
           {thread.author && (
-            <p className="mt-1 text-xs text-neutral-500">par u/{thread.author}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">par u/{thread.author}</p>
           )}
         </div>
       </div>
@@ -252,7 +252,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
         <div className="mt-3">
           <button
             onClick={() => setShowBody((s) => !s)}
-            className="inline-flex items-center gap-1.5 text-[11px] text-neutral-500 hover:text-neutral-300"
+            className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-neutral-500 hover:text-neutral-300"
           >
             <Eye className="h-3 w-3" />
             {showBody ? "Masquer le post" : "Voir le post"}
@@ -266,7 +266,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
       )}
 
       {/* Draft area */}
-      <div className="mt-4 rounded-md border border-neutral-800 bg-neutral-900/60">
+      <div className="mt-4 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60">
         <div className="flex items-center justify-between border-b border-neutral-800 px-3 py-1.5 text-[10px] uppercase tracking-wider text-neutral-500">
           <span>Brouillon Claude (éditable avant copie)</span>
           <button
@@ -298,7 +298,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
           <button
             onClick={onCopy}
             disabled={!draft}
-            className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3 py-1.5 text-xs font-medium text-slate-900 transition-colors dark:text-white hover:bg-[color:var(--color-grenat-glow)] disabled:opacity-50"
           >
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? "Copié" : "Copier"}
@@ -348,7 +348,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
       </div>
 
       {savingDraft && (
-        <p className="mt-2 text-[10px] text-neutral-500">Sauvegarde…</p>
+        <p className="mt-2 text-[10px] text-slate-500 dark:text-neutral-500">Sauvegarde…</p>
       )}
     </li>
   );

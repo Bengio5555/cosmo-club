@@ -74,7 +74,7 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
               {client.email && (
                 <a
                   href={`mailto:${client.email}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
                 >
                   <Mail className="h-3 w-3" /> {client.email}
                 </a>
@@ -82,14 +82,14 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
               {client.phone && (
                 <a
                   href={`tel:${client.phone}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
                 >
                   <Phone className="h-3 w-3" /> {client.phone}
                 </a>
               )}
               <Link
                 href={`/dashboard/clients/${client.id}`}
-                className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
               >
                 Fiche <ExternalLink className="h-3 w-3" />
               </Link>

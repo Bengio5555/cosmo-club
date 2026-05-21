@@ -26,10 +26,10 @@ export default async function HomeGalleryPage() {
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6 max-w-2xl">
-        <h1 className="text-2xl font-semibold text-white md:text-3xl">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
           Galerie home
         </h1>
-        <p className="mt-1 text-sm text-neutral-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
           Choisis jusqu&apos;à 8 photos affichées dans la galerie « Des
           nuits inoubliables » sur la page d&apos;accueil. Les autres
           restent visibles sur{" "}
@@ -43,7 +43,7 @@ export default async function HomeGalleryPage() {
           </a>
           .
         </p>
-        <p className="mt-2 text-xs text-neutral-500">
+        <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
           {selected.size} / 8 sélectionnées · {tiles.length} disponibles
         </p>
       </header>

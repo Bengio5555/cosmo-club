@@ -116,11 +116,11 @@ export function StaffSection({
   }, 0);
 
   return (
-    <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-white">Équipe</h2>
-          <p className="text-[11px] text-neutral-500">
+          <p className="text-[11px] text-slate-500 dark:text-neutral-500">
             {assignments.length} assigné{assignments.length > 1 ? "s" : ""}
             {totalHoursPlanned > 0 && ` · ${totalHoursPlanned}h prévues`}
             {totalCost > 0 && ` · ${totalCost.toFixed(2)} € paie estimée`}
@@ -145,7 +145,7 @@ export function StaffSection({
       )}
 
       {staffOptions.length === 0 && (
-        <div className="rounded-md border border-neutral-800 bg-neutral-900/60 p-3 text-xs text-neutral-400">
+        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-neutral-400">
           Aucun membre d&apos;équipe dans la base.{" "}
           <Link
             href="/dashboard/staff"
@@ -159,7 +159,7 @@ export function StaffSection({
       {adding && staffOptions.length > 0 && (
         <form
           action={handleAssign}
-          className="mb-3 space-y-2 rounded-md border border-neutral-800 bg-neutral-900/60 p-3"
+          className="mb-3 space-y-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3"
         >
           <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_80px_100px]">
             <Field label="Membre">
@@ -202,7 +202,7 @@ export function StaffSection({
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -219,13 +219,13 @@ export function StaffSection({
       )}
 
       {assignments.length === 0 ? (
-        <p className="py-3 text-center text-xs text-neutral-500">
+        <p className="py-3 text-center text-xs text-slate-500 dark:text-neutral-500">
           {staffOptions.length > 0 && !adding
             ? "Aucun membre assigné pour l'instant."
             : ""}
         </p>
       ) : (
-        <ul className="divide-y divide-neutral-900">
+        <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
           {assignments.map((a) => {
             const staff = staffById.get(a.staff_id);
             const rate = a.rate_override ?? Number(staff?.hourly_rate ?? 0);
@@ -241,12 +241,12 @@ export function StaffSection({
                     <p className="text-sm font-medium text-white">
                       {staff?.full_name ?? "—"}
                       {staff?.role && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wide text-neutral-500">
+                        <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                           {ROLE_LABEL[staff.role]}
                         </span>
                       )}
                     </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-neutral-500">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
                       <span>{a.hours_planned}h prévues</span>
                       {allowHoursDone && (
                         <>
@@ -272,14 +272,14 @@ export function StaffSection({
                       {cost > 0 && (
                         <>
                           <span>·</span>
-                          <span className="text-emerald-300">
+                          <span className="text-emerald-700 dark:text-emerald-300">
                             {cost.toFixed(2)} € paie
                           </span>
                         </>
                       )}
                     </div>
                     {a.notes && (
-                      <p className="mt-1 text-[11px] text-neutral-500 line-clamp-2">
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500 line-clamp-2">
                         {a.notes}
                       </p>
                     )}
@@ -338,13 +338,13 @@ function AssignmentField({
       }}
       placeholder={label}
       disabled={disabled}
-      className="w-16 rounded border border-neutral-800 bg-neutral-900 px-1.5 py-0.5 text-[11px] text-neutral-200 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+      className="w-16 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5 text-[11px] text-neutral-200 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
     />
   );
 }
 
 const inputCls =
-  "w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({
   label,
@@ -355,7 +355,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       {children}

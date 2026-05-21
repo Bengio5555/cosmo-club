@@ -53,9 +53,9 @@ export function CalendarView({
   const weekdays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
       {/* Header row */}
-      <div className="grid grid-cols-7 border-b border-neutral-900 bg-neutral-950/80 text-[10px] uppercase tracking-wide text-neutral-500">
+      <div className="grid grid-cols-7 border-b border-neutral-900 bg-neutral-950/80 text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {weekdays.map((w) => (
           <div
             key={w}
@@ -120,7 +120,7 @@ export function CalendarView({
                   </li>
                 ))}
                 {hidden > 0 && (
-                  <li className="px-1.5 text-[10px] text-neutral-500">
+                  <li className="px-1.5 text-[10px] text-slate-500 dark:text-neutral-500">
                     +{hidden} autre{hidden > 1 ? "s" : ""}
                   </li>
                 )}

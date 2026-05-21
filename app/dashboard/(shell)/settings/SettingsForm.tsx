@@ -110,7 +110,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
             placeholder="leads@cosmoclub.fr (laisse vide pour utiliser l'email de contact public)"
           />
         </Field>
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-slate-500 dark:text-neutral-500">
           À chaque nouveau devis envoyé depuis le formulaire public, une notification arrive sur cette boîte. Si vide, on retombe sur l&apos;email de contact public.
         </p>
       </Section>
@@ -195,7 +195,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
         >
           {pending ? "Enregistrement…" : "Enregistrer"}
         </button>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-slate-500 dark:text-neutral-500">
           Ces valeurs apparaîtront automatiquement sur tes devis et factures.
         </p>
       </div>
@@ -209,7 +209,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <section>
       <h2 className="mb-3 text-sm font-semibold text-white">{title}</h2>
-      <div className="space-y-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5">
+      <div className="space-y-3 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
         {children}
       </div>
     </section>
@@ -247,7 +247,7 @@ function Input(props: {
       onChange={(e) => props.onChange(e.target.value)}
       placeholder={props.placeholder}
       disabled={props.disabled}
-      className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-50"
+      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-50"
     />
   );
 }
@@ -262,7 +262,7 @@ function Textarea(props: {
       value={props.value}
       onChange={(e) => props.onChange(e.target.value)}
       rows={props.rows ?? 3}
-      className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
     />
   );
 }

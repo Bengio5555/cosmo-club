@@ -120,7 +120,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-slate-500 dark:text-neutral-500">
           {initial.length} prestation{initial.length > 1 ? "s" : ""} actives
         </p>
         <button
@@ -145,7 +145,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
       )}
 
       {adding === "__new__" && (
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4">
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
             Nouvelle prestation
           </p>
@@ -162,7 +162,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
 
       {initial.length === 0 && adding !== "__new__" && (
         <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 p-8 text-center">
-          <p className="text-sm text-neutral-400">Aucune prestation pour l&apos;instant.</p>
+          <p className="text-sm text-slate-600 dark:text-neutral-400">Aucune prestation pour l&apos;instant.</p>
           <button
             type="button"
             onClick={() => setAdding("__new__")}
@@ -174,7 +174,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
       )}
 
       {grouped.map(([sectionName, sectionItems]) => (
-        <section key={sectionName} className="rounded-xl border border-neutral-800 bg-neutral-950/60">
+        <section key={sectionName} className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
           <header className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-neutral-300">
               {sectionName}
@@ -188,7 +188,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
             </button>
           </header>
 
-          <ul className="divide-y divide-neutral-900">
+          <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
             {sectionItems.map((it) =>
               editingId === it.id ? (
                 <li key={it.id} className="p-4">
@@ -220,7 +220,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
                       </p>
                     )}
                   </div>
-                  <div className="hidden w-24 text-right text-xs text-neutral-500 md:block">
+                  <div className="hidden w-24 text-right text-xs text-slate-500 dark:text-neutral-500 md:block">
                     {it.unit ?? "unité"}
                   </div>
                   <div className="w-24 text-right">
@@ -360,7 +360,7 @@ function DraftForm({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
         >
           <X className="h-3 w-3" /> Annuler
         </button>
@@ -390,12 +390,12 @@ function Input(props: {
         onChange={(e) => props.onChange(e.target.value)}
         placeholder={props.placeholder}
         autoFocus={props.autoFocus}
-        className={`w-full rounded-md border border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none ${
+        className={`w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none ${
           props.small ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm"
         } ${props.rightAdornment ? "pr-12" : ""}`}
       />
       {props.rightAdornment && (
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-wide text-neutral-500">
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
           {props.rightAdornment}
         </span>
       )}
@@ -414,7 +414,7 @@ function Select(props: {
       <select
         value={props.options.some((o) => o.value === props.value) ? props.value : ""}
         onChange={(e) => props.onChange(e.target.value)}
-        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none focus:border-[color:var(--color-grenat)] focus:outline-none"
       >
         {props.options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -439,7 +439,7 @@ function Textarea(props: {
       onChange={(e) => props.onChange(e.target.value)}
       placeholder={props.placeholder}
       rows={props.rows ?? 2}
-      className="w-full resize-y rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+      className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
     />
   );
 }

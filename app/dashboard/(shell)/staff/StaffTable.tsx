@@ -137,7 +137,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
   return (
     <>
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-slate-500 dark:text-neutral-500">
           {active.length} actif{active.length > 1 ? "s" : ""}
           {archived.length > 0 && ` · ${archived.length} archivé${archived.length > 1 ? "s" : ""}`}
           {(roleFilter !== "all" || normalized) && staff.length > 0 && (
@@ -154,7 +154,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un membre…"
-              className="w-full rounded-md border border-neutral-800 bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
+              className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
             />
           </div>
           <button
@@ -207,13 +207,13 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
         {staff.length === 0 ? (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucun membre d&apos;équipe. Clique « Ajouter » pour commencer.
           </div>
         ) : visibleStaff.length === 0 ? (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucun membre ne correspond
             {normalized ? <> à « <span className="text-neutral-300">{search}</span> »</> : null}
             {roleFilter !== "all"
@@ -223,7 +223,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
           </div>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-800 text-[10px] uppercase tracking-wide text-neutral-500">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-neutral-800 dark:bg-transparent dark:text-neutral-500">
               <tr>
                 <th className="px-3 py-2.5 font-medium md:px-4">Nom</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Rôle</th>
@@ -236,18 +236,18 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
               {[...active, ...archived].map((s) => (
                 <tr
                   key={s.id}
-                  className={`border-t border-neutral-900 transition-colors hover:bg-neutral-900 ${s.archived ? "opacity-50" : ""}`}
+                  className={`border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900 ${s.archived ? "opacity-50" : ""}`}
                 >
                   <td className="px-3 py-3 md:px-4">
                     <p className="font-medium text-white">{s.full_name}</p>
                     {s.notes && (
-                      <p className="mt-0.5 text-[11px] text-neutral-500 line-clamp-1">
+                      <p className="mt-0.5 text-[11px] text-slate-500 dark:text-neutral-500 line-clamp-1">
                         {s.notes}
                       </p>
                     )}
                   </td>
                   <td className="px-3 py-3 md:px-4">
-                    <span className="inline-flex rounded-full border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-300">
+                    <span className="inline-flex rounded-full border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-300">
                       {ROLE_LABEL[s.role]}
                     </span>
                   </td>
@@ -255,7 +255,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
                     {s.email && <div>{s.email}</div>}
                     {s.phone && <div className="text-neutral-500">{s.phone}</div>}
                   </td>
-                  <td className="px-3 py-3 text-right text-sm text-neutral-200 md:px-4">
+                  <td className="px-3 py-3 text-right text-sm text-slate-700 dark:text-neutral-200 md:px-4">
                     {s.hourly_rate != null
                       ? `${Number(s.hourly_rate).toFixed(2)} €`
                       : "—"}
@@ -424,7 +424,7 @@ function Modal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -444,7 +444,7 @@ function Modal({
 }
 
 const inputCls =
-  "w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({
   label,
@@ -455,7 +455,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       {children}

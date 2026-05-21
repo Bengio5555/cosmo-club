@@ -260,10 +260,10 @@ export default async function ClientsListPage({
                     <td className="hidden px-3 py-3 text-xs text-slate-500 dark:text-neutral-400 md:table-cell md:px-4">
                       {c.city ?? "—"}
                     </td>
-                    <td className="px-3 py-3 text-right text-slate-700 dark:text-neutral-300 md:px-4">
+                    <td className="px-3 py-3 text-right text-slate-700 dark:text-slate-600 dark:text-neutral-300 md:px-4">
                       {nbQuotes || <span className="text-slate-400 dark:text-neutral-600">—</span>}
                     </td>
-                    <td className="px-3 py-3 text-right text-slate-700 dark:text-neutral-300 md:px-4">
+                    <td className="px-3 py-3 text-right text-slate-700 dark:text-slate-600 dark:text-neutral-300 md:px-4">
                       {nbInvoices || <span className="text-slate-400 dark:text-neutral-600">—</span>}
                     </td>
                     <td className="px-3 py-3 text-right font-medium text-slate-900 dark:text-neutral-100 md:px-4">
@@ -315,9 +315,9 @@ function Stat({
 }) {
   const toneCls =
     tone === "ok"
-      ? "text-emerald-700 dark:text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-700 dark:text-amber-300"
+      ? "text-amber-700 dark:text-amber-700 dark:text-amber-300"
       : "text-slate-900 dark:text-neutral-100";
   return (
     <div>

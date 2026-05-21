@@ -119,7 +119,7 @@ export function CatalogPicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1 text-[11px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+        className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1 text-[11px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
       >
         <Library className="h-3 w-3" /> Catalogue
       </button>
@@ -129,7 +129,7 @@ export function CatalogPicker({
           <header className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-white">Catalogue</p>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-slate-500 dark:text-neutral-500">
                 Sélectionne une ou plusieurs prestations à ajouter au devis.
               </p>
             </div>
@@ -151,11 +151,11 @@ export function CatalogPicker({
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Chercher une prestation…"
                 autoFocus
-                className="w-full rounded-md border border-neutral-800 bg-neutral-900 py-2 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </div>
             <label className="block">
-              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                 Ajouter à la section
               </span>
               <input
@@ -163,7 +163,7 @@ export function CatalogPicker({
                 onChange={(e) => setTargetSection(e.target.value)}
                 placeholder={defaultSection || "Bar à cocktails, Barista…"}
                 list="catalog-sections"
-                className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
               <datalist id="catalog-sections">
                 {sections.map((s) => (
@@ -175,13 +175,13 @@ export function CatalogPicker({
 
           <div className="flex-1 overflow-y-auto">
             {loading && (
-              <p className="p-6 text-center text-sm text-neutral-500">Chargement…</p>
+              <p className="p-6 text-center text-sm text-slate-500 dark:text-neutral-500">Chargement…</p>
             )}
             {error && (
               <p className="p-6 text-center text-sm text-red-300">{error}</p>
             )}
             {!loading && !error && (items?.length ?? 0) === 0 && (
-              <div className="p-6 text-center text-sm text-neutral-500">
+              <div className="p-6 text-center text-sm text-slate-500 dark:text-neutral-500">
                 Aucune prestation enregistrée.
                 <br />
                 <Link
@@ -193,7 +193,7 @@ export function CatalogPicker({
               </div>
             )}
             {!loading && grouped.length === 0 && (items?.length ?? 0) > 0 && (
-              <p className="p-6 text-center text-sm text-neutral-500">
+              <p className="p-6 text-center text-sm text-slate-500 dark:text-neutral-500">
                 Aucun résultat pour « {q} ».
               </p>
             )}
@@ -202,7 +202,7 @@ export function CatalogPicker({
                 <p className="sticky top-0 bg-neutral-950/90 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 backdrop-blur">
                   {section}
                 </p>
-                <ul className="divide-y divide-neutral-900">
+                <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
                   {list.map((it) => {
                     const on = selected.has(it.id);
                     return (
@@ -243,7 +243,7 @@ export function CatalogPicker({
                           <span className="shrink-0 text-xs font-medium text-neutral-300">
                             {formatEUR(it.unit_price_ht ?? 0)}
                             {it.unit ? (
-                              <span className="ml-1 text-[10px] text-neutral-500">
+                              <span className="ml-1 text-[10px] text-slate-500 dark:text-neutral-500">
                                 /{it.unit}
                               </span>
                             ) : null}
@@ -258,14 +258,14 @@ export function CatalogPicker({
           </div>
 
           <footer className="flex items-center justify-between gap-3 border-t border-neutral-800 px-4 py-3">
-            <span className="text-xs text-neutral-500">
+            <span className="text-xs text-slate-500 dark:text-neutral-500">
               {selected.size} sélectionnée{selected.size > 1 ? "s" : ""}
             </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
+                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
               >
                 Annuler
               </button>

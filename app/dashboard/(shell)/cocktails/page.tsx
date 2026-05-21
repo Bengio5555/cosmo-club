@@ -44,10 +44,10 @@ export default async function CocktailsListPage() {
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             Cocktails
           </h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
             Recettes réutilisables. Liées à tes produits stock → calcul
             automatique du stock nécessaire par événement.
           </p>
@@ -56,13 +56,13 @@ export default async function CocktailsListPage() {
       </header>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {error.message}
         </div>
       )}
 
       {(!cocktails || cocktails.length === 0) && (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-10 text-center text-sm text-neutral-500">
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-10 text-center text-sm text-neutral-500">
           <Wine className="h-6 w-6 text-neutral-700" />
           <p>Aucune recette pour l&apos;instant.</p>
           <p className="text-xs text-neutral-600">
@@ -76,12 +76,12 @@ export default async function CocktailsListPage() {
         {Array.from(byCategory.entries()).map(([cat, list]) => (
           <section
             key={cat}
-            className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60"
+            className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none"
           >
             <div className="border-b border-neutral-800 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
               {cat}
             </div>
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {list.map((c) => {
                 const count = ingredientCount.get(c.id) ?? 0;
                 return (
@@ -95,7 +95,7 @@ export default async function CocktailsListPage() {
                           {c.name}
                         </p>
                         {c.description && (
-                          <p className="mt-0.5 truncate text-xs text-neutral-500">
+                          <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-500">
                             {c.description}
                           </p>
                         )}
@@ -115,11 +115,11 @@ export default async function CocktailsListPage() {
         ))}
 
         {archived.length > 0 && (
-          <details className="rounded-xl border border-neutral-800 bg-neutral-950/60">
+          <details className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
             <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 hover:text-neutral-300">
               Archivées · {archived.length}
             </summary>
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {archived.map((c) => (
                 <li key={c.id}>
                   <Link

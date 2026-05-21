@@ -84,7 +84,7 @@ export default async function DevisListPage() {
                         Émis {formatDateFR(q.issue_date)}
                       </p>
                     </td>
-                    <td className="px-3 py-3 text-slate-700 dark:text-neutral-200 md:px-4">
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-700 dark:text-neutral-200 md:px-4">
                       {who}
                     </td>
                     <td className="hidden px-3 py-3 md:table-cell md:px-4">
@@ -96,7 +96,7 @@ export default async function DevisListPage() {
                     <td className="px-3 py-3 md:px-4">
                       <StatusBadge status={q.status} />
                     </td>
-                    <td className="px-3 py-3 text-right font-medium text-slate-900 dark:text-neutral-200 md:px-4">
+                    <td className="px-3 py-3 text-right font-medium text-slate-900 dark:text-slate-700 dark:text-neutral-200 md:px-4">
                       {formatEUR(q.total_ttc)}
                     </td>
                   </tr>
