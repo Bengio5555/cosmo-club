@@ -42,7 +42,7 @@ export function MobileNav({ role }: { role: UserRole }) {
   const tabs = ALL_TABS.filter((t) => canAccess(t.href, role)).slice(0, 5);
 
   return (
-    <nav className="sticky bottom-0 z-30 flex border-t border-neutral-800 bg-neutral-950/95 backdrop-blur md:hidden">
+    <nav className="sticky bottom-0 z-30 flex border-t border-slate-800 bg-slate-950/95 backdrop-blur md:hidden">
       {tabs.map((t) => {
         const active = t.exact ? pathname === t.href : pathname.startsWith(t.href);
         const Icon = t.icon;
@@ -52,7 +52,7 @@ export function MobileNav({ role }: { role: UserRole }) {
             href={t.href}
             className={cn(
               "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px]",
-              active ? "text-white" : "text-neutral-500 hover:text-neutral-300",
+              active ? "text-white" : "text-slate-500 hover:text-slate-300",
             )}
           >
             <Icon className="h-4 w-4" />

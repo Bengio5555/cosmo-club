@@ -53,7 +53,7 @@ export function InviteForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="prenom.nom@exemple.fr"
-            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
           />
         </div>
 
@@ -64,7 +64,7 @@ export function InviteForm() {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
-            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-slate-600 focus:outline-none"
           >
             {ROLES_SELECTABLE.map((r) => (
               <option key={r} value={r}>
@@ -77,7 +77,7 @@ export function InviteForm() {
         <button
           type="submit"
           disabled={pending}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-neutral-200 disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200 disabled:opacity-60"
         >
           <Send className="h-3.5 w-3.5" />
           {pending ? "Envoi…" : "Envoyer l'invitation"}

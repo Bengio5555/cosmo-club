@@ -145,7 +145,7 @@ export function AiPanel({
           onChange={(e) => setGmbPost(e.target.value)}
           rows={8}
           placeholder="Le post optimisé pour Google Business apparaîtra ici. Tu peux l'éditer avant de copier."
-          className="block w-full resize-y rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-[12px] leading-relaxed text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+          className="block w-full resize-y rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-[12px] leading-relaxed text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
         />
         <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-500">
           <span>{gmbPost.length} / 1500 caractères (limite GBP)</span>
@@ -153,7 +153,7 @@ export function AiPanel({
             type="button"
             disabled={!gmbPost}
             onClick={copyGmb}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-slate-700 dark:text-slate-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-slate-700 dark:text-slate-200 hover:border-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-40"
           >
             {copied ? (
               <>
@@ -201,7 +201,7 @@ export function AiPanel({
               download={`gmb-cover-${articleId.slice(0, 8)}.png`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1.5 text-[11px] text-slate-700 dark:text-slate-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1.5 text-[11px] text-slate-700 dark:text-slate-200 hover:border-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800"
             >
               <Download className="h-3 w-3" />
               Télécharger pour GBP

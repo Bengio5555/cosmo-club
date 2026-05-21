@@ -12,6 +12,6 @@ const labels: Record<EventType, string> = {
 };
 
 export function EventTypeLabel({ value }: { value: EventType | null | undefined }) {
-  if (!value) return <span className="text-neutral-500">—</span>;
-  return <span className="text-xs text-neutral-200">{labels[value] ?? value}</span>;
+  if (!value) return <span className="text-slate-500">—</span>;
+  return <span className="text-xs text-slate-200">{labels[value] ?? value}</span>;
 }

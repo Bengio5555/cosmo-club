@@ -358,7 +358,7 @@ export function StockTable({
                             type="button"
                             onClick={() => toggleArchive(p.id, p.archived)}
                             disabled={pending}
-                            className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-neutral-200"
+                            className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-200"
                             aria-label="Archiver"
                           >
                             <Archive className="h-3.5 w-3.5" />
@@ -386,7 +386,7 @@ export function StockTable({
 
         {archived.length > 0 && (
           <details className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
-            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500 hover:text-neutral-300">
+            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500 hover:text-slate-300">
               Archivés · {archived.length}
             </summary>
             <ul className="divide-y divide-slate-100 dark:divide-slate-900">

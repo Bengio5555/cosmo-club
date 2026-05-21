@@ -252,7 +252,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
         <div className="mt-3">
           <button
             onClick={() => setShowBody((s) => !s)}
-            className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-500 hover:text-neutral-300"
+            className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-500 hover:text-slate-300"
           >
             <Eye className="h-3 w-3" />
             {showBody ? "Masquer le post" : "Voir le post"}
@@ -329,7 +329,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
             <button
               onClick={() => onSetStatus("skipped")}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:border-slate-400 dark:hover:border-slate-600 hover:text-neutral-200 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-200 disabled:opacity-50"
             >
               <X className="h-3.5 w-3.5" />
               Ignorer
@@ -339,7 +339,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
             <button
               onClick={() => onSetStatus("pending")}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:border-slate-400 dark:hover:border-slate-600 hover:text-neutral-200 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-200 disabled:opacity-50"
             >
               Remettre à traiter
             </button>

@@ -108,7 +108,7 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
             type="file"
             accept="image/png,image/svg+xml,image/jpeg,image/webp"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-neutral-100 hover:file:bg-neutral-700"
+            className="block w-full text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-100 hover:file:bg-slate-700"
           />
           <span className="mt-1 block text-[10px] text-slate-500 dark:text-slate-500">
             PNG ou SVG transparent recommandé. 2 Mo max.

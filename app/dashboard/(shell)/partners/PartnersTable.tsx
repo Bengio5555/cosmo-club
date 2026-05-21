@@ -190,7 +190,7 @@ export function PartnersTable({ partners }: { partners: Partner[] }) {
 
         {archived.length > 0 && (
           <details className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
-            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500 hover:text-neutral-300">
+            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500 hover:text-slate-300">
               Archivés · {archived.length}
             </summary>
             <ul className="divide-y divide-slate-100 dark:divide-slate-900">
@@ -289,7 +289,7 @@ function PartnerRow({
         <button type="button" onClick={onEdit} disabled={pending} className="rounded p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white" aria-label="Modifier">
           <Pencil className="h-3.5 w-3.5" />
         </button>
-        <button type="button" onClick={onArchive} disabled={pending} className="rounded p-1.5 text-slate-500 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-neutral-200" aria-label={p.archived ? "Désarchiver" : "Archiver"} title={p.archived ? "Désarchiver" : "Archiver"}>
+        <button type="button" onClick={onArchive} disabled={pending} className="rounded p-1.5 text-slate-500 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-200" aria-label={p.archived ? "Désarchiver" : "Archiver"} title={p.archived ? "Désarchiver" : "Archiver"}>
           {p.archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
         </button>
         <button type="button" onClick={onDelete} disabled={pending} className="rounded p-1.5 text-slate-500 dark:text-slate-500 hover:bg-red-500/10 hover:text-red-300" aria-label="Supprimer" title="Supprimer définitivement">
@@ -321,7 +321,7 @@ function CatPill({
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
         active
           ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/15 text-slate-900 dark:text-white"
-          : "border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-neutral-200"
+          : "border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-200"
       }`}
     >
       {label}

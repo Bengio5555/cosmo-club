@@ -185,7 +185,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                 isActive
                   ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/15 text-slate-900 dark:text-white"
-                  : "border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-neutral-200"
+                  : "border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-200"
               }`}
             >
               {opt.label}
@@ -275,7 +275,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
                         type="button"
                         onClick={() => toggleArchive(s.id, s.archived)}
                         disabled={pending}
-                        className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-neutral-200"
+                        className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-200"
                         aria-label={s.archived ? "Désarchiver" : "Archiver"}
                         title={s.archived ? "Désarchiver" : "Archiver"}
                       >

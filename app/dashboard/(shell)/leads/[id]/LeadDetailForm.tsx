@@ -105,7 +105,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
         type="button"
         disabled={pending || !dirty}
         onClick={save}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-slate-200 dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-slate-200 dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
         Enregistrer

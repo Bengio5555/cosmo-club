@@ -50,13 +50,13 @@ function ViewSwitcher({ currentView }: { currentView: "list" | "calendar" }) {
     <div className="inline-flex gap-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 p-1 text-xs">
       <Link
         href="/dashboard/events?view=list"
-        className={`${base} ${currentView === "list" ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-neutral-200"}`}
+        className={`${base} ${currentView === "list" ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-200"}`}
       >
         <List className="h-3 w-3" /> Liste
       </Link>
       <Link
         href="/dashboard/events?view=calendar"
-        className={`${base} ${currentView === "calendar" ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-neutral-200"}`}
+        className={`${base} ${currentView === "calendar" ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-200"}`}
       >
         <LayoutGrid className="h-3 w-3" /> Calendrier
       </Link>
@@ -562,7 +562,7 @@ function FilterLink({
       className={`inline-flex items-center rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
         isActive
           ? "bg-[color:var(--color-grenat)]/20 text-[color:var(--color-grenat-glow)]"
-          : "text-slate-500 dark:text-slate-400 hover:text-neutral-200"
+          : "text-slate-500 dark:text-slate-400 hover:text-slate-200"
       }`}
     >
       {label}

@@ -142,7 +142,7 @@ export function LocationField({
         {open && suggestions.length > 0 && (
           <ul
             role="listbox"
-            className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-md border border-neutral-800 bg-neutral-950 shadow-lg"
+            className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-md border border-slate-800 bg-slate-950 shadow-lg"
           >
             {suggestions.map((s, i) => (
               <li key={`${s.label}-${i}`}>
@@ -154,8 +154,8 @@ export function LocationField({
                   onClick={() => pick(s.label)}
                   className={`block w-full px-3 py-2 text-left text-xs transition-colors ${
                     i === activeIdx
-                      ? "bg-neutral-900 text-white"
-                      : "text-neutral-300 hover:bg-neutral-900"
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-300 hover:bg-slate-900"
                   }`}
                 >
                   {s.label}
@@ -171,7 +171,7 @@ export function LocationField({
         disabled={!hasAddress}
         aria-label="Voir sur la carte"
         title={hasAddress ? "Ouvrir la carte" : "Renseigne d'abord une adresse"}
-        className={`inline-flex shrink-0 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900 px-2.5 text-neutral-400 transition-colors hover:border-neutral-700 hover:text-white ${
+        className={`inline-flex shrink-0 items-center justify-center rounded-md border border-slate-800 bg-slate-900 px-2.5 text-slate-400 transition-colors hover:border-slate-700 hover:text-white ${
           !hasAddress ? "cursor-not-allowed opacity-40" : ""
         }`}
       >
@@ -220,11 +220,11 @@ function MapModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-2xl"
+        className="flex w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-neutral-900 px-4 py-3">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-900 px-4 py-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
               Lieu
             </p>
             <p className="mt-0.5 truncate text-sm text-white" title={address}>
@@ -238,7 +238,7 @@ function MapModal({
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Ouvrir dans Google Maps"
-                className="inline-flex items-center gap-1 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-[11px] text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                className="inline-flex items-center gap-1 rounded-md border border-slate-800 bg-slate-900 px-2 py-1 text-[11px] text-slate-300 transition-colors hover:border-slate-700 hover:text-white"
               >
                 <ExternalLink className="h-3 w-3" /> Maps
               </a>
@@ -247,7 +247,7 @@ function MapModal({
               type="button"
               onClick={onClose}
               aria-label="Fermer"
-              className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+              className="rounded-md p-1 text-slate-500 hover:bg-slate-900 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>

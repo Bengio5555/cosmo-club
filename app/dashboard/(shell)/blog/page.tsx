@@ -25,7 +25,7 @@ export default async function BlogAdminPage() {
         <div className="flex flex-col items-end gap-3">
           <Link
             href="/dashboard/blog/new"
-            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-neutral-200"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
           >
             <Plus className="h-4 w-4" />
             Nouvel article
@@ -50,7 +50,7 @@ export default async function BlogAdminPage() {
               <th className="px-4 py-3 hidden lg:table-cell">Maj</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-800">
+          <tbody className="divide-y divide-slate-800">
             {(data ?? []).length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-xs text-slate-500 dark:text-slate-500">

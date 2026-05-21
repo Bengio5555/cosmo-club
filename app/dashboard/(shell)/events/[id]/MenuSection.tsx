@@ -145,7 +145,7 @@ export function MenuSection({
           <div className="flex flex-wrap items-center gap-2">
             <a
               href={`/api/dashboard/events/${eventId}/courses-pdf`}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-slate-100 transition-colors hover:bg-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-slate-100 transition-colors hover:bg-slate-700"
               title="Télécharger la liste de courses en PDF"
             >
               <Download className="h-3 w-3" /> Liste de courses (PDF)

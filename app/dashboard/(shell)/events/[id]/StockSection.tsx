@@ -114,7 +114,7 @@ export function StockSection({
             type="button"
             onClick={() => setAdding(true)}
             disabled={pending || available.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
           >
             <PackagePlus className="h-3 w-3" /> Réserver
           </button>

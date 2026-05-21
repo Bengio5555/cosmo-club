@@ -33,7 +33,7 @@ export function TeamTable({
             <th className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-800">
+        <tbody className="divide-y divide-slate-800">
           {members.length === 0 && (
             <tr>
               <td colSpan={4} className="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-500">
@@ -108,7 +108,7 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
             value={role}
             disabled={pending}
             onChange={(e) => onRoleChange(e.target.value as UserRole)}
-            className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-white focus:border-neutral-600 focus:outline-none disabled:opacity-60"
+            className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-white focus:border-slate-600 focus:outline-none disabled:opacity-60"
           >
             {ROLES_SELECTABLE.map((r) => (
               <option key={r} value={r}>

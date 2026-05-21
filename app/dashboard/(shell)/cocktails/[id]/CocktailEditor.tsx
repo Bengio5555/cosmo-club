@@ -390,7 +390,7 @@ export function CocktailEditor({
             Renseigne « Contenu par unité » dans{" "}
             <Link
               href="/dashboard/stock"
-              className="underline decoration-dotted underline-offset-2 hover:text-neutral-400"
+              className="underline decoration-dotted underline-offset-2 hover:text-slate-400"
             >
               /stock
             </Link>{" "}

@@ -76,7 +76,7 @@ export function BriefPanel({ onDraft }: Props) {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder='Ex: « Pourquoi le vin d&apos;honneur devient le moment-pivot d&apos;un mariage parisien — et comment penser sa carte cocktails en conséquence »'
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
           />
         </Field>
 
@@ -85,7 +85,7 @@ export function BriefPanel({ onDraft }: Props) {
             <select
               value={persona}
               onChange={(e) => setPersona(e.target.value as ArticlePersona)}
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-slate-600 focus:outline-none"
             >
               {PERSONAS.map((p) => (
                 <option key={p.value} value={p.value}>
@@ -102,7 +102,7 @@ export function BriefPanel({ onDraft }: Props) {
             <select
               value={length}
               onChange={(e) => setLength(e.target.value as ArticleLength)}
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-slate-600 focus:outline-none"
             >
               {LENGTHS.map((l) => (
                 <option key={l.value} value={l.value}>
@@ -119,7 +119,7 @@ export function BriefPanel({ onDraft }: Props) {
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             placeholder="bar à cocktails mariage, vin d'honneur Paris"
-            className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+            className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
           />
         </Field>
 

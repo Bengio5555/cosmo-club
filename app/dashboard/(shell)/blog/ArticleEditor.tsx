@@ -169,7 +169,7 @@ export function ArticleEditor({ initial }: Props) {
           <button
             type="submit"
             disabled={pending || uploading}
-            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-neutral-200 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200 disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
             {pending ? "Enregistrement…" : "Enregistrer"}
@@ -193,7 +193,7 @@ export function ArticleEditor({ initial }: Props) {
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder="Le titre éditorial de l'article"
-              className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-base font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-base font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
             />
           </Field>
 
@@ -204,7 +204,7 @@ export function ArticleEditor({ initial }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Phrase courte qui décrit l'article. Sert de méta description et de chapeau sur la liste."
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
             />
           </Field>
 
@@ -252,7 +252,7 @@ export function ArticleEditor({ initial }: Props) {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as ArticleStatus)}
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-slate-600 focus:outline-none"
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>
@@ -275,7 +275,7 @@ export function ArticleEditor({ initial }: Props) {
                   type="datetime-local"
                   value={publishAt}
                   onChange={(e) => setPublishAt(e.target.value)}
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-slate-600 focus:outline-none"
                 />
               </Field>
             </div>
@@ -295,7 +295,7 @@ export function ArticleEditor({ initial }: Props) {
                   className="aspect-[4/3] w-full rounded-md border border-slate-200 dark:border-slate-800 object-cover"
                 />
               )}
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 dark:border-slate-700 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-300 transition hover:border-neutral-500 hover:text-slate-900 dark:hover:text-white">
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 dark:border-slate-700 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-300 transition hover:border-slate-500 hover:text-slate-900 dark:hover:text-white">
                 <Upload className="h-3.5 w-3.5" />
                 {uploading ? "Upload…" : coverUrl ? "Remplacer l'image" : "Choisir une image"}
                 <input
@@ -314,7 +314,7 @@ export function ArticleEditor({ initial }: Props) {
                 value={coverUrl}
                 onChange={(e) => setCoverUrl(e.target.value)}
                 placeholder="/brand/ai/... ou URL https"
-                className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+                className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
               />
             </div>
           </section>
@@ -339,7 +339,7 @@ export function ArticleEditor({ initial }: Props) {
                     setSlugTouched(true);
                   }}
                   placeholder="cocktails-signature-mai-carnet-saison"
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
                 />
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500">
                   /blog/{slug || "votre-slug"}
@@ -352,7 +352,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={readingTime}
                   onChange={(e) => setReadingTime(e.target.value)}
                   placeholder="6 min"
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
                 />
               </Field>
 
@@ -362,7 +362,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
                   placeholder="cocktail mariage Paris, mixologie événementiel"
-                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
                 />
               </Field>
 
@@ -372,7 +372,7 @@ export function ArticleEditor({ initial }: Props) {
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder="Mariage, Guide"
-                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-neutral-600 focus:outline-none"
+                  className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
                 />
               </Field>
             </div>

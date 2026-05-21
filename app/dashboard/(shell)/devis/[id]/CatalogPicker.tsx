@@ -322,7 +322,7 @@ function Drawer({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex h-full w-full max-w-md flex-col bg-white dark:bg-slate-950 shadow-2xl md:border-l md:border-neutral-800">
+      <div className="flex h-full w-full max-w-md flex-col bg-white dark:bg-slate-950 shadow-2xl md:border-l md:border-slate-800">
         {children}
       </div>
     </div>

@@ -1007,7 +1007,7 @@ function TopBar({
               type="button"
               onClick={onRefuse}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-700"
             >
               <XCircle className="h-3 w-3" /> Refusé
             </button>
@@ -1500,14 +1500,14 @@ function AddSectionButton({
         />
         <button
           type="submit"
-          className="rounded bg-slate-200 dark:bg-slate-800 px-2 py-1 text-[11px] text-slate-900 dark:text-slate-100 hover:bg-neutral-700"
+          className="rounded bg-slate-200 dark:bg-slate-800 px-2 py-1 text-[11px] text-slate-900 dark:text-slate-100 hover:bg-slate-700"
         >
           OK
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-[11px] text-slate-500 dark:text-slate-500 hover:text-neutral-300"
+          className="text-[11px] text-slate-500 dark:text-slate-500 hover:text-slate-300"
         >
           ×
         </button>
