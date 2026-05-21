@@ -313,18 +313,34 @@ export default async function DashboardHome() {
 
   return (
     <div className="min-w-0 max-w-full px-4 py-6 md:px-8 md:py-8">
-      <header className="mb-6">
-        <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-neutral-500">
-          {new Date().toLocaleDateString("fr-FR", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
-        <h1 className="mt-1 font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
-          Tableau de bord
-        </h1>
+      <header className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-neutral-500">
+            {new Date().toLocaleDateString("fr-FR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+            Tableau de bord
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/leads"
+            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white dark:shadow-none"
+          >
+            Voir les demandes
+          </Link>
+          <Link
+            href="/dashboard/devis"
+            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+          >
+            Nouveau devis
+          </Link>
+        </div>
       </header>
 
       {/* ─── Hero KPIs ─── */}
@@ -452,16 +468,16 @@ export default async function DashboardHome() {
       {/* ─── Two-column main body ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Factures à encaisser */}
-        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
-          <div className="mb-3 flex items-center justify-between">
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
             <div>
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-                <Receipt className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">
                 Factures à encaisser
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
                 {invoicesWithRemaining.length} ouverte
-                {invoicesWithRemaining.length > 1 ? "s" : ""} · {formatEUR(totalRemaining)}
+                {invoicesWithRemaining.length > 1 ? "s" : ""} ·{" "}
+                {formatEUR(totalRemaining)}
               </p>
             </div>
             <Link
@@ -472,7 +488,7 @@ export default async function DashboardHome() {
             </Link>
           </div>
           {topUnpaid.length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
               Tout est à jour ✓
             </p>
           ) : (
@@ -485,7 +501,7 @@ export default async function DashboardHome() {
                 return (
                   <li
                     key={inv.id}
-                    className="flex items-center gap-3 py-2.5"
+                    className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-neutral-900"
                   >
                     <Link
                       href={`/dashboard/factures/${inv.id}`}
@@ -502,7 +518,9 @@ export default async function DashboardHome() {
                       <p className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px]">
                         <span
                           className={
-                            overdue ? "text-red-600 dark:text-red-300" : "text-slate-500 dark:text-neutral-500"
+                            overdue
+                              ? "text-red-600 dark:text-red-300"
+                              : "text-slate-500 dark:text-neutral-500"
                           }
                         >
                           {inv.due_date ? (
@@ -524,7 +542,7 @@ export default async function DashboardHome() {
                     </Link>
                     <div className="flex shrink-0 items-center gap-2">
                       <span
-                        className={`text-sm font-medium ${overdue ? "text-red-700 dark:text-red-300" : "text-amber-700 dark:text-amber-300"}`}
+                        className={`text-sm font-medium tabular-nums ${overdue ? "text-red-700 dark:text-red-300" : "text-amber-700 dark:text-amber-300"}`}
                       >
                         {formatEUR(remaining)}
                       </span>
@@ -538,14 +556,13 @@ export default async function DashboardHome() {
         </section>
 
         {/* Prochains événements (7 jours) */}
-        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
-          <div className="mb-3 flex items-center justify-between">
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
             <div>
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-                <CalendarDays className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">
                 Prochains événements
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
                 7 jours à venir · {(upcomingEvents ?? []).length} prévu
                 {(upcomingEvents ?? []).length > 1 ? "s" : ""}
               </p>
@@ -558,7 +575,7 @@ export default async function DashboardHome() {
             </Link>
           </div>
           {(upcomingEvents ?? []).length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
               Pas d&apos;événement prévu cette semaine.
             </p>
           ) : (
@@ -573,12 +590,15 @@ export default async function DashboardHome() {
                 const noStock =
                   stockCount === 0 && ev.status !== "annule";
                 return (
-                  <li key={ev.id} className="py-2.5">
+                  <li
+                    key={ev.id}
+                    className="px-6 py-3 hover:bg-slate-50 dark:hover:bg-neutral-900"
+                  >
                     <Link
                       href={`/dashboard/events/${ev.id}`}
                       className="flex items-center gap-3"
                     >
-                      <div className="shrink-0 inline-flex h-10 w-10 flex-col items-center justify-center rounded-md border border-slate-200 bg-slate-100 dark:border-neutral-800 dark:bg-neutral-900">
+                      <div className="shrink-0 inline-flex h-10 w-10 flex-col items-center justify-center rounded-md border border-slate-200 bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900">
                         <span className="text-[9px] uppercase text-slate-500 dark:text-neutral-500">
                           {new Date(ev.date).toLocaleDateString("fr-FR", {
                             month: "short",
@@ -660,82 +680,117 @@ export default async function DashboardHome() {
       {/* ─── Activity feeds: leads + movements ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Demandes récentes */}
-        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-              <Inbox className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
-              Demandes récentes
-            </h2>
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+                Demandes récentes
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+                {(recentLeads ?? []).length} dernier
+                {(recentLeads ?? []).length > 1 ? "s" : ""} lead
+                {(recentLeads ?? []).length > 1 ? "s" : ""}
+              </p>
+            </div>
             <Link
               href="/dashboard/leads"
-              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(recentLeads ?? []).length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
               Aucune demande pour l&apos;instant.
             </p>
           ) : (
             <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
-              {(recentLeads ?? []).map((l) => (
-                <li key={l.id}>
-                  <Link
-                    href={`/dashboard/leads/${l.id}`}
-                    className="flex items-center gap-3 py-2.5 transition-colors hover:opacity-90"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">
-                        {l.contact_name || l.contact_email || "Sans nom"}
-                      </p>
-                      <p className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
-                        <span>
-                          {formatDateFR(l.created_at, { withTime: true })}
-                        </span>
-                        <EventTypeLabel value={l.event_type} />
-                      </p>
-                    </div>
-                    <StatusBadge status={l.status} />
-                  </Link>
-                </li>
-              ))}
+              {(recentLeads ?? []).map((l) => {
+                const fallback = l.contact_email ?? "?";
+                const display = l.contact_name || fallback;
+                const initials = display
+                  .split(/[\s.@]+/)
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((w) => w[0]?.toUpperCase() ?? "")
+                  .join("");
+                return (
+                  <li key={l.id}>
+                    <Link
+                      href={`/dashboard/leads/${l.id}`}
+                      className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-neutral-900"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-semibold text-white">
+                        {initials || "?"}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">
+                          {display}
+                        </p>
+                        <p className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
+                          <span>
+                            {formatDateFR(l.created_at, { withTime: true })}
+                          </span>
+                          <EventTypeLabel value={l.event_type} />
+                        </p>
+                      </div>
+                      <StatusBadge status={l.status} />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
 
         {/* Mouvements stock */}
-        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-              <Package className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
-              Mouvements stock récents
-            </h2>
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-neutral-800">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+                Mouvements stock récents
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+                Entrées / sorties produits
+              </p>
+            </div>
             <Link
               href="/dashboard/stock"
-              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(recentMovements ?? []).length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
+            <p className="px-6 py-8 text-center text-xs text-slate-500 dark:text-neutral-500">
               Pas de mouvement pour l&apos;instant.
             </p>
           ) : (
             <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {(recentMovements ?? []).map((m) => (
-                <li key={m.id} className="flex items-center gap-3 py-2.5">
-                  {m.direction === "in" ? (
-                    <ArrowUpCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                  ) : (
-                    <ArrowDownCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
-                  )}
+                <li
+                  key={m.id}
+                  className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-neutral-900"
+                >
+                  <span
+                    className={
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-md " +
+                      (m.direction === "in"
+                        ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300"
+                        : "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-300")
+                    }
+                  >
+                    {m.direction === "in" ? (
+                      <ArrowUpCircle className="h-3.5 w-3.5" />
+                    ) : (
+                      <ArrowDownCircle className="h-3.5 w-3.5" />
+                    )}
+                  </span>
                   <span className="flex-1 truncate text-sm text-slate-900 dark:text-neutral-100">
                     {productsMap.get(m.product_id) ?? "—"}
                   </span>
                   <span
-                    className={`text-sm font-medium ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}
+                    className={`text-sm font-medium tabular-nums ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}
                   >
                     {m.direction === "in" ? "+" : "−"}
                     {Number(m.qty)}
@@ -777,6 +832,13 @@ export default async function DashboardHome() {
   );
 }
 
+/**
+ * KPI card façon Zenith : icône dans un cercle pastel (top-right),
+ * label en uppercase tracking-wide, valeur en gros dark
+ * (semantic colour vit dans le cercle, pas dans le chiffre), hint
+ * subtil en bas. Différent de notre ancien pattern où la valeur
+ * elle-même était colorée — ce qui était bruyant visuellement.
+ */
 function HeroKpi({
   label,
   value,
@@ -792,31 +854,41 @@ function HeroKpi({
   hint?: string;
   href: string;
 }) {
-  const valueCls =
+  // Couleur du cercle d'icône — porte le sens (ok/pending/neutral)
+  const iconWrapCls =
     tone === "ok"
-      ? "text-emerald-700 dark:text-emerald-300"
+      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-700 dark:text-amber-300"
-      : "text-slate-900 dark:text-white";
+        ? "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300"
+        : "bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300";
   return (
     <Link
       href={href}
-      className="group block min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+      className="group block min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none dark:hover:bg-neutral-900"
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="min-w-0 truncate text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+      <div className="flex items-start justify-between gap-3">
+        <p className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-neutral-500">
           {label}
         </p>
-        <Icon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-600 transition-colors group-hover:text-slate-600 dark:group-hover:text-neutral-400" />
+        <span
+          className={
+            "flex h-7 w-7 shrink-0 items-center justify-center rounded-md " +
+            iconWrapCls
+          }
+        >
+          <Icon className="h-3.5 w-3.5" />
+        </span>
       </div>
       <p
-        className={`mt-3 truncate font-display text-xl leading-tight tabular-nums sm:text-2xl xl:text-3xl ${valueCls}`}
+        className="mt-3 truncate text-2xl font-semibold tracking-tight tabular-nums text-slate-900 dark:text-white sm:text-3xl"
         title={value}
       >
         {value}
       </p>
       {hint && (
-        <p className="mt-1 truncate text-[11px] text-slate-500 dark:text-neutral-500">{hint}</p>
+        <p className="mt-1 truncate text-[11px] text-slate-500 dark:text-neutral-500">
+          {hint}
+        </p>
       )}
     </Link>
   );
@@ -834,10 +906,15 @@ function QuickCard({
   return (
     <Link
       href={href}
-      className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+      className="group rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
     >
-      <p className="text-sm font-semibold text-slate-900 dark:text-white">{title}</p>
-      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">{desc}</p>
+      <p className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+        {title}
+        <ArrowRight className="h-3.5 w-3.5 text-slate-400 transition-transform group-hover:translate-x-0.5 dark:text-neutral-500" />
+      </p>
+      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">
+        {desc}
+      </p>
     </Link>
   );
 }
