@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { site } from "@/lib/site";
+import { site, editorialAuthor } from "@/lib/site";
 import { getAllArticles, getArticle } from "@/lib/blog";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `/blog/${slug}`,
       type: "article",
       publishedTime: article.date,
-      authors: [site.name],
+      authors: [editorialAuthor.name],
       tags: article.tags,
     },
     twitter: {
@@ -45,12 +45,28 @@ function formatDate(d: string) {
   });
 }
 
+// Mirrors the slug logic used elsewhere — kept local to avoid pulling
+// a util just for one @id fragment.
+function slugify(s: string) {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
   const article = await getArticle(slug);
   if (!article) notFound();
 
-  const jsonLd = {
+  const personId = `${site.url}/concept#author-${slugify(editorialAuthor.name)}`;
+  // Author as Person (with @id) so the BlogPosting and the standalone
+  // Person schemas reference the same entity. AI citation models
+  // (ChatGPT, Claude) anchor expertise on the Person.@id, so reusing
+  // the id everywhere makes the entity stable across articles.
+  const blogPostingLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: article.title,
@@ -61,12 +77,20 @@ export default async function ArticlePage({ params }: Props) {
     datePublished: article.date,
     dateModified: article.date,
     author: {
-      "@type": "Organization",
-      name: site.name,
-      url: site.url,
+      "@type": "Person",
+      "@id": personId,
+      name: editorialAuthor.name,
+      jobTitle: editorialAuthor.role,
+      url: editorialAuthor.url,
+      worksFor: {
+        "@type": "Organization",
+        "@id": `${site.url}/#organization`,
+        name: site.name,
+      },
     },
     publisher: {
       "@type": "Organization",
+      "@id": `${site.url}/#organization`,
       name: site.name,
       url: site.url,
       logo: {
@@ -81,11 +105,37 @@ export default async function ArticlePage({ params }: Props) {
     keywords: article.keywords?.join(", "),
   };
 
+  // Standalone Person schema — emitted in addition to the embedded
+  // Person on BlogPosting. This gives the named author its own
+  // discoverable entity for AI crawlers that index people separately
+  // (Claude/Perplexity rely on it for "who wrote this?" prompts).
+  const personLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": personId,
+    name: editorialAuthor.name,
+    jobTitle: editorialAuthor.role,
+    description: editorialAuthor.bio,
+    url: editorialAuthor.url,
+    image: editorialAuthor.image,
+    sameAs: editorialAuthor.sameAs,
+    worksFor: {
+      "@type": "Organization",
+      "@id": `${site.url}/#organization`,
+      name: site.name,
+      url: site.url,
+    },
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
       />
       <article className="bg-[color:var(--color-cream)]">
         <header className="bg-[color:var(--color-cream-paper)] px-6 pt-40 pb-16 md:px-10 md:pt-56 md:pb-20">
@@ -103,6 +153,17 @@ export default async function ArticlePage({ params }: Props) {
               {article.title}
             </h1>
             <div className="mt-8 flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-grenat)]">
+              <span>
+                Par{" "}
+                <Link
+                  href={editorialAuthor.url}
+                  className="underline-offset-4 transition-colors hover:text-[color:var(--color-ink-text)] hover:underline"
+                  rel="author"
+                >
+                  {editorialAuthor.name}
+                </Link>
+              </span>
+              <span aria-hidden>·</span>
               <time dateTime={article.date}>{formatDate(article.date)}</time>
               {article.readingTime && (
                 <>
