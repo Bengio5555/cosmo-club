@@ -39,6 +39,13 @@ export type LandingConfig = {
   experience: { title: string; paragraphs: string[] };
   /** 4-5 step timeline of how the engagement unfolds. */
   timeline: { label: string; body: string }[];
+  /**
+   * Optional HowTo name. Used as the `name` of the HowTo JSON-LD emitted
+   * from the timeline steps. Falls back to "Comment réserver {h1}" if
+   * omitted. Should read like a query a user would type ("Comment
+   * réserver un bar à cocktails pour un mariage à Paris").
+   */
+  howToName?: string;
   /** 5-7 question/answer pairs. Drives the FAQPage schema. */
   faq: { q: string; a: string }[];
   /** Cross-link tiles to related landing pages / blog. */
@@ -100,6 +107,28 @@ export function LandingPage({ config }: { config: LandingConfig }) {
     ],
   };
 
+  // HowTo schema — derived from the timeline. Google uses this to
+  // trigger the "steps" rich result (numbered cards) on procedural
+  // queries like "comment réserver un bar à cocktails pour un mariage"
+  // and AI Overviews / Perplexity favor pages with explicit HowTo
+  // structure when responding to "how do I…" prompts.
+  // Important: position is 1-indexed per schema.org spec.
+  const howToLd = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "@id": `${canonicalUrl}#howto`,
+    name: config.howToName ?? `Comment réserver ${config.h1.toLowerCase()}`,
+    description: config.subtitle,
+    totalTime: "P14D",
+    step: config.timeline.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.label,
+      text: s.body,
+      url: `${canonicalUrl}#step-${i + 1}`,
+    })),
+  };
+
   return (
     <>
       <script
@@ -113,6 +142,10 @@ export function LandingPage({ config }: { config: LandingConfig }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }}
       />
 
       {/* ─── Hero ────────────────────────────────────────────── */}
@@ -233,7 +266,11 @@ export function LandingPage({ config }: { config: LandingConfig }) {
           <ol className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {config.timeline.map((step, i) => (
               <Reveal key={i}>
-                <li className="border-t border-[color:var(--color-bone)]/20 pt-5">
+                {/* id="step-N" anchors each step so the HowTo JSON-LD
+                    URL targets resolve to a real fragment on the page.
+                    Google validates these — broken fragments degrade
+                    the rich result eligibility. */}
+                <li id={`step-${i + 1}`} className="border-t border-[color:var(--color-bone)]/20 pt-5">
                   <p className="font-accent text-sm italic text-[color:var(--color-or)]">
                     N°{String(i + 1).padStart(2, "0")}
                   </p>

@@ -134,6 +134,8 @@ const config: LandingConfig = {
       "Bar à cocktails événementiel premium pour mariages à Paris et en Île-de-France. Cartes signature, scénographie sur mesure, mocktails, équipe de mixologues formée à l'événementiel haut de gamme.",
     serviceType: "Bar à cocktails mariage",
   },
+  howToName:
+    "Comment réserver un bar à cocktails pour son mariage à Paris",
 };
 
 export default async function MariagePage() {

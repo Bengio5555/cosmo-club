@@ -135,6 +135,8 @@ const config: LandingConfig = {
       "Bar à cocktails événementiel B2B à Paris et en Île-de-France : lancements de marque, soirées corporate, séminaires, cocktails de fin d'année. Scénographie brandée, cartes sur mesure, facturation entreprise.",
     serviceType: "Bar à cocktails entreprise",
   },
+  howToName:
+    "Comment organiser un bar à cocktails pour un événement d'entreprise à Paris",
 };
 
 export default async function EntreprisePage() {

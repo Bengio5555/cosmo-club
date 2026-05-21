@@ -135,6 +135,8 @@ const config: LandingConfig = {
       "Atelier mixologie et masterclass cocktail à Paris : EVJF, EVG, team building, animation à domicile ou en entreprise. Mixologues professionnels, équipement fourni, 3 cocktails par participant.",
     serviceType: "Animation cocktail / atelier mixologie",
   },
+  howToName:
+    "Comment organiser un atelier mixologie ou une animation cocktail à Paris",
 };
 
 export default async function AnimationPage() {

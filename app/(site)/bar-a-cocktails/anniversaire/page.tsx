@@ -135,6 +135,8 @@ const config: LandingConfig = {
       "Bar à cocktails événementiel pour anniversaire (30, 40, 50 ans et plus) à Paris et en Île-de-France. Cartes signature, scénographie premium, mocktails, mixologues professionnels.",
     serviceType: "Bar à cocktails anniversaire",
   },
+  howToName:
+    "Comment organiser un bar à cocktails pour un anniversaire à Paris",
 };
 
 export default async function AnniversairePage() {

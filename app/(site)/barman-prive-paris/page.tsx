@@ -134,6 +134,8 @@ const config: LandingConfig = {
       "Service de barman privé à domicile à Paris et en Île-de-France pour soirées privées, anniversaires, dîners et événements familiaux. Mixologue professionnel, matériel et ingrédients fournis, carte sur mesure.",
     serviceType: "Barman privé événementiel",
   },
+  howToName:
+    "Comment réserver un barman privé à Paris pour une soirée à domicile",
 };
 
 export default async function BarmanPrivePage() {
