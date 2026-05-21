@@ -75,7 +75,9 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
 
   const { data: events, error } = await supabase
     .from("events")
-    .select("id,title,date,start_time,status")
+    .select(
+      "id,title,date,start_time,end_time,status,location,guests_count,client_id",
+    )
     .gte("date", from)
     .lte("date", to)
     .order("date", { ascending: true });
@@ -143,11 +145,23 @@ async function CalendarPage({ monthParam }: { monthParam?: string }) {
 
       <CalendarView monthDate={monthDate} events={events ?? []} />
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-500">
-        <LegendDot cls="bg-sky-500/15 border border-sky-500/30" label="À venir" />
-        <LegendDot cls="bg-amber-500/15 border border-amber-500/40" label="En cours" />
-        <LegendDot cls="bg-emerald-500/15 border border-emerald-500/30" label="Terminé" />
-        <LegendDot cls="bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" label="Annulé" />
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
+        <LegendDot
+          cls="bg-sky-50 ring-1 ring-inset ring-sky-600/20 dark:bg-sky-500/15 dark:ring-sky-400/30"
+          label="À venir"
+        />
+        <LegendDot
+          cls="bg-amber-50 ring-1 ring-inset ring-amber-600/20 dark:bg-amber-500/15 dark:ring-amber-400/30"
+          label="En cours"
+        />
+        <LegendDot
+          cls="bg-emerald-50 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/15 dark:ring-emerald-400/30"
+          label="Terminé"
+        />
+        <LegendDot
+          cls="bg-slate-100 ring-1 ring-inset ring-slate-300/40 dark:bg-slate-800 dark:ring-slate-700"
+          label="Annulé"
+        />
       </div>
     </div>
   );
