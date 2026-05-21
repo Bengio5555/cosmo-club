@@ -314,7 +314,7 @@ export default async function DashboardHome() {
   return (
     <div className="min-w-0 max-w-full px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6">
-        <p className="text-[11px] uppercase tracking-widest text-neutral-500">
+        <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-neutral-500">
           {new Date().toLocaleDateString("fr-FR", {
             weekday: "long",
             day: "numeric",
@@ -322,7 +322,7 @@ export default async function DashboardHome() {
             year: "numeric",
           })}
         </p>
-        <h1 className="mt-1 font-display text-2xl text-white md:text-3xl">
+        <h1 className="mt-1 font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
           Tableau de bord
         </h1>
       </header>
@@ -372,20 +372,20 @@ export default async function DashboardHome() {
 
       {/* ─── Alerts band ─── */}
       {hasAlerts && (
-        <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+        <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/5">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-300" />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-200">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
               Points d&apos;attention
             </p>
-            <ul className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-amber-100/80">
+            <ul className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-amber-800 dark:text-amber-100/80">
               {overdueInvoices.length > 0 && (
                 <li>
                   <Link
                     href="/dashboard/factures?kind=factures"
-                    className="hover:text-white"
+                    className="hover:text-amber-950 dark:hover:text-white"
                   >
-                    <strong className="text-amber-200">
+                    <strong className="text-amber-900 dark:text-amber-200">
                       {overdueInvoices.length}
                     </strong>{" "}
                     facture{overdueInvoices.length > 1 ? "s" : ""} en retard
@@ -394,8 +394,11 @@ export default async function DashboardHome() {
               )}
               {eventsWithoutStaff.length > 0 && (
                 <li>
-                  <Link href="/dashboard/events" className="hover:text-white">
-                    <strong className="text-amber-200">
+                  <Link
+                    href="/dashboard/events"
+                    className="hover:text-amber-950 dark:hover:text-white"
+                  >
+                    <strong className="text-amber-900 dark:text-amber-200">
                       {eventsWithoutStaff.length}
                     </strong>{" "}
                     événement{eventsWithoutStaff.length > 1 ? "s" : ""} sans staff (≤ 7j)
@@ -404,8 +407,11 @@ export default async function DashboardHome() {
               )}
               {eventsWithoutCocktails.length > 0 && (
                 <li>
-                  <Link href="/dashboard/events" className="hover:text-white">
-                    <strong className="text-amber-200">
+                  <Link
+                    href="/dashboard/events"
+                    className="hover:text-amber-950 dark:hover:text-white"
+                  >
+                    <strong className="text-amber-900 dark:text-amber-200">
                       {eventsWithoutCocktails.length}
                     </strong>{" "}
                     événement{eventsWithoutCocktails.length > 1 ? "s" : ""} sans menu cocktails (≤ 15j)
@@ -414,8 +420,11 @@ export default async function DashboardHome() {
               )}
               {eventsWithoutStock.length > 0 && (
                 <li>
-                  <Link href="/dashboard/events" className="hover:text-white">
-                    <strong className="text-amber-200">
+                  <Link
+                    href="/dashboard/events"
+                    className="hover:text-amber-950 dark:hover:text-white"
+                  >
+                    <strong className="text-amber-900 dark:text-amber-200">
                       {eventsWithoutStock.length}
                     </strong>{" "}
                     événement{eventsWithoutStock.length > 1 ? "s" : ""} sans stock réservé (≤ 10j)
@@ -424,8 +433,13 @@ export default async function DashboardHome() {
               )}
               {lowStock.length > 0 && (
                 <li>
-                  <Link href="/dashboard/stock" className="hover:text-white">
-                    <strong className="text-amber-200">{lowStock.length}</strong>{" "}
+                  <Link
+                    href="/dashboard/stock"
+                    className="hover:text-amber-950 dark:hover:text-white"
+                  >
+                    <strong className="text-amber-900 dark:text-amber-200">
+                      {lowStock.length}
+                    </strong>{" "}
                     produit{lowStock.length > 1 ? "s" : ""} sous seuil stock
                   </Link>
                 </li>
@@ -438,31 +452,31 @@ export default async function DashboardHome() {
       {/* ─── Two-column main body ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Factures à encaisser */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-                <Receipt className="h-3.5 w-3.5 text-neutral-500" />
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                <Receipt className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
                 Factures à encaisser
               </h2>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-slate-500 dark:text-neutral-500">
                 {invoicesWithRemaining.length} ouverte
                 {invoicesWithRemaining.length > 1 ? "s" : ""} · {formatEUR(totalRemaining)}
               </p>
             </div>
             <Link
               href="/dashboard/factures"
-              className="inline-flex items-center gap-1 text-xs text-neutral-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {topUnpaid.length === 0 ? (
-            <p className="py-6 text-center text-xs text-neutral-500">
+            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
               Tout est à jour ✓
             </p>
           ) : (
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {topUnpaid.map((inv) => {
                 const paid = paidByInvoice.get(inv.id) ?? 0;
                 const remaining =
@@ -478,17 +492,17 @@ export default async function DashboardHome() {
                       className="min-w-0 flex-1"
                     >
                       <p className="flex items-center gap-2 text-sm">
-                        <span className="font-medium text-neutral-100">
+                        <span className="font-medium text-slate-900 dark:text-neutral-100">
                           {inv.number}
                         </span>
-                        <span className="truncate text-xs text-neutral-500">
+                        <span className="truncate text-xs text-slate-500 dark:text-neutral-500">
                           · {clientName(inv.client_id)}
                         </span>
                       </p>
                       <p className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px]">
                         <span
                           className={
-                            overdue ? "text-red-300" : "text-neutral-500"
+                            overdue ? "text-red-600 dark:text-red-300" : "text-slate-500 dark:text-neutral-500"
                           }
                         >
                           {inv.due_date ? (
@@ -501,7 +515,7 @@ export default async function DashboardHome() {
                           )}
                         </span>
                         {(inv.reminder_count ?? 0) > 0 && (
-                          <span className="text-amber-500/70">
+                          <span className="text-amber-700 dark:text-amber-500/70">
                             · {inv.reminder_count} relance
                             {(inv.reminder_count ?? 0) > 1 ? "s" : ""}
                           </span>
@@ -510,7 +524,7 @@ export default async function DashboardHome() {
                     </Link>
                     <div className="flex shrink-0 items-center gap-2">
                       <span
-                        className={`text-sm font-medium ${overdue ? "text-red-300" : "text-amber-300"}`}
+                        className={`text-sm font-medium ${overdue ? "text-red-700 dark:text-red-300" : "text-amber-700 dark:text-amber-300"}`}
                       >
                         {formatEUR(remaining)}
                       </span>
@@ -524,31 +538,31 @@ export default async function DashboardHome() {
         </section>
 
         {/* Prochains événements (7 jours) */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-                <CalendarDays className="h-3.5 w-3.5 text-neutral-500" />
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                <CalendarDays className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
                 Prochains événements
               </h2>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-slate-500 dark:text-neutral-500">
                 7 jours à venir · {(upcomingEvents ?? []).length} prévu
                 {(upcomingEvents ?? []).length > 1 ? "s" : ""}
               </p>
             </div>
             <Link
               href="/dashboard/events"
-              className="inline-flex items-center gap-1 text-xs text-neutral-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(upcomingEvents ?? []).length === 0 ? (
-            <p className="py-6 text-center text-xs text-neutral-500">
+            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
               Pas d&apos;événement prévu cette semaine.
             </p>
           ) : (
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {(upcomingEvents ?? []).map((ev) => {
                 const staffCount = staffCountByEvent.get(ev.id) ?? 0;
                 const noStaff = staffCount === 0 && ev.status !== "annule";
@@ -564,26 +578,26 @@ export default async function DashboardHome() {
                       href={`/dashboard/events/${ev.id}`}
                       className="flex items-center gap-3"
                     >
-                      <div className="shrink-0 inline-flex h-10 w-10 flex-col items-center justify-center rounded-md border border-neutral-800 bg-neutral-900">
-                        <span className="text-[9px] uppercase text-neutral-500">
+                      <div className="shrink-0 inline-flex h-10 w-10 flex-col items-center justify-center rounded-md border border-slate-200 bg-slate-100 dark:border-neutral-800 dark:bg-neutral-900">
+                        <span className="text-[9px] uppercase text-slate-500 dark:text-neutral-500">
                           {new Date(ev.date).toLocaleDateString("fr-FR", {
                             month: "short",
                           })}
                         </span>
-                        <span className="text-sm font-semibold text-white">
+                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
                           {new Date(ev.date).getDate()}
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="min-w-0 truncate text-sm font-medium text-white">
+                          <span className="min-w-0 truncate text-sm font-medium text-slate-900 dark:text-white">
                             {ev.title}
                           </span>
                           <span className="shrink-0">
                             <StatusBadge status={ev.status} />
                           </span>
                         </div>
-                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-neutral-500">
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 dark:text-neutral-500">
                           {ev.start_time && (
                             <span className="inline-flex items-center gap-1">
                               <Clock className="h-3 w-3" />
@@ -602,7 +616,7 @@ export default async function DashboardHome() {
                         <div className="flex items-center justify-end gap-1.5">
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noStaff ? "text-amber-300" : "text-neutral-400"
+                              noStaff ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
                             }`}
                             title="Staff assignés"
                           >
@@ -611,7 +625,7 @@ export default async function DashboardHome() {
                           </span>
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noCocktails ? "text-amber-300" : "text-neutral-400"
+                              noCocktails ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
                             }`}
                             title="Cocktails au menu"
                           >
@@ -620,7 +634,7 @@ export default async function DashboardHome() {
                           </span>
                           <span
                             className={`inline-flex items-center gap-0.5 tabular-nums ${
-                              noStock ? "text-amber-300" : "text-neutral-400"
+                              noStock ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-400"
                             }`}
                             title="Produits réservés"
                           >
@@ -629,7 +643,7 @@ export default async function DashboardHome() {
                           </span>
                         </div>
                         {(noStaff || noCocktails || noStock) && (
-                          <p className="mt-0.5 text-[10px] text-amber-400/70">
+                          <p className="mt-0.5 text-[10px] text-amber-700 dark:text-amber-400/70">
                             à compléter
                           </p>
                         )}
@@ -646,25 +660,25 @@ export default async function DashboardHome() {
       {/* ─── Activity feeds: leads + movements ─── */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {/* Demandes récentes */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-              <Inbox className="h-3.5 w-3.5 text-neutral-500" />
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+              <Inbox className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
               Demandes récentes
             </h2>
             <Link
               href="/dashboard/leads"
-              className="inline-flex items-center gap-1 text-xs text-neutral-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(recentLeads ?? []).length === 0 ? (
-            <p className="py-6 text-center text-xs text-neutral-500">
+            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
               Aucune demande pour l&apos;instant.
             </p>
           ) : (
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {(recentLeads ?? []).map((l) => (
                 <li key={l.id}>
                   <Link
@@ -672,10 +686,10 @@ export default async function DashboardHome() {
                     className="flex items-center gap-3 py-2.5 transition-colors hover:opacity-90"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-neutral-100">
+                      <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">
                         {l.contact_name || l.contact_email || "Sans nom"}
                       </p>
-                      <p className="flex items-center gap-2 text-[11px] text-neutral-500">
+                      <p className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-neutral-500">
                         <span>
                           {formatDateFR(l.created_at, { withTime: true })}
                         </span>
@@ -691,42 +705,42 @@ export default async function DashboardHome() {
         </section>
 
         {/* Mouvements stock */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 md:p-5 overflow-hidden">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-              <Package className="h-3.5 w-3.5 text-neutral-500" />
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+              <Package className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" />
               Mouvements stock récents
             </h2>
             <Link
               href="/dashboard/stock"
-              className="inline-flex items-center gap-1 text-xs text-neutral-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {(recentMovements ?? []).length === 0 ? (
-            <p className="py-6 text-center text-xs text-neutral-500">
+            <p className="py-6 text-center text-xs text-slate-500 dark:text-neutral-500">
               Pas de mouvement pour l&apos;instant.
             </p>
           ) : (
-            <ul className="divide-y divide-neutral-900">
+            <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
               {(recentMovements ?? []).map((m) => (
                 <li key={m.id} className="flex items-center gap-3 py-2.5">
                   {m.direction === "in" ? (
-                    <ArrowUpCircle className="h-3.5 w-3.5 text-emerald-400" />
+                    <ArrowUpCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                   ) : (
-                    <ArrowDownCircle className="h-3.5 w-3.5 text-red-400" />
+                    <ArrowDownCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
                   )}
-                  <span className="flex-1 truncate text-sm text-neutral-100">
+                  <span className="flex-1 truncate text-sm text-slate-900 dark:text-neutral-100">
                     {productsMap.get(m.product_id) ?? "—"}
                   </span>
                   <span
-                    className={`text-sm font-medium ${m.direction === "in" ? "text-emerald-300" : "text-red-300"}`}
+                    className={`text-sm font-medium ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}
                   >
                     {m.direction === "in" ? "+" : "−"}
                     {Number(m.qty)}
                   </span>
-                  <span className="text-[10px] text-neutral-600">
+                  <span className="text-[10px] text-slate-400 dark:text-neutral-600">
                     {formatDateFR(m.created_at, { withTime: true })}
                   </span>
                 </li>
@@ -738,7 +752,7 @@ export default async function DashboardHome() {
 
       {/* ─── Quick actions ─── */}
       <section className="mt-6">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-neutral-400">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-neutral-400">
           <Zap className="h-3.5 w-3.5" /> Accès rapide
         </h2>
         <div className="grid gap-3 md:grid-cols-3">
@@ -780,20 +794,20 @@ function HeroKpi({
 }) {
   const valueCls =
     tone === "ok"
-      ? "text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-300"
-      : "text-white";
+      ? "text-amber-700 dark:text-amber-300"
+      : "text-slate-900 dark:text-white";
   return (
     <Link
       href={href}
-      className="group block min-w-0 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900"
+      className="group block min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="min-w-0 truncate text-[10px] uppercase tracking-wide text-neutral-500">
+        <p className="min-w-0 truncate text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
           {label}
         </p>
-        <Icon className="h-3.5 w-3.5 shrink-0 text-neutral-600 transition-colors group-hover:text-neutral-400" />
+        <Icon className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-600 transition-colors group-hover:text-slate-600 dark:group-hover:text-neutral-400" />
       </div>
       <p
         className={`mt-3 truncate font-display text-xl leading-tight tabular-nums sm:text-2xl xl:text-3xl ${valueCls}`}
@@ -802,7 +816,7 @@ function HeroKpi({
         {value}
       </p>
       {hint && (
-        <p className="mt-1 truncate text-[11px] text-neutral-500">{hint}</p>
+        <p className="mt-1 truncate text-[11px] text-slate-500 dark:text-neutral-500">{hint}</p>
       )}
     </Link>
   );
@@ -820,10 +834,10 @@ function QuickCard({
   return (
     <Link
       href={href}
-      className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-5 transition-colors hover:border-neutral-700 hover:bg-neutral-900"
+      className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
     >
-      <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-1 text-xs leading-relaxed text-neutral-400">{desc}</p>
+      <p className="text-sm font-semibold text-slate-900 dark:text-white">{title}</p>
+      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">{desc}</p>
     </Link>
   );
 }

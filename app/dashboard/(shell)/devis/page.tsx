@@ -27,29 +27,37 @@ export default async function DevisListPage() {
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-white md:text-3xl">Devis</h1>
-        <p className="mt-1 text-sm text-neutral-400">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
+          Devis
+        </h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
           Plaquette PowerPoint-style + envoi email — éditeur dans le prochain sprint.
         </p>
       </header>
 
       {error && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           Erreur de chargement : {error.message}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
         {quotes && quotes.length > 0 ? (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-800 text-[10px] uppercase tracking-wide text-neutral-500">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-neutral-800 dark:bg-transparent dark:text-neutral-500">
               <tr>
                 <th className="px-3 py-2.5 font-medium md:px-4">Numéro</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Client</th>
-                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Type</th>
-                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Date événement</th>
+                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">
+                  Type
+                </th>
+                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">
+                  Date événement
+                </th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Statut</th>
-                <th className="px-3 py-2.5 text-right font-medium md:px-4">Total TTC</th>
+                <th className="px-3 py-2.5 text-right font-medium md:px-4">
+                  Total TTC
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -63,30 +71,32 @@ export default async function DevisListPage() {
                 return (
                   <tr
                     key={q.id}
-                    className="border-t border-neutral-900 transition-colors hover:bg-neutral-900"
+                    className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900"
                   >
                     <td className="px-3 py-3 md:px-4">
                       <Link
                         href={`/dashboard/devis/${q.id}`}
-                        className="font-medium text-white transition-colors hover:text-[color:var(--color-grenat-glow)]"
+                        className="font-medium text-slate-900 transition-colors hover:text-[color:var(--color-grenat)] dark:text-white dark:hover:text-[color:var(--color-grenat-glow)]"
                       >
                         {q.number}
                       </Link>
-                      <p className="text-[11px] text-neutral-500">
+                      <p className="text-[11px] text-slate-500 dark:text-neutral-500">
                         Émis {formatDateFR(q.issue_date)}
                       </p>
                     </td>
-                    <td className="px-3 py-3 text-neutral-200 md:px-4">{who}</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-neutral-200 md:px-4">
+                      {who}
+                    </td>
                     <td className="hidden px-3 py-3 md:table-cell md:px-4">
                       <EventTypeLabel value={q.event_type} />
                     </td>
-                    <td className="hidden px-3 py-3 text-xs text-neutral-300 md:table-cell md:px-4">
+                    <td className="hidden px-3 py-3 text-xs text-slate-600 dark:text-neutral-300 md:table-cell md:px-4">
                       {formatDateFR(q.event_date)}
                     </td>
                     <td className="px-3 py-3 md:px-4">
                       <StatusBadge status={q.status} />
                     </td>
-                    <td className="px-3 py-3 text-right text-neutral-200 md:px-4">
+                    <td className="px-3 py-3 text-right font-medium text-slate-900 dark:text-neutral-200 md:px-4">
                       {formatEUR(q.total_ttc)}
                     </td>
                   </tr>
@@ -95,9 +105,12 @@ export default async function DevisListPage() {
             </tbody>
           </table>
         ) : (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucun devis. Convertis une{" "}
-            <Link href="/dashboard/leads" className="text-neutral-300 underline">
+            <Link
+              href="/dashboard/leads"
+              className="text-slate-700 underline hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white"
+            >
               demande
             </Link>{" "}
             en devis pour en créer un.

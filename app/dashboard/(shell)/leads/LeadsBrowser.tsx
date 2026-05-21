@@ -36,12 +36,17 @@ const STATUS_TABS: { value: LeadStatus | "all"; label: string }[] = [
 
 // Pill coloring per status — same palette as StatusBadge.
 const ACTIVE_TONE: Record<LeadStatus | "all", string> = {
-  all: "bg-neutral-800 text-white",
-  nouveau: "bg-blue-500/20 text-blue-200",
-  contacte: "bg-amber-500/20 text-amber-200",
-  devis_envoye: "bg-violet-500/20 text-violet-200",
-  gagne: "bg-emerald-500/25 text-emerald-200",
-  perdu: "bg-neutral-700/40 text-neutral-300",
+  all: "bg-slate-900 text-white dark:bg-neutral-800",
+  nouveau:
+    "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-200",
+  contacte:
+    "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200",
+  devis_envoye:
+    "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-200",
+  gagne:
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-200",
+  perdu:
+    "bg-slate-200 text-slate-700 dark:bg-neutral-700/40 dark:text-neutral-300",
 };
 
 const TYPE_OPTIONS: { value: EventType | "all"; label: string }[] = [
@@ -107,12 +112,12 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
   return (
     <div className="space-y-3">
       {/* Status tabs — instant filter, no navigation */}
-      <div className="-mx-1 flex flex-wrap gap-1 rounded-lg border border-neutral-800 bg-neutral-950/60 p-1">
+      <div className="-mx-1 flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
         {STATUS_TABS.map((t) => {
           const isActive = status === t.value;
           const tone = isActive
             ? ACTIVE_TONE[t.value]
-            : "text-neutral-400 hover:bg-neutral-900 hover:text-white";
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white";
           return (
             <button
               key={t.value}
@@ -128,8 +133,8 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                 className={
                   "rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums " +
                   (isActive
-                    ? "bg-black/30 text-current"
-                    : "bg-neutral-900 text-neutral-500")
+                    ? "bg-black/15 text-current dark:bg-black/30"
+                    : "bg-slate-100 text-slate-500 dark:bg-neutral-900 dark:text-neutral-500")
                 }
               >
                 {counts[t.value]}
@@ -142,20 +147,20 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
       {/* Search + type filter */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Nom, email, entreprise, message…"
-            className="w-full rounded-md border border-neutral-800 bg-neutral-950 py-2 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+            className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-neutral-800 dark:bg-neutral-950 dark:text-white dark:placeholder:text-neutral-600 dark:shadow-none"
           />
         </div>
 
         <select
           value={type}
           onChange={(e) => setType(e.target.value as EventType | "all")}
-          className="rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-neutral-800 dark:bg-neutral-950 dark:text-white dark:shadow-none"
         >
           {TYPE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -172,7 +177,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
               setType("all");
               setSearch("");
             }}
-            className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white dark:shadow-none"
           >
             Réinitialiser
           </button>
@@ -180,10 +185,10 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
         {visible.length > 0 ? (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-800 text-[10px] uppercase tracking-wide text-neutral-500">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-neutral-800 dark:bg-transparent dark:text-neutral-500">
               <tr>
                 <th className="px-3 py-2.5 font-medium md:px-4">Contact</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Événement</th>
@@ -201,20 +206,20 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
               {visible.map((l) => (
                 <tr
                   key={l.id}
-                  className="border-t border-neutral-900 transition-colors hover:bg-neutral-900"
+                  className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900"
                 >
                   <td className="px-3 py-3 md:px-4">
                     <Link href={`/dashboard/leads/${l.id}`} className="block">
-                      <p className="font-medium text-white">
+                      <p className="font-medium text-slate-900 dark:text-white">
                         {l.contact_name || (
-                          <span className="text-neutral-500">—</span>
+                          <span className="text-slate-400 dark:text-neutral-500">—</span>
                         )}
                       </p>
-                      <p className="text-xs text-neutral-400">
+                      <p className="text-xs text-slate-500 dark:text-neutral-400">
                         {l.contact_email}
                       </p>
                       {l.company && (
-                        <p className="mt-0.5 text-xs text-neutral-500">
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
                           {l.company}
                         </p>
                       )}
@@ -223,22 +228,22 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                   <td className="px-3 py-3 md:px-4">
                     <EventTypeLabel value={l.event_type} />
                   </td>
-                  <td className="px-3 py-3 text-xs text-neutral-300 md:px-4">
+                  <td className="px-3 py-3 text-xs text-slate-600 dark:text-neutral-300 md:px-4">
                     {l.event_date ? (
                       formatDateFR(l.event_date)
                     ) : (
                       rawDateText(l.raw_payload) ?? (
-                        <span className="text-neutral-500">—</span>
+                        <span className="text-slate-400 dark:text-neutral-500">—</span>
                       )
                     )}
                   </td>
-                  <td className="hidden px-3 py-3 text-xs text-neutral-300 md:table-cell md:px-4">
-                    {l.guests_count ?? <span className="text-neutral-500">—</span>}
+                  <td className="hidden px-3 py-3 text-xs text-slate-600 dark:text-neutral-300 md:table-cell md:px-4">
+                    {l.guests_count ?? <span className="text-slate-400 dark:text-neutral-500">—</span>}
                   </td>
                   <td className="px-3 py-3 md:px-4">
                     <StatusBadge status={l.status} />
                   </td>
-                  <td className="hidden px-3 py-3 text-xs text-neutral-500 md:table-cell md:px-4">
+                  <td className="hidden px-3 py-3 text-xs text-slate-500 dark:text-neutral-500 md:table-cell md:px-4">
                     {formatDateFR(l.created_at, { withTime: true })}
                   </td>
                 </tr>
@@ -246,7 +251,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
             </tbody>
           </table>
         ) : (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucune demande pour ces filtres.
             {hasAnyFilter && (
               <>
@@ -258,7 +263,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                     setType("all");
                     setSearch("");
                   }}
-                  className="text-neutral-300 underline"
+                  className="text-slate-700 underline hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white"
                 >
                   Réinitialiser
                 </button>
@@ -270,7 +275,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
       </div>
 
       {leads.length >= 500 && (
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-slate-500 dark:text-neutral-500">
           500 premières demandes chargées. Les plus anciennes ne sont pas dans
           la liste.
         </p>

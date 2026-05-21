@@ -87,8 +87,10 @@ export default async function InvoicesListPage({
     <div className="px-4 py-6 md:px-8 md:py-8">
       <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white md:text-3xl">Factures</h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
+            Factures
+          </h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
             Numérotation continue FR, PDF imprimable, lock après émission (art. 242
             nonies A du CGI). Avoirs et paiements partiels supportés.
           </p>
@@ -103,38 +105,38 @@ export default async function InvoicesListPage({
 
       <form
         method="GET"
-        className="mb-4 grid gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 p-3 md:grid-cols-[minmax(0,140px)_minmax(0,140px)_minmax(0,140px)_auto] md:items-end"
+        className="mb-4 grid gap-2 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-3 md:grid-cols-[minmax(0,140px)_minmax(0,140px)_minmax(0,140px)_auto] md:items-end"
       >
         <label className="block">
-          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
             Du
           </span>
           <input
             type="date"
             name="from"
             defaultValue={from ?? ""}
-            className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+            className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
             Au
           </span>
           <input
             type="date"
             name="to"
             defaultValue={to ?? ""}
-            className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+            className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
             Type
           </span>
           <select
             name="kind"
             defaultValue={kind ?? "all"}
-            className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+            className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none"
           >
             <option value="all">Tous</option>
             <option value="factures">Factures</option>
@@ -144,14 +146,14 @@ export default async function InvoicesListPage({
         <div className="flex gap-2">
           <button
             type="submit"
-            className="inline-flex items-center rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-neutral-100 hover:border-neutral-700"
+            className="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-700 dark:hover:text-white dark:shadow-none"
           >
             Filtrer
           </button>
           {(from || to || (kind && kind !== "all")) && (
             <Link
               href="/dashboard/factures"
-              className="inline-flex items-center rounded-md border border-transparent px-3 py-1.5 text-xs text-neutral-400 hover:text-white"
+              className="inline-flex items-center rounded-md border border-transparent px-3 py-1.5 text-xs text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               Réinitialiser
             </Link>
@@ -161,7 +163,7 @@ export default async function InvoicesListPage({
 
       {/* Totals bar */}
       {(invoices?.length ?? 0) > 0 && (
-        <div className="mb-4 grid grid-cols-3 gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-3 text-center">
+        <div className="mb-4 grid grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-3 text-center">
           <Stat label={`Total TTC (${invoices?.length})`} value={formatEUR(sumTtc)} />
           <Stat label="Encaissé" value={formatEUR(sumPaid)} tone="ok" />
           <Stat label="Reste à encaisser" value={formatEUR(sumRemaining)} tone="pending" />
@@ -169,15 +171,15 @@ export default async function InvoicesListPage({
       )}
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {error.message}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/60">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
         {invoices && invoices.length > 0 ? (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-800 text-[10px] uppercase tracking-wide text-neutral-500">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-neutral-800 dark:bg-transparent dark:text-neutral-500">
               <tr>
                 <th className="px-3 py-2.5 font-medium md:px-4">Numéro</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Client</th>
@@ -210,33 +212,33 @@ export default async function InvoicesListPage({
                 return (
                   <tr
                     key={inv.id}
-                    className="border-t border-neutral-900 transition-colors hover:bg-neutral-900"
+                    className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900"
                   >
                     <td className="px-3 py-3 md:px-4">
                       <Link
                         href={`/dashboard/factures/${inv.id}`}
-                        className="inline-flex items-center gap-2 font-medium text-white transition-colors hover:text-[color:var(--color-grenat-glow)]"
+                        className="inline-flex items-center gap-2 font-medium text-slate-900 transition-colors hover:text-[color:var(--color-grenat)] dark:text-white dark:hover:text-[color:var(--color-grenat-glow)]"
                       >
                         {inv.number}
                         {inv.is_credit_note && (
-                          <span className="rounded-full border border-violet-500/40 bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-200">
+                          <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-200">
                             Avoir
                           </span>
                         )}
                       </Link>
                     </td>
-                    <td className="px-3 py-3 text-neutral-200 md:px-4">{who}</td>
-                    <td className="hidden px-3 py-3 text-xs text-neutral-400 md:table-cell md:px-4">
+                    <td className="px-3 py-3 text-slate-700 dark:text-neutral-200 md:px-4">{who}</td>
+                    <td className="hidden px-3 py-3 text-xs text-slate-500 dark:text-neutral-400 md:table-cell md:px-4">
                       {formatDateFR(inv.issue_date)}
                     </td>
                     <td className="hidden px-3 py-3 text-xs md:table-cell md:px-4">
                       {inv.due_date ? (
-                        <span className={overdue ? "text-red-300" : "text-neutral-400"}>
+                        <span className={overdue ? "text-red-600 dark:text-red-300" : "text-slate-500 dark:text-neutral-400"}>
                           {formatDateFR(inv.due_date)}
-                          {overdue && <span className="ml-1 text-red-400">(en retard)</span>}
+                          {overdue && <span className="ml-1 text-red-600 dark:text-red-400">(en retard)</span>}
                         </span>
                       ) : (
-                        <span className="text-neutral-500">—</span>
+                        <span className="text-slate-400 dark:text-neutral-500">—</span>
                       )}
                     </td>
                     <td className="px-3 py-3 md:px-4">
@@ -246,20 +248,24 @@ export default async function InvoicesListPage({
                     </td>
                     <td
                       className={`px-3 py-3 text-right font-medium md:px-4 ${
-                        inv.is_credit_note ? "text-violet-200" : "text-neutral-200"
+                        inv.is_credit_note
+                          ? "text-violet-700 dark:text-violet-200"
+                          : "text-slate-900 dark:text-neutral-200"
                       }`}
                     >
                       {formatEUR(Number(inv.total_ttc))}
                     </td>
                     <td className="hidden px-3 py-3 text-right md:table-cell md:px-4">
                       {inv.is_credit_note ? (
-                        <span className="text-xs text-neutral-600">—</span>
+                        <span className="text-xs text-slate-400 dark:text-neutral-600">—</span>
                       ) : remaining <= 0 ? (
-                        <span className="text-xs text-emerald-300">Soldé</span>
+                        <span className="text-xs text-emerald-700 dark:text-emerald-300">Soldé</span>
                       ) : (
                         <span
                           className={`text-xs font-medium ${
-                            overdue ? "text-red-300" : "text-amber-300"
+                            overdue
+                              ? "text-red-600 dark:text-red-300"
+                              : "text-amber-700 dark:text-amber-300"
                           }`}
                         >
                           {formatEUR(remaining)}
@@ -272,10 +278,13 @@ export default async function InvoicesListPage({
             </tbody>
           </table>
         ) : (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-neutral-500">
             Aucune facture{from || to || (kind && kind !== "all") ? " sur ce filtre" : ""}.
             Depuis un{" "}
-            <Link href="/dashboard/devis" className="text-neutral-300 underline">
+            <Link
+              href="/dashboard/devis"
+              className="text-slate-700 underline hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white"
+            >
               devis accepté
             </Link>
             , clique « Créer la facture » pour en générer une.
@@ -297,13 +306,15 @@ function Stat({
 }) {
   const toneCls =
     tone === "ok"
-      ? "text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-300"
-      : "text-neutral-100";
+      ? "text-amber-700 dark:text-amber-300"
+      : "text-slate-900 dark:text-neutral-100";
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wide text-neutral-500">{label}</p>
+      <p className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+        {label}
+      </p>
       <p className={`mt-0.5 text-sm font-semibold ${toneCls}`}>{value}</p>
     </div>
   );
