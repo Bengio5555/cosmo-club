@@ -115,10 +115,10 @@ export default async function ClientDetailPage({
 
   return (
     <>
-      <div className="border-b border-neutral-900 px-4 pt-6 md:px-8">
+      <div className="border-b border-slate-100 dark:border-neutral-900 px-4 pt-6 md:px-8">
         <Link
           href="/dashboard/clients"
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Tous les clients
         </Link>
@@ -126,9 +126,9 @@ export default async function ClientDetailPage({
 
       {/* Header */}
       <div className="px-4 pt-6 md:px-8">
-        <div className="flex flex-col gap-3 border-b border-neutral-900 pb-5 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-neutral-900 pb-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+            <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Client
               {client.company_name && " · B2B"}
               {client.archived && " · archivé"}
@@ -136,7 +136,7 @@ export default async function ClientDetailPage({
             <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
               {displayName}
               {client.archived && (
-                <span className="ml-3 align-middle rounded-full border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+                <span className="ml-3 align-middle rounded-full border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
                   Archivé
                 </span>
               )}
@@ -154,7 +154,7 @@ export default async function ClientDetailPage({
               {client.email && (
                 <a
                   href={`mailto:${client.email}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
                 >
                   <Mail className="h-3 w-3" /> {client.email}
                 </a>
@@ -162,13 +162,13 @@ export default async function ClientDetailPage({
               {client.phone && (
                 <a
                   href={`tel:${client.phone}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
                 >
                   <Phone className="h-3 w-3" /> {client.phone}
                 </a>
               )}
               {client.city && (
-                <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-neutral-400">
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-slate-500 dark:text-neutral-400">
                   <MapPin className="h-3 w-3" /> {client.city}
                 </span>
               )}
@@ -215,10 +215,10 @@ export default async function ClientDetailPage({
           {/* Devis */}
           <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-                <FileText className="h-3.5 w-3.5 text-neutral-500" />
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                <FileText className="h-3.5 w-3.5 text-slate-500 dark:text-neutral-500" />
                 Devis
-                <span className="text-[11px] font-normal text-neutral-500">
+                <span className="text-[11px] font-normal text-slate-500 dark:text-neutral-500">
                   · {quotes?.length ?? 0}
                   {acceptedQuotes.length > 0 &&
                     ` · ${acceptedQuotes.length} accepté${acceptedQuotes.length > 1 ? "s" : ""}`}
@@ -231,7 +231,7 @@ export default async function ClientDetailPage({
                   <li key={q.id} className="flex items-center gap-3 py-2.5">
                     <Link
                       href={`/dashboard/devis/${q.id}`}
-                      className="font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-white"
+                      className="font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-slate-900 dark:hover:text-white"
                     >
                       {q.number}
                     </Link>
@@ -240,7 +240,7 @@ export default async function ClientDetailPage({
                       {q.event_date && ` · événement ${formatDateFR(q.event_date)}`}
                     </div>
                     <StatusBadge status={q.status} />
-                    <span className="w-20 text-right font-medium text-neutral-200">
+                    <span className="w-20 text-right font-medium text-slate-700 dark:text-neutral-200">
                       {formatEUR(q.total_ttc)}
                     </span>
                   </li>
@@ -256,10 +256,10 @@ export default async function ClientDetailPage({
           {/* Factures */}
           <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-                <Receipt className="h-3.5 w-3.5 text-neutral-500" />
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                <Receipt className="h-3.5 w-3.5 text-slate-500 dark:text-neutral-500" />
                 Factures & avoirs
-                <span className="text-[11px] font-normal text-neutral-500">
+                <span className="text-[11px] font-normal text-slate-500 dark:text-neutral-500">
                   · {invoices?.length ?? 0}
                 </span>
               </h2>
@@ -275,7 +275,7 @@ export default async function ClientDetailPage({
                     <li key={inv.id} className="flex items-center gap-3 py-2.5">
                       <Link
                         href={`/dashboard/factures/${inv.id}`}
-                        className="inline-flex items-center gap-1.5 font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-white"
+                        className="inline-flex items-center gap-1.5 font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-slate-900 dark:hover:text-white"
                       >
                         {inv.number}
                         {inv.is_credit_note && (
@@ -300,7 +300,7 @@ export default async function ClientDetailPage({
                       </div>
                       <StatusBadge status={inv.status} />
                       <span
-                        className={`w-24 text-right font-medium ${inv.is_credit_note ? "text-violet-700 dark:text-violet-200" : "text-neutral-200"}`}
+                        className={`w-24 text-right font-medium ${inv.is_credit_note ? "text-violet-700 dark:text-violet-200" : "text-slate-700 dark:text-neutral-200"}`}
                       >
                         {formatEUR(inv.total_ttc)}
                       </span>
@@ -318,10 +318,10 @@ export default async function ClientDetailPage({
           {/* Paiements */}
           {paymentsForClient.length > 0 && (
             <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <CalendarDays className="h-3.5 w-3.5 text-neutral-500" />
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                <CalendarDays className="h-3.5 w-3.5 text-slate-500 dark:text-neutral-500" />
                 Encaissements
-                <span className="text-[11px] font-normal text-neutral-500">
+                <span className="text-[11px] font-normal text-slate-500 dark:text-neutral-500">
                   · {paymentsForClient.length}
                 </span>
               </h2>
@@ -343,7 +343,7 @@ export default async function ClientDetailPage({
                       {inv && (
                         <Link
                           href={`/dashboard/factures/${inv.id}`}
-                          className="text-xs text-neutral-400 transition-colors hover:text-white"
+                          className="text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
                         >
                           {inv.number}
                         </Link>
@@ -358,10 +358,10 @@ export default async function ClientDetailPage({
           {/* Leads (historique demande initiale) */}
           {leads && leads.length > 0 && (
             <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <Inbox className="h-3.5 w-3.5 text-neutral-500" />
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                <Inbox className="h-3.5 w-3.5 text-slate-500 dark:text-neutral-500" />
                 Demandes initiales
-                <span className="text-[11px] font-normal text-neutral-500">
+                <span className="text-[11px] font-normal text-slate-500 dark:text-neutral-500">
                   · {leads.length}
                 </span>
               </h2>
@@ -370,7 +370,7 @@ export default async function ClientDetailPage({
                   <li key={l.id} className="flex items-center gap-3 py-2">
                     <Link
                       href={`/dashboard/leads/${l.id}`}
-                      className="text-xs font-medium text-neutral-200 transition-colors hover:text-white"
+                      className="text-xs font-medium text-slate-700 dark:text-neutral-200 transition-colors hover:text-slate-900 dark:hover:text-white"
                     >
                       {formatDateFR(l.created_at)}
                     </Link>
@@ -405,7 +405,7 @@ function StatCard({
       ? "text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
       ? "text-amber-700 dark:text-amber-300"
-      : "text-neutral-100";
+      : "text-slate-900 dark:text-neutral-100";
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-3">
       <p className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">

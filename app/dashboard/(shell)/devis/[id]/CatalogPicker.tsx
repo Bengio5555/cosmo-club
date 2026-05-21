@@ -119,16 +119,16 @@ export function CatalogPicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1 text-[11px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+        className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1 text-[11px] uppercase tracking-wide text-slate-700 dark:text-neutral-200 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
       >
         <Library className="h-3 w-3" /> Catalogue
       </button>
 
       {open && (
         <Drawer onClose={() => setOpen(false)}>
-          <header className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
+          <header className="flex items-center justify-between border-b border-slate-200 dark:border-neutral-800 px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-white">Catalogue</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Catalogue</p>
               <p className="text-[11px] text-slate-500 dark:text-neutral-500">
                 Sélectionne une ou plusieurs prestations à ajouter au devis.
               </p>
@@ -136,22 +136,22 @@ export function CatalogPicker({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded p-1.5 text-neutral-400 hover:bg-neutral-900 hover:text-white"
+              className="rounded p-1.5 text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white"
               aria-label="Fermer"
             >
               <X className="h-4 w-4" />
             </button>
           </header>
 
-          <div className="space-y-3 border-b border-neutral-800 px-4 py-3">
+          <div className="space-y-3 border-b border-slate-200 dark:border-neutral-800 px-4 py-3">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 dark:text-neutral-500" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Chercher une prestation…"
                 autoFocus
-                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </div>
             <label className="block">
@@ -163,7 +163,7 @@ export function CatalogPicker({
                 onChange={(e) => setTargetSection(e.target.value)}
                 placeholder={defaultSection || "Bar à cocktails, Barista…"}
                 list="catalog-sections"
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
               <datalist id="catalog-sections">
                 {sections.map((s) => (
@@ -186,7 +186,7 @@ export function CatalogPicker({
                 <br />
                 <Link
                   href="/dashboard/catalog"
-                  className="mt-2 inline-block text-neutral-300 underline"
+                  className="mt-2 inline-block text-slate-600 dark:text-neutral-300 underline"
                 >
                   Créer ton catalogue →
                 </Link>
@@ -199,7 +199,7 @@ export function CatalogPicker({
             )}
             {grouped.map(([section, list]) => (
               <div key={section}>
-                <p className="sticky top-0 bg-neutral-950/90 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 backdrop-blur">
+                <p className="sticky top-0 bg-white dark:bg-neutral-950/90 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500 backdrop-blur">
                   {section}
                 </p>
                 <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
@@ -213,14 +213,14 @@ export function CatalogPicker({
                           className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors ${
                             on
                               ? "bg-[color:var(--color-grenat)]/10"
-                              : "hover:bg-neutral-900"
+                              : "hover:bg-slate-100 dark:hover:bg-neutral-900"
                           }`}
                         >
                           <span
                             className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
                               on
-                                ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)] text-white"
-                                : "border-neutral-700 bg-neutral-900"
+                                ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)] text-slate-900 dark:text-white"
+                                : "border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900"
                             }`}
                             aria-hidden
                           >
@@ -231,16 +231,16 @@ export function CatalogPicker({
                             )}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium text-white">
+                            <span className="block truncate text-sm font-medium text-slate-900 dark:text-white">
                               {it.title}
                             </span>
                             {it.description && (
-                              <span className="mt-0.5 block truncate text-xs text-neutral-400">
+                              <span className="mt-0.5 block truncate text-xs text-slate-500 dark:text-neutral-400">
                                 {it.description}
                               </span>
                             )}
                           </span>
-                          <span className="shrink-0 text-xs font-medium text-neutral-300">
+                          <span className="shrink-0 text-xs font-medium text-slate-600 dark:text-neutral-300">
                             {formatEUR(it.unit_price_ht ?? 0)}
                             {it.unit ? (
                               <span className="ml-1 text-[10px] text-slate-500 dark:text-neutral-500">
@@ -257,7 +257,7 @@ export function CatalogPicker({
             ))}
           </div>
 
-          <footer className="flex items-center justify-between gap-3 border-t border-neutral-800 px-4 py-3">
+          <footer className="flex items-center justify-between gap-3 border-t border-slate-200 dark:border-neutral-800 px-4 py-3">
             <span className="text-xs text-slate-500 dark:text-neutral-500">
               {selected.size} sélectionnée{selected.size > 1 ? "s" : ""}
             </span>
@@ -265,7 +265,7 @@ export function CatalogPicker({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
+                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
               >
                 Annuler
               </button>
@@ -322,7 +322,7 @@ function Drawer({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex h-full w-full max-w-md flex-col bg-neutral-950 shadow-2xl md:border-l md:border-neutral-800">
+      <div className="flex h-full w-full max-w-md flex-col bg-white dark:bg-neutral-950 shadow-2xl md:border-l md:border-neutral-800">
         {children}
       </div>
     </div>

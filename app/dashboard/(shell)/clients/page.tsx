@@ -221,7 +221,7 @@ export default async function ClientsListPage({
                         href={`/dashboard/clients/${c.id}`}
                         className="flex items-center gap-3"
                       >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[10px] font-semibold text-white">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[10px] font-semibold text-slate-900 dark:text-white">
                           {(displayName
                             .split(/\s+/)
                             .filter(Boolean)

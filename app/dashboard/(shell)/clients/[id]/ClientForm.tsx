@@ -87,12 +87,12 @@ export function ClientForm({ client }: { client: Client }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-white">Coordonnées</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Coordonnées</h2>
         <button
           type="button"
           onClick={save}
           disabled={pending || !dirty}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-[11px] font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-[11px] font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {pending ? (
             <Loader2 className="h-3 w-3 animate-spin" />
@@ -170,7 +170,7 @@ export function ClientForm({ client }: { client: Client }) {
         </Field>
       </div>
 
-      <p className="mt-3 text-[10px] text-neutral-600">
+      <p className="mt-3 text-[10px] text-slate-400 dark:text-neutral-600">
         Les factures déjà émises conservent le snapshot légal au moment de
         l&apos;émission — modifier le SIRET ou l&apos;adresse ici n&apos;impacte que les
         futures factures.
@@ -180,7 +180,7 @@ export function ClientForm({ client }: { client: Client }) {
 }
 
 const inputCls =
-  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({
   label,

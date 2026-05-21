@@ -156,9 +156,9 @@ export function EventEditor({
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
-      <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+          <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
             Événement · {statusLabel(event.status)}
           </p>
           <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
@@ -181,7 +181,7 @@ export function EventEditor({
               type="button"
               onClick={save}
               disabled={pending || !dirty}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -208,7 +208,7 @@ export function EventEditor({
                 type="button"
                 onClick={cancelEvent}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
               >
                 <Ban className="h-3 w-3" /> Annuler
               </button>
@@ -229,7 +229,7 @@ export function EventEditor({
                 type="button"
                 onClick={() => setCloseOpen(true)}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
               >
                 <Flag className="h-3 w-3" /> Clôturer
               </button>
@@ -237,7 +237,7 @@ export function EventEditor({
                 type="button"
                 onClick={cancelEvent}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
               >
                 <Ban className="h-3 w-3" /> Annuler
               </button>
@@ -259,7 +259,7 @@ export function EventEditor({
       )}
 
       {readOnly && (
-        <div className="mt-3 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 px-3 py-2 text-xs text-neutral-400">
+        <div className="mt-3 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
           {event.status === "termine"
             ? "Événement clôturé. Les informations sont figées — consulte pour archive."
             : "Événement annulé."}
@@ -298,7 +298,7 @@ export function EventEditor({
             />
           </div>
           <label className="block">
-            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Lieu
             </span>
             <LocationField
@@ -306,7 +306,7 @@ export function EventEditor({
               onChange={setLocation}
               readOnly={readOnly}
               placeholder="Adresse ou nom du site"
-              inputClassName="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+              inputClassName="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
             />
           </label>
           <LabeledInput
@@ -320,7 +320,7 @@ export function EventEditor({
 
         <div>
           <label className="block">
-            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Briefing & notes internes
             </span>
             <textarea
@@ -329,7 +329,7 @@ export function EventEditor({
               rows={10}
               readOnly={readOnly}
               placeholder="Setup bar, carte cocktails, contraintes lieu, contact staff sur place, coupure courant vers 00h…"
-              className="w-full resize-y rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+              className="w-full resize-y rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
             />
           </label>
         </div>
@@ -410,18 +410,18 @@ function CloseEventDialog({
       onClick={() => !pending && onCancel()}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-neutral-900 px-5 py-4">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-neutral-900 px-5 py-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Clôture événement
             </p>
-            <h2 className="mt-1 font-display text-lg text-white">
+            <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
               Quantités retournées
             </h2>
-            <p className="mt-1 text-xs text-neutral-400">
+            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
               Renseigne les quantités revenues du terrain. La consommation
               réelle (= sortie − retour) est déduite du stock.
             </p>
@@ -431,7 +431,7 @@ function CloseEventDialog({
             onClick={onCancel}
             disabled={pending}
             aria-label="Fermer"
-            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white disabled:opacity-50"
+            className="rounded-md p-1 text-slate-500 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
           >
             <X className="h-4 w-4" />
           </button>
@@ -439,7 +439,7 @@ function CloseEventDialog({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {reservations.length === 0 ? (
-            <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/40 px-3 py-4 text-center text-xs text-neutral-400">
+            <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/40 px-3 py-4 text-center text-xs text-slate-500 dark:text-neutral-400">
               Aucun produit réservé pour cet événement. La clôture
               n&apos;écrira aucun mouvement de stock.
             </div>
@@ -463,10 +463,10 @@ function CloseEventDialog({
                   const consumed = Math.max(0, r.qty_reserved - ret);
                   return (
                     <tr key={r.product_id}>
-                      <td className="py-2 pr-2 text-neutral-200">
+                      <td className="py-2 pr-2 text-slate-700 dark:text-neutral-200">
                         {r.product_name}
                       </td>
-                      <td className="py-2 pr-2 text-right text-neutral-400">
+                      <td className="py-2 pr-2 text-right text-slate-500 dark:text-neutral-400">
                         {r.qty_reserved} {r.unit}
                       </td>
                       <td className="py-2 pr-2 text-right">
@@ -481,10 +481,10 @@ function CloseEventDialog({
                           }
                           placeholder="0"
                           disabled={pending}
-                          className="w-20 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                          className="w-20 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
                         />
                       </td>
-                      <td className="py-2 text-right text-neutral-200">
+                      <td className="py-2 text-right text-slate-700 dark:text-neutral-200">
                         {consumed} {r.unit}
                       </td>
                     </tr>
@@ -496,24 +496,24 @@ function CloseEventDialog({
         </div>
 
         {reservations.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-neutral-900 px-5 py-3 text-[11px] text-neutral-400">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-slate-100 dark:border-neutral-900 px-5 py-3 text-[11px] text-slate-500 dark:text-neutral-400">
             <span className="inline-flex items-center gap-1.5">
               <Package className="h-3 w-3" />
               {totals.reserved} sortis
             </span>
             <span>· {totals.returned} retournés</span>
-            <span className="font-semibold text-neutral-200">
+            <span className="font-semibold text-slate-700 dark:text-neutral-200">
               · {totals.consumed} consommés
             </span>
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-2 border-t border-neutral-900 px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-neutral-900 px-5 py-3">
           <button
             type="button"
             onClick={onCancel}
             disabled={pending}
-            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700 disabled:opacity-50"
+            className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700 disabled:opacity-50"
           >
             Annuler
           </button>
@@ -521,7 +521,7 @@ function CloseEventDialog({
             type="button"
             onClick={submit}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
           >
             {pending && <Loader2 className="h-3 w-3 animate-spin" />}
             <Flag className="h-3 w-3" /> Clôturer définitivement
@@ -551,7 +551,7 @@ function StatusPill({ status }: { status: Event["status"] }) {
       label: "Terminé",
     },
     annule: {
-      cls: "border-neutral-700 bg-neutral-800 text-neutral-400",
+      cls: "border-slate-300 dark:border-neutral-700 bg-slate-200 dark:bg-neutral-800 text-slate-500 dark:text-neutral-400",
       label: "Annulé",
     },
   };
@@ -582,7 +582,7 @@ function LabeledInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       <input
@@ -591,7 +591,7 @@ function LabeledInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );

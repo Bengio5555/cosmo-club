@@ -95,8 +95,8 @@ export function RedditFeed({
                 className={
                   "rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
                   (active
-                    ? "bg-neutral-800 text-white"
-                    : "text-neutral-400 hover:text-white")
+                    ? "bg-slate-200 dark:bg-neutral-800 text-slate-900 dark:text-white"
+                    : "text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white")
                 }
               >
                 {t.label}
@@ -107,7 +107,7 @@ export function RedditFeed({
 
         <div className="flex items-center gap-3">
           {refreshMsg && (
-            <span className="text-xs text-neutral-400">{refreshMsg}</span>
+            <span className="text-xs text-slate-500 dark:text-neutral-400">{refreshMsg}</span>
           )}
           <button
             onClick={onRefresh}
@@ -135,8 +135,8 @@ export function RedditFeed({
 
 function EmptyState({ filter }: { filter: Filter }) {
   return (
-    <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-950/60 p-10 text-center">
-      <Inbox className="mx-auto h-8 w-8 text-neutral-600" />
+    <div className="rounded-xl border border-dashed border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/60 p-10 text-center">
+      <Inbox className="mx-auto h-8 w-8 text-slate-400 dark:text-neutral-600" />
       <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">
         {filter === "pending"
           ? "Aucun thread à traiter pour l'instant. Lance « Rafraîchir Reddit » pour scanner les nouveaux posts."
@@ -204,16 +204,16 @@ function ThreadCard({ thread }: { thread: Thread }) {
   const statusBadge = {
     pending: "bg-blue-500/15 text-blue-300 border-blue-500/30",
     answered: "bg-green-500/15 text-green-300 border-green-500/30",
-    skipped: "bg-neutral-700/30 text-neutral-400 border-neutral-700",
+    skipped: "bg-neutral-700/30 text-slate-500 dark:text-neutral-400 border-slate-300 dark:border-neutral-700",
   }[thread.status];
 
   return (
-    <li className="rounded-xl border border-neutral-800 bg-neutral-950/80 p-5 md:p-6">
+    <li className="rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/80 p-5 md:p-6">
       {/* Thread header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="rounded border border-neutral-700 bg-neutral-900 px-1.5 py-0.5 font-mono text-neutral-300">
+            <span className="rounded border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-1.5 py-0.5 font-mono text-slate-600 dark:text-neutral-300">
               r/{thread.subreddit}
             </span>
             <span className={"rounded border px-1.5 py-0.5 " + statusBadge}>
@@ -223,12 +223,12 @@ function ThreadCard({ thread }: { thread: Thread }) {
                   ? "répondu"
                   : "ignoré"}
             </span>
-            <span className="text-neutral-500">·</span>
-            <span className="text-neutral-400">
+            <span className="text-slate-500 dark:text-neutral-500">·</span>
+            <span className="text-slate-500 dark:text-neutral-400">
               {ageLabel} · {thread.score} upvotes · {thread.num_comments} comm.
             </span>
-            <span className="text-neutral-500">·</span>
-            <span className="text-neutral-500 italic">
+            <span className="text-slate-500 dark:text-neutral-500">·</span>
+            <span className="text-slate-500 dark:text-neutral-500 italic">
               match « {thread.matched_keyword} »
             </span>
           </div>
@@ -236,10 +236,10 @@ function ThreadCard({ thread }: { thread: Thread }) {
             href={thread.permalink}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 inline-flex items-baseline gap-1.5 font-display text-lg text-white hover:text-[color:var(--color-grenat)] md:text-xl"
+            className="mt-2 inline-flex items-baseline gap-1.5 font-display text-lg text-slate-900 dark:text-white hover:text-[color:var(--color-grenat)] md:text-xl"
           >
             {thread.title}
-            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-neutral-500" />
           </a>
           {thread.author && (
             <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">par u/{thread.author}</p>
@@ -258,7 +258,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
             {showBody ? "Masquer le post" : "Voir le post"}
           </button>
           {showBody && (
-            <pre className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-md border border-neutral-800 bg-black/40 p-3 font-sans text-xs leading-relaxed text-neutral-300">
+            <pre className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-md border border-slate-200 dark:border-neutral-800 bg-black/40 p-3 font-sans text-xs leading-relaxed text-slate-600 dark:text-neutral-300">
               {thread.selftext}
             </pre>
           )}
@@ -267,12 +267,12 @@ function ThreadCard({ thread }: { thread: Thread }) {
 
       {/* Draft area */}
       <div className="mt-4 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60">
-        <div className="flex items-center justify-between border-b border-neutral-800 px-3 py-1.5 text-[10px] uppercase tracking-wider text-neutral-500">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-neutral-800 px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-500 dark:text-neutral-500">
           <span>Brouillon Claude (éditable avant copie)</span>
           <button
             onClick={onRegenerate}
             disabled={pending}
-            className="inline-flex items-center gap-1 text-neutral-400 hover:text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
           >
             <RotateCw className={"h-3 w-3 " + (pending ? "animate-spin" : "")} />
             Régénérer
@@ -288,7 +288,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
               ? "Brouillon pas encore généré. Clique « Régénérer » pour lancer Claude."
               : ""
           }
-          className="block w-full resize-y border-0 bg-transparent px-3 py-3 text-sm leading-relaxed text-neutral-100 placeholder:text-neutral-600 focus:outline-none"
+          className="block w-full resize-y border-0 bg-transparent px-3 py-3 text-sm leading-relaxed text-slate-900 dark:text-neutral-100 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:outline-none"
         />
       </div>
 
@@ -307,7 +307,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
             href={thread.permalink}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 transition-colors hover:border-neutral-600"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-3 py-1.5 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-400 dark:hover:border-neutral-600"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             Ouvrir Reddit
@@ -329,7 +329,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
             <button
               onClick={() => onSetStatus("skipped")}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-neutral-600 hover:text-neutral-200 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 px-3 py-1.5 text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:border-slate-400 dark:hover:border-neutral-600 hover:text-neutral-200 disabled:opacity-50"
             >
               <X className="h-3.5 w-3.5" />
               Ignorer
@@ -339,7 +339,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
             <button
               onClick={() => onSetStatus("pending")}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-neutral-600 hover:text-neutral-200 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 px-3 py-1.5 text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:border-slate-400 dark:hover:border-neutral-600 hover:text-neutral-200 disabled:opacity-50"
             >
               Remettre à traiter
             </button>

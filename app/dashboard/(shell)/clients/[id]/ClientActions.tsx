@@ -76,7 +76,7 @@ export function ClientActions({
           type="button"
           onClick={toggleArchive}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700 hover:text-white disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-60"
           title={archived ? "Désarchiver" : "Archiver (masquer du listing)"}
         >
           {archived ? (

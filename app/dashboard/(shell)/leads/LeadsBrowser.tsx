@@ -36,7 +36,7 @@ const STATUS_TABS: { value: LeadStatus | "all"; label: string }[] = [
 
 // Pill coloring per status — same palette as StatusBadge.
 const ACTIVE_TONE: Record<LeadStatus | "all", string> = {
-  all: "bg-slate-900 text-white dark:bg-neutral-800",
+  all: "bg-slate-900 text-slate-900 dark:text-white dark:bg-neutral-800",
   nouveau:
     "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-200",
   contacte:
@@ -222,7 +222,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                       href={`/dashboard/leads/${l.id}`}
                       className="flex items-center gap-3"
                     >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[10px] font-semibold text-white">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[10px] font-semibold text-slate-900 dark:text-white">
                         {initials}
                       </div>
                       <div className="min-w-0">

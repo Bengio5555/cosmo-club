@@ -50,7 +50,7 @@ export default async function RedditMonitorPage({
     <div className="space-y-8 p-6 md:p-10">
       <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-display text-3xl text-white md:text-4xl">
+          <h1 className="font-display text-3xl text-slate-900 dark:text-white md:text-4xl">
             Reddit — veille &amp; brouillons
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-neutral-400">

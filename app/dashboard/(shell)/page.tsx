@@ -336,7 +336,7 @@ export default async function DashboardHome() {
           </Link>
           <Link
             href="/dashboard/devis"
-            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-slate-900 dark:text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
           >
             Nouveau devis
           </Link>
@@ -720,7 +720,7 @@ export default async function DashboardHome() {
                       href={`/dashboard/leads/${l.id}`}
                       className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-neutral-900"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-semibold text-white">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-semibold text-slate-900 dark:text-white">
                         {initials || "?"}
                       </div>
                       <div className="min-w-0 flex-1">

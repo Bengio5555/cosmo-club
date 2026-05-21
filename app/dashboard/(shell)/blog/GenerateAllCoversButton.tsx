@@ -62,7 +62,7 @@ export function GenerateAllCoversButton({ missingCount }: { missingCount: number
         type="button"
         onClick={run}
         disabled={pending}
-        className="inline-flex items-center gap-2 rounded-md border border-neutral-700 bg-neutral-900 px-3.5 py-2 text-xs font-medium text-slate-900 dark:text-neutral-100 transition hover:border-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-3.5 py-2 text-xs font-medium text-slate-900 dark:text-neutral-100 transition hover:border-slate-400 dark:hover:border-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />

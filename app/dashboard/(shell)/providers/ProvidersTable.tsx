@@ -134,18 +134,18 @@ export function ProvidersTable({ providers }: { providers: Provider[] }) {
           {visible.filter((p) => !p.archived).length} prestataire(s) actif(s)
           {archived.length > 0 && ` · ${archived.length} archivé(s)`}
           {(cat !== "all" || normalized) && providers.length > 0 && (
-            <span className="ml-1 text-neutral-600"> · sur {providers.length} au total</span>
+            <span className="ml-1 text-slate-400 dark:text-neutral-600"> · sur {providers.length} au total</span>
           )}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 dark:text-neutral-500" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Société, contact, service…"
-              className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-72"
+              className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-72"
             />
           </div>
           <button
@@ -179,7 +179,7 @@ export function ProvidersTable({ providers }: { providers: Provider[] }) {
         ) : (
           grouped.map(([catName, list]) => (
             <div key={catName} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-              <div className="border-b border-neutral-800 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+              <div className="border-b border-slate-200 dark:border-neutral-800 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
                 {catName} · {list.length}
               </div>
               <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
@@ -200,7 +200,7 @@ export function ProvidersTable({ providers }: { providers: Provider[] }) {
 
         {archived.length > 0 && (
           <details className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 hover:text-neutral-300">
+            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500 hover:text-neutral-300">
               Archivés · {archived.length}
             </summary>
             <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
@@ -265,7 +265,7 @@ function ProviderRow({
   return (
     <li className={`flex flex-col gap-2 px-4 py-3 ${p.archived ? "opacity-50" : ""} md:flex-row md:items-center md:gap-3`}>
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-white">{displayName}</p>
+        <p className="font-medium text-slate-900 dark:text-white">{displayName}</p>
         <p className="text-[11px] text-slate-500 dark:text-neutral-500">
           {p.service_type && p.service_type !== p.company_name ? p.service_type : null}
           {p.contact_name ? `${p.service_type && p.service_type !== p.company_name ? " · " : ""}${p.contact_name}` : null}
@@ -317,7 +317,7 @@ function ProviderRow({
           type="button"
           onClick={onEdit}
           disabled={pending}
-          className="rounded p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+          className="rounded p-1.5 text-slate-500 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-800 hover:text-slate-900 dark:hover:text-white"
           aria-label="Modifier"
         >
           <Pencil className="h-3.5 w-3.5" />
@@ -326,7 +326,7 @@ function ProviderRow({
           type="button"
           onClick={onArchive}
           disabled={pending}
-          className="rounded p-1.5 text-neutral-500 hover:bg-neutral-800 hover:text-neutral-200"
+          className="rounded p-1.5 text-slate-500 dark:text-neutral-500 hover:bg-slate-200 dark:hover:bg-neutral-800 hover:text-neutral-200"
           aria-label={p.archived ? "Désarchiver" : "Archiver"}
           title={p.archived ? "Désarchiver" : "Archiver"}
         >
@@ -336,7 +336,7 @@ function ProviderRow({
           type="button"
           onClick={onDelete}
           disabled={pending}
-          className="rounded p-1.5 text-neutral-500 hover:bg-red-500/10 hover:text-red-300"
+          className="rounded p-1.5 text-slate-500 dark:text-neutral-500 hover:bg-red-500/10 hover:text-red-300"
           aria-label="Supprimer"
           title="Supprimer définitivement"
         >
@@ -367,14 +367,14 @@ function CatPill({
       onClick={() => onClick(value)}
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
         active
-          ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/15 text-white"
-          : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-700 hover:text-neutral-200"
+          ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/15 text-slate-900 dark:text-white"
+          : "border-slate-200 dark:border-neutral-800 bg-slate-100 dark:bg-neutral-900 text-slate-500 dark:text-neutral-400 hover:border-slate-300 dark:hover:border-neutral-700 hover:text-neutral-200"
       }`}
     >
       {label}
       <span
         className={`rounded-full px-1.5 text-[10px] font-mono ${
-          active ? "bg-[color:var(--color-grenat)]/30" : "bg-neutral-800"
+          active ? "bg-[color:var(--color-grenat)]/30" : "bg-slate-200 dark:bg-neutral-800"
         }`}
       >
         {count}
@@ -422,17 +422,17 @@ function ProviderModal({
   const isEdit = !!provider;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-5 shadow-2xl">
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               {isEdit ? "Modifier" : "Nouveau"}
             </p>
-            <h2 className="mt-1 font-display text-lg text-white">
+            <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
               {isEdit ? provider!.company_name ?? provider!.service_type ?? "Prestataire" : "Prestataire"}
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white" aria-label="Fermer">
+          <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-500 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white" aria-label="Fermer">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -493,8 +493,8 @@ function ProviderModal({
             <textarea name="notes" defaultValue={provider?.notes ?? ""} rows={2} className={input} />
           </Field>
 
-          <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-900 pt-4">
-            <button type="button" onClick={onClose} disabled={pending} className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700">
+          <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-neutral-900 pt-4">
+            <button type="button" onClick={onClose} disabled={pending} className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700">
               Annuler
             </button>
             <button type="submit" disabled={pending} className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)] disabled:opacity-60">
@@ -509,7 +509,7 @@ function ProviderModal({
 }
 
 const input =
-  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

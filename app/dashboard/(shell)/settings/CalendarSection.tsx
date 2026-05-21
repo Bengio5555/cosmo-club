@@ -90,14 +90,14 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
   return (
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-5">
       <div className="mb-4 flex items-start gap-3">
-        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2 text-neutral-300">
+        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2 text-slate-600 dark:text-neutral-300">
           <Calendar className="h-4 w-4" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-white">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
             Synchronisation Google Agenda
           </h2>
-          <p className="mt-1 text-xs leading-relaxed text-neutral-400">
+          <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
             Expose tes événements en flux iCalendar pour les afficher dans
             Google Agenda, Apple Calendar ou Outlook. Lecture seule — tes
             modifications dans Cosmo se propagent automatiquement.
@@ -116,12 +116,12 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
                 readOnly
                 value={url}
                 onFocus={(e) => e.currentTarget.select()}
-                className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 font-mono text-xs text-neutral-200 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 font-mono text-xs text-slate-700 dark:text-neutral-200 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={copy}
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-700 dark:text-neutral-200 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
               >
                 <Copy className="h-3 w-3" /> {copied ? "Copié ✓" : "Copier"}
               </button>
@@ -129,17 +129,17 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
           </label>
 
           <details className="mt-4 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/50 px-3 py-2 text-xs">
-            <summary className="cursor-pointer font-semibold text-neutral-200">
+            <summary className="cursor-pointer font-semibold text-slate-700 dark:text-neutral-200">
               Comment ajouter à Google Agenda&nbsp;?
             </summary>
-            <ol className="mt-2 list-decimal space-y-1 pl-4 text-neutral-400">
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-slate-500 dark:text-neutral-400">
               <li>
                 Ouvre{" "}
                 <a
                   href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-neutral-200 hover:text-white"
+                  className="inline-flex items-center gap-1 text-slate-700 dark:text-neutral-200 hover:text-slate-900 dark:hover:text-white"
                 >
                   Google Agenda → Ajouter par URL
                   <ExternalLink className="h-3 w-3" />
@@ -152,19 +152,19 @@ export function CalendarSection({ initialToken }: { initialToken: string | null 
                 la barre latérale
               </li>
             </ol>
-            <p className="mt-2 text-neutral-500">
+            <p className="mt-2 text-slate-500 dark:text-neutral-500">
               Google rafraîchit automatiquement toutes les 8 à 24h. Pour
               forcer&nbsp;: clic droit sur l&apos;agenda dans la barre
               latérale → « Actualiser ».
             </p>
           </details>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-neutral-900 pt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 dark:border-neutral-900 pt-4">
             <button
               type="button"
               onClick={rotate}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-700 dark:text-neutral-200 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
             >
               <RefreshCw className="h-3 w-3" /> Régénérer le lien
             </button>

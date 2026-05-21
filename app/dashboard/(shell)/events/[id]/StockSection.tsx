@@ -99,7 +99,7 @@ export function StockSection({
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-white">Stock réservé</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Stock réservé</h2>
           <p className="text-[11px] text-slate-500 dark:text-neutral-500">
             {reservations.length} ligne{reservations.length > 1 ? "s" : ""}
             {eventStatus === "termine"
@@ -114,7 +114,7 @@ export function StockSection({
             type="button"
             onClick={() => setAdding(true)}
             disabled={pending || available.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-md bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-neutral-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700 disabled:opacity-50"
           >
             <PackagePlus className="h-3 w-3" /> Réserver
           </button>
@@ -128,11 +128,11 @@ export function StockSection({
       )}
 
       {productOptions.length === 0 && (
-        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-neutral-400">
+        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-slate-500 dark:text-neutral-400">
           Aucun produit dans le stock.{" "}
           <Link
             href="/dashboard/stock"
-            className="text-neutral-200 underline decoration-dotted underline-offset-2 hover:text-white"
+            className="text-slate-700 dark:text-neutral-200 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white"
           >
             Ajoute d&apos;abord tes produits →
           </Link>
@@ -186,7 +186,7 @@ export function StockSection({
                 setAdding(false);
                 setPickedProduct("");
               }}
-              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -214,7 +214,7 @@ export function StockSection({
             .filter((c) => grouped.has(c))
             .map((cat) => (
               <div key={cat}>
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                   {CATEGORY_LABEL[cat]}
                 </p>
                 <ul className="divide-y divide-slate-100 dark:divide-neutral-900 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/40">
@@ -227,7 +227,7 @@ export function StockSection({
                         key={r.product_id}
                         className="flex items-center gap-3 px-3 py-2"
                       >
-                        <span className="flex-1 text-sm text-neutral-100">
+                        <span className="flex-1 text-sm text-slate-900 dark:text-neutral-100">
                           {product.name}
                         </span>
                         <ReservationQtyField
@@ -239,7 +239,7 @@ export function StockSection({
                           {product.unit}
                         </span>
                         <span
-                          className={`w-24 text-right text-[11px] ${short ? "text-amber-700 dark:text-amber-300" : "text-neutral-500"}`}
+                          className={`w-24 text-right text-[11px] ${short ? "text-amber-700 dark:text-amber-300" : "text-slate-500 dark:text-neutral-500"}`}
                         >
                           {short && <AlertTriangle className="inline h-3 w-3 mr-1" />}
                           stock {product.stock_qty}
@@ -249,7 +249,7 @@ export function StockSection({
                             type="button"
                             onClick={() => remove(r.product_id)}
                             disabled={pending}
-                            className="rounded p-1 text-neutral-500 hover:bg-red-500/10 hover:text-red-300"
+                            className="rounded p-1 text-slate-500 dark:text-neutral-500 hover:bg-red-500/10 hover:text-red-300"
                             aria-label="Retirer"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -270,7 +270,7 @@ export function StockSection({
           dans{" "}
           <Link
             href="/dashboard/stock"
-            className="text-neutral-300 underline decoration-dotted underline-offset-2 hover:text-white"
+            className="text-slate-600 dark:text-neutral-300 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white"
           >
             /stock
           </Link>
@@ -305,13 +305,13 @@ function ReservationQtyField({
         if (e.key === "Enter") (e.target as HTMLInputElement).blur();
       }}
       disabled={disabled}
-      className="w-16 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+      className="w-16 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
     />
   );
 }
 
 const inputCls =
-  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({
   label,

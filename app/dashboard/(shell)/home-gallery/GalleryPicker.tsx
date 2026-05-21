@@ -45,10 +45,10 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
 
   if (tiles.length === 0) {
     return (
-      <p className="rounded-md border border-neutral-800 bg-neutral-950/60 p-6 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="rounded-md border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/60 p-6 text-sm text-slate-600 dark:text-neutral-400">
         Aucune photo dans la page « evenements ». Va d&apos;abord en
         ajouter dans{" "}
-        <a href="/admin" className="underline hover:text-white">
+        <a href="/admin" className="underline hover:text-slate-900 dark:hover:text-white">
           l&apos;admin images
         </a>
         .
@@ -86,11 +86,11 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
             key={tile.key}
             className={`group relative overflow-hidden rounded-xl border transition-colors ${
               tile.selected
-                ? "border-[color:var(--color-grenat)] bg-neutral-900/60"
-                : "border-neutral-800 bg-neutral-950/60"
+                ? "border-[color:var(--color-grenat)] bg-slate-100 dark:bg-neutral-900/60"
+                : "border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/60"
             }`}
           >
-            <div className="relative aspect-[4/3] w-full bg-neutral-900">
+            <div className="relative aspect-[4/3] w-full bg-slate-100 dark:bg-neutral-900">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={tile.url}
@@ -110,10 +110,10 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
 
             <div className="flex items-center justify-between gap-2 p-3">
               <div className="min-w-0">
-                <p className="truncate text-xs text-neutral-400">
+                <p className="truncate text-xs text-slate-500 dark:text-neutral-400">
                   {tile.label}
                 </p>
-                <p className="truncate text-[10px] text-neutral-600">
+                <p className="truncate text-[10px] text-slate-400 dark:text-neutral-600">
                   {tile.key}
                 </p>
               </div>
@@ -126,7 +126,7 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
                       onClick={() => move(tile.key, "up")}
                       disabled={pending || tile.rank === 1}
                       aria-label="Monter"
-                      className="rounded p-1 text-neutral-500 hover:text-white disabled:opacity-30"
+                      className="rounded p-1 text-slate-500 dark:text-neutral-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
                     >
                       <ChevronUp className="h-3.5 w-3.5" />
                     </button>
@@ -135,7 +135,7 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
                       onClick={() => move(tile.key, "down")}
                       disabled={pending || tile.rank === maxRank}
                       aria-label="Descendre"
-                      className="rounded p-1 text-neutral-500 hover:text-white disabled:opacity-30"
+                      className="rounded p-1 text-slate-500 dark:text-neutral-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
                     >
                       <ChevronDown className="h-3.5 w-3.5" />
                     </button>
@@ -151,7 +151,7 @@ export function GalleryPicker({ tiles }: { tiles: DecoratedTile[] }) {
                   className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors disabled:opacity-50 ${
                     tile.selected
                       ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/15 text-[color:var(--color-grenat-glow)]"
-                      : "border-neutral-800 bg-neutral-900 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
+                      : "border-slate-200 dark:border-neutral-800 bg-slate-100 dark:bg-neutral-900 text-slate-700 hover:border-slate-400 hover:text-slate-900 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-white"
                   }`}
                 >
                   <Star

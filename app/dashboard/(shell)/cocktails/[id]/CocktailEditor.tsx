@@ -198,9 +198,9 @@ export function CocktailEditor({
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
-      <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+          <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
             Recette {cocktail.archived && "· Archivée"}
           </p>
           <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">
@@ -213,7 +213,7 @@ export function CocktailEditor({
             type="button"
             onClick={save}
             disabled={pending || !dirty}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {pending ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -228,7 +228,7 @@ export function CocktailEditor({
             type="button"
             onClick={toggleArchive}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
           >
             {cocktail.archived ? (
               <>
@@ -275,7 +275,7 @@ export function CocktailEditor({
               placeholder="Signature, Classique, Mocktail…"
             />
             <label className="block">
-              <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+              <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                 Description
               </span>
               <textarea
@@ -283,7 +283,7 @@ export function CocktailEditor({
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 placeholder="Base, amertume, acidité, garniture…"
-                className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+                className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
               />
             </label>
           </Card>
@@ -292,11 +292,11 @@ export function CocktailEditor({
         {/* Ingredients */}
         <Card title="Ingrédients">
           {productOptions.length === 0 && (
-            <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-neutral-400">
+            <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-slate-500 dark:text-neutral-400">
               Aucun produit dans le stock.{" "}
               <Link
                 href="/dashboard/stock"
-                className="text-neutral-200 underline decoration-dotted underline-offset-2 hover:text-white"
+                className="text-slate-700 dark:text-neutral-200 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white"
               >
                 Crée d&apos;abord tes bouteilles / sirops / garnitures →
               </Link>
@@ -309,7 +309,7 @@ export function CocktailEditor({
               <button
                 type="button"
                 onClick={addIngredient}
-                className="text-neutral-300 underline"
+                className="text-slate-600 dark:text-neutral-300 underline"
               >
                 Ajouter la première ligne
               </button>
@@ -330,7 +330,7 @@ export function CocktailEditor({
                       onChange={(e) =>
                         patchIngredient(i.localId, { product_id: e.target.value })
                       }
-                      className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                      className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
                     >
                       <option value="">— Choisir un produit —</option>
                       {Array.from(grouped.entries()).map(([cat, list]) => (
@@ -356,7 +356,7 @@ export function CocktailEditor({
                           qty: Number(e.target.value) || 0,
                         })
                       }
-                      className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
+                      className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
                     />
                     <span className="text-[11px] text-slate-500 dark:text-neutral-500">
                       {contentUnit}
@@ -364,7 +364,7 @@ export function CocktailEditor({
                     <button
                       type="button"
                       onClick={() => removeIngredient(i.localId)}
-                      className="rounded p-1 text-neutral-500 hover:text-red-300"
+                      className="rounded p-1 text-slate-500 dark:text-neutral-500 hover:text-red-300"
                       aria-label="Retirer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -377,7 +377,7 @@ export function CocktailEditor({
                 <button
                   type="button"
                   onClick={addIngredient}
-                  className="mt-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-neutral-400 transition-colors hover:text-white"
+                  className="mt-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
                 >
                   <Plus className="h-3 w-3" /> Ajouter un ingrédient
                 </button>
@@ -385,7 +385,7 @@ export function CocktailEditor({
             </div>
           )}
 
-          <p className="mt-3 text-[10px] text-neutral-600">
+          <p className="mt-3 text-[10px] text-slate-400 dark:text-neutral-600">
             Unité affichée = « contenu » du produit (ex: cl pour une bouteille).
             Renseigne « Contenu par unité » dans{" "}
             <Link
@@ -412,7 +412,7 @@ function Card({
 }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {title}
       </p>
       <div className="space-y-3">{children}</div>
@@ -433,14 +433,14 @@ function LabeledInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
       />
     </label>
   );

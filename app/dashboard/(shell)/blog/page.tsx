@@ -40,9 +40,9 @@ export default async function BlogAdminPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-neutral-800 bg-neutral-950">
+      <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
         <table className="w-full text-sm">
-          <thead className="border-b border-neutral-800 bg-neutral-900/50 text-left text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+          <thead className="border-b border-slate-200 dark:border-neutral-800 bg-slate-100 dark:bg-neutral-900/50 text-left text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-neutral-500">
             <tr>
               <th className="px-4 py-3">Article</th>
               <th className="px-4 py-3">Statut</th>
@@ -59,11 +59,11 @@ export default async function BlogAdminPage() {
               </tr>
             )}
             {(data ?? []).map((a) => (
-              <tr key={a.id} className="text-neutral-200">
+              <tr key={a.id} className="text-slate-700 dark:text-neutral-200">
                 <td className="px-4 py-3">
                   <Link
                     href={`/dashboard/blog/${a.id}`}
-                    className="block hover:text-white"
+                    className="block hover:text-slate-900 dark:hover:text-white"
                   >
                     <div className="font-medium">{a.title}</div>
                     <div className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-neutral-500">
@@ -76,7 +76,7 @@ export default async function BlogAdminPage() {
                     {STATUS_LABEL[a.status as ArticleStatus]}
                   </span>
                 </td>
-                <td className="px-4 py-3 hidden md:table-cell text-xs text-neutral-400">
+                <td className="px-4 py-3 hidden md:table-cell text-xs text-slate-500 dark:text-neutral-400">
                   {new Date(a.publish_at).toLocaleDateString("fr-FR", {
                     day: "numeric",
                     month: "short",

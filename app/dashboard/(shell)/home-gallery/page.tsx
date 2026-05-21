@@ -35,7 +35,7 @@ export default async function HomeGalleryPage() {
           restent visibles sur{" "}
           <a
             href="/evenements"
-            className="text-neutral-200 underline"
+            className="text-slate-700 dark:text-neutral-200 underline"
             target="_blank"
             rel="noopener noreferrer"
           >

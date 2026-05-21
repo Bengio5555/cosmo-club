@@ -36,8 +36,8 @@ export function AiPanel({
 
   if (!articleId) {
     return (
-      <section className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
+      <section className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
           <Sparkles className="h-4 w-4 text-amber-400" />
           Génération IA
         </h2>
@@ -84,8 +84,8 @@ export function AiPanel({
   }
 
   return (
-    <section className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
+    <section className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
         <Sparkles className="h-4 w-4 text-amber-400" />
         Génération IA
       </h2>
@@ -100,9 +100,9 @@ export function AiPanel({
       )}
 
       {/* Cover article (site) */}
-      <div className="mt-4 space-y-2 rounded-md border border-neutral-800 p-3">
+      <div className="mt-4 space-y-2 rounded-md border border-slate-200 dark:border-neutral-800 p-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-white">Cover article (site)</p>
+          <p className="text-xs font-medium text-slate-900 dark:text-white">Cover article (site)</p>
           <button
             type="button"
             disabled={pending}
@@ -123,9 +123,9 @@ export function AiPanel({
       </div>
 
       {/* GMB text */}
-      <div className="mt-3 space-y-2 rounded-md border border-neutral-800 p-3">
+      <div className="mt-3 space-y-2 rounded-md border border-slate-200 dark:border-neutral-800 p-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-white">Version GMB (texte)</p>
+          <p className="text-xs font-medium text-slate-900 dark:text-white">Version GMB (texte)</p>
           <button
             type="button"
             disabled={pending}
@@ -145,7 +145,7 @@ export function AiPanel({
           onChange={(e) => setGmbPost(e.target.value)}
           rows={8}
           placeholder="Le post optimisé pour Google Business apparaîtra ici. Tu peux l'éditer avant de copier."
-          className="block w-full resize-y rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-[12px] leading-relaxed text-neutral-100 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
+          className="block w-full resize-y rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-[12px] leading-relaxed text-slate-900 dark:text-neutral-100 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
         />
         <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-500">
           <span>{gmbPost.length} / 1500 caractères (limite GBP)</span>
@@ -153,7 +153,7 @@ export function AiPanel({
             type="button"
             disabled={!gmbPost}
             onClick={copyGmb}
-            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-900 px-2.5 py-1 text-neutral-200 hover:border-neutral-500 hover:bg-neutral-800 disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-2.5 py-1 text-slate-700 dark:text-neutral-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-neutral-800 disabled:opacity-40"
           >
             {copied ? (
               <>
@@ -171,9 +171,9 @@ export function AiPanel({
       </div>
 
       {/* GMB cover (square) */}
-      <div className="mt-3 space-y-2 rounded-md border border-neutral-800 p-3">
+      <div className="mt-3 space-y-2 rounded-md border border-slate-200 dark:border-neutral-800 p-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-white">Cover GMB (1:1)</p>
+          <p className="text-xs font-medium text-slate-900 dark:text-white">Cover GMB (1:1)</p>
           <button
             type="button"
             disabled={pending}
@@ -194,14 +194,14 @@ export function AiPanel({
             <img
               src={gmbCover}
               alt="Cover GMB"
-              className="aspect-square w-full rounded-md border border-neutral-800 object-cover"
+              className="aspect-square w-full rounded-md border border-slate-200 dark:border-neutral-800 object-cover"
             />
             <a
               href={gmbCover}
               download={`gmb-cover-${articleId.slice(0, 8)}.png`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-900 px-2.5 py-1.5 text-[11px] text-neutral-200 hover:border-neutral-500 hover:bg-neutral-800"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-2.5 py-1.5 text-[11px] text-slate-700 dark:text-neutral-200 hover:border-neutral-500 hover:bg-slate-200 dark:hover:bg-neutral-800"
             >
               <Download className="h-3 w-3" />
               Télécharger pour GBP

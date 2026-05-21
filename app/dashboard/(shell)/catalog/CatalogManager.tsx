@@ -146,7 +146,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
 
       {adding === "__new__" && (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4">
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
             Nouvelle prestation
           </p>
           <DraftForm
@@ -161,12 +161,12 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
       )}
 
       {initial.length === 0 && adding !== "__new__" && (
-        <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 p-8 text-center">
+        <div className="rounded-xl border border-dashed border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/40 p-8 text-center">
           <p className="text-sm text-slate-600 dark:text-neutral-400">Aucune prestation pour l&apos;instant.</p>
           <button
             type="button"
             onClick={() => setAdding("__new__")}
-            className="mt-3 text-xs text-neutral-300 underline"
+            className="mt-3 text-xs text-slate-600 dark:text-neutral-300 underline"
           >
             Créer la première
           </button>
@@ -175,14 +175,14 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
 
       {grouped.map(([sectionName, sectionItems]) => (
         <section key={sectionName} className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-          <header className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-300">
+          <header className="flex items-center justify-between border-b border-slate-200 dark:border-neutral-800 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
               {sectionName}
             </p>
             <button
               type="button"
               onClick={() => setAdding(sectionName)}
-              className="inline-flex items-center gap-1 text-[11px] text-neutral-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
             >
               <Plus className="h-3 w-3" /> ligne
             </button>
@@ -210,12 +210,12 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
               ) : (
                 <li
                   key={it.id}
-                  className="flex items-start justify-between gap-4 px-4 py-3 transition-colors hover:bg-neutral-900"
+                  className="flex items-start justify-between gap-4 px-4 py-3 transition-colors hover:bg-slate-100 dark:hover:bg-neutral-900"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-white">{it.title}</p>
+                    <p className="font-medium text-slate-900 dark:text-white">{it.title}</p>
                     {it.description && (
-                      <p className="mt-0.5 text-xs text-neutral-400">
+                      <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
                         {it.description}
                       </p>
                     )}
@@ -224,7 +224,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
                     {it.unit ?? "unité"}
                   </div>
                   <div className="w-24 text-right">
-                    <span className="font-medium text-white">
+                    <span className="font-medium text-slate-900 dark:text-white">
                       {formatEUR(it.unit_price_ht ?? 0)}
                     </span>
                   </div>
@@ -232,7 +232,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
                     <button
                       type="button"
                       onClick={() => setEditingId(it.id)}
-                      className="rounded p-1.5 text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-white"
+                      className="rounded p-1.5 text-slate-500 dark:text-neutral-500 transition-colors hover:bg-slate-200 dark:hover:bg-neutral-800 hover:text-slate-900 dark:hover:text-white"
                       aria-label="Éditer"
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -240,7 +240,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
                     <button
                       type="button"
                       onClick={() => remove(it.id, it.title)}
-                      className="rounded p-1.5 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                      className="rounded p-1.5 text-slate-500 dark:text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
                       aria-label="Supprimer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -252,7 +252,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
           </ul>
 
           {adding === sectionName && (
-            <div className="border-t border-neutral-900 p-4">
+            <div className="border-t border-slate-100 dark:border-neutral-900 p-4">
               <DraftForm
                 initial={emptyDraft(sectionName)}
                 knownSections={knownSectionNames}
@@ -360,7 +360,7 @@ function DraftForm({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
         >
           <X className="h-3 w-3" /> Annuler
         </button>
@@ -390,7 +390,7 @@ function Input(props: {
         onChange={(e) => props.onChange(e.target.value)}
         placeholder={props.placeholder}
         autoFocus={props.autoFocus}
-        className={`w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none ${
+        className={`w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none ${
           props.small ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm"
         } ${props.rightAdornment ? "pr-12" : ""}`}
       />
@@ -439,7 +439,7 @@ function Textarea(props: {
       onChange={(e) => props.onChange(e.target.value)}
       placeholder={props.placeholder}
       rows={props.rows ?? 2}
-      className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+      className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
     />
   );
 }

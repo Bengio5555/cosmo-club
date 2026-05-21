@@ -200,10 +200,10 @@ export default async function EventDetailPage({
 
   return (
     <>
-      <div className="border-b border-neutral-900 px-4 pt-6 md:px-8">
+      <div className="border-b border-slate-100 dark:border-neutral-900 px-4 pt-6 md:px-8">
         <Link
           href="/dashboard/events"
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Tous les événements
         </Link>
@@ -242,16 +242,16 @@ export default async function EventDetailPage({
       </div>
 
       {(client || quote) && (
-        <div className="border-t border-neutral-900 px-4 py-6 md:px-8">
+        <div className="border-t border-slate-100 dark:border-neutral-900 px-4 py-6 md:px-8">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {client && (
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                   Client
                 </p>
                 <Link
                   href={`/dashboard/clients/${client.id}`}
-                  className="group inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="group inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
                 >
                   <User className="h-3.5 w-3.5" />
                   {client.company_name ||
@@ -284,12 +284,12 @@ export default async function EventDetailPage({
             )}
             {quote && (
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                   Devis source
                 </p>
                 <Link
                   href={`/dashboard/devis/${quote.id}`}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-neutral-700 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 hover:text-slate-900 dark:hover:text-white"
                 >
                   <FileText className="h-3.5 w-3.5" />
                   {quote.number}

@@ -131,8 +131,8 @@ export function MenuSection({
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-            <Wine className="h-3.5 w-3.5 text-neutral-500" />
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+            <Wine className="h-3.5 w-3.5 text-slate-500 dark:text-neutral-500" />
             Menu cocktails
           </h2>
           <p className="text-[11px] text-slate-500 dark:text-neutral-500">
@@ -145,14 +145,14 @@ export function MenuSection({
           <div className="flex flex-wrap items-center gap-2">
             <a
               href={`/api/dashboard/events/${eventId}/courses-pdf`}
-              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:bg-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-200 dark:bg-neutral-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:bg-neutral-700"
               title="Télécharger la liste de courses en PDF"
             >
               <Download className="h-3 w-3" /> Liste de courses (PDF)
             </a>
             <Link
               href={`/dashboard/events/${eventId}/courses`}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1 text-[11px] text-neutral-300 transition-colors hover:border-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1 text-[11px] text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
               title="Aperçu à l'écran avant téléchargement"
             >
               <ListChecks className="h-3 w-3" /> Aperçu
@@ -178,11 +178,11 @@ export function MenuSection({
       )}
 
       {cocktailOptions.length === 0 && (
-        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-neutral-400">
+        <div className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 p-3 text-xs text-slate-500 dark:text-neutral-400">
           Aucune recette cocktail dans le catalogue.{" "}
           <Link
             href="/dashboard/cocktails"
-            className="text-neutral-200 underline decoration-dotted underline-offset-2 hover:text-white"
+            className="text-slate-700 dark:text-neutral-200 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white"
           >
             Crée d&apos;abord tes recettes →
           </Link>
@@ -228,7 +228,7 @@ export function MenuSection({
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -259,7 +259,7 @@ export function MenuSection({
             >
               <Link
                 href={`/dashboard/cocktails/${m.cocktail_id}`}
-                className="min-w-0 flex-1 text-sm font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-white"
+                className="min-w-0 flex-1 text-sm font-medium text-slate-900 dark:text-neutral-100 transition-colors hover:text-slate-900 dark:hover:text-white"
               >
                 {m.cocktail.name}
                 {m.cocktail.category && (
@@ -279,7 +279,7 @@ export function MenuSection({
                   type="button"
                   onClick={() => removeRow(m.cocktail_id)}
                   disabled={pending}
-                  className="rounded p-1 text-neutral-500 hover:bg-red-500/10 hover:text-red-300"
+                  className="rounded p-1 text-slate-500 dark:text-neutral-500 hover:bg-red-500/10 hover:text-red-300"
                   aria-label="Retirer"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -298,7 +298,7 @@ export function MenuSection({
             setAdding(true);
           }}
           disabled={pending || available.length === 0}
-          className="mt-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-neutral-400 transition-colors hover:text-white"
+          className="mt-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
         >
           <Plus className="h-3 w-3" /> Ajouter un cocktail
         </button>
@@ -307,20 +307,20 @@ export function MenuSection({
       {/* Compute modal */}
       {showCompute && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-5 shadow-2xl">
             <div className="mb-3 flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                   Calcul stock
                 </p>
-                <h3 className="mt-1 font-display text-lg text-white">
+                <h3 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
                   Besoins pour {totalCocktails} cocktails
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCompute(false)}
-                className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+                className="rounded-md p-1 text-slate-500 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white"
                 aria-label="Fermer"
               >
                 <X className="h-4 w-4" />
@@ -359,7 +359,7 @@ export function MenuSection({
                     return (
                       <tr
                         key={l.productId}
-                        className={`border-t border-neutral-900 ${short ? "bg-red-500/5" : ""}`}
+                        className={`border-t border-slate-100 dark:border-neutral-900 ${short ? "bg-red-500/5" : ""}`}
                       >
                         <td className="px-2 py-2">
                           <p className="font-medium text-slate-900 dark:text-neutral-100">
@@ -369,14 +369,14 @@ export function MenuSection({
                             {l.productCategory}
                           </p>
                         </td>
-                        <td className="px-2 py-2 text-right text-neutral-300">
+                        <td className="px-2 py-2 text-right text-slate-600 dark:text-neutral-300">
                           {formatNumber(l.need)} {l.contentUnit}
                         </td>
                         <td className="px-2 py-2 text-right font-medium text-slate-900 dark:text-neutral-100">
                           {l.packsNeeded} {l.packUnit}
                         </td>
                         <td
-                          className={`px-2 py-2 text-right ${short ? "text-red-300 font-medium" : "text-neutral-400"}`}
+                          className={`px-2 py-2 text-right ${short ? "text-red-300 font-medium" : "text-slate-500 dark:text-neutral-400"}`}
                         >
                           {l.stockQty}
                           {short && (
@@ -385,18 +385,18 @@ export function MenuSection({
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-2 text-right text-[11px] text-neutral-400">
+                        <td className="px-2 py-2 text-right text-[11px] text-slate-500 dark:text-neutral-400">
                           {l.lineCost != null
                             ? formatEUR(l.lineCost)
-                            : <span className="text-neutral-600">—</span>}
+                            : <span className="text-slate-400 dark:text-neutral-600">—</span>}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-neutral-800 text-[11px]">
-                    <td className="px-2 py-2 text-neutral-500" colSpan={4}>
+                  <tr className="border-t-2 border-slate-200 dark:border-neutral-800 text-[11px]">
+                    <td className="px-2 py-2 text-slate-500 dark:text-neutral-500" colSpan={4}>
                       Coût matière estimé
                     </td>
                     <td className="px-2 py-2 text-right font-semibold text-emerald-700 dark:text-emerald-300">
@@ -414,12 +414,12 @@ export function MenuSection({
               </p>
             )}
 
-            <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-900 pt-4">
+            <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-neutral-900 pt-4">
               <button
                 type="button"
                 onClick={() => setShowCompute(false)}
                 disabled={pending}
-                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
               >
                 Fermer
               </button>
@@ -464,7 +464,7 @@ function QtyField({
         if (e.key === "Enter") (e.target as HTMLInputElement).blur();
       }}
       disabled={disabled}
-      className="w-16 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+      className="w-16 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
     />
   );
 }
@@ -476,7 +476,7 @@ function formatNumber(n: number): string {
 }
 
 const inputCls =
-  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function Field({
   label,

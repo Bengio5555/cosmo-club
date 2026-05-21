@@ -58,7 +58,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
     <div className="sticky top-16 space-y-4">
       {/* Status */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
           Statut
         </p>
         <select
@@ -76,7 +76,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
 
       {/* Internal notes */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
           Notes internes
         </p>
         <textarea
@@ -84,7 +84,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
           onChange={(e) => setNotes(e.target.value)}
           rows={5}
           placeholder="Détails, points à vérifier, pricing indicatif…"
-          className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+          className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
         />
       </div>
 
@@ -105,7 +105,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
         type="button"
         disabled={pending || !dirty}
         onClick={save}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-neutral-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-slate-200 dark:bg-neutral-800 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white transition-colors hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
         Enregistrer
@@ -122,7 +122,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
         {hasQuote ? "Créer un nouveau devis" : "Transformer en devis"}
       </button>
 
-      <p className="text-[11px] leading-relaxed text-neutral-500">
+      <p className="text-[11px] leading-relaxed text-slate-500 dark:text-neutral-500">
         Crée ou ré-utilise une fiche client et génère un devis brouillon. Le
         statut passera automatiquement à <em>Devis envoyé</em>.
       </p>

@@ -235,26 +235,26 @@ export function StockTable({
               <AlertTriangle className="h-3 w-3" /> {lowStockCount} sous seuil
             </span>
           )}
-          <span className="rounded-full border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-0.5 text-[10px] text-neutral-300">
-            Valorisation HT&nbsp;: <strong className="text-neutral-100">{formatEUR(totalValueHt)}</strong>
+          <span className="rounded-full border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-0.5 text-[10px] text-slate-600 dark:text-neutral-300">
+            Valorisation HT&nbsp;: <strong className="text-slate-900 dark:text-neutral-100">{formatEUR(totalValueHt)}</strong>
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 dark:text-neutral-500" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un produit…"
-              className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
+              className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 pl-8 pr-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none md:w-64"
             />
           </div>
           <button
             type="button"
             onClick={exportStockCsv}
             title="Exporter la valorisation du stock pour la compta (CSV Excel)"
-            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-200 hover:border-neutral-600"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-700 dark:text-neutral-200 hover:border-slate-400 dark:hover:border-neutral-600"
           >
             <Download className="h-3.5 w-3.5" /> Export compta
           </button>
@@ -280,7 +280,7 @@ export function StockTable({
             key={c.value}
             className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none"
           >
-            <div className="border-b border-neutral-800 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+            <div className="border-b border-slate-200 dark:border-neutral-800 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
               {c.label}
             </div>
             <table className="w-full text-left text-sm">
@@ -294,7 +294,7 @@ export function StockTable({
                       className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-neutral-900 dark:hover:bg-neutral-900"
                     >
                       <td className="px-3 py-3 md:px-4">
-                        <p className="font-medium text-white">{p.name}</p>
+                        <p className="font-medium text-slate-900 dark:text-white">{p.name}</p>
                         {p.supplier && (
                           <p className="text-[11px] text-slate-500 dark:text-neutral-500">
                             {p.supplier}
@@ -306,17 +306,17 @@ export function StockTable({
                       </td>
                       <td className="px-3 py-3 text-right md:px-4">
                         <span
-                          className={`font-medium ${low ? "text-amber-700 dark:text-amber-300" : "text-neutral-200"}`}
+                          className={`font-medium ${low ? "text-amber-700 dark:text-amber-300" : "text-slate-700 dark:text-neutral-200"}`}
                         >
                           {Number(p.stock_qty)}
                         </span>
                         {p.min_threshold > 0 && (
-                          <span className="ml-1 text-[10px] text-neutral-600">
+                          <span className="ml-1 text-[10px] text-slate-400 dark:text-neutral-600">
                             / {p.min_threshold}
                           </span>
                         )}
                       </td>
-                      <td className="hidden px-3 py-3 text-right text-xs text-neutral-400 md:table-cell md:px-4">
+                      <td className="hidden px-3 py-3 text-right text-xs text-slate-500 dark:text-neutral-400 md:table-cell md:px-4">
                         {p.cost_ht != null
                           ? `${formatEUR(Number(p.cost_ht))} / ${p.unit}`
                           : "—"}
@@ -349,7 +349,7 @@ export function StockTable({
                             type="button"
                             onClick={() => setModal({ edit: p })}
                             disabled={pending}
-                            className="rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
+                            className="rounded p-1.5 text-slate-500 dark:text-neutral-400 transition-colors hover:bg-slate-200 dark:hover:bg-neutral-800 hover:text-slate-900 dark:hover:text-white"
                             aria-label="Modifier"
                           >
                             <Pencil className="h-3.5 w-3.5" />
@@ -358,7 +358,7 @@ export function StockTable({
                             type="button"
                             onClick={() => toggleArchive(p.id, p.archived)}
                             disabled={pending}
-                            className="rounded p-1.5 text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-neutral-200"
+                            className="rounded p-1.5 text-slate-500 dark:text-neutral-500 transition-colors hover:bg-slate-200 dark:hover:bg-neutral-800 hover:text-neutral-200"
                             aria-label="Archiver"
                           >
                             <Archive className="h-3.5 w-3.5" />
@@ -386,7 +386,7 @@ export function StockTable({
 
         {archived.length > 0 && (
           <details className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none">
-            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 hover:text-neutral-300">
+            <summary className="cursor-pointer px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500 hover:text-neutral-300">
               Archivés · {archived.length}
             </summary>
             <ul className="divide-y divide-slate-100 dark:divide-neutral-900">
@@ -400,7 +400,7 @@ export function StockTable({
                     type="button"
                     onClick={() => toggleArchive(p.id, true)}
                     disabled={pending}
-                    className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-white"
+                    className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
                   >
                     <ArchiveRestore className="h-3 w-3" /> Désarchiver
                   </button>
@@ -413,7 +413,7 @@ export function StockTable({
         {/* Movement log */}
         {movements.length > 0 && (
           <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Historique des mouvements · 50 dernières
             </p>
             <ul className="divide-y divide-slate-100 dark:divide-neutral-900 text-sm">
@@ -426,7 +426,7 @@ export function StockTable({
                     ) : (
                       <ArrowDownCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
                     )}
-                    <span className="font-medium text-neutral-200">
+                    <span className="font-medium text-slate-700 dark:text-neutral-200">
                       {product?.name ?? "—"}
                     </span>
                     <span
@@ -438,7 +438,7 @@ export function StockTable({
                     <span className="min-w-0 flex-1 truncate text-xs text-slate-500 dark:text-neutral-500">
                       {m.reason || (m.event_id ? "clôture événement" : "—")}
                     </span>
-                    <span className="text-[11px] text-neutral-600">
+                    <span className="text-[11px] text-slate-400 dark:text-neutral-600">
                       {formatDateFR(m.created_at, { withTime: true })}
                     </span>
                   </li>
@@ -503,20 +503,20 @@ function ProductModal({
   const isEdit = !!product;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-5 shadow-2xl">
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               {isEdit ? "Modifier" : "Nouveau"}
             </p>
-            <h2 className="mt-1 font-display text-lg text-white">
+            <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
               {isEdit ? product!.name : "Produit"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+            className="rounded-md p-1 text-slate-500 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white"
             aria-label="Fermer"
           >
             <X className="h-4 w-4" />
@@ -641,7 +641,7 @@ function ProductModal({
               </select>
             </Field>
           </div>
-          <p className="-mt-1 text-[10px] text-neutral-600">
+          <p className="-mt-1 text-[10px] text-slate-400 dark:text-neutral-600">
             Optionnel · utilisé par le menu cocktails pour calculer le stock
             nécessaire à un événement (ex: 1 btl = 70 cl).
           </p>
@@ -655,12 +655,12 @@ function ProductModal({
             />
           </Field>
 
-          <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-900 pt-4">
+          <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-neutral-900 pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
             >
               Annuler
             </button>
@@ -694,13 +694,13 @@ function AdjustModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl">
+      <div className="w-full max-w-md rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-5 shadow-2xl">
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               {direction === "in" ? "Entrée de stock" : "Sortie de stock"}
             </p>
-            <h2 className="mt-1 font-display text-lg text-white">
+            <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
               {product.name}
             </h2>
             <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
@@ -710,7 +710,7 @@ function AdjustModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+            className="rounded-md p-1 text-slate-500 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white"
             aria-label="Fermer"
           >
             <X className="h-4 w-4" />
@@ -741,19 +741,19 @@ function AdjustModal({
             />
           </Field>
 
-          <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-900 pt-4">
+          <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-neutral-900 pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+              className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={pending}
-              className={`inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold text-white transition-colors disabled:opacity-60 ${
+              className={`inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white transition-colors disabled:opacity-60 ${
                 direction === "in"
                   ? "bg-emerald-600 hover:bg-emerald-500"
                   : "bg-red-600 hover:bg-red-500"
@@ -770,7 +770,7 @@ function AdjustModal({
 }
 
 const inputCls =
-  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
+  "w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
 
 function csvEscape(s: string): string {
   // CSV cells containing ; " or \n need quoting; embedded quotes get doubled.

@@ -320,8 +320,8 @@ export function InvoiceEditor({
       )}
 
       {!isCreditNote && creditNotes.length > 0 && (
-        <div className="mt-3 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 mb-1">
+        <div className="mt-3 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500 mb-1">
             Avoirs émis
           </p>
           <ul className="space-y-1">
@@ -329,7 +329,7 @@ export function InvoiceEditor({
               <li key={cn.id} className="flex items-center justify-between gap-3">
                 <Link
                   href={`/dashboard/factures/${cn.id}`}
-                  className="inline-flex items-center gap-1.5 text-neutral-200 hover:text-white"
+                  className="inline-flex items-center gap-1.5 text-slate-700 dark:text-neutral-200 hover:text-slate-900 dark:hover:text-white"
                 >
                   <ExternalLink className="h-3 w-3" /> {cn.number}
                   <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
@@ -404,12 +404,12 @@ export function InvoiceEditor({
 
           <Card title="Prestations">
             {items.length === 0 ? (
-              <p className="py-6 text-center text-sm text-neutral-500">
+              <p className="py-6 text-center text-sm text-slate-500 dark:text-neutral-500">
                 Aucune ligne.
                 {!readOnly && (
                   <>
                     {" "}
-                    <button onClick={addItem} className="text-neutral-300 underline">
+                    <button onClick={addItem} className="text-slate-600 dark:text-neutral-300 underline">
                       Ajouter la première ligne
                     </button>
                   </>
@@ -433,7 +433,7 @@ export function InvoiceEditor({
                     <button
                       type="button"
                       onClick={addItem}
-                      className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-neutral-400 transition-colors hover:text-white"
+                      className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-400 transition-colors hover:text-slate-900 dark:hover:text-white"
                     >
                       <Plus className="h-3 w-3" /> Ajouter une ligne
                     </button>
@@ -457,16 +457,16 @@ export function InvoiceEditor({
 
         <aside className="space-y-5">
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Totaux
             </p>
             <dl className="space-y-1.5 text-sm">
               <div className="flex justify-between">
-                <dt className="text-neutral-500">Total HT</dt>
+                <dt className="text-slate-500 dark:text-neutral-500">Total HT</dt>
                 <dd className="font-medium text-slate-900 dark:text-neutral-100">{formatEUR(totalHt)}</dd>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <dt className="flex items-center gap-2 text-neutral-500">
+                <dt className="flex items-center gap-2 text-slate-500 dark:text-neutral-500">
                   TVA
                   <input
                     type="number"
@@ -475,21 +475,21 @@ export function InvoiceEditor({
                     min="0"
                     onChange={(e) => setTvaRate(e.target.value)}
                     disabled={readOnly}
-                    className="w-14 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5 text-right text-xs text-neutral-100 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                    className="w-14 rounded border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5 text-right text-xs text-slate-900 dark:text-neutral-100 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
                   />
                   %
                 </dt>
-                <dd className="text-neutral-200">{formatEUR(totalTva)}</dd>
+                <dd className="text-slate-700 dark:text-neutral-200">{formatEUR(totalTva)}</dd>
               </div>
-              <div className="flex justify-between border-t border-neutral-800 pt-2 text-base font-semibold">
-                <dt className="text-neutral-300">Total TTC</dt>
+              <div className="flex justify-between border-t border-slate-200 dark:border-neutral-800 pt-2 text-base font-semibold">
+                <dt className="text-slate-600 dark:text-neutral-300">Total TTC</dt>
                 <dd className="text-slate-900 dark:text-white">{formatEUR(totalTtc)}</dd>
               </div>
             </dl>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5 text-xs text-slate-500 dark:text-neutral-500">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
               Workflow
             </p>
             <ul className="space-y-1 leading-relaxed">
@@ -506,26 +506,26 @@ export function InvoiceEditor({
 
       {creditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-950 p-5 shadow-2xl">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-5 shadow-2xl">
             <div className="mb-3 flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
                   Émettre un avoir
                 </p>
-                <h2 className="mt-1 font-display text-lg text-white">
+                <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
                   Sur la facture {invoice.number}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setCreditModal(false)}
-                className="rounded-md p-1 text-neutral-500 hover:bg-neutral-900 hover:text-white"
+                className="rounded-md p-1 text-slate-500 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-900 hover:text-slate-900 dark:hover:text-white"
                 aria-label="Fermer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="mb-4 text-xs leading-relaxed text-neutral-400">
+            <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
               L&apos;avoir duplique les lignes en quantités négatives (TTC{" "}
               {formatEUR(-Number(invoice.total_ttc))}). Tu pourras l&apos;ajuster
               en brouillon avant émission — par ex. avoir partiel.
@@ -542,7 +542,7 @@ export function InvoiceEditor({
                 type="button"
                 onClick={() => setCreditModal(false)}
                 disabled={pending}
-                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 hover:border-neutral-700"
+                className="rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 hover:border-slate-300 dark:hover:border-neutral-700"
               >
                 Annuler
               </button>
@@ -597,9 +597,9 @@ function TopBar({
   onRemind: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
+    <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-neutral-900 pb-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+        <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-500">
           {invoice.is_credit_note ? "Avoir" : "Facture"}
         </p>
         <h1 className="font-display text-2xl text-slate-900 dark:text-white md:text-3xl">{invoice.number}</h1>
@@ -627,7 +627,7 @@ function TopBar({
               type="button"
               onClick={onSave}
               disabled={pending || !dirty}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-neutral-100 transition-colors hover:border-slate-300 dark:hover:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
               {dirty ? "Enregistrer" : "Enregistré"}
@@ -678,7 +678,7 @@ function TopBar({
               type="button"
               onClick={onMarkPaid}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500"
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white transition-colors hover:bg-emerald-500"
             >
               <Euro className="h-3 w-3" /> Marquer payée
             </button>
@@ -686,7 +686,7 @@ function TopBar({
               type="button"
               onClick={onCancel}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
             >
               <Ban className="h-3 w-3" /> Annuler
             </button>
@@ -700,7 +700,7 @@ function TopBar({
         )}
 
         {invoice.status === "annule" && (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs font-semibold text-neutral-400">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-neutral-700 bg-slate-200 dark:bg-neutral-800 px-3 py-1.5 text-xs font-semibold text-slate-500 dark:text-neutral-400">
             <XCircle className="h-3 w-3" /> Annulée
           </span>
         )}
@@ -727,7 +727,7 @@ function TopBar({
           }
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-neutral-300 transition-colors hover:border-neutral-700"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 transition-colors hover:border-slate-300 dark:hover:border-neutral-700"
         >
           <Eye className="h-3 w-3" /> {invoice.is_credit_note ? "Avoir PDF" : "Facture PDF"}
         </a>
@@ -738,11 +738,11 @@ function TopBar({
 
 function StatusPill({ status }: { status: InvoiceStatus }) {
   const map: Record<InvoiceStatus, { cls: string; label: string }> = {
-    brouillon: { cls: "border-neutral-700 bg-neutral-800 text-neutral-300", label: "Brouillon" },
+    brouillon: { cls: "border-slate-300 dark:border-neutral-700 bg-slate-200 dark:bg-neutral-800 text-slate-600 dark:text-neutral-300", label: "Brouillon" },
     envoye: { cls: "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-200", label: "Envoyée" },
     paye: { cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200", label: "Payée" },
     en_retard: { cls: "border-red-500/50 bg-red-500/15 text-red-300", label: "En retard" },
-    annule: { cls: "border-neutral-700 bg-neutral-800 text-neutral-400", label: "Annulée" },
+    annule: { cls: "border-slate-300 dark:border-neutral-700 bg-slate-200 dark:bg-neutral-800 text-slate-500 dark:text-neutral-400", label: "Annulée" },
   };
   const p = map[status];
   return (
@@ -757,7 +757,7 @@ function StatusPill({ status }: { status: InvoiceStatus }) {
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950/60 dark:shadow-none p-4 md:p-5">
-      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {title}
       </p>
       <div className="space-y-3">{children}</div>
@@ -786,7 +786,7 @@ function LabeledInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       <input
@@ -795,7 +795,7 @@ function LabeledInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );
@@ -818,7 +818,7 @@ function LabeledTextarea({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
         {label}
       </span>
       <textarea
@@ -827,7 +827,7 @@ function LabeledTextarea({
         placeholder={placeholder}
         rows={rows}
         readOnly={readOnly}
-        className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>
   );
@@ -847,7 +847,7 @@ function ItemRow({
   const total = item.qty * item.unit_price_ht;
   return (
     <div className="grid gap-2 py-2.5 md:grid-cols-[auto_minmax(0,1fr)_72px_88px_100px_24px] md:items-start md:gap-3">
-      <div className="mt-2 hidden text-neutral-600 md:block">
+      <div className="mt-2 hidden text-slate-400 dark:text-neutral-600 md:block">
         <GripVertical className="h-3.5 w-3.5" />
       </div>
       <div className="space-y-1">
@@ -857,7 +857,7 @@ function ItemRow({
           onChange={(e) => onPatch({ title: e.target.value })}
           placeholder="Intitulé de la prestation"
           readOnly={readOnly}
-          className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
         <textarea
           value={item.description}
@@ -865,7 +865,7 @@ function ItemRow({
           placeholder="Description (optionnelle)"
           rows={1}
           readOnly={readOnly}
-          className="w-full resize-y rounded-md border border-neutral-800/70 bg-neutral-900/60 px-2.5 py-1.5 text-xs text-neutral-300 placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          className="w-full resize-y rounded-md border border-slate-200 dark:border-neutral-800/70 bg-slate-100 dark:bg-neutral-900/60 px-2.5 py-1.5 text-xs text-slate-600 dark:text-neutral-300 placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
       </div>
       <input
@@ -875,7 +875,7 @@ function ItemRow({
         value={item.qty}
         onChange={(e) => onPatch({ qty: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <input
         type="text"
@@ -883,7 +883,7 @@ function ItemRow({
         onChange={(e) => onPatch({ unit: e.target.value })}
         placeholder="unité"
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-sm text-neutral-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-sm text-slate-600 dark:text-neutral-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <input
         type="number"
@@ -892,17 +892,17 @@ function ItemRow({
         value={item.unit_price_ht}
         onChange={(e) => onPatch({ unit_price_ht: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full rounded-md border border-slate-300 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <div className="flex items-center justify-end gap-2 md:flex-col md:items-end md:gap-1 md:pt-1">
-        <span className="text-xs font-medium text-neutral-300 md:text-[11px]">
+        <span className="text-xs font-medium text-slate-600 dark:text-neutral-300 md:text-[11px]">
           {formatEUR(total)}
         </span>
         {!readOnly && (
           <button
             type="button"
             onClick={onRemove}
-            className="rounded text-neutral-500 transition-colors hover:text-red-300"
+            className="rounded text-slate-500 dark:text-neutral-500 transition-colors hover:text-red-300"
             aria-label="Supprimer la ligne"
           >
             <Trash2 className="h-3.5 w-3.5" />

@@ -51,16 +51,16 @@ export default async function TeamPage() {
 function RolesLegend() {
   const order: UserRole[] = ["owner", "admin", "manager", "staff", "compta"];
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
-      <h2 className="text-sm font-semibold text-white">Les rôles</h2>
+    <div className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4">
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Les rôles</h2>
       <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-500">
         Périmètre d'accès résumé. Le propriétaire ne peut pas être modifié.
       </p>
       <dl className="mt-4 space-y-3 text-xs">
         {order.map((r) => (
           <div key={r}>
-            <dt className="font-semibold text-neutral-200">{ROLE_LABEL[r]}</dt>
-            <dd className="mt-0.5 text-neutral-500">{ROLE_DESCRIPTION[r]}</dd>
+            <dt className="font-semibold text-slate-700 dark:text-neutral-200">{ROLE_LABEL[r]}</dt>
+            <dd className="mt-0.5 text-slate-500 dark:text-neutral-500">{ROLE_DESCRIPTION[r]}</dd>
           </div>
         ))}
       </dl>
