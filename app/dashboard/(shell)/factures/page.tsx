@@ -181,7 +181,7 @@ export default async function InvoicesListPage({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+      <div className="table-as-cards overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
         {invoices && invoices.length > 0 ? (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-transparent dark:text-slate-500">
@@ -219,58 +219,59 @@ export default async function InvoicesListPage({
                     key={inv.id}
                     className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-slate-900 dark:hover:bg-slate-900"
                   >
-                    <td className="px-3 py-3 md:px-4">
+                    <td data-label-hidden className="px-3 py-3 md:px-4">
                       <Link
                         href={`/dashboard/factures/${inv.id}`}
                         className="inline-flex items-center gap-2 font-medium text-slate-900 transition-colors hover:text-[color:var(--color-grenat)] dark:text-white dark:hover:text-[color:var(--color-grenat-glow)]"
                       >
                         {inv.number}
                         {inv.is_credit_note && (
-                          <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-700 dark:text-violet-200">
+                          <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-200">
                             Avoir
                           </span>
                         )}
                       </Link>
                     </td>
-                    <td className="px-3 py-3 text-slate-700 dark:text-slate-700 dark:text-slate-200 md:px-4">{who}</td>
-                    <td className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-400 md:table-cell md:px-4">
+                    <td data-label="Client" className="px-3 py-3 text-slate-700 dark:text-slate-200 md:px-4">{who}</td>
+                    <td data-label="Émise" className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-400 md:table-cell md:px-4">
                       {formatDateFR(inv.issue_date)}
                     </td>
-                    <td className="hidden px-3 py-3 text-xs md:table-cell md:px-4">
+                    <td data-label="Échéance" className="hidden px-3 py-3 text-xs md:table-cell md:px-4">
                       {inv.due_date ? (
                         <span className={overdue ? "text-red-600 dark:text-red-300" : "text-slate-500 dark:text-slate-400"}>
                           {formatDateFR(inv.due_date)}
-                          {overdue && <span className="ml-1 text-red-600 dark:text-red-600 dark:text-red-400">(en retard)</span>}
+                          {overdue && <span className="ml-1 text-red-600 dark:text-red-400">(en retard)</span>}
                         </span>
                       ) : (
                         <span className="text-slate-400 dark:text-slate-500">—</span>
                       )}
                     </td>
-                    <td className="px-3 py-3 md:px-4">
+                    <td data-label="Statut" className="px-3 py-3 md:px-4">
                       <StatusBadge
                         status={overdue && inv.status === "envoye" ? "en_retard" : inv.status}
                       />
                     </td>
                     <td
+                      data-label="Total TTC"
                       className={`px-3 py-3 text-right font-medium md:px-4 ${
                         inv.is_credit_note
-                          ? "text-violet-700 dark:text-violet-700 dark:text-violet-200"
+                          ? "text-violet-700 dark:text-violet-200"
                           : "text-slate-900 dark:text-slate-200"
                       }`}
                     >
                       {formatEUR(Number(inv.total_ttc))}
                     </td>
-                    <td className="hidden px-3 py-3 text-right md:table-cell md:px-4">
+                    <td data-label="Reste" className="hidden px-3 py-3 text-right md:table-cell md:px-4">
                       {inv.is_credit_note ? (
                         <span className="text-xs text-slate-400 dark:text-slate-600">—</span>
                       ) : remaining <= 0 ? (
-                        <span className="text-xs text-emerald-700 dark:text-emerald-700 dark:text-emerald-300">Soldé</span>
+                        <span className="text-xs text-emerald-700 dark:text-emerald-300">Soldé</span>
                       ) : (
                         <span
                           className={`text-xs font-medium ${
                             overdue
                               ? "text-red-600 dark:text-red-300"
-                              : "text-amber-700 dark:text-amber-700 dark:text-amber-300"
+                              : "text-amber-700 dark:text-amber-300"
                           }`}
                         >
                           {formatEUR(remaining)}
@@ -312,9 +313,9 @@ function Stat({
 }) {
   const toneCls =
     tone === "ok"
-      ? "text-emerald-700 dark:text-emerald-700 dark:text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-700 dark:text-amber-700 dark:text-amber-300"
+      ? "text-amber-700 dark:text-amber-300"
       : "text-slate-900 dark:text-slate-100";
   return (
     <div>

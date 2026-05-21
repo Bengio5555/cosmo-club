@@ -114,8 +114,10 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
 
   return (
     <div className="space-y-3">
-      {/* Status tabs — instant filter, no navigation */}
-      <div className="-mx-1 flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+      {/* Status tabs — instant filter, no navigation. On mobile the
+          bar scrolls horizontally instead of wrapping, like iOS segmented
+          controls in long form. */}
+      <div className="-mx-1 flex gap-1 overflow-x-auto rounded-lg border border-slate-200 bg-white p-1 shadow-sm scrollbar-none md:flex-wrap dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
         {STATUS_TABS.map((t) => {
           const isActive = status === t.value;
           const tone = isActive
@@ -127,7 +129,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
               type="button"
               onClick={() => setStatus(t.value)}
               className={
-                "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
+                "inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
                 tone
               }
             >
@@ -187,8 +189,11 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+      {/* Table — on mobile the rows render as cards via globals.css
+          `.table-as-cards` selector. Each <td> declares its column
+          label via data-label so the card layout can prefix each
+          cell with the right caption. */}
+      <div className="table-as-cards overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none md:bg-white md:dark:bg-slate-950/60">
         {visible.length > 0 ? (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-transparent dark:text-slate-500">
@@ -220,7 +225,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                   key={l.id}
                   className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-slate-900 dark:hover:bg-slate-900"
                 >
-                  <td className="px-3 py-3 md:px-4">
+                  <td data-label-hidden className="px-3 py-3 md:px-4">
                     <Link
                       href={`/dashboard/leads/${l.id}`}
                       className="flex items-center gap-3"
@@ -247,10 +252,10 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                       </div>
                     </Link>
                   </td>
-                  <td className="px-3 py-3 md:px-4">
+                  <td data-label="Événement" className="px-3 py-3 md:px-4">
                     <EventTypeLabel value={l.event_type} />
                   </td>
-                  <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-600 dark:text-slate-300 md:px-4">
+                  <td data-label="Date" className="px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:px-4">
                     {l.event_date ? (
                       formatDateFR(l.event_date)
                     ) : (
@@ -259,13 +264,13 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                       )
                     )}
                   </td>
-                  <td className="hidden px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:table-cell md:px-4">
+                  <td data-label="Invités" className="hidden px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:table-cell md:px-4">
                     {l.guests_count ?? <span className="text-slate-400 dark:text-slate-500">—</span>}
                   </td>
-                  <td className="px-3 py-3 md:px-4">
+                  <td data-label="Statut" className="px-3 py-3 md:px-4">
                     <StatusBadge status={l.status} />
                   </td>
-                  <td className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-500 md:table-cell md:px-4">
+                  <td data-label="Reçu" className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-500 md:table-cell md:px-4">
                     {formatDateFR(l.created_at, { withTime: true })}
                   </td>
                 </tr>

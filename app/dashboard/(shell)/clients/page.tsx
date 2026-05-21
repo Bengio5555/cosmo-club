@@ -182,7 +182,7 @@ export default async function ClientsListPage({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
+      <div className="table-as-cards overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
         {sortedClients.length > 0 ? (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-transparent dark:text-slate-500">
@@ -219,7 +219,7 @@ export default async function ClientsListPage({
                     key={c.id}
                     className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-slate-900 dark:hover:bg-slate-900"
                   >
-                    <td className="px-3 py-3 md:px-4">
+                    <td data-label-hidden className="px-3 py-3 md:px-4">
                       <Link
                         href={`/dashboard/clients/${c.id}`}
                         className="flex items-center gap-3"
@@ -254,22 +254,22 @@ export default async function ClientsListPage({
                         </div>
                       </Link>
                     </td>
-                    <td className="hidden px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:table-cell md:px-4">
+                    <td data-label="Contact" className="hidden px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:table-cell md:px-4">
                       {c.email && <div>{c.email}</div>}
                       {c.phone && (
                         <div className="text-slate-500 dark:text-slate-500">{c.phone}</div>
                       )}
                     </td>
-                    <td className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-400 md:table-cell md:px-4">
+                    <td data-label="Ville" className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-400 md:table-cell md:px-4">
                       {c.city ?? "—"}
                     </td>
-                    <td className="px-3 py-3 text-right text-slate-700 dark:text-slate-600 dark:text-slate-300 md:px-4">
+                    <td data-label="Devis" className="px-3 py-3 text-right text-slate-700 dark:text-slate-300 md:px-4">
                       {nbQuotes || <span className="text-slate-400 dark:text-slate-600">—</span>}
                     </td>
-                    <td className="px-3 py-3 text-right text-slate-700 dark:text-slate-600 dark:text-slate-300 md:px-4">
+                    <td data-label="Factures" className="px-3 py-3 text-right text-slate-700 dark:text-slate-300 md:px-4">
                       {nbInvoices || <span className="text-slate-400 dark:text-slate-600">—</span>}
                     </td>
-                    <td className="px-3 py-3 text-right font-medium text-slate-900 dark:text-slate-100 md:px-4">
+                    <td data-label="CA cumulé" className="px-3 py-3 text-right font-medium text-slate-900 dark:text-slate-100 md:px-4">
                       {ca > 0 ? formatEUR(ca) : <span className="text-slate-400 dark:text-slate-600">—</span>}
                     </td>
                   </tr>
@@ -319,9 +319,9 @@ function Stat({
 }) {
   const toneCls =
     tone === "ok"
-      ? "text-emerald-700 dark:text-emerald-700 dark:text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-300"
       : tone === "pending"
-      ? "text-amber-700 dark:text-amber-700 dark:text-amber-300"
+      ? "text-amber-700 dark:text-amber-300"
       : "text-slate-900 dark:text-slate-100";
   return (
     <div>

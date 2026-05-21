@@ -237,6 +237,117 @@ body {
    du dashboard ajoute explicitement ses classes `dark:` à côté des
    classes light. Plus de conflit entre les deux systèmes. */
 
+/* ─── Dashboard mobile / PWA polish ───────────────────
+   Scoped to .dashboard-shell so the public site keeps its airy serif
+   typography while the admin chrome feels like a native app on phones.
+
+   - System font stack ⇒ matches the OS UI shell (San Francisco on
+     iOS, Roboto/Segoe on Android/Windows).
+   - 16 px minimum input font ⇒ Safari only auto-zooms on focus when
+     the input is < 16px. Locking it at 16 keeps inputs from triggering
+     an aggressive zoom-then-blur jitter on iPhone.
+   - touch-action: manipulation ⇒ kills the 300 ms tap delay legacy
+     and disables double-tap zoom on buttons.
+   - -webkit-tap-highlight-color: transparent ⇒ removes the gray flash
+     iOS adds on every link tap; we use group-active: for feedback. */
+.dashboard-shell {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (max-width: 767px) {
+  .dashboard-shell input,
+  .dashboard-shell select,
+  .dashboard-shell textarea {
+    font-size: 16px;
+  }
+  .dashboard-shell a,
+  .dashboard-shell button,
+  .dashboard-shell [role="button"],
+  .dashboard-shell label {
+    touch-action: manipulation;
+  }
+  /* Native momentum scrolling on inner scrollers (tables, modals) */
+  .dashboard-shell .overflow-x-auto,
+  .dashboard-shell .overflow-y-auto,
+  .dashboard-shell .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Disable iOS pull-to-refresh on the dashboard shell — feels jarring
+   when the route is a server-rendered Next page. Public site keeps
+   normal browser behavior. */
+.dashboard-shell {
+  overscroll-behavior-y: contain;
+}
+
+/* Hide scrollbar utility for horizontally-scrolling pill rows on
+   mobile. The track is visible-by-design only on macOS hover-to-show
+   scrollbars; this just removes the visible bar on Windows/Android. */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Table → card view under md.
+   Apply `.table-as-cards` on a wrapping element. Mobile-only the
+   <table> renders as a stack of cards; each row becomes a card with
+   each cell on its own line prefixed by its column label (read from
+   `data-label`). Above md it falls back to a normal table. */
+@media (max-width: 767px) {
+  .table-as-cards table,
+  .table-as-cards thead,
+  .table-as-cards tbody,
+  .table-as-cards tr,
+  .table-as-cards td {
+    display: block;
+    width: 100%;
+  }
+  .table-as-cards thead {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .table-as-cards tr {
+    border: 1px solid rgb(226 232 240); /* slate-200 */
+    border-radius: 12px;
+    padding: 12px;
+    margin: 0 0 10px 0;
+    background: rgb(255 255 255);
+  }
+  .dark .table-as-cards tr {
+    border-color: rgb(30 41 59);   /* slate-800 */
+    background: rgb(15 23 42 / 0.6); /* slate-950/60 */
+  }
+  .table-as-cards td {
+    border: 0;
+    padding: 4px 0;
+    text-align: left;
+  }
+  /* Render the column label before the cell content, derived from
+     the `data-label` attribute set per <td>. */
+  .table-as-cards td[data-label]::before {
+    content: attr(data-label);
+    display: inline-block;
+    min-width: 80px;
+    margin-right: 8px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(100 116 139); /* slate-500 */
+  }
+  /* Hide labels on the "primary" cell which already contains identity */
+  .table-as-cards td[data-label-hidden]::before { content: none; }
+}
+
 /* ─── Article prose (blog content) ─────────────────────── */
 .article-prose {
   color: var(--color-ink-text);

@@ -37,12 +37,25 @@ const ALL_TABS: Tab[] = [
   { href: "/dashboard/images", label: "Images", icon: ImageIcon },
 ];
 
+/**
+ * Bottom tab bar — iOS/Android pattern. Sticky to viewport bottom,
+ * respects safe-area-inset so it lifts above the home indicator on
+ * iPhones with notch. Theme-aware and exits below md breakpoint
+ * where the sidebar takes over.
+ *
+ * Active tab gets a pill background (more native-feeling than the
+ * usual top underline) and an enlarged icon. Inactive icons fade
+ * briefly when tapped so users get touch feedback while routing.
+ */
 export function MobileNav({ role }: { role: UserRole }) {
   const pathname = usePathname();
   const tabs = ALL_TABS.filter((t) => canAccess(t.href, role)).slice(0, 5);
 
   return (
-    <nav className="sticky bottom-0 z-30 flex border-t border-slate-800 bg-slate-950/95 backdrop-blur md:hidden">
+    <nav
+      aria-label="Navigation principale"
+      className="sticky bottom-0 z-30 flex border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_-2px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-none md:hidden"
+    >
       {tabs.map((t) => {
         const active = t.exact ? pathname === t.href : pathname.startsWith(t.href);
         const Icon = t.icon;
@@ -50,12 +63,24 @@ export function MobileNav({ role }: { role: UserRole }) {
           <Link
             key={t.href}
             href={t.href}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px]",
-              active ? "text-white" : "text-slate-500 hover:text-slate-300",
+              "group flex min-h-[44px] flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-medium tracking-tight transition-colors",
+              active
+                ? "text-slate-900 dark:text-white"
+                : "text-slate-500 hover:text-slate-900 dark:text-slate-500 dark:hover:text-slate-200",
             )}
           >
-            <Icon className="h-4 w-4" />
+            <span
+              className={cn(
+                "flex h-7 w-12 items-center justify-center rounded-full transition-colors",
+                active
+                  ? "bg-slate-900/10 dark:bg-white/10"
+                  : "bg-transparent group-active:bg-slate-900/5 dark:group-active:bg-white/5",
+              )}
+            >
+              <Icon className="h-[18px] w-[18px]" />
+            </span>
             <span>{t.label}</span>
           </Link>
         );
