@@ -100,10 +100,10 @@ export default async function DashboardHome() {
         "id,title,date,start_time,location,status,client_id,guests_count",
       )
       .gte("date", todayISO)
-      .lte("date", sevenDaysFromNow)
+      .lte("date", fifteenDaysFromNow)
       .neq("status", "annule")
       .order("date", { ascending: true })
-      .limit(6),
+      .limit(8),
     supabase
       .from("events")
       .select("id,date,status")
@@ -583,7 +583,7 @@ export default async function DashboardHome() {
                   Prochains événements
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  7 jours à venir · {(upcomingEvents ?? []).length} prévu
+                  15 jours à venir · {(upcomingEvents ?? []).length} prévu
                   {(upcomingEvents ?? []).length > 1 ? "s" : ""}
                 </p>
               </div>
@@ -598,7 +598,7 @@ export default async function DashboardHome() {
             <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {(upcomingEvents ?? []).length === 0 ? (
                 <li className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-                  Pas d&apos;événement prévu cette semaine.
+                  Pas d&apos;événement prévu dans les 15 prochains jours.
                 </li>
               ) : (
                 (upcomingEvents ?? []).map((e) => (
