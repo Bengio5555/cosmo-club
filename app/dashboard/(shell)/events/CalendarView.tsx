@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Clock, MapPin, Users, ChevronRight } from "lucide-react";
 import type { Database } from "@/types/database";
+import { buildMonthGrid, isoKey } from "./calendarGrid";
 
 type EventStatus = Database["public"]["Enums"]["event_status"];
 type EventCell = {
@@ -253,41 +254,3 @@ export function CalendarView({
   );
 }
 
-/* ─── Grid utilities (kept identical for API compatibility) ─── */
-
-export function buildMonthGrid(monthDate: Date) {
-  const y = monthDate.getFullYear();
-  const m = monthDate.getMonth();
-  const firstOfMonth = new Date(y, m, 1);
-  const lastOfMonth = new Date(y, m + 1, 0);
-
-  // 0=Sun..6=Sat → 0=Mon..6=Sun
-  const firstWeekday = (firstOfMonth.getDay() + 6) % 7;
-  const lastWeekday = (lastOfMonth.getDay() + 6) % 7;
-
-  const start = new Date(firstOfMonth);
-  start.setDate(firstOfMonth.getDate() - firstWeekday);
-
-  const end = new Date(lastOfMonth);
-  end.setDate(lastOfMonth.getDate() + (6 - lastWeekday));
-
-  const days: { date: Date; key: string }[] = [];
-  const cur = new Date(start);
-  while (cur <= end) {
-    days.push({ date: new Date(cur), key: isoKey(cur) });
-    cur.setDate(cur.getDate() + 1);
-  }
-  return days;
-}
-
-function isoKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-export function gridRange(monthDate: Date): { from: string; to: string } {
-  const days = buildMonthGrid(monthDate);
-  return { from: days[0].key, to: days[days.length - 1].key };
-}

@@ -14,7 +14,8 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { NewEventButton } from "./NewEventButton";
-import { CalendarView, gridRange } from "./CalendarView";
+import { CalendarView } from "./CalendarView";
+import { gridRange } from "./calendarGrid";
 import { autoStartDueEvents } from "./actions";
 import { computeEventMarginsBatch } from "@/lib/server/eventMargin";
 
