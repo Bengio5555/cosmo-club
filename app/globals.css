@@ -231,31 +231,11 @@ body {
 }
 
 /* ─── Dashboard light theme ───────────────────────────
-   Scoped to descendants of [data-theme="light"]. The dashboard shell
-   wraps its tree in this attribute so the public site is unaffected.
-   We invert the neutral scale (Tailwind v4 exposes each step as a CSS
-   var, so bg/text/border-neutral-* utilities pick up the new value via
-   inheritance), then patch the few hard-coded white/black utilities. */
-[data-theme="light"] {
-  --color-neutral-50: #0a0a0a;
-  --color-neutral-100: #171717;
-  --color-neutral-200: #262626;
-  --color-neutral-300: #404040;
-  --color-neutral-400: #525252;
-  --color-neutral-500: #737373;
-  --color-neutral-600: #a3a3a3;
-  --color-neutral-700: #d4d4d4;
-  --color-neutral-800: #e5e5e5;
-  --color-neutral-900: #ffffff;
-  --color-neutral-950: #fafafa;
-}
-
-[data-theme="light"] .text-white { color: #0a0a0a; }
-[data-theme="light"] .hover\:text-white:hover { color: #0a0a0a; }
-[data-theme="light"] .bg-white { background-color: #ffffff; }
-[data-theme="light"] .hover\:bg-white:hover { background-color: #ffffff; }
-[data-theme="light"] .text-black { color: #fafafa; }
-[data-theme="light"] .bg-black { background-color: #fafafa; }
+   Ancien système (data-theme="light" qui inverse --color-neutral-*)
+   retiré le 2026-05-21. Remplacé par le nouveau modèle Tailwind v4
+   `@custom-variant dark` défini en haut du fichier : chaque composant
+   du dashboard ajoute explicitement ses classes `dark:` à côté des
+   classes light. Plus de conflit entre les deux systèmes. */
 
 /* ─── Article prose (blog content) ─────────────────────── */
 .article-prose {
