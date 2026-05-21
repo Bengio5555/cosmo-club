@@ -188,14 +188,19 @@ export async function deleteClient(id: string) {
 /**
  * Spin up a blank draft quote pre-linked to this client and redirect
  * straight into the editor. Mirrors convertLeadToQuote's pattern but
- * without a lead — owner initiates from the fiche client.
+ * starts from the fiche client.
+ *
+ * Important: si le client a un email et qu'une demande "ouverte"
+ * (statut `nouveau` ou `contacte`) existe avec le même email, on lie
+ * automatiquement le devis à ce lead. Sans ça, le statut de la demande
+ * reste figé à "nouveau" après envoi du devis — le CRM pipeline ment.
  */
 export async function createQuoteForClient(clientId: string) {
   const supabase = await createServerClient();
 
   const { data: client, error: cErr } = await supabase
     .from("clients")
-    .select("id,first_name,last_name,company_name")
+    .select("id,first_name,last_name,company_name,email")
     .eq("id", clientId)
     .maybeSingle();
   if (cErr || !client) {
@@ -212,11 +217,30 @@ export async function createQuoteForClient(clientId: string) {
     [client.first_name, client.last_name].filter(Boolean).join(" ") ||
     "client";
 
+  // Cherche une demande ouverte (nouveau / contacte) avec le même
+  // email que le client. ilike pour matcher insensible à la casse
+  // (les emails arrivent en majuscules, minuscules, mélangé).
+  let leadId: string | null = null;
+  if (client.email) {
+    const { data: openLead } = await supabase
+      .from("leads")
+      .select("id")
+      .ilike("contact_email", client.email)
+      .in("status", ["nouveau", "contacte"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (openLead?.id) {
+      leadId = openLead.id;
+    }
+  }
+
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
     .insert({
       number: nbr,
       client_id: client.id,
+      lead_id: leadId,
       status: "brouillon",
       subject: `Devis — ${display}`,
       // IDOR protection: random token required in the public URL
@@ -228,6 +252,19 @@ export async function createQuoteForClient(clientId: string) {
     .single();
   if (qErr || !quote) {
     return { ok: false as const, error: qErr?.message ?? "Création devis échouée" };
+  }
+
+  // Quand on a auto-lié un lead, on bump aussi son statut à `contacte`
+  // et on lui attache le client_id (au cas où ce n'était pas encore fait).
+  // Le passage à `devis_envoye` se fait plus tard dans sendDevis().
+  if (leadId) {
+    await supabase
+      .from("leads")
+      .update({ client_id: client.id, status: "contacte" })
+      .eq("id", leadId)
+      .eq("status", "nouveau"); // ne downgrade pas un lead déjà plus loin
+    revalidatePath("/dashboard/leads");
+    revalidatePath(`/dashboard/leads/${leadId}`);
   }
 
   revalidatePath("/dashboard/devis");
