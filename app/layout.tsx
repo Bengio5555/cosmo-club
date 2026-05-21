@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { fontClassName } from "@/lib/fonts";
 import { site } from "@/lib/site";
 import "./globals.css";
+
+// GA4 measurement ID. Lit l'env d'abord pour rester configurable
+// (preview/dev = sans GA pour ne pas polluer les stats prod). Fallback
+// vers la valeur prod en clair pour ne jamais casser le tracking en
+// cas d'oubli côté Vercel.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-MWLCN3KLW9";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -108,6 +115,11 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
+        {/* Google Analytics 4 — chargé en `afterInteractive` par
+            @next/third-parties, donc n'impacte pas le LCP. Tracking
+            désactivé en dev (le composant ignore l'injection quand
+            NODE_ENV !== 'production'). */}
+        <GoogleAnalytics gaId={GA_ID} />
       </body>
     </html>
   );
