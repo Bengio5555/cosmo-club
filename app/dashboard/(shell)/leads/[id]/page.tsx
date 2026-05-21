@@ -69,7 +69,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               Reçu {formatDateFR(lead.created_at, { withTime: true })}
             </span>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
             {lead.contact_name || <span className="text-slate-500 dark:text-slate-500">Sans nom</span>}
           </h1>
           {lead.company && (

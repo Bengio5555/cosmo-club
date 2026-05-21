@@ -19,29 +19,34 @@ export default async function LeadsPage() {
     .limit(500);
 
   return (
-    <div className="px-4 py-6 md:px-8 md:py-8">
-      <header className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-3xl">
-            Demandes
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Leads entrants depuis le site (formulaire{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[12px] text-slate-700 dark:bg-slate-800 dark:text-slate-400">
-              /contact
-            </code>
-            ).
-          </p>
-        </div>
-      </header>
+    <div className="px-6 py-6 md:px-10 md:py-8">
+      <div className="mx-auto max-w-[1400px]">
+        <header className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Pilotage · Pipeline commercial
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
+              Demandes
+            </h1>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              Leads entrants depuis le site (formulaire{" "}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-[12px] text-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                /contact
+              </code>
+              ).
+            </p>
+          </div>
+        </header>
 
-      {error && (
-        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
-          Erreur de chargement : {error.message}
-        </div>
-      )}
+        {error && (
+          <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
+            Erreur de chargement : {error.message}
+          </div>
+        )}
 
-      <LeadsBrowser leads={leads ?? []} />
+        <LeadsBrowser leads={leads ?? []} />
+      </div>
     </div>
   );
 }

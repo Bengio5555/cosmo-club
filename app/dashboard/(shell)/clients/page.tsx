@@ -102,19 +102,22 @@ export default async function ClientsListPage({
   const totalCA = Array.from(caByClient.values()).reduce((s, v) => s + v, 0);
 
   return (
-    <div className="px-4 py-6 md:px-8 md:py-8">
-      <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
-            Clients
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Annuaire consolidé · CA cumulé, historique devis et factures en un
-            coup d&apos;œil.
-          </p>
-        </div>
-        <NewClientButton />
-      </header>
+    <div className="px-6 py-6 md:px-10 md:py-8">
+      <div className="mx-auto max-w-[1400px]">
+        <header className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Ressources · Annuaire
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
+              Clients
+            </h1>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              CA cumulé, historique devis et factures en un coup d&apos;œil.
+            </p>
+          </div>
+          <NewClientButton />
+        </header>
 
       <form
         method="GET"
@@ -296,10 +299,11 @@ export default async function ClientsListPage({
         )}
       </div>
 
-      <p className="mt-4 text-[11px] text-slate-500 dark:text-slate-600">
-        {formatDateFR(new Date())} · CA cumulé net des avoirs, factures annulées
-        exclues.
-      </p>
+        <p className="mt-4 text-[11px] text-slate-500 dark:text-slate-500">
+          {formatDateFR(new Date())} · CA cumulé net des avoirs, factures
+          annulées exclues.
+        </p>
+      </div>
     </div>
   );
 }

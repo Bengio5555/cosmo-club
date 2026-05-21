@@ -14,10 +14,10 @@ export default async function BlogAdminPage() {
   const missingCovers = (data ?? []).filter((a) => !a.cover_url).length;
 
   return (
-    <div className="px-4 py-6 md:px-8 md:py-8">
+    <div className="px-6 py-6 md:px-10 md:py-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">Le Mag</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">Le Mag</h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Articles éditoriaux publiés sur cosmoclub.fr/blog. Brouillons, planifications et version GMB en un seul endroit.
           </p>

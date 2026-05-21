@@ -84,22 +84,27 @@ export default async function InvoicesListPage({
   void sumHt; // placeholder, we display TTC aggregates
 
   return (
-    <div className="px-4 py-6 md:px-8 md:py-8">
-      <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div className="px-6 py-6 md:px-10 md:py-8">
+      <div className="mx-auto max-w-[1400px]">
+      <header className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Pilotage · Comptabilité
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
             Factures
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Numérotation continue FR, PDF imprimable, lock après émission (art. 242
-            nonies A du CGI). Avoirs et paiements partiels supportés.
+            Numérotation continue FR, PDF imprimable, lock après émission (art.
+            242 nonies A du CGI). Avoirs et paiements partiels supportés.
           </p>
         </div>
         <a
           href={exportHref}
-          className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3.5 py-2 text-xs font-semibold text-[color:var(--color-bone)] transition-colors hover:bg-[color:var(--color-grenat-glow)]"
+          className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
         >
-          <Download className="h-3.5 w-3.5" /> Exporter CSV compta
+          <Download className="h-3.5 w-3.5" />
+          Exporter CSV
         </a>
       </header>
 
@@ -290,6 +295,7 @@ export default async function InvoicesListPage({
             , clique « Créer la facture » pour en générer une.
           </div>
         )}
+      </div>
       </div>
     </div>
   );
