@@ -21,6 +21,7 @@ import {
   Newspaper,
   Truck,
   Network,
+  MessageSquareText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccess, type UserRole } from "@/lib/auth/roles";
@@ -60,6 +61,7 @@ const nav: { section: string; items: NavItem[] }[] = [
     section: "Contenu",
     items: [
       { href: "/dashboard/blog", label: "Le Mag", icon: Newspaper },
+      { href: "/dashboard/reddit", label: "Reddit veille", icon: MessageSquareText },
       { href: "/dashboard/images", label: "Images site", icon: ImageIcon },
       { href: "/dashboard/home-gallery", label: "Galerie home", icon: ImageIcon },
       { href: "/dashboard/logos", label: "Logos clients", icon: Building2 },

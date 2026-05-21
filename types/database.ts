@@ -226,6 +226,38 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["leads"]["Row"]>
         Relationships: []
       }
+      reddit_threads: {
+        Row: {
+          id: string
+          reddit_id: string
+          subreddit: string
+          title: string
+          url: string
+          permalink: string
+          selftext: string | null
+          author: string | null
+          score: number
+          num_comments: number
+          posted_at: string
+          matched_keyword: string
+          draft_reply: string | null
+          status: "pending" | "answered" | "skipped"
+          internal_note: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["reddit_threads"]["Row"]> & {
+          reddit_id: string
+          subreddit: string
+          title: string
+          url: string
+          permalink: string
+          posted_at: string
+          matched_keyword: string
+        }
+        Update: Partial<Database["public"]["Tables"]["reddit_threads"]["Row"]>
+        Relationships: []
+      }
       partners: {
         Row: {
           archived: boolean
