@@ -136,8 +136,8 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
         <div
           className={`rounded-md border px-3 py-2 text-xs ${
             msg.kind === "ok"
-              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-              : "border-red-500/40 bg-red-500/10 text-red-200"
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+              : "border-red-300 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
           }`}
         >
           {msg.text}
@@ -240,7 +240,7 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
                     <button
                       type="button"
                       onClick={() => remove(it.id, it.title)}
-                      className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                      className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10 hover:text-red-300"
                       aria-label="Supprimer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

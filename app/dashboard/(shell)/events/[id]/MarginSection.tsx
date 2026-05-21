@@ -30,10 +30,10 @@ export function MarginSection({ margin }: { margin: EventMargin | null }) {
 
   const positive = margin.marginHt >= 0;
   const Icon = positive ? TrendingUp : TrendingDown;
-  const accent = positive ? "text-emerald-700 dark:text-emerald-300" : "text-red-300";
+  const accent = positive ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300";
   const accentBg = positive
-    ? "border-emerald-500/30 bg-emerald-500/5"
-    : "border-red-500/30 bg-red-500/5";
+    ? "border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/5"
+    : "border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5";
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-5">

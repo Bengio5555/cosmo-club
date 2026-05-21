@@ -94,7 +94,7 @@ export function AiPanel({
       </p>
 
       {error && (
-        <div className="mt-3 rounded-md border border-red-500/30 bg-red-500/10 p-2 text-[11px] text-red-200">
+        <div className="mt-3 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-2 text-[11px] text-red-800 dark:text-red-200">
           {error}
         </div>
       )}
@@ -107,7 +107,7 @@ export function AiPanel({
             type="button"
             disabled={pending}
             onClick={() => run("cover", () => generateCoverImage(articleId))}
-            className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/15 px-2.5 py-1 text-[11px] text-amber-200 hover:bg-amber-500/25 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/25 px-2.5 py-1 text-[11px] disabled:opacity-50"
           >
             {busyId === "cover" ? (
               <RefreshCw className="h-3 w-3 animate-spin" />
@@ -130,7 +130,7 @@ export function AiPanel({
             type="button"
             disabled={pending}
             onClick={() => run("gmb_text", () => generateGmbVersion(articleId))}
-            className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/15 px-2.5 py-1 text-[11px] text-amber-200 hover:bg-amber-500/25 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/25 px-2.5 py-1 text-[11px] disabled:opacity-50"
           >
             {busyId === "gmb_text" ? (
               <RefreshCw className="h-3 w-3 animate-spin" />
@@ -178,7 +178,7 @@ export function AiPanel({
             type="button"
             disabled={pending}
             onClick={() => run("gmb_img", () => generateGmbImage(articleId))}
-            className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/15 px-2.5 py-1 text-[11px] text-amber-200 hover:bg-amber-500/25 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/25 px-2.5 py-1 text-[11px] disabled:opacity-50"
           >
             {busyId === "gmb_img" ? (
               <RefreshCw className="h-3 w-3 animate-spin" />

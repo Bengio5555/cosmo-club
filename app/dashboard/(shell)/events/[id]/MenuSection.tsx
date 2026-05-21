@@ -162,7 +162,7 @@ export function MenuSection({
                 type="button"
                 onClick={() => setShowCompute(true)}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200 transition-colors hover:bg-amber-500/20 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 dark:border-amber-500/40 bg-amber-100 dark:bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-800 dark:text-amber-200 transition-colors hover:bg-amber-200 dark:hover:bg-amber-500/20 disabled:opacity-60"
               >
                 <Calculator className="h-3 w-3" /> Calculer le stock
               </button>
@@ -172,7 +172,7 @@ export function MenuSection({
       </div>
 
       {err && (
-        <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+        <div className="mb-3 rounded-md border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 px-3 py-2 text-xs text-red-800 dark:text-red-200">
           {err}
         </div>
       )}
@@ -279,7 +279,7 @@ export function MenuSection({
                   type="button"
                   onClick={() => removeRow(m.cocktail_id)}
                   disabled={pending}
-                  className="rounded p-1 text-slate-500 dark:text-slate-500 hover:bg-red-500/10 hover:text-red-300"
+                  className="rounded p-1 text-slate-500 dark:text-slate-500 hover:bg-red-100 dark:hover:bg-red-500/10 hover:text-red-300"
                   aria-label="Retirer"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -328,7 +328,7 @@ export function MenuSection({
             </div>
 
             {hasShortage && (
-              <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+              <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-300 dark:border-amber-500/40 bg-amber-100 dark:bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
                 <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
                   Certains produits manquent en stock. Réappro à prévoir avant
@@ -359,7 +359,7 @@ export function MenuSection({
                     return (
                       <tr
                         key={l.productId}
-                        className={`border-t border-slate-100 dark:border-slate-900 ${short ? "bg-red-500/5" : ""}`}
+                        className={`border-t border-slate-100 dark:border-slate-900 ${short ? "bg-red-50 dark:bg-red-500/5" : ""}`}
                       >
                         <td className="px-2 py-2">
                           <p className="font-medium text-slate-900 dark:text-slate-100">
@@ -376,7 +376,7 @@ export function MenuSection({
                           {l.packsNeeded} {l.packUnit}
                         </td>
                         <td
-                          className={`px-2 py-2 text-right ${short ? "text-red-300 font-medium" : "text-slate-500 dark:text-slate-400"}`}
+                          className={`px-2 py-2 text-right ${short ? "text-red-700 dark:text-red-300 font-medium" : "text-slate-500 dark:text-slate-400"}`}
                         >
                           {l.stockQty}
                           {short && (

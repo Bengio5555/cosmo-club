@@ -180,7 +180,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           className={`rounded-md border px-3 py-2 text-xs ${
             msg.kind === "ok"
               ? "border-green-700/40 bg-green-900/30 text-green-300"
-              : "border-red-700/40 bg-red-900/30 text-red-300"
+              : "border-red-300 bg-red-50 text-red-800 dark:border-red-700/40 dark:bg-red-900/30 dark:text-red-300"
           }`}
         >
           {msg.text}

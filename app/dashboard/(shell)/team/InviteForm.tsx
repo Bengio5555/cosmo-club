@@ -87,8 +87,8 @@ export function InviteForm() {
           <div
             className={
               message.type === "ok"
-                ? "rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-[11px] text-emerald-200"
-                : "rounded-md border border-red-500/30 bg-red-500/10 p-2.5 text-[11px] text-red-200"
+                ? "rounded-md border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 p-2.5 text-[11px] text-emerald-800 dark:text-emerald-200"
+                : "rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-2.5 text-[11px] text-red-800 dark:text-red-200"
             }
           >
             {message.text}

@@ -477,7 +477,7 @@ async function ListPage({ when, status }: { when?: string; status?: string }) {
                             <p
                               className={
                                 margin.marginHt < 0
-                                  ? "text-red-300"
+                                  ? "text-red-700 dark:text-red-300"
                                   : margin.marginPct != null && margin.marginPct < 30
                                     ? "text-amber-700 dark:text-amber-300"
                                     : "text-emerald-700 dark:text-emerald-300"

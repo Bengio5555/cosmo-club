@@ -133,7 +133,7 @@ function TeamRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
             type="button"
             onClick={onRemove}
             disabled={pending}
-            className="inline-flex items-center gap-1 rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-[11px] text-red-300 transition hover:border-red-500/50 hover:bg-red-500/20 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-2 py-1 text-[11px] text-red-700 dark:text-red-300 transition hover:border-red-500/50 hover:bg-red-500/20 disabled:opacity-50"
           >
             <Trash2 className="h-3 w-3" />
             Retirer

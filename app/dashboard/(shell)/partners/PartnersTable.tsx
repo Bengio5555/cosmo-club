@@ -156,7 +156,7 @@ export function PartnersTable({ partners }: { partners: Partner[] }) {
       </div>
 
       {err && (
-        <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-200">
+        <div className="mb-3 rounded-md border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 p-2 text-xs text-red-800 dark:text-red-200">
           {err}
         </div>
       )}
@@ -292,7 +292,7 @@ function PartnerRow({
         <button type="button" onClick={onArchive} disabled={pending} className="rounded p-1.5 text-slate-500 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-200" aria-label={p.archived ? "Désarchiver" : "Archiver"} title={p.archived ? "Désarchiver" : "Archiver"}>
           {p.archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
         </button>
-        <button type="button" onClick={onDelete} disabled={pending} className="rounded p-1.5 text-slate-500 dark:text-slate-500 hover:bg-red-500/10 hover:text-red-300" aria-label="Supprimer" title="Supprimer définitivement">
+        <button type="button" onClick={onDelete} disabled={pending} className="rounded p-1.5 text-slate-500 dark:text-slate-500 hover:bg-red-100 dark:hover:bg-red-500/10 hover:text-red-300" aria-label="Supprimer" title="Supprimer définitivement">
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>

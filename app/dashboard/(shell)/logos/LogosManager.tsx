@@ -132,8 +132,8 @@ export function LogosManager({ logos }: { logos: Logo[] }) {
           <div
             className={`rounded-md border px-3 py-2 text-xs ${
               msg.kind === "ok"
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-                : "border-red-500/40 bg-red-500/10 text-red-200"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+                : "border-red-300 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
             }`}
           >
             {msg.text}

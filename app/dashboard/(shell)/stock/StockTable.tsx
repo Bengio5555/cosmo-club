@@ -231,7 +231,7 @@ export function StockTable({
             {products.filter((p) => !p.archived).length > 1 ? "s" : ""}
           </span>
           {lowStockCount > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-200">
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 dark:border-amber-500/40 bg-amber-100 dark:bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-200">
               <AlertTriangle className="h-3 w-3" /> {lowStockCount} sous seuil
             </span>
           )}
@@ -269,7 +269,7 @@ export function StockTable({
       </div>
 
       {err && (
-        <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-200">
+        <div className="mb-3 rounded-md border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 p-2 text-xs text-red-800 dark:text-red-200">
           {err}
         </div>
       )}
@@ -341,7 +341,7 @@ export function StockTable({
                             }
                             disabled={pending}
                             title="Sortie stock"
-                            className="rounded p-1.5 text-red-600 dark:text-red-400 transition-colors hover:bg-red-500/10"
+                            className="rounded p-1.5 text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10"
                           >
                             <ArrowDownCircle className="h-3.5 w-3.5" />
                           </button>
@@ -430,7 +430,7 @@ export function StockTable({
                       {product?.name ?? "—"}
                     </span>
                     <span
-                      className={`font-medium ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-300" : "text-red-300"}`}
+                      className={`font-medium ${m.direction === "in" ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}
                     >
                       {m.direction === "in" ? "+" : "−"}
                       {Number(m.qty)}

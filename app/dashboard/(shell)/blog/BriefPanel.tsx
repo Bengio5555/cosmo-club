@@ -60,7 +60,7 @@ export function BriefPanel({ onDraft }: Props) {
   }
 
   return (
-    <section className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+    <section className="rounded-lg border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5 p-4">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
         <Wand2 className="h-4 w-4 text-amber-400" />
         Générer l'article avec l'IA
@@ -138,7 +138,7 @@ export function BriefPanel({ onDraft }: Props) {
         </button>
 
         {error && (
-          <div className="rounded-md border border-red-500/30 bg-red-500/10 p-2.5 text-[11px] text-red-200">
+          <div className="rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-2.5 text-[11px] text-red-800 dark:text-red-200">
             {error}
           </div>
         )}

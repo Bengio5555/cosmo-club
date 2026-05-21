@@ -146,7 +146,7 @@ export function Sidebar({ role }: { role: UserRole }) {
                       <Icon className="h-4 w-4" />
                       <span className="flex-1 truncate">{item.label}</span>
                       {item.badge && (
-                        <span className="rounded bg-red-500/20 px-1.5 text-[10px] font-semibold text-red-300">
+                        <span className="rounded bg-red-500/20 px-1.5 text-[10px] font-semibold text-red-700 dark:text-red-300">
                           {item.badge}
                         </span>
                       )}

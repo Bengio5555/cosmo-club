@@ -123,7 +123,7 @@ export function MoodboardPicker({
       </div>
 
       {err && (
-        <p className="rounded-md border border-red-500/40 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-200">
+        <p className="rounded-md border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-800 dark:text-red-200">
           {err}
         </p>
       )}

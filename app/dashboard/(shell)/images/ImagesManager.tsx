@@ -196,8 +196,8 @@ export function ImagesManager({ initialConfig }: { initialConfig: Config }) {
           <div
             className={`rounded-md border px-3 py-2 text-xs ${
               msg.kind === "ok"
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-                : "border-red-500/40 bg-red-500/10 text-red-200"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+                : "border-red-300 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
             }`}
           >
             {msg.text}
@@ -471,7 +471,7 @@ function DetailPanel({
           type="button"
           onClick={onDelete}
           disabled={pending}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-red-500/30 bg-red-500/5 px-4 py-2 text-xs font-semibold text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5 px-4 py-2 text-xs font-semibold text-red-700 dark:text-red-300 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10 disabled:opacity-50"
         >
           <Trash2 className="h-3 w-3" /> Supprimer
         </button>

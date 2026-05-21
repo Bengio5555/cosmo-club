@@ -349,8 +349,8 @@ export function InvoiceEditor({
         <div
           className={`mt-3 rounded-md border px-3 py-2 text-xs ${
             msg.kind === "ok"
-              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-              : "border-red-500/40 bg-red-500/10 text-red-200"
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+              : "border-red-300 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
           }`}
         >
           {msg.text}
@@ -358,7 +358,7 @@ export function InvoiceEditor({
       )}
 
       {readOnly && (
-        <div className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-200">
+        <div className="mt-3 rounded-md border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
           Facture verrouillée ({invoice.status}). Pour toute modification, émets
           un avoir — une facture émise est immuable (art. 242 nonies A du CGI).
         </div>
@@ -644,7 +644,7 @@ function TopBar({
             <button
               type="button"
               onClick={onDelete}
-              className="inline-flex items-center gap-1 rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-300 transition-colors hover:bg-red-500/10"
+              className="inline-flex items-center gap-1 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5 px-3 py-2 text-xs text-red-700 dark:text-red-300 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10"
             >
               <Trash2 className="h-3 w-3" /> Supprimer
             </button>
@@ -663,7 +663,7 @@ function TopBar({
                     ? `Dernière relance : ${new Date(invoice.last_reminded_at).toLocaleDateString("fr-FR")}`
                     : "Aucune relance encore envoyée"
                 }
-                className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-200 transition-colors hover:bg-amber-500/20 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 dark:border-amber-500/40 bg-amber-100 dark:bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-200 transition-colors hover:bg-amber-200 dark:hover:bg-amber-500/20 disabled:opacity-60"
               >
                 <BellRing className="h-3 w-3" />
                 Relancer
@@ -694,7 +694,7 @@ function TopBar({
         )}
 
         {invoice.status === "paye" && (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-200">
             <Check className="h-3 w-3" /> Encaissée
           </span>
         )}
@@ -740,8 +740,8 @@ function StatusPill({ status }: { status: InvoiceStatus }) {
   const map: Record<InvoiceStatus, { cls: string; label: string }> = {
     brouillon: { cls: "border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300", label: "Brouillon" },
     envoye: { cls: "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-200", label: "Envoyée" },
-    paye: { cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200", label: "Payée" },
-    en_retard: { cls: "border-red-500/50 bg-red-500/15 text-red-300", label: "En retard" },
+    paye: { cls: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200", label: "Payée" },
+    en_retard: { cls: "border-red-500/50 bg-red-500/15 text-red-700 dark:text-red-300", label: "En retard" },
     annule: { cls: "border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400", label: "Annulée" },
   };
   const p = map[status];

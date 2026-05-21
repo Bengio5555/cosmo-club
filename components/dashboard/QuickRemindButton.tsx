@@ -41,10 +41,10 @@ export function QuickRemindButton({ invoiceId }: { invoiceId: string }) {
       title="Envoyer une relance"
       className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-semibold transition-colors ${
         flash === "ok"
-          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+          ? "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
           : flash === "err"
-          ? "border-red-500/40 bg-red-500/10 text-red-200"
-          : "border-amber-500/40 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20"
+          ? "border-red-300 bg-red-100 text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
+          : "border-amber-300 bg-amber-100 text-amber-800 hover:bg-amber-200 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200 dark:hover:bg-amber-500/20"
       }`}
     >
       {pending ? (

@@ -202,7 +202,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
       </div>
 
       {err && (
-        <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-200">
+        <div className="mb-3 rounded-md border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 p-2 text-xs text-red-800 dark:text-red-200">
           {err}
         </div>
       )}
@@ -289,7 +289,7 @@ export function StaffTable({ staff }: { staff: Staff[] }) {
                         type="button"
                         onClick={() => doDelete(s)}
                         disabled={pending}
-                        className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                        className="rounded p-1.5 text-slate-500 dark:text-slate-500 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10 hover:text-red-300"
                         aria-label="Supprimer"
                         title="Supprimer définitivement"
                       >

@@ -160,7 +160,7 @@ export function ArticleEditor({ initial }: Props) {
               type="button"
               onClick={onDelete}
               disabled={pending}
-              className="inline-flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300 hover:border-red-500/50 hover:bg-red-500/20 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-300 hover:border-red-500/50 hover:bg-red-500/20 disabled:opacity-50"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Supprimer

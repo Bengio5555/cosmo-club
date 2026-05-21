@@ -178,7 +178,7 @@ export function CatalogPicker({
               <p className="p-6 text-center text-sm text-slate-500 dark:text-slate-500">Chargement…</p>
             )}
             {error && (
-              <p className="p-6 text-center text-sm text-red-300">{error}</p>
+              <p className="p-6 text-center text-sm text-red-700 dark:text-red-300">{error}</p>
             )}
             {!loading && !error && (items?.length ?? 0) === 0 && (
               <div className="p-6 text-center text-sm text-slate-500 dark:text-slate-500">

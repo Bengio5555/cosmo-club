@@ -216,7 +216,7 @@ export function EventEditor({
                 type="button"
                 onClick={doDelete}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-300 hover:bg-red-500/10"
+                className="inline-flex items-center gap-1.5 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5 px-3 py-2 text-xs text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-500/10"
               >
                 <Trash2 className="h-3 w-3" /> Supprimer
               </button>
@@ -250,8 +250,8 @@ export function EventEditor({
         <div
           className={`mt-3 rounded-md border px-3 py-2 text-xs ${
             msg.kind === "ok"
-              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-              : "border-red-500/40 bg-red-500/10 text-red-200"
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+              : "border-red-300 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
           }`}
         >
           {msg.text}
@@ -543,11 +543,11 @@ function StatusPill({ status }: { status: Event["status"] }) {
       label: "À venir",
     },
     en_cours: {
-      cls: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+      cls: "border-amber-300 dark:border-amber-500/40 bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200",
       label: "En cours",
     },
     termine: {
-      cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+      cls: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200",
       label: "Terminé",
     },
     annule: {
