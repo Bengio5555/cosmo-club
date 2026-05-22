@@ -26,12 +26,17 @@ export default async function DevisListPage() {
     : { data: [] };
   const clientsMap = new Map((clientsList ?? []).map((c) => [c.id, c]));
 
-  // Aggregates for the small stats row.
-  const totalTtc = (quotes ?? []).reduce(
+  // Aggregates for the small stats row. The "Signés" pill shows both
+  // the count AND the cumulative TTC of accepted quotes — used to be
+  // computed across ALL statuses, which inflated the value by mixing
+  // in drafts + sent + refused. Restricting to status === "accepte"
+  // matches the count and what the label promises.
+  const signedQuotes = (quotes ?? []).filter((q) => q.status === "accepte");
+  const signedTotalTtc = signedQuotes.reduce(
     (s, q) => s + Number(q.total_ttc ?? 0),
     0,
   );
-  const signedCount = (quotes ?? []).filter((q) => q.status === "accepte").length;
+  const signedCount = signedQuotes.length;
   const pendingCount = (quotes ?? []).filter((q) => q.status === "envoye").length;
 
   return (
@@ -71,7 +76,7 @@ export default async function DevisListPage() {
             />
             <StatPill
               label="Signés"
-              value={`${signedCount} · ${formatEUR(totalTtc)}`}
+              value={`${signedCount} · ${formatEUR(signedTotalTtc)}`}
               tone="emerald"
             />
           </div>
