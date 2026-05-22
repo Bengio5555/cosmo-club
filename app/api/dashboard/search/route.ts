@@ -144,15 +144,33 @@ export async function GET(req: NextRequest) {
     {
       type: "leads",
       label: "Demandes",
-      hits: (leadsRes.data ?? []).map((l): Hit => ({
-        id: l.id,
-        type: "leads",
-        label: l.contact_name || l.company || l.contact_email || "—",
-        hint:
-          [l.contact_email, l.company].filter(Boolean).join(" · ") ||
-          undefined,
-        href: `/dashboard/leads/${l.id}`,
-      })),
+      // A converted lead lives twice in the DB: once in `leads` (the
+      // entry-point form submission) and once in `clients` (the
+      // promoted record). Both surface with the same name/email,
+      // which feels like a duplicate to the operator. Drop the lead
+      // hit whenever a client with the same email already exists in
+      // the result set — the client is the authoritative entity.
+      hits: (() => {
+        const clientEmails = new Set(
+          (clientsRes.data ?? [])
+            .map((c) => c.email?.toLowerCase())
+            .filter((e): e is string => !!e),
+        );
+        return (leadsRes.data ?? [])
+          .filter((l) => {
+            const e = l.contact_email?.toLowerCase();
+            return !e || !clientEmails.has(e);
+          })
+          .map((l): Hit => ({
+            id: l.id,
+            type: "leads",
+            label: l.contact_name || l.company || l.contact_email || "—",
+            hint:
+              [l.contact_email, l.company].filter(Boolean).join(" · ") ||
+              undefined,
+            href: `/dashboard/leads/${l.id}`,
+          }));
+      })(),
     },
     {
       type: "quotes",
