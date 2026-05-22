@@ -403,18 +403,20 @@ export default async function DashboardHome() {
             </div>
           </div>
 
-          {/* Pipeline summary */}
+          {/* Pipeline summary — counts leads (not quotes). A single
+              lead can have several accepted quotes, so this won't
+              match the devis page count by design. */}
           <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-              Pipeline
+              Pipeline des demandes
             </h3>
             <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-              Demandes en cours
+              Chaque demande compte 1 fois, peu importe le nombre de devis
             </p>
             <ul className="mt-5 space-y-3">
-              <PipelineRow label="Nouveau" count={leadCounts.nouveau} tone="blue" />
+              <PipelineRow label="Nouvelle" count={leadCounts.nouveau} tone="blue" />
               <PipelineRow
-                label="Contacté"
+                label="Contactée"
                 count={leadCounts.contacte}
                 tone="amber"
               />
@@ -423,7 +425,11 @@ export default async function DashboardHome() {
                 count={leadCounts.devis_envoye}
                 tone="violet"
               />
-              <PipelineRow label="Gagné" count={leadCounts.gagne} tone="emerald" />
+              <PipelineRow
+                label="Gagnée"
+                count={leadCounts.gagne}
+                tone="emerald"
+              />
             </ul>
             <Link
               href="/dashboard/leads"
