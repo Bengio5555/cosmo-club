@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/dashboard/ThemeProvider";
+import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
 import logoSrc from "@/public/brand/cosmo-logo.avif";
 
 /**
@@ -48,11 +49,12 @@ export function Topbar({ email }: { email: string | null }) {
           </span>
         </Link>
 
-        <div className="hidden md:block" />
+        <div className="hidden flex-1 md:block" />
 
         <div className="flex items-center gap-2 md:gap-3">
+          <GlobalSearch />
           {email && (
-            <span className="hidden text-xs text-slate-500 dark:text-slate-500 md:inline">
+            <span className="hidden text-xs text-slate-500 dark:text-slate-500 lg:inline">
               {email}
             </span>
           )}
