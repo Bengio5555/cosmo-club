@@ -57,32 +57,21 @@
 }
 .invoice-brand {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
-.invoice-brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--grenat);
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  border-radius: 4px;
-}
-.invoice-brand-name {
-  font-family: "Fraunces", Georgia, serif;
-  font-size: 18px;
-  font-weight: 500;
+.invoice-brand-logo {
+  display: block;
+  width: 170px;
+  height: auto;
+  object-fit: contain;
 }
 .invoice-brand-tag {
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  margin-top: 2px;
 }
 .invoice-title-box {
   text-align: right;

@@ -7,6 +7,7 @@ import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cgvVersion } from "@/lib/cgv";
 import { SignedQuotePdf, type SignedQuoteData } from "@/lib/pdf/SignedQuotePdf";
+import { getCompanyLogoDataUrl } from "@/lib/pdf/logo";
 
 // Public acceptance / refusal flow. No auth is checked — the plaquette
 // URL itself is the access token. We only allow the transition from
@@ -309,6 +310,7 @@ async function sendAcceptanceEmails(o: {
             (settings as { email?: string | null } | null)?.email ?? null,
           phone:
             (settings as { phone?: string | null } | null)?.phone ?? null,
+          logoDataUrl: await getCompanyLogoDataUrl(),
         },
         signature: {
           name: o.signerName,

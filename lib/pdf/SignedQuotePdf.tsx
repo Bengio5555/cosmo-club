@@ -7,7 +7,7 @@ import {
   Image as _Image,
   StyleSheet,
 } from "@react-pdf/renderer";
-import { formatEUR } from "@/lib/format";
+import { formatEURPdfSafe } from "@/lib/format";
 import { CGV_TEXT } from "@/lib/cgv";
 
 // React 19 / @react-pdf v4 typing clash — same trick as CoursesPdf.tsx.
@@ -62,6 +62,10 @@ export type SignedQuoteData = {
     siret: string | null;
     email: string | null;
     phone: string | null;
+    /** data:image/png;base64 logo to render in the PDF header. When
+     *  null the template falls back to the company name in display
+     *  type. */
+    logoDataUrl: string | null;
   };
   signature: {
     name: string;
@@ -107,12 +111,20 @@ const s = StyleSheet.create({
     fontSize: 18,
     letterSpacing: 0.5,
   },
+  brandLogo: {
+    // Logo is 1000×600 (5:3 ratio). Height capped at ~32 pt keeps the
+    // header light; the source PNG is sharp enough at any DPI Adobe
+    // Reader / Preview will request.
+    width: 140,
+    height: 32,
+    objectFit: "contain",
+  },
   brandSub: {
     fontSize: 8,
     letterSpacing: 1.2,
     color: c.muted,
     textTransform: "uppercase",
-    marginTop: 3,
+    marginTop: 6,
   },
   doc: {
     alignItems: "flex-end",
@@ -370,7 +382,11 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.brand}>{data.company.name}</Text>
+            {data.company.logoDataUrl ? (
+              <Image src={data.company.logoDataUrl} style={s.brandLogo} />
+            ) : (
+              <Text style={s.brand}>{data.company.name}</Text>
+            )}
             <Text style={s.brandSub}>Cocktails · Barista · Événementiel</Text>
             {data.company.address_line1 && (
               <Text style={[s.partyLine, { color: c.muted, marginTop: 4 }]}>
@@ -456,7 +472,7 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
                   )}
                   {it.discount_ht && it.discount_ht > 0 ? (
                     <Text style={[s.cellSub, { color: c.grenat }]}>
-                      Remise commerciale : −{formatEUR(it.discount_ht)}
+                      Remise commerciale : −{formatEURPdfSafe(it.discount_ht)}
                     </Text>
                   ) : null}
                 </View>
@@ -465,10 +481,10 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
                   {it.unit ? ` ${it.unit}` : ""}
                 </Text>
                 <Text style={[s.cell, s.colPu]}>
-                  {formatEUR(it.unit_price_ht)}
+                  {formatEURPdfSafe(it.unit_price_ht)}
                 </Text>
                 <Text style={[s.cell, s.colSum]}>
-                  {formatEUR(it.line_total_ht)}
+                  {formatEURPdfSafe(it.line_total_ht)}
                 </Text>
               </View>
             ))}
@@ -480,16 +496,16 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
           <View style={s.totalsTable}>
             <View style={s.trow}>
               <Text style={s.tlabel}>Total HT</Text>
-              <Text style={s.tvalue}>{formatEUR(data.quote.total_ht)}</Text>
+              <Text style={s.tvalue}>{formatEURPdfSafe(data.quote.total_ht)}</Text>
             </View>
             <View style={s.trow}>
               <Text style={s.tlabel}>TVA {data.quote.tva_rate}%</Text>
-              <Text style={s.tvalue}>{formatEUR(data.quote.total_tva)}</Text>
+              <Text style={s.tvalue}>{formatEURPdfSafe(data.quote.total_tva)}</Text>
             </View>
             <View style={s.tfinal}>
               <Text style={s.tfinalLabel}>Total TTC</Text>
               <Text style={s.tfinalValue}>
-                {formatEUR(data.quote.total_ttc)}
+                {formatEURPdfSafe(data.quote.total_ttc)}
               </Text>
             </View>
           </View>

@@ -115,13 +115,15 @@ export default async function InvoicePage({
         {/* ─── Header ─── */}
         <header className="invoice-header">
           <div className="invoice-brand">
-            <div className="invoice-brand-mark">CC</div>
-            <div>
-              <p className="invoice-brand-name">
-                {legal.company_name ?? "Cosmo Club Paris"}
-              </p>
-              <p className="invoice-brand-tag">Bar à cocktails · Barista événementiel</p>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/cosmo-logo.png"
+              alt={legal.company_name ?? "Cosmo Club Paris"}
+              className="invoice-brand-logo"
+              width={170}
+              height={102}
+            />
+            <p className="invoice-brand-tag">Cocktails · Barista · Événementiel</p>
           </div>
 
           <div className="invoice-title-box">
