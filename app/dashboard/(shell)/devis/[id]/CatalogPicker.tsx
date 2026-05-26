@@ -20,12 +20,35 @@ export type PickedItem = {
  * Small right-side drawer listing the catalog with a search input and a
  * one-click insert. Loads items once lazily on first open.
  */
+/**
+ * Pick the localized title/description/section for an item. When the
+ * parent quote is in English and the operator filled the EN fields,
+ * those take precedence; otherwise we fall back to the French ones so
+ * the picker never shows an empty row.
+ */
+function localized(it: CatalogItem, locale: "fr" | "en") {
+  if (locale === "en") {
+    return {
+      title: it.title_en?.trim() || it.title,
+      description: it.description_en?.trim() || it.description,
+      section: it.section_en?.trim() || it.section,
+    };
+  }
+  return {
+    title: it.title,
+    description: it.description,
+    section: it.section,
+  };
+}
+
 export function CatalogPicker({
   onPick,
   defaultSection,
+  locale = "fr",
 }: {
   onPick: (items: PickedItem[], targetSection: string | null) => void;
   defaultSection?: string;
+  locale?: "fr" | "en";
 }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<CatalogItem[] | null>(null);
@@ -61,32 +84,37 @@ export function CatalogPicker({
 
   const sections = useMemo(() => {
     const s = new Set<string>();
-    for (const it of items ?? []) if (it.section) s.add(it.section);
+    for (const it of items ?? []) {
+      const sec = localized(it, locale).section;
+      if (sec) s.add(sec);
+    }
     return [...s];
-  }, [items]);
+  }, [items, locale]);
 
   const filtered = useMemo(() => {
     const pool = items ?? [];
     if (!q.trim()) return pool;
     const needle = q.trim().toLowerCase();
-    return pool.filter(
-      (it) =>
-        it.title.toLowerCase().includes(needle) ||
-        (it.description ?? "").toLowerCase().includes(needle) ||
-        (it.section ?? "").toLowerCase().includes(needle),
-    );
-  }, [items, q]);
+    return pool.filter((it) => {
+      const v = localized(it, locale);
+      return (
+        v.title.toLowerCase().includes(needle) ||
+        (v.description ?? "").toLowerCase().includes(needle) ||
+        (v.section ?? "").toLowerCase().includes(needle)
+      );
+    });
+  }, [items, q, locale]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, CatalogItem[]>();
     for (const it of filtered) {
-      const key = it.section ?? "Autres";
+      const key = localized(it, locale).section ?? "Autres";
       const arr = map.get(key) ?? [];
       arr.push(it);
       map.set(key, arr);
     }
     return [...map.entries()];
-  }, [filtered]);
+  }, [filtered, locale]);
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -101,13 +129,16 @@ export function CatalogPicker({
     if (!items || selected.size === 0) return;
     const picks = items
       .filter((i) => selected.has(i.id))
-      .map<PickedItem>((i) => ({
-        title: i.title,
-        description: i.description,
-        section: targetSection || i.section,
-        unit: i.unit,
-        unit_price_ht: i.unit_price_ht,
-      }));
+      .map<PickedItem>((i) => {
+        const v = localized(i, locale);
+        return {
+          title: v.title,
+          description: v.description,
+          section: targetSection || v.section,
+          unit: i.unit,
+          unit_price_ht: i.unit_price_ht,
+        };
+      });
     onPick(picks, targetSection || null);
     setSelected(new Set());
     setQ("");
@@ -205,6 +236,9 @@ export function CatalogPicker({
                 <ul className="divide-y divide-slate-100 dark:divide-slate-900">
                   {list.map((it) => {
                     const on = selected.has(it.id);
+                    const v = localized(it, locale);
+                    const missingEn =
+                      locale === "en" && (!it.title_en || it.title_en.trim() === "");
                     return (
                       <li key={it.id}>
                         <button
@@ -231,12 +265,20 @@ export function CatalogPicker({
                             )}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium text-slate-900 dark:text-white">
-                              {it.title}
+                            <span className="flex items-center gap-2 truncate text-sm font-medium text-slate-900 dark:text-white">
+                              <span className="truncate">{v.title}</span>
+                              {missingEn && (
+                                <span
+                                  title="Aucune traduction anglaise renseignée — version française utilisée"
+                                  className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
+                                >
+                                  FR
+                                </span>
+                              )}
                             </span>
-                            {it.description && (
+                            {v.description && (
                               <span className="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400">
-                                {it.description}
+                                {v.description}
                               </span>
                             )}
                           </span>

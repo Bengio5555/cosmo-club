@@ -556,7 +556,7 @@ export function DevisEditor({
             action={
               !readOnly && (
                 <div className="flex flex-wrap items-center gap-2">
-                  <CatalogPicker onPick={addFromCatalog} />
+                  <CatalogPicker onPick={addFromCatalog} locale={language} />
                   <AddSectionButton
                     onAdd={addSection}
                     knownSections={knownSections.filter(
@@ -591,6 +591,7 @@ export function DevisEditor({
                     onRemove={removeItem}
                     onAddLine={() => addItem(sectionName)}
                     onPickFromCatalog={addFromCatalog}
+                    catalogLocale={language}
                   />
                 ))}
               </div>
@@ -1344,6 +1345,7 @@ function SectionBlock({
   onRemove,
   onAddLine,
   onPickFromCatalog,
+  catalogLocale = "fr",
 }: {
   name: string;
   items: EditableItem[];
@@ -1352,6 +1354,7 @@ function SectionBlock({
   onRemove: (localId: string) => void;
   onAddLine: () => void;
   onPickFromCatalog?: (picks: PickedItem[], targetSection: string | null) => void;
+  catalogLocale?: "fr" | "en";
 }) {
   const sectionTotal = items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0);
 
@@ -1389,6 +1392,7 @@ function SectionBlock({
             <CatalogPicker
               onPick={onPickFromCatalog}
               defaultSection={name}
+              locale={catalogLocale}
             />
           )}
         </div>

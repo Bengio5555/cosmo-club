@@ -37,8 +37,11 @@ export type Database = {
         Row: {
           id: string
           title: string
+          title_en: string | null
           description: string | null
+          description_en: string | null
           section: string | null
+          section_en: string | null
           unit: string | null
           unit_price_ht: number
           sort_order: number

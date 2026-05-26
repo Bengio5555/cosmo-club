@@ -6,12 +6,21 @@ import type { Database } from "@/types/database";
 
 type CatalogInput = {
   title: string;
+  title_en?: string | null;
   description?: string | null;
+  description_en?: string | null;
   section?: string | null;
+  section_en?: string | null;
   unit?: string | null;
   unit_price_ht: number;
   sort_order?: number;
 };
+
+function cleanOptional(v: string | null | undefined): string | null {
+  if (v == null) return null;
+  const t = String(v).trim();
+  return t || null;
+}
 
 export async function createCatalogItem(input: CatalogInput) {
   const supabase = await createClient();
@@ -19,8 +28,11 @@ export async function createCatalogItem(input: CatalogInput) {
     .from("catalog_items")
     .insert({
       title: input.title.trim(),
-      description: input.description?.trim() || null,
-      section: input.section?.trim() || null,
+      title_en: cleanOptional(input.title_en),
+      description: cleanOptional(input.description),
+      description_en: cleanOptional(input.description_en),
+      section: cleanOptional(input.section),
+      section_en: cleanOptional(input.section_en),
       unit: input.unit?.trim() || "unité",
       unit_price_ht: input.unit_price_ht,
       sort_order: input.sort_order ?? 0,
@@ -34,8 +46,12 @@ export async function updateCatalogItem(id: string, patch: Partial<CatalogInput>
   const supabase = await createClient();
   const db: Database["public"]["Tables"]["catalog_items"]["Update"] = {};
   if (patch.title != null) db.title = patch.title.trim();
-  if ("description" in patch) db.description = patch.description?.trim() || null;
-  if ("section" in patch) db.section = patch.section?.trim() || null;
+  if ("title_en" in patch) db.title_en = cleanOptional(patch.title_en);
+  if ("description" in patch) db.description = cleanOptional(patch.description);
+  if ("description_en" in patch)
+    db.description_en = cleanOptional(patch.description_en);
+  if ("section" in patch) db.section = cleanOptional(patch.section);
+  if ("section_en" in patch) db.section_en = cleanOptional(patch.section_en);
   if ("unit" in patch) db.unit = patch.unit?.trim() || "unité";
   if (patch.unit_price_ht != null) db.unit_price_ht = patch.unit_price_ht;
   if (patch.sort_order != null) db.sort_order = patch.sort_order;

@@ -23,18 +23,24 @@ const SUGGESTED_SECTIONS = [
 
 type DraftInput = {
   title: string;
+  title_en: string;
   section: string;
+  section_en: string;
   unit: string;
   unit_price_ht: string;
   description: string;
+  description_en: string;
 };
 
 const emptyDraft = (section = ""): DraftInput => ({
   title: "",
+  title_en: "",
   section,
+  section_en: "",
   unit: "unité",
   unit_price_ht: "",
   description: "",
+  description_en: "",
 });
 
 export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
@@ -78,10 +84,13 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
     startTransition(async () => {
       const res = await createCatalogItem({
         title: draft.title,
+        title_en: draft.title_en,
         section: (forSection ?? draft.section) || null,
+        section_en: draft.section_en,
         unit: draft.unit || "unité",
         unit_price_ht: Number(draft.unit_price_ht) || 0,
         description: draft.description,
+        description_en: draft.description_en,
       });
       if (!res.ok) return flash({ kind: "err", text: res.error });
       setAdding(null);
@@ -95,10 +104,13 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
     startTransition(async () => {
       const res = await updateCatalogItem(id, {
         title: draft.title,
+        title_en: draft.title_en,
         section: draft.section || null,
+        section_en: draft.section_en,
         unit: draft.unit || "unité",
         unit_price_ht: Number(draft.unit_price_ht) || 0,
         description: draft.description,
+        description_en: draft.description_en,
       });
       if (!res.ok) return flash({ kind: "err", text: res.error });
       setEditingId(null);
@@ -195,10 +207,13 @@ export function CatalogManager({ initial }: { initial: CatalogItem[] }) {
                   <DraftForm
                     initial={{
                       title: it.title,
+                      title_en: it.title_en ?? "",
                       section: it.section ?? "",
+                      section_en: it.section_en ?? "",
                       unit: it.unit ?? "unité",
                       unit_price_ht: String(it.unit_price_ht ?? 0),
                       description: it.description ?? "",
+                      description_en: it.description_en ?? "",
                     }}
                     knownSections={knownSectionNames}
                     pending={pending}
@@ -343,6 +358,46 @@ function DraftForm({
           rightAdornment="€ HT"
         />
       </div>
+
+      {/* English version — collapsible to keep the form light when the
+          operator doesn't sell to English-speaking clients. Auto-opens
+          when any EN field is already filled. */}
+      <details
+        className="group rounded-md border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40"
+        open={!!(d.title_en || d.description_en || d.section_en)}
+      >
+        <summary className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <span>🇬🇧 Version anglaise (optionnelle)</span>
+          <span className="text-[10px] font-normal normal-case tracking-normal text-slate-400 dark:text-slate-500 group-open:hidden">
+            Cliquer pour ouvrir
+          </span>
+        </summary>
+        <div className="space-y-2 border-t border-slate-200 p-3 dark:border-slate-800">
+          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,200px)]">
+            <Input
+              value={d.title_en}
+              onChange={(v) => setD({ ...d, title_en: v })}
+              placeholder="English title (e.g. Frozen gold Cosmopolitan)"
+            />
+            <Input
+              value={d.section_en}
+              onChange={(v) => setD({ ...d, section_en: v })}
+              placeholder="English section (e.g. Cocktail bar)"
+              small
+            />
+          </div>
+          <Textarea
+            value={d.description_en}
+            onChange={(v) => setD({ ...d, description_en: v })}
+            placeholder="English description (optional)"
+            rows={2}
+          />
+          <p className="text-[10px] leading-relaxed text-slate-500 dark:text-slate-500">
+            Utilisé quand un devis est en anglais (toggle dans l&apos;éditeur
+            de devis). Si vide, on retombe sur la version française.
+          </p>
+        </div>
+      </details>
 
       <div className="flex items-center gap-2">
         <button
