@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { seedQuotePresetItems } from "@/lib/server/quotePresetItems";
 import type { Database } from "@/types/database";
 
 type LeadStatus = Database["public"]["Enums"]["lead_status"];
@@ -117,6 +118,11 @@ export async function convertLeadToQuote(leadId: string) {
   if (qErr || !quote) {
     return { ok: false as const, error: qErr?.message ?? "Création devis échouée" };
   }
+
+  // 3.5 Pre-fill with the standard preset (cocktails, matériel,
+  // équipe…). Operator adjusts quantities and removes lines per
+  // event. Best-effort: catalog lookup misses are silent.
+  await seedQuotePresetItems(supabase, quote.id);
 
   // 4. Move the lead into the "contacté" pipeline stage + link to the
   //    client. The bump to "devis_envoye" happens later in sendDevis().

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { seedQuotePresetItems } from "@/lib/server/quotePresetItems";
 
 export type ClientInput = {
   first_name?: string | null;
@@ -253,6 +254,10 @@ export async function createQuoteForClient(clientId: string) {
   if (qErr || !quote) {
     return { ok: false as const, error: qErr?.message ?? "Création devis échouée" };
   }
+
+  // Pre-fill with the standard preset (cocktails, matériel, équipe…).
+  // Operator adjusts quantities and removes lines per event.
+  await seedQuotePresetItems(supabase, quote.id);
 
   // Quand on a auto-lié un lead, on bump aussi son statut à `contacte`
   // et on lui attache le client_id (au cas où ce n'était pas encore fait).
