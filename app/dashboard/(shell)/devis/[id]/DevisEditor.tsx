@@ -103,7 +103,7 @@ export function DevisEditor({
   // Acompte stocké en fraction (0..1) en DB. L'éditeur expose le %
   // (0..100) pour rester aligné sur le langage métier ("30 %").
   const [depositPct, setDepositPct] = useState<string>(() => {
-    const raw = Number(quote.deposit_rate ?? 0.3);
+    const raw = Number(quote.deposit_rate ?? 0.5);
     return String(Math.round(raw * 100));
   });
   const initialCommission = Number(quote.commission_rate ?? 0);
@@ -605,7 +605,7 @@ export function DevisEditor({
               onChange={setTerms}
               readOnly={readOnly}
               rows={4}
-              placeholder="Acompte 30% à la signature, solde 7 jours avant l'événement…"
+              placeholder="Acompte 50% à la signature, solde 7 jours avant l'événement…"
             />
           </Card>
 
@@ -738,8 +738,8 @@ export function DevisEditor({
             </label>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
               Affiché en bloc &laquo;&nbsp;Acompte&nbsp;&raquo; sur la
-              plaquette et repris dans les emails de confirmation. 30&nbsp;%
-              par défaut, 40-50&nbsp;% recommandé sur les gros tickets.
+              plaquette et repris dans les emails de confirmation. 50&nbsp;%
+              par défaut, ajustable selon le ticket.
             </p>
           </div>
 

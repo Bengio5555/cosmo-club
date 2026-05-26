@@ -341,7 +341,7 @@ async function sendAcceptanceEmails(o: {
 
   // Per-quote acompte rate (fraction 0..1 → integer percent).
   const depositPct = Math.round(
-    Math.min(1, Math.max(0, Number(quote?.deposit_rate ?? 0.3))) * 100,
+    Math.min(1, Math.max(0, Number(quote?.deposit_rate ?? 0.5))) * 100,
   );
 
   // 1. Client confirmation

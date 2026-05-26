@@ -185,7 +185,7 @@ export default async function DevisPlaquettePage({
   // the integer percentage so "0.30" becomes "30 %".
   const depositRate = Math.min(
     1,
-    Math.max(0, Number((quote as { deposit_rate?: number }).deposit_rate ?? 0.3)),
+    Math.max(0, Number((quote as { deposit_rate?: number }).deposit_rate ?? 0.5)),
   );
   const depositPct = Math.round(depositRate * 100);
   // Per-quote locale: 'fr' (default for every existing quote) or 'en'.
@@ -196,8 +196,12 @@ export default async function DevisPlaquettePage({
   const terms = splitTerms(quote.terms) ?? defaultTerms(depositPct, locale);
 
   const validUntilLabel = quote.valid_until
-    ? `Valable jusqu'au ${formatDateFR(quote.valid_until)}`
-    : "Valable 30 jours à compter de l'émission";
+    ? locale === "en"
+      ? `Valid until ${new Date(quote.valid_until).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
+      : `Valable jusqu'au ${formatDateFR(quote.valid_until)}`
+    : locale === "en"
+      ? "Valid for 30 days from issue date"
+      : "Valable 30 jours à compter de l'émission";
 
   const deposit = round2(quote.total_ttc * depositRate);
 
@@ -242,33 +246,37 @@ export default async function DevisPlaquettePage({
           <header className="cover-top">
             <div className="cover-logo">COSMO&nbsp;&nbsp;CLUB</div>
             <div className="cover-ref">
-              <small>Proposition N°</small>
+              <small>{locale === "en" ? "Proposal N°" : "Proposition N°"}</small>
               {quote.number}
             </div>
           </header>
 
           <div className="cover-main">
             <div className="cover-kicker">
-              <em>Une proposition pour</em>
+              <em>{locale === "en" ? "A proposal for" : "Une proposition pour"}</em>
             </div>
             <h1 className="cover-title" dangerouslySetInnerHTML={{ __html: coverTitle }} />
 
             <div className="cover-meta">
               {quote.event_date && (
                 <div className="cover-meta-item">
-                  <small>Date</small>
-                  <strong>{formatDateFR(quote.event_date)}</strong>
+                  <small>{locale === "en" ? "Date" : "Date"}</small>
+                  <strong>
+                    {locale === "en"
+                      ? new Date(quote.event_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+                      : formatDateFR(quote.event_date)}
+                  </strong>
                 </div>
               )}
               {quote.event_location && (
                 <div className="cover-meta-item">
-                  <small>Lieu</small>
+                  <small>{locale === "en" ? "Venue" : "Lieu"}</small>
                   <strong>{quote.event_location}</strong>
                 </div>
               )}
               {quote.guests_count != null && (
                 <div className="cover-meta-item">
-                  <small>Invités</small>
+                  <small>{locale === "en" ? "Guests" : "Invités"}</small>
                   <strong>{quote.guests_count}</strong>
                 </div>
               )}
@@ -301,24 +309,40 @@ export default async function DevisPlaquettePage({
           <span className="page-mark">— 02 —</span>
 
           <div className="intro-letter-wrap">
-            <div className="letter-kicker">Un mot pour commencer</div>
+            <div className="letter-kicker">
+              {locale === "en" ? "A word to begin" : "Un mot pour commencer"}
+            </div>
             <h2 className="letter-hook" dangerouslySetInnerHTML={{ __html: letterHook }} />
 
             <p className="letter-body dropcap">{quote.intro}</p>
 
             <p className="letter-body">
-              Cette proposition est valable <strong>30 jours</strong>. Nous
-              restons à votre écoute pour l&apos;adapter à mesure que votre
-              vision se précise.
+              {locale === "en" ? (
+                <>
+                  This proposal is valid for <strong>30 days</strong>. We remain
+                  available to refine it as your vision takes shape.
+                </>
+              ) : (
+                <>
+                  Cette proposition est valable <strong>30 jours</strong>. Nous
+                  restons à votre écoute pour l&apos;adapter à mesure que votre
+                  vision se précise.
+                </>
+              )}
             </p>
 
             <div className="letter-signoff">
               <div>
                 <div className="signature-text">{senderShortName} Team</div>
-                <div className="signature-name">— L&apos;équipe {senderShortName}</div>
+                <div className="signature-name">
+                  — {locale === "en" ? "The" : "L'équipe"} {senderShortName}
+                  {locale === "en" ? " team" : ""}
+                </div>
               </div>
               <div className="letter-date">
-                Paris, le {formatDateFR(quote.issue_date)}
+                {locale === "en"
+                  ? `Paris, ${new Date(quote.issue_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
+                  : `Paris, le ${formatDateFR(quote.issue_date)}`}
               </div>
             </div>
           </div>
@@ -337,7 +361,15 @@ export default async function DevisPlaquettePage({
             <div className="section-label">Moodboard</div>
           </div>
           <h2 className="section-title">
-            L&apos;ambiance que nous <em>imaginons</em> pour vous.
+            {locale === "en" ? (
+              <>
+                The atmosphere we <em>imagine</em> for you.
+              </>
+            ) : (
+              <>
+                L&apos;ambiance que nous <em>imaginons</em> pour vous.
+              </>
+            )}
           </h2>
         </div>
 
@@ -364,10 +396,13 @@ export default async function DevisPlaquettePage({
 
           <div className="moodboard-header">
             <div>
-              <div className="section-label">La proposition</div>
+              <div className="section-label">
+                {locale === "en" ? "The proposal" : "La proposition"}
+              </div>
             </div>
             <h2 className="section-title">
-              {quote.subject || "Notre proposition"}
+              {quote.subject ||
+                (locale === "en" ? "Our proposal" : "Notre proposition")}
             </h2>
           </div>
 
@@ -385,9 +420,13 @@ export default async function DevisPlaquettePage({
               if (scheduleItems.length > 0) {
                 return (
                   <div className="offer-schedule">
-                    <p className="offer-schedule-eyebrow">Déroulé</p>
+                    <p className="offer-schedule-eyebrow">
+                      {locale === "en" ? "Schedule" : "Déroulé"}
+                    </p>
                     <h3 className="offer-schedule-title">
-                      Planning de la prestation
+                      {locale === "en"
+                        ? "Event run-of-show"
+                        : "Planning de la prestation"}
                     </h3>
                     <ol className="offer-schedule-list">
                       {scheduleItems.map((s, i) => (
@@ -449,10 +488,18 @@ export default async function DevisPlaquettePage({
 
         <div className="pricing-header">
           <h2>
-            Le <em>chiffrage</em>.
+            {locale === "en" ? (
+              <>
+                The <em>pricing</em>.
+              </>
+            ) : (
+              <>
+                Le <em>chiffrage</em>.
+              </>
+            )}
           </h2>
           <div className="pricing-badge">
-            <small>Proposition</small>
+            <small>{locale === "en" ? "Proposal" : "Proposition"}</small>
             {validUntilLabel}
           </div>
         </div>
@@ -556,7 +603,15 @@ export default async function DevisPlaquettePage({
 
         <div className="sig-wrap">
           <h2 className="sig-title">
-            Et si nous <em>donnions vie</em> à ce projet ensemble ?
+            {locale === "en" ? (
+              <>
+                Shall we <em>bring this project</em> to life together?
+              </>
+            ) : (
+              <>
+                Et si nous <em>donnions vie</em> à ce projet ensemble ?
+              </>
+            )}
           </h2>
 
           <div className="terms">
