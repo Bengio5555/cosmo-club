@@ -839,3 +839,116 @@ export async function deleteQuote(id: string) {
   revalidatePath(`/dashboard/leads/${q.lead_id}`);
   return { ok: true as const };
 }
+
+/**
+ * Duplicate an existing quote into a fresh `brouillon`. Use case: repeat
+ * clients who reorder the same package — copy the source quote, swap
+ * the dates, send. Carries over the commercial substance (line items,
+ * client, subject, intro, terms, TVA/commission/deposit rates,
+ * schedule, moodboard) but RESETS everything tied to the previous
+ * lifecycle: status returns to brouillon, dates to today, audit trail
+ * stripped (sent_at/accepted_at/refused_at, signature data, CGV
+ * acceptance, generated PDF URL). A new access_token is minted so the
+ * old public URL keeps working for the original quote.
+ *
+ * The new quote is intentionally NOT linked to any lead — the source
+ * lead pipeline shouldn't shift because of a copy. The operator can
+ * relink manually if they want to.
+ */
+export async function duplicateQuote(id: string) {
+  const supabase = await createClient();
+
+  const { data: source, error: qErr } = await supabase
+    .from("quotes")
+    .select("id,client_id,event_type,event_date,event_location,guests_count,subject,intro,terms,tva_rate,commission_rate,deposit_rate,schedule,moodboard_images,total_ht,total_tva,total_ttc")
+    .eq("id", id)
+    .maybeSingle();
+  if (qErr || !source) {
+    return { ok: false as const, error: qErr?.message ?? "Devis introuvable" };
+  }
+
+  const { data: items, error: iErr } = await supabase
+    .from("quote_items")
+    .select(
+      "position,section,title,description,qty,unit,unit_price_ht,discount_ht",
+    )
+    .eq("quote_id", id)
+    .order("position", { ascending: true });
+  if (iErr) {
+    return { ok: false as const, error: iErr.message };
+  }
+
+  // Mint the next quote number (SECURITY DEFINER function — same path
+  // every other quote-creation flow uses).
+  const { data: nbr, error: nbrErr } = await supabase.rpc("next_quote_number");
+  if (nbrErr || !nbr) {
+    return {
+      ok: false as const,
+      error: nbrErr?.message ?? "Numérotation impossible",
+    };
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data: created, error: cErr } = await supabase
+    .from("quotes")
+    .insert({
+      number: nbr,
+      client_id: source.client_id,
+      lead_id: null,
+      status: "brouillon",
+      issue_date: today,
+      event_type: source.event_type,
+      // Reset event date — most repeat clients want the same package
+      // on a different date, so blanking it forces the operator to
+      // pick the new one and avoids accidentally re-using the old one.
+      event_date: null,
+      event_location: source.event_location,
+      guests_count: source.guests_count,
+      subject: source.subject ? `Copie — ${source.subject}` : null,
+      intro: source.intro,
+      terms: source.terms,
+      tva_rate: source.tva_rate,
+      commission_rate: source.commission_rate,
+      deposit_rate: source.deposit_rate,
+      schedule: source.schedule,
+      moodboard_images: source.moodboard_images,
+      total_ht: source.total_ht,
+      total_tva: source.total_tva,
+      total_ttc: source.total_ttc,
+      access_token: crypto.randomUUID(),
+    })
+    .select("id")
+    .single();
+  if (cErr || !created) {
+    return {
+      ok: false as const,
+      error: cErr?.message ?? "Création du duplicata échouée",
+    };
+  }
+
+  if (items && items.length > 0) {
+    const { error: insErr } = await supabase.from("quote_items").insert(
+      items.map((it) => ({
+        quote_id: created.id,
+        position: it.position,
+        section: it.section,
+        title: it.title,
+        description: it.description,
+        qty: it.qty,
+        unit: it.unit,
+        unit_price_ht: it.unit_price_ht,
+        discount_ht: it.discount_ht,
+      })),
+    );
+    if (insErr) {
+      // Roll back the empty quote rather than leave the operator with a
+      // copy missing its line items.
+      await supabase.from("quotes").delete().eq("id", created.id);
+      return { ok: false as const, error: insErr.message };
+    }
+  }
+
+  revalidatePath("/dashboard/devis");
+  return { ok: true as const, id: created.id };
+}

@@ -12,6 +12,7 @@ import {
   XCircle,
   Eye,
   GripVertical,
+  Copy,
 } from "lucide-react";
 import type { Database, Tables } from "@/types/database";
 import { formatEUR } from "@/lib/format";
@@ -20,6 +21,7 @@ import {
   setQuoteStatus,
   sendDevis,
   deleteQuote,
+  duplicateQuote,
   createInvoiceFromQuote,
   type SaveQuoteInput,
   type ScheduleItem,
@@ -318,6 +320,23 @@ export function DevisEditor({
     });
   }
 
+  function doDuplicate() {
+    if (
+      !window.confirm(
+        "Dupliquer ce devis en nouveau brouillon ? Les lignes, le client et les paramètres sont recopiés ; la date d'événement et l'historique de signature sont remis à zéro.",
+      )
+    )
+      return;
+    startTransition(async () => {
+      const res = await duplicateQuote(quote.id);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      router.push(`/dashboard/devis/${res.id}`);
+    });
+  }
+
   function createInvoice() {
     startTransition(async () => {
       setMsg(null);
@@ -425,6 +444,7 @@ export function DevisEditor({
         onRefuse={() => transition("refuse")}
         onReopen={() => transition("brouillon")}
         onDelete={doDelete}
+        onDuplicate={doDuplicate}
         onCreateInvoice={createInvoice}
         onCreateEvent={createEvent}
       />
@@ -911,6 +931,7 @@ function TopBar({
   onRefuse,
   onReopen,
   onDelete,
+  onDuplicate,
   onCreateInvoice,
   onCreateEvent,
 }: {
@@ -923,6 +944,7 @@ function TopBar({
   onRefuse: () => void;
   onReopen: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onCreateInvoice: () => void;
   onCreateEvent: () => void;
 }) {
@@ -1050,6 +1072,15 @@ function TopBar({
         >
           <Eye className="h-3 w-3" /> Plaquette
         </a>
+        <button
+          type="button"
+          onClick={onDuplicate}
+          disabled={pending}
+          title="Créer un brouillon avec les mêmes lignes (même client, dates remises à zéro)"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white"
+        >
+          <Copy className="h-3 w-3" /> Dupliquer
+        </button>
       </div>
     </div>
   );
