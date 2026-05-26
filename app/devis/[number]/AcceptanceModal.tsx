@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { acceptDevis } from "./actions";
+import { type QuoteLocale } from "@/lib/i18n/quote-plaquette";
 
 /**
  * Two-step acceptance modal:
@@ -23,13 +24,50 @@ export function AcceptanceModal({
   quoteId,
   number,
   defaultName,
+  locale = "fr",
   onClose,
 }: {
   quoteId: string;
   number: string;
   defaultName?: string;
+  locale?: QuoteLocale;
   onClose: () => void;
 }) {
+  const isEn = locale === "en";
+  const L = {
+    cgvError: isEn
+      ? "You must accept the terms before signing."
+      : "Tu dois accepter les CGV avant de signer.",
+    nameError: isEn
+      ? "Please enter your full name to sign."
+      : "Indique ton nom complet pour la signature.",
+    inkError: isEn
+      ? "Please draw your signature in the box above."
+      : "Trace ta signature dans le cadre prévu.",
+    eyebrow: isEn ? "Quote acceptance" : "Acceptation devis",
+    sub: isEn
+      ? "To finalise, please read and accept the terms below then sign. A copy will be sent to your email."
+      : "Pour finaliser, lis et accepte les conditions générales puis signe ci-dessous. Une copie te sera envoyée par email.",
+    cgvCheckLead: isEn
+      ? "I have read and I accept the "
+      : "J'ai lu et j'accepte les ",
+    cgvCheckLink: isEn
+      ? "general terms and conditions of sale"
+      : "conditions générales de vente",
+    cgvFrenchOnly: isEn
+      ? "Note: the legal terms (CGV) are governed by French law and provided in French only. Get in touch if you need an English overview before signing."
+      : null,
+    nameLabel: isEn ? "Full name of the signatory" : "Nom complet du signataire",
+    namePlaceholder: isEn ? "First and last name" : "Prénom Nom",
+    signatureLabel: isEn ? "Signature" : "Signature",
+    padHint: isEn
+      ? "Sign with your finger or mouse"
+      : "Signe avec le doigt ou la souris",
+    clear: isEn ? "Clear" : "Effacer",
+    cancel: isEn ? "Cancel" : "Annuler",
+    submitting: isEn ? "Signing…" : "Signature en cours…",
+    submit: isEn ? "Confirm & sign" : "Confirmer & signer",
+  };
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
@@ -156,15 +194,15 @@ export function AcceptanceModal({
   function submit() {
     setErr(null);
     if (!accepted) {
-      setErr("Tu dois accepter les CGV avant de signer.");
+      setErr(L.cgvError);
       return;
     }
     if (!name.trim()) {
-      setErr("Indique ton nom complet pour la signature.");
+      setErr(L.nameError);
       return;
     }
     if (!hasInk) {
-      setErr("Trace ta signature dans le cadre prévu.");
+      setErr(L.inkError);
       return;
     }
     const canvas = canvasRef.current;
@@ -190,7 +228,7 @@ export function AcceptanceModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Signer le devis ${number}`}
+      aria-label={isEn ? `Sign quote ${number}` : `Signer le devis ${number}`}
       onClick={() => !pending && onClose()}
       className="acceptance-modal-backdrop"
     >
@@ -199,12 +237,9 @@ export function AcceptanceModal({
         onClick={(e) => e.stopPropagation()}
       >
         <header className="acceptance-modal-head">
-          <p className="acceptance-modal-eyebrow">Acceptation devis</p>
+          <p className="acceptance-modal-eyebrow">{L.eyebrow}</p>
           <h2 className="acceptance-modal-title">{number}</h2>
-          <p className="acceptance-modal-sub">
-            Pour finaliser, lis et accepte les conditions générales puis
-            signe ci-dessous. Une copie te sera envoyée par email.
-          </p>
+          <p className="acceptance-modal-sub">{L.sub}</p>
         </header>
 
         <div className="acceptance-modal-body">
@@ -215,32 +250,36 @@ export function AcceptanceModal({
               onChange={(e) => setAccepted(e.target.checked)}
             />
             <span>
-              J&apos;ai lu et j&apos;accepte les{" "}
+              {L.cgvCheckLead}
               <a
                 href="/cgv"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="acceptance-modal-link"
               >
-                conditions générales de vente
+                {L.cgvCheckLink}
               </a>
               .
             </span>
           </label>
 
+          {L.cgvFrenchOnly && (
+            <p className="acceptance-modal-cgv-note">{L.cgvFrenchOnly}</p>
+          )}
+
           <label className="acceptance-modal-field">
-            <span>Nom complet du signataire</span>
+            <span>{L.nameLabel}</span>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Prénom Nom"
+              placeholder={L.namePlaceholder}
               autoComplete="name"
             />
           </label>
 
           <div className="acceptance-modal-field">
-            <span>Signature</span>
+            <span>{L.signatureLabel}</span>
             <div className="acceptance-modal-padwrap">
               <canvas
                 ref={canvasRef}
@@ -252,9 +291,7 @@ export function AcceptanceModal({
                 style={{ touchAction: "none" }}
               />
               {!hasInk && (
-                <span className="acceptance-modal-padhint">
-                  Signe avec le doigt ou la souris
-                </span>
+                <span className="acceptance-modal-padhint">{L.padHint}</span>
               )}
               <button
                 type="button"
@@ -262,7 +299,7 @@ export function AcceptanceModal({
                 disabled={!hasInk || pending}
                 className="acceptance-modal-padclear"
               >
-                Effacer
+                {L.clear}
               </button>
             </div>
           </div>
@@ -277,7 +314,7 @@ export function AcceptanceModal({
             disabled={pending}
             className="acceptance-modal-cancel"
           >
-            Annuler
+            {L.cancel}
           </button>
           <button
             type="button"
@@ -285,7 +322,7 @@ export function AcceptanceModal({
             disabled={pending}
             className="acceptance-modal-submit"
           >
-            {pending ? "Signature en cours…" : "Confirmer & signer"}
+            {pending ? L.submitting : L.submit}
           </button>
         </footer>
       </div>
@@ -364,6 +401,16 @@ export function AcceptanceModal({
           color: #8b1a1a;
           text-decoration: underline;
           text-underline-offset: 2px;
+        }
+        .acceptance-modal-cgv-note {
+          font-size: 12px;
+          line-height: 1.5;
+          color: #3a2a1e;
+          margin: -8px 0 0;
+          padding: 10px 12px;
+          background: rgba(139, 26, 26, 0.06);
+          border-left: 2px solid #8b1a1a;
+          border-radius: 0 6px 6px 0;
         }
         .acceptance-modal-field {
           display: flex;

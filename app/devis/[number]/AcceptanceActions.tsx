@@ -4,28 +4,31 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { refuseDevis } from "./actions";
 import { AcceptanceModal } from "./AcceptanceModal";
+import { type QuoteLocale } from "@/lib/i18n/quote-plaquette";
 
 export function AcceptanceActions({
   quoteId,
   number,
   defaultName,
+  locale = "fr",
 }: {
   quoteId: string;
   number: string;
   defaultName?: string;
+  locale?: QuoteLocale;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
+  const isEn = locale === "en";
+
   function refuse() {
-    if (
-      !window.confirm(
-        `Refuser le devis ${number} ? Nous restons à votre disposition pour ajuster.`,
-      )
-    )
-      return;
+    const prompt = isEn
+      ? `Decline quote ${number}? We remain available to adjust the proposal.`
+      : `Refuser le devis ${number} ? Nous restons à votre disposition pour ajuster.`;
+    if (!window.confirm(prompt)) return;
     startTransition(async () => {
       setErr(null);
       const res = await refuseDevis(quoteId);
@@ -45,7 +48,7 @@ export function AcceptanceActions({
         disabled={pending}
         className="sig-cta-button"
       >
-        Accepter & signer
+        {isEn ? "Accept & sign" : "Accepter & signer"}
       </button>
       <button
         type="button"
@@ -53,7 +56,7 @@ export function AcceptanceActions({
         disabled={pending}
         className="sig-cta-button secondary"
       >
-        {pending ? "…" : "Refuser le devis"}
+        {pending ? "…" : isEn ? "Decline" : "Refuser le devis"}
       </button>
       {err && <p className="sig-cta-err">{err}</p>}
 
@@ -62,6 +65,7 @@ export function AcceptanceActions({
           quoteId={quoteId}
           number={number}
           defaultName={defaultName}
+          locale={locale}
           onClose={() => setOpen(false)}
         />
       )}

@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { AcceptanceActions } from "./AcceptanceActions";
 import { NavDots } from "./NavDots";
+import { t, normalizeLocale } from "@/lib/i18n/quote-plaquette";
 import "./plaquette.css";
 
 type Params = Promise<{ number: string }>;
@@ -45,9 +46,34 @@ const DEFAULT_COCKTAILS = [
   "Old Fashioned",
 ];
 
-// Default FR terms when quote.terms is empty. The "Acompte" line is
-// generated dynamically from quote.deposit_rate at render time.
-function defaultTerms(depositPct: number): { label: string; text: string }[] {
+// Default terms when quote.terms is empty. The "Acompte" line is
+// generated dynamically from quote.deposit_rate at render time. Locale
+// flips the whole block to EN when the operator chose the English
+// plaquette in the editor.
+function defaultTerms(
+  depositPct: number,
+  locale: "fr" | "en",
+): { label: string; text: string }[] {
+  if (locale === "en") {
+    return [
+      {
+        label: "Validity",
+        text: "This proposal is valid for 30 days from the date of issue. Beyond that, pricing may be adjusted based on availability.",
+      },
+      {
+        label: "Deposit",
+        text: `A ${depositPct}% deposit is required on signature to confirm the booking. The balance is due 7 days before the event.`,
+      },
+      {
+        label: "Cancellation",
+        text: "If cancelled more than 30 days before the event, 50% of the deposit is refunded. Between 30 and 15 days, 25%. Within 15 days, the deposit is non-refundable.",
+      },
+      {
+        label: "Changes",
+        text: "Minor adjustments to the menu or headcount (±10%) are accepted up to 10 days before the event at no extra cost.",
+      },
+    ];
+  }
   return [
     {
       label: "Validité",
@@ -162,7 +188,12 @@ export default async function DevisPlaquettePage({
     Math.max(0, Number((quote as { deposit_rate?: number }).deposit_rate ?? 0.3)),
   );
   const depositPct = Math.round(depositRate * 100);
-  const terms = splitTerms(quote.terms) ?? defaultTerms(depositPct);
+  // Per-quote locale: 'fr' (default for every existing quote) or 'en'.
+  // Falls through normalizeLocale to defend against legacy NULL rows
+  // and unexpected values.
+  const locale = normalizeLocale((quote as { language?: string }).language);
+  const i18n = t(locale);
+  const terms = splitTerms(quote.terms) ?? defaultTerms(depositPct, locale);
 
   const validUntilLabel = quote.valid_until
     ? `Valable jusqu'au ${formatDateFR(quote.valid_until)}`
@@ -484,28 +515,32 @@ export default async function DevisPlaquettePage({
             <table className="totals-table">
               <tbody>
                 <tr>
-                  <td>Sous-total HT</td>
+                  <td>{i18n.totals.subtotal}</td>
                   <td>{formatEUR(quote.total_ht)}</td>
                 </tr>
                 <tr>
                   <td>
-                    {settings?.tva_franchise ? "TVA" : `TVA ${quote.tva_rate}%`}
+                    {settings?.tva_franchise
+                      ? i18n.totals.tva(0).split(" ")[0]
+                      : i18n.totals.tva(Number(quote.tva_rate))}
                   </td>
                   <td>
                     {settings?.tva_franchise
-                      ? "Non applicable"
+                      ? locale === "en"
+                        ? "Not applicable"
+                        : "Non applicable"
                       : formatEUR(quote.total_tva)}
                   </td>
                 </tr>
                 <tr className="total-final">
-                  <td>Total TTC</td>
+                  <td>{i18n.totals.totalTtc}</td>
                   <td>{formatEUR(quote.total_ttc)}</td>
                 </tr>
               </tbody>
             </table>
 
             <div className="deposit-block">
-              <span>Acompte à la signature ({depositPct} %)</span>
+              <span>{i18n.totals.deposit(depositPct)}</span>
               <span>{formatEUR(deposit)}</span>
             </div>
           </div>
@@ -536,31 +571,44 @@ export default async function DevisPlaquettePage({
           {quote.status === "envoye" && (
             <div className="sig-cta">
               <div className="sig-cta-text">
-                Un clic et nous <em>bloquons votre date</em>.
-                <br />
-                Signature numérique sécurisée, réponse sous 24 h.
+                {locale === "en" ? (
+                  <>
+                    One click and we <em>lock in your date</em>.
+                    <br />
+                    Secure electronic signature, response within 24h.
+                  </>
+                ) : (
+                  <>
+                    Un clic et nous <em>bloquons votre date</em>.
+                    <br />
+                    Signature numérique sécurisée, réponse sous 24 h.
+                  </>
+                )}
               </div>
               <AcceptanceActions
                 quoteId={quote.id}
                 number={quote.number}
                 defaultName={clientDisplayName}
+                locale={locale}
               />
             </div>
           )}
 
           {quote.status === "accepte" && (
             <div className="sig-cta-status">
-              ✓ Devis accepté
+              ✓ {locale === "en" ? "Quote accepted" : "Devis accepté"}
               {quote.signed_by_name
-                ? ` par ${quote.signed_by_name}`
+                ? ` ${locale === "en" ? "by" : "par"} ${quote.signed_by_name}`
                 : clientDisplayName
-                  ? ` — merci ${clientDisplayName}`
+                  ? ` — ${locale === "en" ? "thank you" : "merci"} ${clientDisplayName}`
                   : ""}
               {quote.accepted_at &&
-                ` le ${new Date(quote.accepted_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`}
+                ` ${locale === "en" ? "on" : "le"} ${new Date(quote.accepted_at).toLocaleDateString(locale === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "long", year: "numeric" })}`}
               .
               <br />
-              Nous revenons vers vous avec contrat + acompte sous 24 h.
+              {locale === "en"
+                ? "We'll get back to you with the contract + deposit details within 24h."
+                : "Nous revenons vers vous avec contrat + acompte sous 24 h."}
               {quote.signature_data && (
                 <div
                   style={{
@@ -572,11 +620,11 @@ export default async function DevisPlaquettePage({
                   }}
                 >
                   <p style={{ margin: 0, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.6 }}>
-                    Signature enregistrée
+                    {locale === "en" ? "Signature on file" : "Signature enregistrée"}
                   </p>
                   <img
                     src={quote.signature_data}
-                    alt={`Signature de ${quote.signed_by_name ?? "client"}`}
+                    alt={`${locale === "en" ? "Signature of" : "Signature de"} ${quote.signed_by_name ?? (locale === "en" ? "client" : "client")}`}
                     style={{
                       marginTop: "6px",
                       maxWidth: "260px",
@@ -593,8 +641,9 @@ export default async function DevisPlaquettePage({
 
           {quote.status === "refuse" && (
             <div className="sig-cta-status refused">
-              Devis refusé. Nous restons à votre disposition pour ajuster si
-              besoin.
+              {locale === "en"
+                ? "Quote declined. We remain available to adjust the proposal if needed."
+                : "Devis refusé. Nous restons à votre disposition pour ajuster si besoin."}
             </div>
           )}
 

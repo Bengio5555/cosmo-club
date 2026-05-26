@@ -47,6 +47,12 @@ export type SaveQuoteInput = {
    * les emails de confirmation à la signature.
    */
   deposit_rate: number;
+  /**
+   * Locale for the public plaquette and the client email. 'fr' is the
+   * default; 'en' opt-in for international clients. The signed PDF + CGV
+   * remain in French regardless.
+   */
+  language: "fr" | "en";
   valid_until: string | null;
   /**
    * Run-of-show steps ("14:00 — Livraison"). Persisted as JSONB on
@@ -248,6 +254,7 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
       tva_rate: tvaRate,
       commission_rate: commissionRate,
       deposit_rate: depositRate,
+      language: input.language === "en" ? "en" : "fr",
       valid_until: input.valid_until,
       schedule: sanitizeSchedule(input.schedule),
       moodboard_images: sanitizeMoodboard(input.moodboard_images),
@@ -369,7 +376,7 @@ export async function sendDevis(
   const supabase = await createClient();
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
-    .select("id,status,number,subject,client_id,lead_id,access_token")
+    .select("id,status,number,subject,client_id,lead_id,access_token,language")
     .eq("id", id)
     .maybeSingle();
   if (qErr || !quote) {
@@ -449,17 +456,21 @@ export async function sendDevis(
       (settings as { company_name?: string | null } | null)?.company_name || "Cosmo Club Paris";
 
     const cc = parseCcEmails(opts?.cc);
+    const isEn = quote.language === "en";
     await resend.emails.send({
       from: `${companyName} <${fromEmail}>`,
       to: [client.email],
       cc: cc.length > 0 ? cc : undefined,
-      subject: `Votre devis ${quote.number} — ${companyName}`,
+      subject: isEn
+        ? `Your Cosmo Club Paris quote — ${quote.number}`
+        : `Votre devis ${quote.number} — ${companyName}`,
       html: buildEmailHtml({
         firstName,
         subject: quote.subject,
         link,
         number: quote.number,
         sender: companyName,
+        locale: isEn ? "en" : "fr",
       }),
     });
     return { ok: true as const, emailed: true, ccCount: cc.length };
@@ -479,12 +490,32 @@ function buildEmailHtml(o: {
   link: string;
   number: string;
   sender: string;
+  locale?: "fr" | "en";
 }): string {
-  const greeting = o.firstName ? `Bonjour ${o.firstName},` : "Bonjour,";
-  const subjectLine = o.subject || `Votre devis ${o.number}`;
+  const isEn = o.locale === "en";
+  const greeting = o.firstName
+    ? isEn
+      ? `Hi ${o.firstName},`
+      : `Bonjour ${o.firstName},`
+    : isEn
+      ? "Hello,"
+      : "Bonjour,";
+  const subjectLine =
+    o.subject ||
+    (isEn ? `Your quote ${o.number}` : `Votre devis ${o.number}`);
+  const introCopy = isEn
+    ? "Your quote is ready. You can review it, accept it or get in touch with us directly from the link below."
+    : "Votre devis est prêt. Vous pouvez le consulter, l'accepter ou nous écrire directement depuis le lien ci-dessous.";
+  const ctaCopy = isEn ? "View the quote" : "Voir le devis";
+  const fallbackCopy = isEn
+    ? "Or paste this link into your browser:"
+    : "Ou copiez ce lien dans votre navigateur :";
+  const footerCopy = isEn
+    ? `Reference: ${o.number} · This email was sent in response to your request.`
+    : `Référence : ${o.number} · Cet email vous a été envoyé suite à votre demande.`;
   return `
 <!doctype html>
-<html>
+<html lang="${isEn ? "en" : "fr"}">
   <body style="font-family: Inter, system-ui, sans-serif; background:#f5efe0; margin:0; padding:32px; color:#2a1f14;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden;">
       <tr>
@@ -492,23 +523,23 @@ function buildEmailHtml(o: {
           <p style="font-size:10px; letter-spacing:0.28em; text-transform:uppercase; color:#8b1a1a; margin:0 0 12px;">${escape(o.sender)}</p>
           <h1 style="font-family:Georgia,serif; font-size:28px; line-height:1.2; margin:0 0 18px; color:#2a1f14;">${escape(subjectLine)}</h1>
           <p style="margin:0 0 12px;">${escape(greeting)}</p>
-          <p style="margin:0 0 12px;">Votre devis est prêt. Vous pouvez le consulter, l'accepter ou nous écrire directement depuis le lien ci-dessous.</p>
+          <p style="margin:0 0 12px;">${escape(introCopy)}</p>
         </td>
       </tr>
       <tr>
         <td style="padding:16px 32px 32px;">
           <a href="${o.link}" style="display:inline-block; padding:14px 28px; background:#8b1a1a; color:#f5efe0; text-decoration:none; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase;">
-            Voir le devis
+            ${escape(ctaCopy)}
           </a>
           <p style="margin:24px 0 0; font-size:12px; color:#3a2a1e; opacity:0.7;">
-            Ou copiez ce lien dans votre navigateur : <br/>
+            ${escape(fallbackCopy)} <br/>
             <a href="${o.link}" style="color:#8b1a1a;">${o.link}</a>
           </p>
         </td>
       </tr>
       <tr>
         <td style="padding:20px 32px; background:#f5efe0; font-size:11px; color:#3a2a1e; opacity:0.7;">
-          Référence : ${escape(o.number)} · Cet email vous a été envoyé suite à votre demande.
+          ${escape(footerCopy)}
         </td>
       </tr>
     </table>
@@ -860,7 +891,7 @@ export async function duplicateQuote(id: string) {
 
   const { data: source, error: qErr } = await supabase
     .from("quotes")
-    .select("id,client_id,event_type,event_date,event_location,guests_count,subject,intro,terms,tva_rate,commission_rate,deposit_rate,schedule,moodboard_images,total_ht,total_tva,total_ttc")
+    .select("id,client_id,event_type,event_date,event_location,guests_count,subject,intro,terms,tva_rate,commission_rate,deposit_rate,language,schedule,moodboard_images,total_ht,total_tva,total_ttc")
     .eq("id", id)
     .maybeSingle();
   if (qErr || !source) {
@@ -911,6 +942,7 @@ export async function duplicateQuote(id: string) {
       tva_rate: source.tva_rate,
       commission_rate: source.commission_rate,
       deposit_rate: source.deposit_rate,
+      language: source.language,
       schedule: source.schedule,
       moodboard_images: source.moodboard_images,
       total_ht: source.total_ht,

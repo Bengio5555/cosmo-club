@@ -116,6 +116,13 @@ export function DevisEditor({
   const [validUntil, setValidUntil] = useState<string>(
     quote.valid_until ? quote.valid_until.slice(0, 10) : "",
   );
+  // Locale of the public plaquette + the accompanying client email.
+  // 'fr' is the default for backward compatibility; 'en' is the opt-in
+  // path for international clients. PDF and CGV stay in French either
+  // way — see lib/i18n/quote-plaquette.ts for the rationale.
+  const [language, setLanguage] = useState<"fr" | "en">(
+    (quote as { language?: string }).language === "en" ? "en" : "fr",
+  );
 
   // Picked moodboard images for the plaquette. Stored as JSONB
   // (string array of public URLs); coerce defensively on load.
@@ -223,6 +230,7 @@ export function DevisEditor({
       tva_rate: tvaNum,
       commission_rate: commissionRateNum,
       deposit_rate: Math.min(1, Math.max(0, (Number(depositPct) || 0) / 100)),
+      language,
       valid_until: validUntil || null,
       schedule,
       moodboard_images: moodboardImages,
@@ -745,6 +753,37 @@ export function DevisEditor({
               onChange={setValidUntil}
               readOnly={readOnly}
             />
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+              Langue de la plaquette
+            </p>
+            <div className="flex gap-2">
+              {(["fr", "en"] as const).map((lang) => {
+                const active = language === lang;
+                return (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setLanguage(lang)}
+                    disabled={readOnly}
+                    className={
+                      "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 " +
+                      (active
+                        ? "border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900"
+                        : "border-slate-300 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white")
+                    }
+                  >
+                    {lang === "fr" ? "🇫🇷 Français" : "🇬🇧 English"}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
+              Bascule la plaquette HTML et l&apos;email envoyé au client. Le
+              PDF signé et les CGV restent en français.
+            </p>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5 text-xs text-slate-500 dark:text-slate-500">

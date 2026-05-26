@@ -409,6 +409,7 @@ export type Database = {
           id: string
           intro: string | null
           issue_date: string
+          language: string
           lead_id: string | null
           moodboard_images: Json
           number: string
