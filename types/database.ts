@@ -79,6 +79,8 @@ export type Database = {
       events: {
         Row: {
           briefing: string | null
+          briefing_data: Json | null
+          briefing_token: string | null
           client_id: string | null
           created_at: string
           date: string

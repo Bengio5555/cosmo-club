@@ -29,6 +29,7 @@ export default function robots(): MetadataRoute.Robots {
   const adminDisallow = [
     "/admin",
     "/api",
+    "/briefing/",
     "/calendar",
     "/dashboard",
     "/devis/",

@@ -1,0 +1,273 @@
+/*
+ * Public staff briefing — print-friendly, mobile-readable, modeled
+ * after the existing PDF the operator was producing manually.
+ *
+ * Two contexts:
+ *   - Screen (WhatsApp link tap): readable on phones, no Cosmo brand
+ *     decoration (it's an internal doc, not a marketing surface).
+ *   - Print (Cmd+P / Save as PDF): plain B/W with grenat accents to
+ *     match the original .numbers export.
+ */
+
+:root {
+  --brief-ink: #1a1614;
+  --brief-muted: #5a5147;
+  --brief-line: #dcd6c9;
+  --brief-grenat: #8b1a1a;
+  --brief-paper: #fbfaf7;
+  --brief-warn: #b45309;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.briefing-body {
+  background: #efeade;
+  color: var(--brief-ink);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+  padding: 24px 16px 64px;
+  min-height: 100vh;
+}
+
+.briefing-actions {
+  max-width: 920px;
+  margin: 0 auto 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+.briefing-actions button {
+  border: 1px solid var(--brief-ink);
+  background: var(--brief-ink);
+  color: var(--brief-paper);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.briefing-actions button:hover {
+  background: var(--brief-grenat);
+  border-color: var(--brief-grenat);
+}
+
+.briefing {
+  max-width: 920px;
+  margin: 0 auto;
+  background: var(--brief-paper);
+  border: 1px solid var(--brief-line);
+  padding: 32px 28px;
+}
+
+@media (min-width: 720px) {
+  .briefing {
+    padding: 48px;
+  }
+}
+
+.briefing-header h1 {
+  margin: 0;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  color: var(--brief-ink);
+}
+.briefing-subtitle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--brief-muted);
+}
+
+.briefing-section {
+  margin-top: 28px;
+  break-inside: avoid;
+}
+
+.briefing-h2 {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  background: var(--brief-grenat);
+  color: #fff;
+  border-radius: 3px;
+}
+.briefing-h2--grenat {
+  /* alias kept for readability */
+}
+.briefing-h2--warn {
+  background: var(--brief-warn);
+}
+
+.briefing-schedule,
+.briefing-contacts {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  table-layout: fixed;
+}
+.briefing-schedule th,
+.briefing-contacts th {
+  text-align: left;
+  background: rgba(139, 26, 26, 0.08);
+  color: var(--brief-grenat);
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--brief-line);
+}
+.briefing-schedule td,
+.briefing-contacts td {
+  padding: 10px;
+  border-bottom: 1px solid var(--brief-line);
+  vertical-align: top;
+  word-break: break-word;
+}
+.briefing-schedule .briefing-time {
+  font-weight: 700;
+  font-feature-settings: "tnum" 1;
+  color: var(--brief-ink);
+  font-size: 13px;
+}
+.briefing-schedule .briefing-desc {
+  font-weight: 600;
+  color: var(--brief-ink);
+}
+.briefing-schedule .briefing-people {
+  color: var(--brief-muted);
+  font-style: italic;
+}
+.briefing-schedule .briefing-comment pre {
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--brief-ink);
+  white-space: pre-wrap;
+  margin: 0;
+}
+.briefing-muted {
+  color: var(--brief-muted);
+  opacity: 0.6;
+}
+
+.briefing-pre {
+  font-family: inherit;
+  white-space: pre-wrap;
+  background: rgba(139, 26, 26, 0.04);
+  padding: 12px 14px;
+  border-left: 2px solid var(--brief-grenat);
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  color: var(--brief-ink);
+  margin: 0;
+}
+
+.briefing-recipes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .briefing-recipes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.briefing-recipe {
+  border: 1px solid var(--brief-line);
+  border-radius: 6px;
+  padding: 12px 14px;
+  background: #fff;
+  break-inside: avoid;
+}
+.briefing-recipe-name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--brief-ink);
+  font-size: 14px;
+}
+.briefing-recipe-qty {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--brief-muted);
+}
+.briefing-recipe-desc {
+  margin: 4px 0 8px;
+  font-style: italic;
+  color: var(--brief-muted);
+  font-size: 12px;
+}
+.briefing-recipe-ings {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.briefing-recipe-ings li {
+  padding: 3px 0;
+  font-size: 13px;
+  color: var(--brief-ink);
+  font-feature-settings: "tnum" 1;
+}
+
+.briefing-attachments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.briefing-attachments li {
+  padding: 6px 0;
+}
+.briefing-attachments a {
+  color: var(--brief-grenat);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.briefing-guide pre {
+  background: rgba(0, 0, 0, 0.03);
+  border-left-color: var(--brief-muted);
+}
+
+.briefing-footer {
+  margin-top: 36px;
+  padding-top: 16px;
+  border-top: 1px solid var(--brief-line);
+  font-size: 11px;
+  color: var(--brief-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Print rules — strip backgrounds, hide the print button */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .briefing-body {
+    background: #fff !important;
+    padding: 0;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .briefing {
+    border: none;
+    padding: 16px;
+    max-width: none;
+  }
+  .briefing-section {
+    page-break-inside: avoid;
+  }
+  .briefing-schedule {
+    page-break-inside: auto;
+  }
+  .briefing-schedule tr {
+    page-break-inside: avoid;
+  }
+}

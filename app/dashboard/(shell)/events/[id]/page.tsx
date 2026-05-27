@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
+  ClipboardList,
   FileText,
   User,
   Mail,
@@ -200,12 +201,19 @@ export default async function EventDetailPage({
 
   return (
     <>
-      <div className="border-b border-slate-100 dark:border-slate-900 px-4 pt-6 md:px-8">
+      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-900 px-4 pt-6 md:px-8">
         <Link
           href="/dashboard/events"
           className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Tous les événements
+        </Link>
+        <Link
+          href={`/dashboard/events/${event.id}/briefing`}
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white"
+        >
+          <ClipboardList className="h-3.5 w-3.5" />
+          Briefing staff
         </Link>
       </div>
 
