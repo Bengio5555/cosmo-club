@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
-import { formatDateFR, formatEUR } from "@/lib/format";
+import { formatEUR } from "@/lib/format";
+import { DevisBrowser, type QuoteRow, type ClientLite } from "./DevisBrowser";
 
 export default async function DevisListPage() {
   const supabase = await createClient();
@@ -24,7 +23,6 @@ export default async function DevisListPage() {
         .select("id,first_name,last_name,company_name,email")
         .in("id", clientIds)
     : { data: [] };
-  const clientsMap = new Map((clientsList ?? []).map((c) => [c.id, c]));
 
   // Aggregates for the small stats row. The "Signés" pill shows both
   // the count AND the cumulative TTC of accepted quotes — used to be
@@ -88,82 +86,11 @@ export default async function DevisListPage() {
           </div>
         )}
 
-        {/* Table card */}
-        <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          {quotes && quotes.length > 0 ? (
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Numéro</th>
-                  <th className="px-4 py-3 font-medium">Client</th>
-                  <th className="hidden px-4 py-3 font-medium md:table-cell">
-                    Type
-                  </th>
-                  <th className="hidden px-4 py-3 font-medium md:table-cell">
-                    Date événement
-                  </th>
-                  <th className="px-4 py-3 font-medium">Statut</th>
-                  <th className="px-4 py-3 text-right font-medium">Total TTC</th>
-                </tr>
-              </thead>
-              <tbody>
-                {quotes.map((q) => {
-                  const client = q.client_id ? clientsMap.get(q.client_id) : null;
-                  const who =
-                    client?.company_name ||
-                    [client?.first_name, client?.last_name]
-                      .filter(Boolean)
-                      .join(" ") ||
-                    client?.email ||
-                    "—";
-                  return (
-                    <tr
-                      key={q.id}
-                      className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
-                    >
-                      <td className="px-4 py-3">
-                        <Link
-                          href={`/dashboard/devis/${q.id}`}
-                          className="font-medium text-slate-900 transition-colors hover:text-[color:var(--color-grenat)] dark:text-slate-100 dark:hover:text-[color:var(--color-grenat-glow)]"
-                        >
-                          {q.number}
-                        </Link>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          Émis {formatDateFR(q.issue_date)}
-                        </p>
-                      </td>
-                      <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
-                        {who}
-                      </td>
-                      <td className="hidden px-4 py-3 md:table-cell">
-                        <EventTypeLabel value={q.event_type} />
-                      </td>
-                      <td className="hidden px-4 py-3 text-xs text-slate-600 dark:text-slate-400 md:table-cell">
-                        {formatDateFR(q.event_date)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={q.status} />
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium tabular-nums text-slate-900 dark:text-slate-100">
-                        {formatEUR(q.total_ttc)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <div className="p-12 text-center text-sm text-slate-500 dark:text-slate-400">
-              Aucun devis. Convertis une{" "}
-              <Link
-                href="/dashboard/leads"
-                className="font-medium text-slate-700 underline hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-              >
-                demande
-              </Link>{" "}
-              pour en créer un.
-            </div>
-          )}
+        <div className="mt-6">
+          <DevisBrowser
+            quotes={(quotes ?? []) as QuoteRow[]}
+            clients={(clientsList ?? []) as ClientLite[]}
+          />
         </div>
       </div>
     </div>
