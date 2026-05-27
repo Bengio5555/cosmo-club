@@ -1280,11 +1280,25 @@ function ScheduleEditor({
   onChange: (next: ScheduleItem[]) => void;
   readOnly: boolean;
 }) {
+  // Drag state: index of the row being dragged + the index it would be
+  // dropped at. Both refer to positions in `steps`. We re-order on
+  // dragEnd to keep the list stable while the user is still moving.
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+
   function patch(idx: number, p: Partial<ScheduleItem>) {
     onChange(steps.map((s, i) => (i === idx ? { ...s, ...p } : s)));
   }
   function remove(idx: number) {
     onChange(steps.filter((_, i) => i !== idx));
+  }
+
+  function reorder(from: number, to: number) {
+    if (from === to) return;
+    const next = steps.slice();
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
   }
 
   if (steps.length === 0) {
@@ -1299,38 +1313,86 @@ function ScheduleEditor({
 
   return (
     <ul className="space-y-2">
-      {steps.map((step, idx) => (
-        <li
-          key={idx}
-          className="flex items-center gap-2 rounded-md border border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-slate-900/40 px-2 py-1.5"
-        >
-          <input
-            type="time"
-            value={step.time}
-            onChange={(e) => patch(idx, { time: e.target.value })}
-            readOnly={readOnly}
-            className="w-[88px] rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
-          />
-          <input
-            type="text"
-            value={step.label}
-            onChange={(e) => patch(idx, { label: e.target.value })}
-            placeholder="Étape (ex. Arrivée invités)"
-            readOnly={readOnly}
-            className="min-w-0 flex-1 rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
-          />
-          {!readOnly && (
-            <button
-              type="button"
-              onClick={() => remove(idx)}
-              aria-label="Supprimer l'étape"
-              className="shrink-0 rounded p-1 text-slate-500 dark:text-slate-500 hover:text-red-300"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </li>
-      ))}
+      {steps.map((step, idx) => {
+        const isDragging = dragIdx === idx;
+        const isOver = overIdx === idx && dragIdx !== null && dragIdx !== idx;
+        return (
+          <li
+            key={idx}
+            draggable={!readOnly}
+            onDragStart={(e) => {
+              if (readOnly) return;
+              setDragIdx(idx);
+              // Mark the drag effect; some browsers need an empty dataTransfer
+              // to opt-in to drag.
+              e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData("text/plain", String(idx));
+            }}
+            onDragOver={(e) => {
+              if (readOnly || dragIdx === null) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              if (overIdx !== idx) setOverIdx(idx);
+            }}
+            onDragLeave={() => {
+              if (overIdx === idx) setOverIdx(null);
+            }}
+            onDrop={(e) => {
+              if (readOnly || dragIdx === null) return;
+              e.preventDefault();
+              reorder(dragIdx, idx);
+              setDragIdx(null);
+              setOverIdx(null);
+            }}
+            onDragEnd={() => {
+              setDragIdx(null);
+              setOverIdx(null);
+            }}
+            className={
+              "flex items-center gap-2 rounded-md border bg-slate-100 px-2 py-1.5 transition-colors dark:bg-slate-900/40 " +
+              (isOver
+                ? "border-[color:var(--color-grenat)] ring-1 ring-[color:var(--color-grenat)]/40"
+                : "border-slate-200 dark:border-slate-800/80") +
+              (isDragging ? " opacity-50" : "")
+            }
+          >
+            {!readOnly && (
+              <span
+                aria-label="Glisser pour réordonner"
+                title="Glisser pour réordonner"
+                className="shrink-0 cursor-grab text-slate-400 active:cursor-grabbing dark:text-slate-500"
+              >
+                <GripVertical className="h-3.5 w-3.5" />
+              </span>
+            )}
+            <input
+              type="time"
+              value={step.time}
+              onChange={(e) => patch(idx, { time: e.target.value })}
+              readOnly={readOnly}
+              className="w-[88px] rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+            />
+            <input
+              type="text"
+              value={step.label}
+              onChange={(e) => patch(idx, { label: e.target.value })}
+              placeholder="Étape (ex. Arrivée invités)"
+              readOnly={readOnly}
+              className="min-w-0 flex-1 rounded border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+            />
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => remove(idx)}
+                aria-label="Supprimer l'étape"
+                className="shrink-0 rounded p-1 text-slate-500 dark:text-slate-500 hover:text-red-300"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }

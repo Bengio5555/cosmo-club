@@ -29,6 +29,20 @@ export const QUOTE_PRESET_TITLES = [
 ] as const;
 
 /**
+ * Default run-of-show skeleton applied to every fresh quote alongside
+ * QUOTE_PRESET_TITLES. Times are left blank on purpose — the operator
+ * sets them once the event clock is locked. Order is the canonical
+ * chronological flow and can be reshuffled in the editor.
+ */
+export const QUOTE_PRESET_SCHEDULE: Array<{ time: string; label: string }> = [
+  { time: "", label: "Livraison, montage & installation du bar" },
+  { time: "", label: "Arrivée du personnel & mise en place du bar" },
+  { time: "", label: "Arrivée des convives & début du service" },
+  { time: "", label: "Départ des convives & fin de service" },
+  { time: "", label: "Rangement & reprise matériel" },
+];
+
+/**
  * Seed a freshly-created quote with the preset line items. Returns
  * the number of rows actually inserted (≤ QUOTE_PRESET_TITLES.length —
  * any catalog item missing from the DB is simply skipped).

@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { seedQuotePresetItems } from "@/lib/server/quotePresetItems";
+import {
+  seedQuotePresetItems,
+  QUOTE_PRESET_SCHEDULE,
+} from "@/lib/server/quotePresetItems";
 
 export type ClientInput = {
   first_name?: string | null;
@@ -244,6 +247,7 @@ export async function createQuoteForClient(clientId: string) {
       lead_id: leadId,
       status: "brouillon",
       subject: `Devis — ${display}`,
+      schedule: QUOTE_PRESET_SCHEDULE,
       // IDOR protection: random token required in the public URL
       // (/devis/[number]?t=<token>). Anciens devis sans token restent
       // accessibles par numéro seul (legacy bypass dans la route).
