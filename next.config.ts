@@ -64,22 +64,19 @@ export default withSentryConfig(nextConfig, {
   // server-side stack traces). Costs a tiny bit of build time.
   widenClientFileUpload: true,
 
-  // Don't expose the .map files publicly — symbolication happens on
-  // Sentry's side from the uploaded artifacts, not from the user's
-  // browser fetching maps next to the bundle.
-  hideSourceMaps: true,
-
-  // Strip Sentry's SDK logger from the prod bundle. Smaller JS, no
-  // noisy console messages in production.
-  disableLogger: true,
-
-  // Auto-register Vercel cron jobs (vercel.json crons block) as Sentry
-  // monitors. If a cron stops firing or starts erroring, we hear about
-  // it. Currently wired to /api/cron/reddit-refresh.
-  automaticVercelMonitors: true,
-
   // Tunnel client-side events through our own origin so AdBlock /
   // uBlock don't drop the report. The /monitoring path is rewritten
   // to Sentry's ingestion endpoint at build time.
   tunnelRoute: "/monitoring",
+
+  // NOTE — options omitted intentionally:
+  //   - `hideSourceMaps`: removed from the v10.x typings. The SDK
+  //     now deletes uploaded source maps from the build output by
+  //     default, which is what we want (no .map fetchable next to
+  //     the bundle). Re-add via `sourcemaps: { deleteFilesAfterUpload }`
+  //     only if we ever need to ship maps to the CDN.
+  //   - `disableLogger`, `automaticVercelMonitors`: both flagged as
+  //     "Not supported with Turbopack" — we omit them so the build
+  //     doesn't emit deprecation noise. Cron monitoring can be
+  //     re-enabled per-route via Sentry.withMonitor when needed.
 });
