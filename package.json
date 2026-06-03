@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@next/third-parties": "^16.2.6",
     "@react-pdf/renderer": "^4.5.1",
+    "@sentry/nextjs": "^10.56.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.0",
     "@tanstack/react-query": "^5.99.2",

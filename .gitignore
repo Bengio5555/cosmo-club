@@ -44,3 +44,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 generated-cocktails-mai/
+.sentryclirc
+
+# Claude Code local files (not committed)
+.claude/
+
+# Forensic backup of a corrupted .git from June 2026 — keep one cycle, then delete
+.git-corrupted-*/

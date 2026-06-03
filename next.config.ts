@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -35,4 +36,50 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/**
+ * Sentry wrap: uploads source maps at build time so prod stack traces
+ * resolve to readable code, and rewrites client routes through a
+ * `/monitoring` tunnel that bypasses ad-blockers (a meaningful chunk
+ * of visitors would otherwise have their errors silently dropped).
+ *
+ * Behaviour is gated on env vars so a build without `SENTRY_AUTH_TOKEN`
+ * (e.g. a contributor's first `next build`) still succeeds — it just
+ * skips the source-map upload. Vercel production builds get the token
+ * from the encrypted env and produce a fully symbolicated artifact.
+ */
+export default withSentryConfig(nextConfig, {
+  // From the Sentry project URL — keep these in sync if we rename.
+  org: "cosmo-club-paris",
+  project: "javascript-nextjs",
+
+  // Auth token used to upload source maps + releases. Add it as
+  // SENTRY_AUTH_TOKEN in Vercel; the build skips uploads if missing.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Don't spam CI logs with Sentry chatter unless we explicitly want it.
+  silent: !process.env.CI,
+
+  // Source-map upload covers chunks that Next.js doesn't ship to the
+  // browser by default (server-only code that ends up symbolicating
+  // server-side stack traces). Costs a tiny bit of build time.
+  widenClientFileUpload: true,
+
+  // Don't expose the .map files publicly — symbolication happens on
+  // Sentry's side from the uploaded artifacts, not from the user's
+  // browser fetching maps next to the bundle.
+  hideSourceMaps: true,
+
+  // Strip Sentry's SDK logger from the prod bundle. Smaller JS, no
+  // noisy console messages in production.
+  disableLogger: true,
+
+  // Auto-register Vercel cron jobs (vercel.json crons block) as Sentry
+  // monitors. If a cron stops firing or starts erroring, we hear about
+  // it. Currently wired to /api/cron/reddit-refresh.
+  automaticVercelMonitors: true,
+
+  // Tunnel client-side events through our own origin so AdBlock /
+  // uBlock don't drop the report. The /monitoring path is rewritten
+  // to Sentry's ingestion endpoint at build time.
+  tunnelRoute: "/monitoring",
+});
