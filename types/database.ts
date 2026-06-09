@@ -94,6 +94,7 @@ export type Database = {
           start_time: string | null
           status: Database["public"]["Enums"]["event_status"]
           title: string
+          todo_data: Json | null
           updated_at: string
         }
         Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & { title: string; date: string }

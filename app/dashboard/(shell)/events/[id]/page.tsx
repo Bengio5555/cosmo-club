@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { EventEditor } from "./EventEditor";
+import { EventTodo } from "./EventTodo";
 import { StaffSection } from "./StaffSection";
 import { StockSection } from "./StockSection";
 import { MenuSection } from "./MenuSection";
@@ -201,6 +202,9 @@ export default async function EventDetailPage({
 
   return (
     <>
+      {/* Floating validation checklist — fixed flag on the right edge. */}
+      <EventTodo eventId={event.id} initialData={event.todo_data} />
+
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-900 px-4 pt-6 md:px-8">
         <Link
           href="/dashboard/events"

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database, TablesUpdate } from "@/types/database";
+import type { EventTodoData } from "@/lib/server/eventTodoTemplate";
 
 type EventStatus = Database["public"]["Enums"]["event_status"];
 type EventUpdate = TablesUpdate<"events">;
@@ -473,6 +474,26 @@ export async function clearStaffPayment(eventId: string, staffId: string) {
     .eq("staff_id", staffId);
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
+/* ─── Event validation checklist (TO-DO drawer) ───────────────────── */
+
+/**
+ * Persist the whole TO-DO checklist blob for an event. The client owns
+ * the structure (sections → groups → items) and sends the full payload
+ * on every mutation (toggle / add / remove / rename) — simplest robust
+ * approach for a JSONB-backed checklist, mirrors the briefing editor.
+ * We don't revalidate the page: the drawer manages its own optimistic
+ * state, and a refetch would just re-seed the same data.
+ */
+export async function saveEventTodo(eventId: string, data: EventTodoData) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("events")
+    .update({ todo_data: data })
+    .eq("id", eventId);
+  if (error) return { ok: false as const, error: error.message };
   return { ok: true as const };
 }
 
