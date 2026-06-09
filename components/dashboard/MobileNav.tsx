@@ -33,7 +33,7 @@ const ALL_TABS: Tab[] = [
   { href: "/dashboard/factures", label: "Factures", icon: Receipt },
   { href: "/dashboard/events", label: "Events", icon: CalendarDays },
   { href: "/dashboard/clients", label: "Clients", icon: Contact },
-  { href: "/dashboard/cocktails", label: "Cocktails", icon: Wine },
+  { href: "/dashboard/cocktails", label: "Boissons", icon: Wine },
   { href: "/dashboard/images", label: "Images", icon: ImageIcon },
 ];
 

@@ -50,7 +50,7 @@ const nav: { section: string; items: NavItem[] }[] = [
     items: [
       { href: "/dashboard/clients", label: "Clients", icon: Contact },
       { href: "/dashboard/catalog", label: "Catalogue", icon: BookText },
-      { href: "/dashboard/cocktails", label: "Cocktails", icon: Wine },
+      { href: "/dashboard/cocktails", label: "Boissons", icon: Wine },
       { href: "/dashboard/stock", label: "Stock", icon: Package },
       { href: "/dashboard/staff", label: "Équipe", icon: Users },
       { href: "/dashboard/providers", label: "Prestataires", icon: Truck },

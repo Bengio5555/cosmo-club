@@ -30,7 +30,7 @@ export default async function CocktailsListPage() {
       <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
-            Cocktails
+            Boissons
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Recettes réutilisables. Liées à tes produits stock → calcul
