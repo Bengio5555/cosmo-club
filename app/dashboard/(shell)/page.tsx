@@ -59,14 +59,14 @@ export default async function DashboardHome() {
   ] = await Promise.all([
     supabase
       .from("invoices")
-      .select("id,total_ttc,is_credit_note")
+      .select("id,total_ht,total_ttc,is_credit_note")
       .gte("issue_date", firstOfMonth)
       .neq("status", "brouillon")
       .neq("status", "annule"),
-    // 6-month trend for the bar chart
+    // 6-month revenue trend (HT — chiffre d'affaires excl. VAT)
     supabase
       .from("invoices")
-      .select("issue_date,total_ttc,is_credit_note,status")
+      .select("issue_date,total_ht,total_ttc,is_credit_note,status")
       .gte("issue_date", sixMonthsAgo)
       .neq("status", "brouillon")
       .neq("status", "annule"),
@@ -141,7 +141,7 @@ export default async function DashboardHome() {
     const label = d.toLocaleDateString("fr-FR", { month: "short" });
     const total = (trendInvoices ?? [])
       .filter((inv) => (inv.issue_date ?? "").startsWith(monthKey))
-      .reduce((sum, inv) => sum + Number(inv.total_ttc ?? 0), 0);
+      .reduce((sum, inv) => sum + Number(inv.total_ht ?? 0), 0);
     monthlySeries.push({ month: label, total });
   }
   const maxTrend = Math.max(1, ...monthlySeries.map((t) => t.total));
@@ -255,9 +255,10 @@ export default async function DashboardHome() {
     );
   };
 
-  // KPI aggregates
+  // KPI aggregates. "Chiffre d'affaires" is HT by French accounting
+  // convention (VAT collected isn't revenue), so we sum total_ht.
   const caMonth = (monthInvoices ?? []).reduce(
-    (s, i) => s + Number(i.total_ttc ?? 0),
+    (s, i) => s + Number(i.total_ht ?? 0),
     0,
   );
   let totalRemaining = 0;
@@ -325,7 +326,7 @@ export default async function DashboardHome() {
         {/* ─── KPI Cards ─── */}
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard
-            label="CA du mois"
+            label="CA du mois (HT)"
             value={formatEUR(caMonth)}
             icon={<Wallet className="h-4 w-4" />}
             delta={trendDelta}
@@ -368,7 +369,7 @@ export default async function DashboardHome() {
                   Chiffre d&apos;affaires
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  Sur les 6 derniers mois
+                  Sur les 6 derniers mois · HT
                 </p>
               </div>
               {Math.abs(trendDelta) >= 0.5 && (
