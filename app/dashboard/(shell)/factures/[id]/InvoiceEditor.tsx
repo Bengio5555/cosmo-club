@@ -876,8 +876,14 @@ function ItemRow({
   onRemove: () => void;
 }) {
   const total = item.qty * item.unit_price_ht;
+  // Grid columns: handle | title+desc | qty | unit | unit_price |
+  // line_total+trash. The last column needs to fit a 4-figure euro
+  // like "1 050,00 €" (~90px) plus the trash icon — a 24px column
+  // was clipping the total and pushing it leftward over the price
+  // input. Widening to minmax(104px,auto) gives the total room while
+  // still letting the trash sit tight on the right edge.
   return (
-    <div className="grid gap-2 py-2.5 md:grid-cols-[auto_minmax(0,1fr)_72px_88px_100px_24px] md:items-start md:gap-3">
+    <div className="grid gap-2 py-2.5 md:grid-cols-[auto_minmax(0,1fr)_64px_72px_88px_minmax(104px,auto)] md:items-start md:gap-3">
       <div className="mt-2 hidden text-slate-400 dark:text-slate-600 md:block">
         <GripVertical className="h-3.5 w-3.5" />
       </div>
@@ -926,7 +932,7 @@ function ItemRow({
         className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <div className="flex items-center justify-end gap-2 md:flex-col md:items-end md:gap-1 md:pt-1">
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-300 md:text-[11px]">
+        <span className="whitespace-nowrap text-xs font-medium tabular-nums text-slate-600 dark:text-slate-300 md:text-[11px]">
           {formatEUR(total)}
         </span>
         {!readOnly && (
