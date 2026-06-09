@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { MobileNav } from "@/components/dashboard/MobileNav";
-import { ThemeProvider } from "@/components/dashboard/ThemeProvider";
+import {
+  ThemeProvider,
+  ThemeNoFlashScript,
+} from "@/components/dashboard/ThemeProvider";
 import type { UserRole } from "@/lib/auth/roles";
 
 // PWA-friendly metadata scoped to the dashboard. When users "Add to
@@ -71,6 +74,9 @@ export default async function ShellLayout({
 
   return (
     <ThemeProvider>
+      {/* Sets the .dark class on <html> before paint — kills the
+          light→dark flash on reload. Must render before the shell. */}
+      <ThemeNoFlashScript />
       <div className="dashboard-shell flex min-h-[100dvh] bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-200">
         <Sidebar role={role} />
         <div className="flex min-w-0 flex-1 flex-col">

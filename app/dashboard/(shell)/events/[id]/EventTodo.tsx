@@ -211,27 +211,34 @@ export function EventTodo({
                             key={it.id}
                             className="group flex items-start gap-2 rounded-md px-1.5 py-1 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                           >
+                            {/* Checkbox + label share one click target so
+                                tapping the text toggles the item too. */}
                             <button
                               type="button"
                               onClick={() => toggleItem(section.id, gi, it.id)}
-                              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                                it.done
-                                  ? "border-emerald-500 bg-emerald-500 text-white"
-                                  : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900"
-                              }`}
+                              className="flex flex-1 items-start gap-2 text-left"
+                              aria-pressed={it.done}
                               aria-label={it.done ? "Décocher" : "Cocher"}
                             >
-                              {it.done && <Check className="h-3 w-3" />}
+                              <span
+                                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                                  it.done
+                                    ? "border-emerald-500 bg-emerald-500 text-white"
+                                    : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900"
+                                }`}
+                              >
+                                {it.done && <Check className="h-3 w-3" />}
+                              </span>
+                              <span
+                                className={`text-[13px] leading-snug ${
+                                  it.done
+                                    ? "text-slate-400 line-through dark:text-slate-600"
+                                    : "text-slate-700 dark:text-slate-200"
+                                }`}
+                              >
+                                {it.label}
+                              </span>
                             </button>
-                            <span
-                              className={`flex-1 text-[13px] leading-snug ${
-                                it.done
-                                  ? "text-slate-400 line-through dark:text-slate-600"
-                                  : "text-slate-700 dark:text-slate-200"
-                              }`}
-                            >
-                              {it.label}
-                            </span>
                             <button
                               type="button"
                               onClick={() => removeItem(section.id, gi, it.id)}

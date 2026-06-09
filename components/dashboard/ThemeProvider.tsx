@@ -10,38 +10,39 @@ const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
 });
 
 /**
- * Manages the dashboard light/dark theme. Stored in localStorage so
- * the choice survives reloads. The provider does two things on top of
- * exposing the theme via context:
- *   1. Applies the `.dark` class on a wrapper div so all `dark:`
- *      Tailwind variants resolve correctly downstream.
- *   2. Sets `data-theme` for non-Tailwind code that wants to react to
- *      the current scheme (custom CSS, third-party libs).
+ * Dashboard light/dark theme, persisted in localStorage.
  *
- * Default: light. We migrated from a hardcoded dark dashboard so the
- * first paint may be jarring on existing logged-in sessions; the
- * effect picks up the stored preference instantly though so the
- * flicker is unnoticeable in practice.
+ * No-flash strategy: the actual `.dark` class is applied to
+ * <html> by a blocking inline script (see ThemeNoFlashScript) BEFORE
+ * first paint, so the page renders in the correct theme immediately —
+ * no light→dark flicker on reload. This provider then just keeps React
+ * state in sync with that class and re-applies it on toggle. It no
+ * longer wraps children in a `.dark` div (the variant matches the
+ * <html> ancestor instead), which is what removed the flash.
  */
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
-  const [hydrated, setHydrated] = useState(false);
+function readInitialTheme(): Theme {
+  if (
+    typeof document !== "undefined" &&
+    document.documentElement.classList.contains("dark")
+  ) {
+    return "dark";
+  }
+  return "light";
+}
 
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Lazy init from the <html> class the inline script already set, so
+  // the very first client render matches what's painted (no flash, no
+  // hydration mismatch since we render no theme-dependent DOM here).
+  const [theme, setTheme] = useState<Theme>(readInitialTheme);
+
+  // Reflect state → <html> after every change (covers toggles; the
+  // inline script handled the initial paint).
   useEffect(() => {
-    let resolved: Theme = "light";
-    try {
-      const saved = localStorage.getItem("dashboardTheme");
-      if (saved === "light" || saved === "dark") {
-        resolved = saved;
-      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        resolved = "dark";
-      }
-    } catch {
-      // localStorage indispo (private mode) — on garde le défaut
-    }
-    setTheme(resolved);
-    setHydrated(true);
-  }, []);
+    const el = document.documentElement;
+    el.classList.toggle("dark", theme === "dark");
+    el.setAttribute("data-theme", theme);
+  }, [theme]);
 
   function toggle() {
     setTheme((prev) => {
@@ -49,26 +50,37 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       try {
         localStorage.setItem("dashboardTheme", next);
       } catch {
-        // ignore
+        // localStorage indispo (private mode) — on garde le défaut
       }
       return next;
     });
   }
 
-  // Avant l'hydratation on rend en `light` côté serveur, ce qui matche
-  // notre nouveau défaut. Pas de flash de thème puisque le re-render
-  // initial est synchrone après le useEffect.
-  const applied = hydrated ? theme : "light";
-
   return (
-    <ThemeContext.Provider value={{ theme: applied, toggle }}>
-      <div data-theme={applied} className={applied === "dark" ? "dark" : ""}>
-        {children}
-      </div>
+    <ThemeContext.Provider value={{ theme, toggle }}>
+      {children}
     </ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
   return useContext(ThemeContext);
+}
+
+/**
+ * Blocking inline script — render it once, early in the dashboard
+ * layout. It reads the saved preference (or the OS scheme as fallback)
+ * and toggles `.dark` on <html> synchronously during HTML parse,
+ * before the styled shell paints. This is what kills the reload flash.
+ */
+export function ThemeNoFlashScript() {
+  const js = `(function(){try{
+    var t=localStorage.getItem('dashboardTheme');
+    var dark = t==='dark' || (t!=='light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var el=document.documentElement;
+    if(dark){el.classList.add('dark');el.setAttribute('data-theme','dark');}
+    else{el.classList.remove('dark');el.setAttribute('data-theme','light');}
+  }catch(e){}})();`;
+  // eslint-disable-next-line react/no-danger
+  return <script dangerouslySetInnerHTML={{ __html: js }} />;
 }
