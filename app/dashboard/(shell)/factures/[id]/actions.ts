@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -29,6 +30,68 @@ export type SaveInvoiceInput = {
 
 function round2(n: number) {
   return Math.round(n * 100) / 100;
+}
+
+/**
+ * Create a blank draft invoice not tied to any quote — for direct
+ * billing (the client never went through the devis flow). Mints a
+ * continuous invoice number, sets the due date from settings, links
+ * the chosen client, and redirects into the editor where the operator
+ * adds line items. Mirrors createInvoiceFromQuote minus the quote
+ * snapshot.
+ *
+ * `clientId` may be null (e.g. a quick miscellaneous invoice), but a
+ * facture legally needs a recipient before it's issued — the operator
+ * can attach the client in the editor, and sendInvoice already guards
+ * on a missing email.
+ */
+export async function createBlankInvoice(clientId: string | null) {
+  const supabase = await createClient();
+
+  const { data: nbr, error: nbrErr } = await supabase.rpc(
+    "next_invoice_number",
+  );
+  if (nbrErr || !nbr) {
+    return {
+      ok: false as const,
+      error: nbrErr?.message ?? "Numérotation impossible",
+    };
+  }
+
+  const { data: settings } = await supabase
+    .from("settings")
+    .select("invoice_due_days,default_tva_rate")
+    .eq("id", 1)
+    .maybeSingle();
+  const dueDays = settings?.invoice_due_days ?? 30;
+  const tvaRate = Number(settings?.default_tva_rate ?? 20);
+  const issueDate = new Date();
+  const dueDate = new Date(issueDate);
+  dueDate.setDate(dueDate.getDate() + dueDays);
+
+  const { data: invoice, error } = await supabase
+    .from("invoices")
+    .insert({
+      number: nbr,
+      quote_id: null,
+      client_id: clientId,
+      status: "brouillon",
+      issue_date: issueDate.toISOString().slice(0, 10),
+      due_date: dueDate.toISOString().slice(0, 10),
+      tva_rate: tvaRate,
+      total_ht: 0,
+      total_tva: 0,
+      total_ttc: 0,
+      access_token: crypto.randomUUID(),
+    })
+    .select("id")
+    .single();
+  if (error || !invoice) {
+    return { ok: false as const, error: error?.message ?? "Création échouée" };
+  }
+
+  revalidatePath("/dashboard/factures");
+  redirect(`/dashboard/factures/${invoice.id}`);
 }
 
 /**

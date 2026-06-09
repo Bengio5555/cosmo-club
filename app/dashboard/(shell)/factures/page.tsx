@@ -3,6 +3,7 @@ import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { formatDateFR, formatEUR } from "@/lib/format";
+import { NewInvoiceButton } from "./NewInvoiceButton";
 
 type SP = Promise<{ from?: string; to?: string; kind?: string }>;
 
@@ -49,6 +50,25 @@ export default async function InvoicesListPage({
   ]);
 
   const clientsMap = new Map((clientsList ?? []).map((c) => [c.id, c]));
+
+  // Full client roster for the "Nouvelle facture" picker (direct
+  // billing without a quote). Non-archived, alphabetical-ish.
+  const { data: allClients } = await supabase
+    .from("clients")
+    .select("id,first_name,last_name,company_name,email")
+    .eq("archived", false)
+    .order("company_name", { ascending: true, nullsFirst: false })
+    .limit(1000);
+  const clientPickerOptions = (allClients ?? []).map((c) => {
+    const name =
+      [c.first_name, c.last_name].filter(Boolean).join(" ") ||
+      c.company_name ||
+      c.email ||
+      "Client sans nom";
+    const sub =
+      c.company_name && (c.first_name || c.last_name) ? c.company_name : c.email;
+    return { id: c.id, label: name, sub: sub ?? null };
+  });
   const paidByInvoice = new Map<string, number>();
   for (const p of payments ?? []) {
     paidByInvoice.set(
@@ -99,13 +119,16 @@ export default async function InvoicesListPage({
             242 nonies A du CGI). Avoirs et paiements partiels supportés.
           </p>
         </div>
-        <a
-          href={exportHref}
-          className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-        >
-          <Download className="h-3.5 w-3.5" />
-          Exporter CSV
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={exportHref}
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-700"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Exporter CSV
+          </a>
+          <NewInvoiceButton clients={clientPickerOptions} />
+        </div>
       </header>
 
       <form
