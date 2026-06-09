@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Calculator,
+  Check,
+  ChevronDown,
   Download,
   ListChecks,
   Loader2,
   Plus,
+  Search,
   Trash2,
   TriangleAlert,
   Wine,
@@ -196,22 +199,7 @@ export function MenuSection({
         >
           <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_90px]">
             <Field label="Recette">
-              <select
-                name="cocktail_id"
-                defaultValue=""
-                autoFocus
-                className={inputCls}
-              >
-                <option value="" disabled>
-                  Choisir…
-                </option>
-                {available.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                    {c.category ? ` · ${c.category}` : ""}
-                  </option>
-                ))}
-              </select>
+              <CocktailCombobox name="cocktail_id" options={available} />
             </Field>
             <Field label="Qté à servir">
               <input
@@ -492,5 +480,166 @@ function Field({
       </span>
       {children}
     </label>
+  );
+}
+
+/* ─── Searchable cocktail picker ──────────────────────────────────
+   Replaces the native <select> (260+ recipes is unusable as a plain
+   dropdown). A text input filters the list by name + category as you
+   type; picking an option writes the id into a hidden <input> named
+   `cocktail_id` so the parent <form action={submitAdd}> keeps working
+   unchanged. Keyboard: ↑/↓ move, Enter selects, Esc closes. */
+function CocktailCombobox({
+  name,
+  options,
+}: {
+  name: string;
+  options: CocktailOption[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+  const [activeIdx, setActiveIdx] = useState(0);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  const selected = options.find((o) => o.id === selectedId) ?? null;
+
+  // Case/diacritic-insensitive match across name + category.
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  const q = norm(query.trim());
+  const filtered =
+    q === ""
+      ? options
+      : options.filter(
+          (o) =>
+            norm(o.name).includes(q) ||
+            (o.category ? norm(o.category).includes(q) : false),
+        );
+
+  // Close on outside click.
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  // Keep the active row in range as the filtered list shrinks.
+  useEffect(() => {
+    setActiveIdx(0);
+  }, [query]);
+
+  function pick(o: CocktailOption) {
+    setSelectedId(o.id);
+    setQuery("");
+    setOpen(false);
+  }
+
+  return (
+    <div ref={wrapRef} className="relative">
+      {/* Hidden field consumed by the parent form submission. */}
+      <input type="hidden" name={name} value={selectedId} />
+
+      {/* Trigger / search input. When closed it shows the picked
+          cocktail; clicking opens it into search mode. */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`flex w-full items-center justify-between gap-2 rounded-md border bg-white px-2.5 py-1.5 text-left text-sm dark:bg-slate-900 focus:outline-none ${
+          open
+            ? "border-[color:var(--color-grenat)]"
+            : "border-slate-300 dark:border-slate-800"
+        }`}
+      >
+        <span
+          className={
+            selected
+              ? "truncate text-slate-900 dark:text-white"
+              : "truncate text-slate-400 dark:text-slate-600"
+          }
+        >
+          {selected
+            ? `${selected.name}${selected.category ? ` · ${selected.category}` : ""}`
+            : "Choisir un cocktail…"}
+        </span>
+        <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-600" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-md border border-slate-300 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex items-center gap-2 border-b border-slate-100 px-2.5 py-2 dark:border-slate-800">
+            <Search className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+            <input
+              type="text"
+              value={query}
+              autoFocus
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setActiveIdx((i) => Math.min(i + 1, filtered.length - 1));
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setActiveIdx((i) => Math.max(i - 1, 0));
+                } else if (e.key === "Enter") {
+                  e.preventDefault();
+                  const o = filtered[activeIdx];
+                  if (o) pick(o);
+                } else if (e.key === "Escape") {
+                  setOpen(false);
+                }
+              }}
+              placeholder="Rechercher une recette…"
+              className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-white dark:placeholder:text-slate-600"
+            />
+          </div>
+          <ul className="max-h-64 overflow-y-auto py-1">
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2 text-xs text-slate-500 dark:text-slate-500">
+                Aucune recette ne correspond.
+              </li>
+            ) : (
+              filtered.map((o, i) => (
+                <li key={o.id}>
+                  <button
+                    type="button"
+                    onClick={() => pick(o)}
+                    onMouseEnter={() => setActiveIdx(i)}
+                    className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm ${
+                      i === activeIdx
+                        ? "bg-slate-100 dark:bg-slate-800"
+                        : ""
+                    } ${
+                      o.id === selectedId
+                        ? "text-[color:var(--color-grenat)]"
+                        : "text-slate-700 dark:text-slate-200"
+                    }`}
+                  >
+                    <span className="truncate">
+                      {o.name}
+                      {o.category && (
+                        <span className="ml-1 text-slate-400 dark:text-slate-500">
+                          · {o.category}
+                        </span>
+                      )}
+                    </span>
+                    {o.id === selectedId && (
+                      <Check className="h-3.5 w-3.5 shrink-0" />
+                    )}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
