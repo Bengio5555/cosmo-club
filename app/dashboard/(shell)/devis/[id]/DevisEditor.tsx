@@ -550,6 +550,9 @@ export function DevisEditor({
                 ]}
                 readOnly={readOnly}
               />
+              <div />
+            </Row2>
+            <Row2>
               <LabeledInput
                 label="Date de début"
                 type="date"
@@ -557,8 +560,6 @@ export function DevisEditor({
                 onChange={setEventDate}
                 readOnly={readOnly}
               />
-            </Row2>
-            <Row2>
               <LabeledInput
                 label="Date de fin (si plusieurs jours)"
                 type="date"
@@ -567,7 +568,6 @@ export function DevisEditor({
                 readOnly={readOnly}
                 min={eventDate || undefined}
               />
-              <div />
             </Row2>
             {eventEndDate && eventDate && eventEndDate <= eventDate && (
               <p className="text-[11px] text-amber-700 dark:text-amber-300">
