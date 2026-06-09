@@ -160,6 +160,7 @@
 .briefing-pre {
   font-family: inherit;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   background: rgba(139, 26, 26, 0.04);
   padding: 12px 14px;
   border-left: 2px solid var(--brief-grenat);
@@ -242,6 +243,91 @@
   color: var(--brief-muted);
   text-align: center;
   font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Mobile (≤ 640px) — the staff opens this from a WhatsApp link on a
+   phone. Four-column tables are unreadable at that width, so we
+   collapse each row into a labelled card (the classic responsive
+   table→cards pattern, driven by data-label attributes on the cells).
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .briefing-body {
+    padding: 14px 10px 48px;
+  }
+  .briefing {
+    padding: 20px 16px;
+  }
+  .briefing-header h1 {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+  .briefing-subtitle {
+    font-size: 12.5px;
+  }
+  .briefing-section {
+    margin-top: 22px;
+  }
+
+  /* Tables become stacked cards */
+  .briefing-schedule,
+  .briefing-contacts,
+  .briefing-schedule tbody,
+  .briefing-contacts tbody,
+  .briefing-schedule tr,
+  .briefing-contacts tr,
+  .briefing-schedule td,
+  .briefing-contacts td {
+    display: block;
+    width: 100% !important;
+  }
+  .briefing-schedule thead,
+  .briefing-contacts thead {
+    display: none;
+  }
+  .briefing-schedule tr,
+  .briefing-contacts tr {
+    border: 1px solid var(--brief-line);
+    border-radius: 10px;
+    background: #fff;
+    margin-bottom: 12px;
+    padding: 4px 14px 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+  .briefing-schedule td,
+  .briefing-contacts td {
+    border-bottom: 1px solid var(--brief-line);
+    padding: 8px 0;
+  }
+  .briefing-schedule td:last-child,
+  .briefing-contacts td:last-child {
+    border-bottom: none;
+  }
+  /* Field label printed above each value */
+  .briefing-schedule td::before,
+  .briefing-contacts td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brief-grenat);
+    margin-bottom: 3px;
+  }
+  /* The time is the card's headline — bigger, no need to shout the label */
+  .briefing-schedule .briefing-time {
+    font-size: 20px;
+    padding-top: 10px;
+  }
+  /* Don't render the "—" placeholder rows on mobile when empty would
+     just be noise — keep them but dim. (Empty assignees/comments show
+     a dash; that's still informative for staff.) */
+
+  /* Recipe ingredient lines a touch larger for thumb-reading */
+  .briefing-recipe-ings li {
+    padding: 4px 0;
+  }
 }
 
 /* Print rules — strip backgrounds, hide the print button */

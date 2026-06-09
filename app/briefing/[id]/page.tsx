@@ -175,16 +175,18 @@ export default async function PublicBriefingPage({
             <tbody>
               {data.schedule.map((step: BriefingScheduleStep, i: number) => (
                 <tr key={i}>
-                  <td className="briefing-time">
+                  <td className="briefing-time" data-label="Horaire">
                     {step.time ? step.time.replace(":", "h").toUpperCase() : "—"}
                   </td>
-                  <td className="briefing-desc">{step.label || "—"}</td>
-                  <td className="briefing-people">
+                  <td className="briefing-desc" data-label="Désignation">
+                    {step.label || "—"}
+                  </td>
+                  <td className="briefing-people" data-label="Intervenants">
                     {step.assignees.length > 0
                       ? step.assignees.join(" / ")
                       : "—"}
                   </td>
-                  <td className="briefing-comment">
+                  <td className="briefing-comment" data-label="Commentaire">
                     {step.comment ? (
                       <pre>{step.comment}</pre>
                     ) : (
@@ -265,10 +267,18 @@ export default async function PublicBriefingPage({
               <tbody>
                 {data.external_contacts.map((c, i) => (
                   <tr key={i}>
-                    <td>{c.role || "—"}</td>
-                    <td>{c.name || "—"}</td>
-                    <td>{c.phone || "—"}</td>
-                    <td>{c.order_ref || "—"}</td>
+                    <td data-label="Rôle">{c.role || "—"}</td>
+                    <td data-label="Nom / société">{c.name || "—"}</td>
+                    <td data-label="Téléphone">
+                      {c.phone ? (
+                        <a href={`tel:${c.phone.replace(/\s/g, "")}`}>
+                          {c.phone}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td data-label="N° commande">{c.order_ref || "—"}</td>
                   </tr>
                 ))}
               </tbody>
