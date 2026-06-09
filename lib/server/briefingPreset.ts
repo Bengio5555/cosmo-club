@@ -128,30 +128,69 @@ export const BRIEFING_PRESET_SCHEDULE: BriefingScheduleStep[] = [
   },
 ];
 
-/** Fixed reference guide always shipped with the briefing. Plain
- *  markdown-ish; rendered as a small annex at the bottom of the print
- *  view. Edit the constant here when the SOP evolves — no DB write
- *  needed. */
+/** Fixed reference guide always shipped with the briefing. Rendered as
+ *  a small annex at the bottom of the briefing (screen + print). Edit
+ *  the constant here when the SOP evolves — no DB write needed.
+ *  Bullets use "•" so they read cleanly inside the pre block. */
 export const BRIEFING_MONTAGE_GUIDE = `
-## Guide de montage — rappel rapide
+Afin que chaque prestation se déroule dans les meilleures conditions, merci de respecter les points suivants :
 
-**Bar Portabar 2 Bay**
-- Monter pieds + panneaux en commençant par la droite du barman.
-- Poser les bartops en commençant par la gauche du barman.
-- Vérifier l'aplomb avec niveau avant fixation finale.
+✨ Attitude & comportement
+• Soyez souriants, accueillants et proactifs avec les invités.
+• Adoptez une posture professionnelle en toutes circonstances.
+• Évitez les téléphones portables derrière le bar, sauf nécessité liée à la prestation.
 
-**Réception verrerie Acaris**
-- Compter chaque caisse à l'arrivée, signer le bon Acaris uniquement après comptage.
-- Photographier toute casse constatée à l'ouverture des caisses (ouverture du contradictoire).
+👔 Tenue & présentation
+• Tenue propre et repassée.
+• Cheveux attachés si nécessaire.
+• Apparence soignée du début à la fin de la prestation.
 
-**Stock tampon**
-- Ne déclencher qu'avec accord explicite de Michael ou Yvanna par WhatsApp.
-- Ne JAMAIS proposer le tampon à la cliente — il est "offert".
+🍸 Bar propre et bien tenu
+• Le bar doit rester propre, organisé et élégant pendant toute la durée de l'événement.
+• Débarrassez régulièrement les déchets, cartons et bouteilles vides afin qu'ils ne soient jamais visibles des invités.
 
-**Fin de service**
-- Message retour de stock à Michael/Yvanna : produits restants, casse éventuelle, photos.
-- Éléments lavables (tee-shirts, torchons…) dans la poubelle propre.
-- Déchets à reprendre par Cosmo séparés des poubelles du lieu.
+📦 Rangement du matériel
+• Toutes les caisses Cosmo sont numérotées et organisées par catégorie.
+• Merci de remettre chaque élément exactement dans la caisse correspondante après utilisation.
+• Prenez le temps de vérifier que tout est correctement rangé avant le départ.
+• Veillez à ce que tout le matériel soit parfaitement sec avant son rangement en caisse.
+• Pensez à placer du Sopalin dans les biberons, bouteilles verseuses et autres contenants afin d'absorber l'humidité résiduelle et d'éviter tout risque de moisissure.
+• Cette consigne s'applique également aux bacs à glace, aux éléments du bar ainsi qu'à tout matériel susceptible de conserver de l'humidité.
+
+📱 Communication & groupe WhatsApp
+• Le groupe WhatsApp de chaque événement doit être utilisé pour toutes les informations importantes liées à la prestation en cours afin que l'ensemble des intervenants puisse suivre les échanges en temps réel.
+• Nous privilégions les communications sur le groupe pour une meilleure réactivité et une meilleure coordination des équipes.
+
+📞 Communication avec le manutentionnaire
+• Si l'événement se termine plus tôt que prévu ou, au contraire, se prolonge, prévenez impérativement le manutentionnaire au minimum 1 heure à l'avance.
+• Le manutentionnaire est toujours présent sur le groupe WhatsApp, mais privilégiez un appel téléphonique, car les messages ne sont pas toujours lus immédiatement.
+
+🥂 Casse de verrerie
+• Toute casse de verrerie Cosmo doit être signalée avec un décompte précis en fin de prestation.
+• Concernant la verrerie ou le matériel mis à disposition par la société Acaris, merci de nous signaler également toute casse.
+
+📸 Matériel laissé sur place
+• Lorsque la reprise du matériel est prévue le lendemain (information indiquée sur le planning), prenez systématiquement des photos du matériel avant votre départ.
+• Merci de photographier le matériel correctement rangé ainsi que son emplacement exact afin de faciliter la reprise le lendemain.
+• Cela concerne notamment la verrerie, les bacs à glaçons, les bars, les caisses et tout autre matériel laissé sur place.
+
+🎨 Personnalisations & éléments de décoration
+• Toutes les personnalisations se trouvent dans la caisse déco.
+• Cela comprend notamment les menus personnalisés, les stickers de bar, les pastilles comestibles et tout autre élément personnalisé prévu pour l'événement.
+• Pensez à installer ces éléments dès la mise en place du bar.
+
+🥤 Produits périssables
+• Toutes les bouteilles de soda, jus, purées de fruits ou autres produits périssables doivent être soit reprises par vos soins, soit jetées en fin de prestation selon les consignes données.
+
+✅ Avant de partir
+• Vérifiez que le bar est propre.
+• Vérifiez que le matériel est complet et rangé.
+• Signalez toute anomalie, casse ou manque avant votre départ.
+• En cas de doute, appelez-nous. Nous préférons recevoir trop d'informations que pas assez.
+
+Merci à tous pour votre professionnalisme et votre implication. La qualité de nos prestations repose autant sur nos cocktails que sur l'image que nous donnons auprès de nos clients. 🍸✨
+
+L'équipe Cosmo Club
 `.trim();
 
 /**

@@ -310,9 +310,9 @@ export default async function PublicBriefingPage({
           </section>
         )}
 
-        {/* ─── Fixed montage guide ─── */}
+        {/* ─── Fixed reference reminders ─── */}
         <section className="briefing-section briefing-guide">
-          <h2 className="briefing-h2">Guide de référence</h2>
+          <h2 className="briefing-h2">📋 Rappels importants — Staff Cosmo Club</h2>
           <pre className="briefing-pre">{BRIEFING_MONTAGE_GUIDE}</pre>
         </section>
 
