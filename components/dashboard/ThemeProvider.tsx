@@ -37,11 +37,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
 
   // Reflect state → <html> after every change (covers toggles; the
-  // inline script handled the initial paint).
+  // inline head script handled the initial paint). We also manage the
+  // inline background the head script may have set, so switching back
+  // to light clears the dark paint instead of leaving it stuck.
   useEffect(() => {
     const el = document.documentElement;
     el.classList.toggle("dark", theme === "dark");
     el.setAttribute("data-theme", theme);
+    el.style.background = theme === "dark" ? "#020617" : "";
   }, [theme]);
 
   function toggle() {
@@ -65,22 +68,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 export function useTheme() {
   return useContext(ThemeContext);
-}
-
-/**
- * Blocking inline script — render it once, early in the dashboard
- * layout. It reads the saved preference (or the OS scheme as fallback)
- * and toggles `.dark` on <html> synchronously during HTML parse,
- * before the styled shell paints. This is what kills the reload flash.
- */
-export function ThemeNoFlashScript() {
-  const js = `(function(){try{
-    var t=localStorage.getItem('dashboardTheme');
-    var dark = t==='dark' || (t!=='light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    var el=document.documentElement;
-    if(dark){el.classList.add('dark');el.setAttribute('data-theme','dark');}
-    else{el.classList.remove('dark');el.setAttribute('data-theme','light');}
-  }catch(e){}})();`;
-  // eslint-disable-next-line react/no-danger
-  return <script dangerouslySetInnerHTML={{ __html: js }} />;
 }

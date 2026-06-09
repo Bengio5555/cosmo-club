@@ -78,6 +78,15 @@ body {
   overflow-x: hidden;
 }
 
+/* Dashboard dark mode: the inline head script adds `.dark` on <html>
+   before paint. Paint html + body slate-950 immediately so the cream
+   default never flashes through on a dashboard reload. The public site
+   never carries `.dark`, so it's unaffected. */
+html.dark,
+html.dark body {
+  background: #020617;
+}
+
 /* ─── Typography base ─────────────────────────────── */
 .font-display {
   font-family: var(--font-display), "Times New Roman", serif;
