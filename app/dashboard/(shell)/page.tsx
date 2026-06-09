@@ -630,26 +630,40 @@ export default async function DashboardHome() {
                           </p>
                           <StatusBadge status={e.status} />
                         </div>
+                        {/* Meta line under the event title. Each `<span>` is
+                            a flex child; the address can be very long (we
+                            stash door codes / floor info in the location
+                            field), so the wrapper needs `min-w-0` to let
+                            `truncate` engage — without it the inline-flex
+                            sizes to its content and overflows the card. */}
                         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-xs text-slate-500 dark:text-slate-400">
                           {e.start_time && (
-                            <span className="inline-flex items-center gap-1">
+                            <span className="inline-flex shrink-0 items-center gap-1">
                               <Clock className="h-3 w-3" />
                               {e.start_time.slice(0, 5)}
                             </span>
                           )}
                           {e.location && (
-                            <span className="inline-flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
+                            <span
+                              className="inline-flex min-w-0 max-w-full items-center gap-1"
+                              title={e.location}
+                            >
+                              <MapPin className="h-3 w-3 shrink-0" />
                               <span className="truncate">{e.location}</span>
                             </span>
                           )}
                           {clientName(e.client_id) !== "—" && (
-                            <span className="truncate">
+                            <span
+                              className="inline-block min-w-0 max-w-full truncate"
+                              title={clientName(e.client_id)}
+                            >
                               · {clientName(e.client_id)}
                             </span>
                           )}
                           {e.guests_count && (
-                            <span>· {e.guests_count} pers.</span>
+                            <span className="shrink-0">
+                              · {e.guests_count} pers.
+                            </span>
                           )}
                         </p>
                       </div>
