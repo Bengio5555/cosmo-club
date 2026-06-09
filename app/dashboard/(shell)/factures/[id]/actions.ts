@@ -42,7 +42,7 @@ export async function saveInvoice(id: string, input: SaveInvoiceInput) {
 
   const { data: current, error: readErr } = await supabase
     .from("invoices")
-    .select("id,status")
+    .select("id,status,discount_global_pct")
     .eq("id", id)
     .maybeSingle();
   if (readErr || !current) {
@@ -97,15 +97,23 @@ export async function saveInvoice(id: string, input: SaveInvoiceInput) {
     }
   }
 
-  // Recompute totals from the canonical generated column.
+  // Recompute totals from the canonical generated column. Preserve
+  // the frozen `discount_global_pct` inherited from the source quote —
+  // operators don't edit it on draft invoices, but the math must apply
+  // it so the totals stay coherent with what the client signed.
   const { data: finalItems } = await supabase
     .from("invoice_items")
     .select("line_total_ht")
     .eq("invoice_id", id);
-  const totalHt = round2(
+  const subtotalHt = round2(
     (finalItems ?? []).reduce((sum, r) => sum + (r.line_total_ht ?? 0), 0),
   );
   const tvaRate = Number.isFinite(input.tva_rate) ? input.tva_rate : 20;
+  const discountGlobalPct = Math.min(
+    100,
+    Math.max(0, Number(current.discount_global_pct ?? 0)),
+  );
+  const totalHt = round2(subtotalHt * (1 - discountGlobalPct / 100));
   const totalTva = round2((totalHt * tvaRate) / 100);
   const totalTtc = round2(totalHt + totalTva);
 

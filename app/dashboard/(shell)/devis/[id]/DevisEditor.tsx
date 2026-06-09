@@ -113,6 +113,19 @@ export function DevisEditor({
   const [commissionRate, setCommissionRate] = useState<string>(
     initialCommission > 0 ? String(initialCommission) : "20",
   );
+  // Global commercial discount % — applied on subtotal HT after
+  // per-line discounts and before the agency commission gross-up.
+  // Stored as a 5,2 numeric in DB; the editor exposes a plain integer
+  // string so empty/invalid input falls back to 0 cleanly.
+  const initialDiscountGlobal = Number(
+    (quote as { discount_global_pct?: number }).discount_global_pct ?? 0,
+  );
+  const [discountGlobalEnabled, setDiscountGlobalEnabled] = useState(
+    initialDiscountGlobal > 0,
+  );
+  const [discountGlobalPct, setDiscountGlobalPct] = useState<string>(
+    initialDiscountGlobal > 0 ? String(initialDiscountGlobal) : "10",
+  );
   const [validUntil, setValidUntil] = useState<string>(
     quote.valid_until ? quote.valid_until.slice(0, 10) : "",
   );
@@ -196,8 +209,17 @@ export function DevisEditor({
     : 0;
   const commissionFactor =
     commissionRateNum > 0 ? 100 / (100 - commissionRateNum) : 1;
-  const totalHt = round2(subtotalHt * commissionFactor);
-  const commissionAmount = round2(totalHt - subtotalHt);
+  // Effective global discount % used for the live preview. Must mirror
+  // the server clamp in saveQuote() so editor and DB always agree.
+  const discountGlobalPctNum = discountGlobalEnabled
+    ? Math.min(100, Math.max(0, Number(discountGlobalPct) || 0))
+    : 0;
+  const discountGlobalAmount = round2(
+    subtotalHt * (discountGlobalPctNum / 100),
+  );
+  const subtotalAfterDiscount = round2(subtotalHt - discountGlobalAmount);
+  const totalHt = round2(subtotalAfterDiscount * commissionFactor);
+  const commissionAmount = round2(totalHt - subtotalAfterDiscount);
   const totalTva = round2((totalHt * tvaNum) / 100);
   const totalTtc = round2(totalHt + totalTva);
 
@@ -230,6 +252,9 @@ export function DevisEditor({
       tva_rate: tvaNum,
       commission_rate: commissionRateNum,
       deposit_rate: Math.min(1, Math.max(0, (Number(depositPct) || 0) / 100)),
+      discount_global_pct: discountGlobalEnabled
+        ? Math.min(100, Math.max(0, Number(discountGlobalPct) || 0))
+        : 0,
       language,
       valid_until: validUntil || null,
       schedule,
@@ -633,18 +658,24 @@ export function DevisEditor({
               Totaux
             </p>
             <dl className="space-y-1.5 text-sm">
-              {commissionRateNum > 0 ? (
-                <>
-                  <div className="flex justify-between">
-                    <dt className="text-slate-500 dark:text-slate-500">Sous-total HT</dt>
-                    <dd className="text-slate-700 dark:text-slate-200">{formatEUR(subtotalHt)}</dd>
-                  </div>
-                  <div className="flex justify-between text-amber-700 dark:text-amber-300/90">
-                    <dt>Apporteur ({commissionRateNum}%)</dt>
-                    <dd>+ {formatEUR(commissionAmount)}</dd>
-                  </div>
-                </>
-              ) : null}
+              {(commissionRateNum > 0 || discountGlobalPctNum > 0) && (
+                <div className="flex justify-between">
+                  <dt className="text-slate-500 dark:text-slate-500">Sous-total HT</dt>
+                  <dd className="text-slate-700 dark:text-slate-200">{formatEUR(subtotalHt)}</dd>
+                </div>
+              )}
+              {discountGlobalPctNum > 0 && (
+                <div className="flex justify-between text-emerald-700 dark:text-emerald-300/90">
+                  <dt>Remise globale ({discountGlobalPctNum}%)</dt>
+                  <dd>− {formatEUR(discountGlobalAmount)}</dd>
+                </div>
+              )}
+              {commissionRateNum > 0 && (
+                <div className="flex justify-between text-amber-700 dark:text-amber-300/90">
+                  <dt>Apporteur ({commissionRateNum}%)</dt>
+                  <dd>+ {formatEUR(commissionAmount)}</dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-slate-500 dark:text-slate-500">Total HT</dt>
                 <dd className="font-medium text-slate-900 dark:text-slate-100">{formatEUR(totalHt)}</dd>
@@ -670,6 +701,60 @@ export function DevisEditor({
                 <dd className="text-slate-900 dark:text-white">{formatEUR(totalTtc)}</dd>
               </div>
             </dl>
+          </div>
+
+          {/* ─── Global commercial discount (%) ─────────────────
+              Applied on the subtotal HT after per-line discounts and
+              before the agency commission gross-up, so the commission
+              shrinks proportionally with the discount. Default toggle
+              off; default rate 10% on enable. */}
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+                Remise globale
+              </span>
+              <input
+                type="checkbox"
+                checked={discountGlobalEnabled}
+                disabled={readOnly}
+                onChange={(e) => setDiscountGlobalEnabled(e.target.checked)}
+                className="h-4 w-4 cursor-pointer accent-[color:var(--color-grenat)] disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </label>
+            {discountGlobalEnabled ? (
+              <>
+                <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
+                  Pourcentage retiré du sous-total HT (après remises
+                  ligne) et avant la majoration apporteur. Affiché comme
+                  une ligne séparée sur la plaquette et la facture.
+                </p>
+                <label className="mt-3 flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={discountGlobalPct}
+                    onChange={(e) => setDiscountGlobalPct(e.target.value)}
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    disabled={readOnly}
+                    className="w-20 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60"
+                  />
+                  <span className="text-sm text-slate-600 dark:text-slate-400">% de remise</span>
+                </label>
+                <div className="mt-3 rounded-md border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/5 px-3 py-2 text-[11px] text-emerald-800/90 dark:text-emerald-200/90">
+                  Économie pour le client&nbsp;:
+                  <span className="ml-1 font-semibold">
+                    − {formatEUR(discountGlobalAmount)} HT
+                  </span>
+                </div>
+              </>
+            ) : (
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
+                Active pour appliquer une remise commerciale sur
+                l&apos;ensemble du devis, en plus des éventuelles
+                remises ligne par ligne.
+              </p>
+            )}
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">

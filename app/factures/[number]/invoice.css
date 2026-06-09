@@ -203,12 +203,35 @@
   color: var(--muted);
   line-height: 1.5;
 }
+/* Per-line commercial discount label rendered under the description.
+   Italic + grenat so it reads as a deliberate concession, not a
+   typo. Matches the styling on the devis plaquette. */
+.line-desc.line-discount {
+  margin-top: 2px;
+  font-style: italic;
+  color: var(--accent, #8b1a1a);
+}
 .num {
   text-align: right;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
 .num.strong {
+  font-weight: 600;
+}
+/* Strike-through gross subtotal stacked above the net total when a
+   line discount applies. The gross figure becomes a quiet reference,
+   the net is the actual amount billed. */
+.num.strong .line-strike {
+  display: block;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: line-through;
+  margin-bottom: 2px;
+}
+.num.strong .line-net {
+  display: block;
   font-weight: 600;
 }
 
@@ -248,6 +271,13 @@
   font-family: "Fraunces", Georgia, serif;
   font-size: 20px;
   font-weight: 500;
+}
+/* Global commercial discount row in the totals box. Italic + accent
+   color so it stands out from the neutral subtotal/TVA rows but
+   doesn't compete with the grand total below. */
+.invoice-totals-box .row.discount {
+  font-style: italic;
+  color: var(--accent, #8b1a1a);
 }
 .invoice-paid {
   margin-top: 12px;

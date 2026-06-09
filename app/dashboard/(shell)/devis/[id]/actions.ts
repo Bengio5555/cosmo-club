@@ -48,6 +48,15 @@ export type SaveQuoteInput = {
    */
   deposit_rate: number;
   /**
+   * Commercial global discount as a percentage (0-100). Applied on the
+   * subtotal HT AFTER per-line discounts and BEFORE the agency
+   * commission gross-up — so the agency commission shrinks
+   * proportionally with the discount (consistent: agency takes a cut
+   * of what the client actually pays).
+   * 0 = pas de remise. 10 = -10% sur le sous-total HT.
+   */
+  discount_global_pct: number;
+  /**
    * Locale for the public plaquette and the client email. 'fr' is the
    * default; 'en' opt-in for international clients. The signed PDF + CGV
    * remain in French regardless.
@@ -229,6 +238,11 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
   const commissionRate = Number.isFinite(input.commission_rate)
     ? Math.min(99, Math.max(0, input.commission_rate))
     : 0;
+  // Global discount % is clamped to [0, 100] before any math so an
+  // out-of-range editor value can never produce a negative subtotal.
+  const discountGlobalPct = Number.isFinite(input.discount_global_pct)
+    ? Math.min(100, Math.max(0, input.discount_global_pct))
+    : 0;
   // Acompte: clamp to [0, 1]. The DB has a CHECK constraint so an out-
   // of-range value would 500 the save anyway; we clamp here to keep
   // the user input forgiving (negative numbers, accidental 30 instead
@@ -236,7 +250,16 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
   const depositRate = Number.isFinite(input.deposit_rate)
     ? Math.min(1, Math.max(0, input.deposit_rate))
     : 0.3;
-  const totalHt = round2(subtotalHt * commissionFactor(commissionRate));
+  // Apply the global discount on the subtotal (post line-discounts),
+  // then gross up by the commission factor. Doing it in this order
+  // keeps the agency's cut proportional to the actual sale price —
+  // a 10% commercial discount also reduces the commission by 10%.
+  const subtotalAfterGlobalDiscount = round2(
+    subtotalHt * (1 - discountGlobalPct / 100),
+  );
+  const totalHt = round2(
+    subtotalAfterGlobalDiscount * commissionFactor(commissionRate),
+  );
   const totalTva = round2((totalHt * tvaRate) / 100);
   const totalTtc = round2(totalHt + totalTva);
 
@@ -254,6 +277,7 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
       tva_rate: tvaRate,
       commission_rate: commissionRate,
       deposit_rate: depositRate,
+      discount_global_pct: discountGlobalPct,
       language: input.language === "en" ? "en" : "fr",
       valid_until: input.valid_until,
       schedule: sanitizeSchedule(input.schedule),
@@ -572,7 +596,7 @@ export async function createInvoiceFromQuote(quoteId: string) {
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
     .select(
-      "id,number,status,client_id,event_date,subject,terms,tva_rate,commission_rate,total_ht,total_tva,total_ttc",
+      "id,number,status,client_id,event_date,subject,terms,tva_rate,commission_rate,discount_global_pct,total_ht,total_tva,total_ttc",
     )
     .eq("id", quoteId)
     .maybeSingle();
@@ -626,6 +650,11 @@ export async function createInvoiceFromQuote(quoteId: string) {
       subject: quote.subject,
       terms: quote.terms,
       tva_rate: quote.tva_rate,
+      // Freeze the global discount snapshot. The invoice's totals
+      // already incorporate it (total_ht is post-discount), but we
+      // persist the rate so the HTML/PDF can render the same "Remise
+      // globale (X%)" line the client saw on the quote.
+      discount_global_pct: quote.discount_global_pct ?? 0,
       total_ht: quote.total_ht,
       total_tva: quote.total_tva,
       total_ttc: quote.total_ttc,
@@ -891,7 +920,7 @@ export async function duplicateQuote(id: string) {
 
   const { data: source, error: qErr } = await supabase
     .from("quotes")
-    .select("id,client_id,event_type,event_date,event_location,guests_count,subject,intro,terms,tva_rate,commission_rate,deposit_rate,language,schedule,moodboard_images,total_ht,total_tva,total_ttc")
+    .select("id,client_id,event_type,event_date,event_location,guests_count,subject,intro,terms,tva_rate,commission_rate,deposit_rate,discount_global_pct,language,schedule,moodboard_images,total_ht,total_tva,total_ttc")
     .eq("id", id)
     .maybeSingle();
   if (qErr || !source) {
@@ -942,6 +971,7 @@ export async function duplicateQuote(id: string) {
       tva_rate: source.tva_rate,
       commission_rate: source.commission_rate,
       deposit_rate: source.deposit_rate,
+      discount_global_pct: source.discount_global_pct,
       language: source.language,
       schedule: source.schedule,
       moodboard_images: source.moodboard_images,

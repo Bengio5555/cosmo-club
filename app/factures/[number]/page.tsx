@@ -4,6 +4,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import "./invoice.css";
 
+/** Local euro rounder — keeps the page module self-contained. Same
+ *  semantics as the helper duplicated across the other money-aware
+ *  files (see actions.ts / DevisEditor / etc.). */
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 type Params = Promise<{ number: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -246,20 +253,46 @@ export default async function InvoicePage({
               </tr>
             </thead>
             <tbody>
-              {(items ?? []).map((it) => (
-                <tr key={it.id}>
-                  <td>
-                    <p className="line-title">{it.title}</p>
-                    {it.description && <p className="line-desc">{it.description}</p>}
-                  </td>
-                  <td className="num">{it.qty}</td>
-                  <td className="num">{it.unit ?? ""}</td>
-                  <td className="num">{formatEUR(it.unit_price_ht ?? 0)}</td>
-                  <td className="num strong">
-                    {formatEUR(it.line_total_ht ?? 0)}
-                  </td>
-                </tr>
-              ))}
+              {(items ?? []).map((it) => {
+                // Mirror the devis plaquette: when a per-line discount
+                // is present, surface it explicitly (strike the gross
+                // line subtotal, label the rebate). The invoice items
+                // are already commission-grossed at copy time, so no
+                // further factor is needed here.
+                const discount = Number(it.discount_ht ?? 0);
+                const grossSubtotal = round2(
+                  Number(it.qty ?? 0) * Number(it.unit_price_ht ?? 0),
+                );
+                const lineTotal = Number(it.line_total_ht ?? 0);
+                return (
+                  <tr key={it.id}>
+                    <td>
+                      <p className="line-title">{it.title}</p>
+                      {it.description && <p className="line-desc">{it.description}</p>}
+                      {discount > 0 && (
+                        <p className="line-desc line-discount">
+                          Remise commerciale&nbsp;: −{formatEUR(discount)}
+                        </p>
+                      )}
+                    </td>
+                    <td className="num">{it.qty}</td>
+                    <td className="num">{it.unit ?? ""}</td>
+                    <td className="num">{formatEUR(it.unit_price_ht ?? 0)}</td>
+                    <td className="num strong">
+                      {discount > 0 ? (
+                        <>
+                          <span className="line-strike">
+                            {formatEUR(grossSubtotal)}
+                          </span>
+                          <span className="line-net">{formatEUR(lineTotal)}</span>
+                        </>
+                      ) : (
+                        formatEUR(lineTotal)
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </section>
@@ -318,6 +351,41 @@ export default async function InvoicePage({
           </div>
 
           <div className="invoice-totals-box">
+            {/* Global discount snapshot. The invoice's total_ht is
+                already post-discount + post-commission, so we invert
+                the discount factor to recover the "subtotal HT before
+                rebate" figure the client expects to see. Matches the
+                math used on the devis plaquette. */}
+            {Number(invoice.discount_global_pct ?? 0) > 0 && (
+              <>
+                <div className="row">
+                  <span>Sous-total HT</span>
+                  <span>
+                    {formatEUR(
+                      round2(
+                        Number(invoice.total_ht) /
+                          (1 - Number(invoice.discount_global_pct) / 100),
+                      ),
+                    )}
+                  </span>
+                </div>
+                <div className="row discount">
+                  <span>
+                    Remise commerciale (−
+                    {Number(invoice.discount_global_pct)}%)
+                  </span>
+                  <span>
+                    − {formatEUR(
+                      round2(
+                        Number(invoice.total_ht) /
+                          (1 - Number(invoice.discount_global_pct) / 100) -
+                          Number(invoice.total_ht),
+                      ),
+                    )}
+                  </span>
+                </div>
+              </>
+            )}
             <div className="row">
               <span>Total HT</span>
               <span>{formatEUR(invoice.total_ht)}</span>

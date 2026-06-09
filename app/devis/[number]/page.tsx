@@ -217,6 +217,22 @@ export default async function DevisPlaquettePage({
   const grossUp =
     commissionRate > 0 ? 100 / (100 - commissionRate) : 1;
 
+  // Global discount surfaced as a distinct row in the totals table so
+  // the client sees the commercial gesture. quote.total_ht is already
+  // POST-discount (and post-commission), so to render the "before"
+  // figure we invert the discount factor — pre = total_ht / (1 − pct).
+  const discountGlobalPctNum = Math.min(
+    100,
+    Math.max(0, Number((quote as { discount_global_pct?: number }).discount_global_pct ?? 0)),
+  );
+  const displayedSubtotalPreDiscount =
+    discountGlobalPctNum > 0
+      ? round2(quote.total_ht / (1 - discountGlobalPctNum / 100))
+      : quote.total_ht;
+  const displayedDiscountAmount = round2(
+    displayedSubtotalPreDiscount - quote.total_ht,
+  );
+
   // Totals note from settings (penalty + any custom copy) or the default.
   const totalsNote =
     settings?.penalty_rate_text && settings.penalty_rate_text.trim()
@@ -561,10 +577,37 @@ export default async function DevisPlaquettePage({
           <div>
             <table className="totals-table">
               <tbody>
-                <tr>
-                  <td>{i18n.totals.subtotal}</td>
-                  <td>{formatEUR(quote.total_ht)}</td>
-                </tr>
+                {/* When a global discount applies, surface it as its own
+                    line so the client sees the commercial gesture
+                    explicitly. The displayed pre-discount subtotal
+                    grosses up from total_ht (which is already post-
+                    discount, post-commission) by inverting the discount
+                    factor — so the math the client sees stays
+                    consistent with the line items rendered above. */}
+                {discountGlobalPctNum > 0 ? (
+                  <>
+                    <tr>
+                      <td>{i18n.totals.subtotal}</td>
+                      <td>{formatEUR(displayedSubtotalPreDiscount)}</td>
+                    </tr>
+                    <tr className="line-discount">
+                      <td>
+                        {i18n.totals.discount}
+                        {" "}(−{discountGlobalPctNum}%)
+                      </td>
+                      <td>− {formatEUR(displayedDiscountAmount)}</td>
+                    </tr>
+                    <tr>
+                      <td>{i18n.totals.totalHt}</td>
+                      <td>{formatEUR(quote.total_ht)}</td>
+                    </tr>
+                  </>
+                ) : (
+                  <tr>
+                    <td>{i18n.totals.subtotal}</td>
+                    <td>{formatEUR(quote.total_ht)}</td>
+                  </tr>
+                )}
                 <tr>
                   <td>
                     {settings?.tva_franchise

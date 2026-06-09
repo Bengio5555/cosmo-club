@@ -259,6 +259,10 @@ async function sendAcceptanceEmails(o: {
           guests_count: quote.guests_count,
           tva_rate: Number(quote.tva_rate ?? 20),
           commission_rate: Number(quote.commission_rate ?? 0),
+          discount_global_pct: Number(
+            (quote as { discount_global_pct?: number | null })
+              .discount_global_pct ?? 0,
+          ),
           total_ht: Number(quote.total_ht ?? 0),
           total_tva: Number(quote.total_tva ?? 0),
           total_ttc: Number(quote.total_ttc ?? 0),

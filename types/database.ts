@@ -106,6 +106,7 @@ export type Database = {
           client_id: string | null
           created_at: string
           credit_note_reason: string | null
+          discount_global_pct: number
           due_date: string | null
           event_date: string | null
           id: string
@@ -407,6 +408,7 @@ export type Database = {
           commission_rate: number
           created_at: string
           deposit_rate: number
+          discount_global_pct: number
           event_date: string | null
           event_location: string | null
           event_type: Database["public"]["Enums"]["event_type"] | null

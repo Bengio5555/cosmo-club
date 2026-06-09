@@ -32,6 +32,9 @@ export type SignedQuoteData = {
     guests_count: number | null;
     tva_rate: number;
     commission_rate: number;
+    /** Global commercial discount in %, applied on subtotal HT after
+     *  line discounts and before commission gross-up. 0 = no rebate. */
+    discount_global_pct?: number;
     total_ht: number;
     total_tva: number;
     total_ttc: number;
@@ -494,6 +497,32 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
         {/* Totals */}
         <View style={s.totalsBlock}>
           <View style={s.totalsTable}>
+            {/* Global commercial discount, surfaced as a distinct row
+                when present. total_ht is already post-discount and
+                post-commission, so we invert the discount factor to
+                reconstruct the pre-rebate subtotal the client expects
+                to see. Mirrors the HTML plaquette + invoice. */}
+            {Number(data.quote.discount_global_pct ?? 0) > 0 && (() => {
+              const pct = Number(data.quote.discount_global_pct);
+              const pre = data.quote.total_ht / (1 - pct / 100);
+              const rebate = pre - data.quote.total_ht;
+              return (
+                <>
+                  <View style={s.trow}>
+                    <Text style={s.tlabel}>Sous-total HT</Text>
+                    <Text style={s.tvalue}>{formatEURPdfSafe(pre)}</Text>
+                  </View>
+                  <View style={s.trow}>
+                    <Text style={s.tlabel}>
+                      Remise commerciale (−{pct}%)
+                    </Text>
+                    <Text style={s.tvalue}>
+                      − {formatEURPdfSafe(rebate)}
+                    </Text>
+                  </View>
+                </>
+              );
+            })()}
             <View style={s.trow}>
               <Text style={s.tlabel}>Total HT</Text>
               <Text style={s.tvalue}>{formatEURPdfSafe(data.quote.total_ht)}</Text>

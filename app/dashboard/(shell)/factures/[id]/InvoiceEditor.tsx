@@ -108,10 +108,29 @@ export function InvoiceEditor({
   );
 
   // ─── Live totals ───
-  const totalHt = useMemo(
+  // Sub-total is the raw sum of line items (no per-line discount on
+  // invoice items — those were already baked into unit_price at quote
+  // → invoice conversion). The global discount % is FROZEN from the
+  // source quote and the operator cannot edit it on the invoice; we
+  // read it here to render an accurate live preview matching what the
+  // server will persist on save.
+  const subtotalHt = useMemo(
     () => round2(items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0)),
     [items],
   );
+  const discountGlobalPctNum = Math.min(
+    100,
+    Math.max(
+      0,
+      Number(
+        (invoice as { discount_global_pct?: number }).discount_global_pct ?? 0,
+      ),
+    ),
+  );
+  const discountGlobalAmount = round2(
+    subtotalHt * (discountGlobalPctNum / 100),
+  );
+  const totalHt = round2(subtotalHt - discountGlobalAmount);
   const tvaNum = Number(tvaRate) || 0;
   const totalTva = round2((totalHt * tvaNum) / 100);
   const totalTtc = round2(totalHt + totalTva);
@@ -461,6 +480,18 @@ export function InvoiceEditor({
               Totaux
             </p>
             <dl className="space-y-1.5 text-sm">
+              {discountGlobalPctNum > 0 && (
+                <>
+                  <div className="flex justify-between">
+                    <dt className="text-slate-500 dark:text-slate-500">Sous-total HT</dt>
+                    <dd className="text-slate-700 dark:text-slate-200">{formatEUR(subtotalHt)}</dd>
+                  </div>
+                  <div className="flex justify-between text-emerald-700 dark:text-emerald-300/90">
+                    <dt>Remise globale ({discountGlobalPctNum}%)</dt>
+                    <dd>− {formatEUR(discountGlobalAmount)}</dd>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between">
                 <dt className="text-slate-500 dark:text-slate-500">Total HT</dt>
                 <dd className="font-medium text-slate-900 dark:text-slate-100">{formatEUR(totalHt)}</dd>
