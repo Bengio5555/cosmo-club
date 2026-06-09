@@ -1083,6 +1083,8 @@ function serialize(p: SaveQuoteInput): string {
    standard emails were sent" and the card isn't rendered at all. */
 function MessageHistoryCard({ messages }: { messages: MessageLog[] }) {
   const [expanded, setExpanded] = useState(false);
+  // The message currently opened in the full-text popup (null = closed).
+  const [openMsg, setOpenMsg] = useState<MessageLog | null>(null);
   // Collapsed view shows the 2 most recent; expand reveals the rest.
   const shown = expanded ? messages : messages.slice(0, 2);
   const fmt = (iso: string) =>
@@ -1093,44 +1095,149 @@ function MessageHistoryCard({ messages }: { messages: MessageLog[] }) {
       hour: "2-digit",
       minute: "2-digit",
     });
+
+  // A message is "long" if it spills past a short preview — we then
+  // show only the opening and route the rest to the popup. The check
+  // is on raw length OR a line break, so even a short-but-multiline
+  // note opens cleanly.
+  const PREVIEW_LEN = 90;
+  const isLong = (m: string) => m.length > PREVIEW_LEN || m.includes("\n");
+  const preview = (m: string) => {
+    const firstLine = m.split("\n")[0];
+    const base = firstLine.length > PREVIEW_LEN ? firstLine.slice(0, PREVIEW_LEN).trimEnd() : firstLine;
+    return base + "…";
+  };
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
-      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
-        Messages envoyés ({messages.length})
-      </p>
-      <ul className="space-y-2.5">
-        {shown.map((m) => (
-          <li
-            key={m.id}
-            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/50"
+    <>
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+          Messages envoyés ({messages.length})
+        </p>
+        <ul className="space-y-2.5">
+          {shown.map((m) => {
+            const long = isLong(m.message);
+            return (
+              <li
+                key={m.id}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/50"
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-[color:var(--color-grenat)]">
+                    {fmt(m.sent_at)}
+                  </span>
+                </div>
+                {long ? (
+                  <button
+                    type="button"
+                    onClick={() => setOpenMsg(m)}
+                    className="group block w-full text-left"
+                  >
+                    <span className="block text-xs leading-relaxed text-slate-700 dark:text-slate-200">
+                      {preview(m.message)}
+                    </span>
+                    <span className="mt-1 inline-block text-[10px] font-medium text-slate-500 underline decoration-dotted underline-offset-2 group-hover:text-slate-900 dark:text-slate-400 dark:group-hover:text-white">
+                      Lire le message
+                    </span>
+                  </button>
+                ) : (
+                  <p className="whitespace-pre-line text-xs leading-relaxed text-slate-700 dark:text-slate-200">
+                    {m.message}
+                  </p>
+                )}
+                {m.cc && m.cc.length > 0 && (
+                  <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-500">
+                    Copie&nbsp;: {m.cc.join(", ")}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        {messages.length > 2 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-3 text-[11px] font-medium text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
           >
-            <div className="mb-1 flex items-center justify-between gap-2">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-[color:var(--color-grenat)]">
-                {fmt(m.sent_at)}
-              </span>
-            </div>
-            <p className="whitespace-pre-line text-xs leading-relaxed text-slate-700 dark:text-slate-200">
-              {m.message}
-            </p>
-            {m.cc && m.cc.length > 0 && (
-              <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-500">
-                Copie&nbsp;: {m.cc.join(", ")}
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
-      {messages.length > 2 && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="mt-3 text-[11px] font-medium text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-        >
-          {expanded
-            ? "Réduire"
-            : `Voir les ${messages.length - 2} autres`}
-        </button>
+            {expanded
+              ? "Réduire"
+              : `Voir les ${messages.length - 2} autres`}
+          </button>
+        )}
+      </div>
+
+      {openMsg && (
+        <MessagePopup
+          message={openMsg}
+          formattedDate={fmt(openMsg.sent_at)}
+          onClose={() => setOpenMsg(null)}
+        />
       )}
+    </>
+  );
+}
+
+/* Full-text popup for a logged message. Click-outside or Escape to
+   close — same modal conventions as the send dialog. */
+function MessagePopup({
+  message,
+  formattedDate,
+  onClose,
+}: {
+  message: MessageLog;
+  formattedDate: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Message envoyé"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-900 px-5 py-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+              Message envoyé
+            </p>
+            <p className="mt-1 text-sm font-medium text-[color:var(--color-grenat)]">
+              {formattedDate}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer"
+            className="rounded-md p-1 text-slate-500 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
+          >
+            ×
+          </button>
+        </div>
+        <div className="overflow-y-auto px-5 py-4">
+          <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+            {message.message}
+          </p>
+          {message.cc && message.cc.length > 0 && (
+            <p className="mt-4 border-t border-slate-100 dark:border-slate-900 pt-3 text-[11px] text-slate-500 dark:text-slate-500">
+              Copie&nbsp;: {message.cc.join(", ")}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
