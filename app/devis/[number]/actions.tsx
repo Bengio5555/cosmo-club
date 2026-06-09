@@ -198,7 +198,7 @@ async function sendAcceptanceEmails(o: {
     supabase
       .from("quotes")
       .select(
-        "number,subject,issue_date,event_date,event_location,guests_count,tva_rate,commission_rate,deposit_rate,total_ht,total_tva,total_ttc,client_id,access_token",
+        "number,subject,issue_date,event_date,event_end_date,event_location,guests_count,tva_rate,commission_rate,deposit_rate,total_ht,total_tva,total_ttc,client_id,access_token",
       )
       .eq("id", o.quoteId)
       .maybeSingle(),
@@ -257,6 +257,9 @@ async function sendAcceptanceEmails(o: {
           event_date: quote.event_date,
           event_location: quote.event_location,
           guests_count: quote.guests_count,
+          event_end_date:
+            (quote as { event_end_date?: string | null }).event_end_date ??
+            null,
           tva_rate: Number(quote.tva_rate ?? 20),
           commission_rate: Number(quote.commission_rate ?? 0),
           discount_global_pct: Number(

@@ -15,7 +15,7 @@ import {
   Package,
 } from "lucide-react";
 import type { Tables } from "@/types/database";
-import { formatDateFR } from "@/lib/format";
+import { formatDateFR, formatDateRangeFR } from "@/lib/format";
 import { LocationField } from "@/components/dashboard/LocationField";
 import {
   saveEvent,
@@ -49,6 +49,11 @@ export function EventEditor({
   const [date, setDate] = useState<string>(
     event.date ? event.date.slice(0, 10) : "",
   );
+  const [end_date, setEndDate] = useState<string>(
+    (event as { end_date?: string | null }).end_date
+      ? (event as { end_date: string }).end_date.slice(0, 10)
+      : "",
+  );
   const [start_time, setStart] = useState(event.start_time?.slice(0, 5) ?? "");
   const [end_time, setEnd] = useState(event.end_time?.slice(0, 5) ?? "");
   const [location, setLocation] = useState(event.location ?? "");
@@ -72,6 +77,7 @@ export function EventEditor({
     return JSON.stringify({
       title: title.trim(),
       date,
+      end_date: end_date || null,
       start_time: start_time || null,
       end_time: end_time || null,
       location: location.trim() || null,
@@ -89,6 +95,7 @@ export function EventEditor({
     const patch: Partial<EventInput> = {
       title,
       date,
+      end_date: end_date || null,
       start_time,
       end_time,
       location,
@@ -167,7 +174,10 @@ export function EventEditor({
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-500">
             <span className="inline-flex items-center gap-1">
               <CalendarDays className="h-3 w-3" />
-              {formatDateFR(event.date)}
+              {formatDateRangeFR(
+                event.date,
+                (event as { end_date?: string | null }).end_date,
+              )}
               {event.start_time && ` · ${event.start_time.slice(0, 5)}`}
               {event.end_time && `–${event.end_time.slice(0, 5)}`}
             </span>
@@ -274,23 +284,32 @@ export function EventEditor({
             onChange={setTitle}
             readOnly={readOnly}
           />
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2">
             <LabeledInput
-              label="Date"
+              label="Date de début"
               type="date"
               value={date}
               onChange={setDate}
               readOnly={readOnly}
             />
             <LabeledInput
-              label="Début"
+              label="Date de fin (si plusieurs jours)"
+              type="date"
+              value={end_date}
+              onChange={setEndDate}
+              readOnly={readOnly}
+            />
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <LabeledInput
+              label="Heure de début"
               type="time"
               value={start_time}
               onChange={setStart}
               readOnly={readOnly}
             />
             <LabeledInput
-              label="Fin"
+              label="Heure de fin"
               type="time"
               value={end_time}
               onChange={setEnd}

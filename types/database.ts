@@ -85,6 +85,7 @@ export type Database = {
           created_at: string
           date: string
           duration_hours: number | null
+          end_date: string | null
           end_time: string | null
           guests_count: number | null
           id: string
@@ -109,6 +110,7 @@ export type Database = {
           discount_global_pct: number
           due_date: string | null
           event_date: string | null
+          event_end_date: string | null
           id: string
           is_credit_note: boolean
           issue_date: string
@@ -422,6 +424,7 @@ export type Database = {
           deposit_rate: number
           discount_global_pct: number
           event_date: string | null
+          event_end_date: string | null
           event_location: string | null
           event_type: Database["public"]["Enums"]["event_type"] | null
           guests_count: number | null

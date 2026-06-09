@@ -29,6 +29,8 @@ export type SaveQuoteInput = {
   terms: string | null;
   event_type: Database["public"]["Enums"]["event_type"] | null;
   event_date: string | null;
+  /** Optional end date for multi-day events. Null = single day. */
+  event_end_date: string | null;
   event_location: string | null;
   guests_count: number | null;
   tva_rate: number;
@@ -272,6 +274,7 @@ export async function saveQuote(id: string, input: SaveQuoteInput) {
       terms: input.terms,
       event_type: input.event_type,
       event_date: input.event_date,
+      event_end_date: input.event_end_date,
       event_location: input.event_location,
       guests_count: input.guests_count,
       tva_rate: tvaRate,
@@ -647,7 +650,7 @@ export async function createInvoiceFromQuote(quoteId: string) {
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
     .select(
-      "id,number,status,client_id,event_date,subject,terms,tva_rate,commission_rate,discount_global_pct,total_ht,total_tva,total_ttc",
+      "id,number,status,client_id,event_date,event_end_date,subject,terms,tva_rate,commission_rate,discount_global_pct,total_ht,total_tva,total_ttc",
     )
     .eq("id", quoteId)
     .maybeSingle();
@@ -698,6 +701,7 @@ export async function createInvoiceFromQuote(quoteId: string) {
       issue_date: issueDate.toISOString().slice(0, 10),
       due_date: dueDate.toISOString().slice(0, 10),
       event_date: quote.event_date,
+      event_end_date: quote.event_end_date,
       subject: quote.subject,
       terms: quote.terms,
       tva_rate: quote.tva_rate,
@@ -1013,7 +1017,9 @@ export async function duplicateQuote(id: string) {
       // Reset event date — most repeat clients want the same package
       // on a different date, so blanking it forces the operator to
       // pick the new one and avoids accidentally re-using the old one.
+      // The end date follows suit (a range with no start is meaningless).
       event_date: null,
+      event_end_date: null,
       event_location: source.event_location,
       guests_count: source.guests_count,
       subject: source.subject ? `Copie — ${source.subject}` : null,

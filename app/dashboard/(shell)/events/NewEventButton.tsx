@@ -37,6 +37,7 @@ export function NewEventButton() {
     const input: EventInput = {
       title: String(form.get("title") || ""),
       date: String(form.get("date") || ""),
+      end_date: String(form.get("end_date") || "") || null,
       start_time: String(form.get("start_time") || "") || null,
       end_time: String(form.get("end_time") || "") || null,
       duration_hours: null,
@@ -112,8 +113,8 @@ export function NewEventButton() {
                 />
               </Field>
 
-              <div className="grid gap-3 md:grid-cols-3">
-                <Field label="Date">
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field label="Date de début">
                   <input
                     type="date"
                     name="date"
@@ -122,10 +123,15 @@ export function NewEventButton() {
                     className={inputCls}
                   />
                 </Field>
-                <Field label="Début">
+                <Field label="Date de fin (si plusieurs jours)">
+                  <input type="date" name="end_date" className={inputCls} />
+                </Field>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field label="Heure de début">
                   <input type="time" name="start_time" className={inputCls} />
                 </Field>
-                <Field label="Fin">
+                <Field label="Heure de fin">
                   <input type="time" name="end_time" className={inputCls} />
                 </Field>
               </div>

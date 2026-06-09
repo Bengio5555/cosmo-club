@@ -11,7 +11,8 @@ type EventStaffUpdate = TablesUpdate<"event_staff">;
 
 export type EventInput = {
   title: string;
-  date: string; // YYYY-MM-DD
+  date: string; // YYYY-MM-DD (start)
+  end_date: string | null; // YYYY-MM-DD — multi-day events; null = single day
   start_time: string | null; // HH:MM
   end_time: string | null;
   duration_hours: number | null;
@@ -42,6 +43,8 @@ export async function saveNewEvent(input: EventInput) {
     .insert({
       title: input.title.trim(),
       date: input.date,
+      end_date:
+        input.end_date && input.end_date > input.date ? input.end_date : null,
       start_time: clean(input.start_time),
       end_time: clean(input.end_time),
       duration_hours: input.duration_hours,
@@ -74,7 +77,7 @@ export async function createEventFromQuote(quoteId: string) {
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
     .select(
-      "id,number,subject,event_date,event_location,event_type,guests_count,client_id,status",
+      "id,number,subject,event_date,event_end_date,event_location,event_type,guests_count,client_id,status",
     )
     .eq("id", quoteId)
     .maybeSingle();
@@ -103,6 +106,7 @@ export async function createEventFromQuote(quoteId: string) {
     .insert({
       title: quote.subject || `Événement — devis ${quote.number}`,
       date: quote.event_date ?? new Date().toISOString().slice(0, 10),
+      end_date: quote.event_end_date,
       location: quote.event_location,
       guests_count: quote.guests_count,
       client_id: quote.client_id,
@@ -126,6 +130,14 @@ export async function saveEvent(id: string, input: Partial<EventInput>) {
   const patch: EventUpdate = {};
   if (input.title !== undefined) patch.title = input.title.trim();
   if (input.date !== undefined) patch.date = input.date;
+  if (input.end_date !== undefined) {
+    // Only keep an end date strictly after the start; otherwise clear it
+    // (single-day). Guards against a backwards range slipping through.
+    patch.end_date =
+      input.end_date && input.date && input.end_date > input.date
+        ? input.end_date
+        : null;
+  }
   if (input.start_time !== undefined) patch.start_time = clean(input.start_time);
   if (input.end_time !== undefined) patch.end_time = clean(input.end_time);
   if (input.duration_hours !== undefined)

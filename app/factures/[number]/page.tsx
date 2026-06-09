@@ -223,7 +223,11 @@ export default async function InvoicePage({
             {invoice.subject && <p className="invoice-subject-line">{invoice.subject}</p>}
             {invoice.event_date && (
               <p className="invoice-subject-sub">
-                Date de la prestation&nbsp;: {formatDateFR(invoice.event_date)}
+                {invoice.event_end_date &&
+                invoice.event_end_date.slice(0, 10) !==
+                  invoice.event_date.slice(0, 10)
+                  ? `Dates de la prestation : du ${formatDateFR(invoice.event_date)} au ${formatDateFR(invoice.event_end_date)}`
+                  : `Date de la prestation : ${formatDateFR(invoice.event_date)}`}
               </p>
             )}
             {invoice.is_credit_note && invoice.credit_note_reason && (

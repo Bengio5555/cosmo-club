@@ -104,6 +104,13 @@ export function DevisEditor({
   const [eventDate, setEventDate] = useState<string>(
     quote.event_date ? quote.event_date.slice(0, 10) : "",
   );
+  // Optional end date for multi-day events. Empty = single-day (the
+  // common case); when set it must be ≥ eventDate (validated below).
+  const [eventEndDate, setEventEndDate] = useState<string>(
+    (quote as { event_end_date?: string | null }).event_end_date
+      ? (quote as { event_end_date: string }).event_end_date.slice(0, 10)
+      : "",
+  );
   const [eventLocation, setEventLocation] = useState(quote.event_location ?? "");
   const [guestsCount, setGuestsCount] = useState<string>(
     quote.guests_count != null ? String(quote.guests_count) : "",
@@ -256,6 +263,13 @@ export function DevisEditor({
       terms: terms.trim() || null,
       event_type: (eventType || null) as EventType | null,
       event_date: eventDate || null,
+      // Only persist an end date when it's after the start — a value
+      // ≤ start is treated as "single day" (null) so a stray entry
+      // can't produce a backwards range on the plaquette.
+      event_end_date:
+        eventEndDate && eventDate && eventEndDate > eventDate
+          ? eventEndDate
+          : null,
       event_location: eventLocation.trim() || null,
       guests_count: guestsCount ? Number(guestsCount) : null,
       tva_rate: tvaNum,
@@ -537,13 +551,30 @@ export function DevisEditor({
                 readOnly={readOnly}
               />
               <LabeledInput
-                label="Date"
+                label="Date de début"
                 type="date"
                 value={eventDate}
                 onChange={setEventDate}
                 readOnly={readOnly}
               />
             </Row2>
+            <Row2>
+              <LabeledInput
+                label="Date de fin (si plusieurs jours)"
+                type="date"
+                value={eventEndDate}
+                onChange={setEventEndDate}
+                readOnly={readOnly}
+                min={eventDate || undefined}
+              />
+              <div />
+            </Row2>
+            {eventEndDate && eventDate && eventEndDate <= eventDate && (
+              <p className="text-[11px] text-amber-700 dark:text-amber-300">
+                La date de fin doit être après la date de début — sinon
+                elle est ignorée (événement sur un seul jour).
+              </p>
+            )}
             <Row2>
               <LabeledInput
                 label="Lieu"
@@ -1461,6 +1492,7 @@ function LabeledInput({
   type = "text",
   placeholder,
   readOnly,
+  min,
 }: {
   label: string;
   value: string;
@@ -1468,6 +1500,7 @@ function LabeledInput({
   type?: string;
   placeholder?: string;
   readOnly?: boolean;
+  min?: string;
 }) {
   return (
     <label className="block">
@@ -1480,6 +1513,7 @@ function LabeledInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
+        min={min}
         className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
     </label>

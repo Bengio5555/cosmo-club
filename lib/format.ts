@@ -21,6 +21,33 @@ export function formatDateFR(
   return (opts?.withTime ? dateTimeFmt : dateFmt).format(d);
 }
 
+/**
+ * Render an event date as either a single day or a "du X au Y" range
+ * for multi-day events. When `end` is null, equal to `start`, or
+ * invalid, falls back to a plain single-date render (so existing
+ * single-day events look exactly as before). The leading "du …" prefix
+ * is omitted when `prefixed` is false (handy when the label already
+ * says "Date").
+ */
+export function formatDateRangeFR(
+  start: string | Date | null | undefined,
+  end: string | Date | null | undefined,
+  opts?: { prefixed?: boolean; fallback?: string },
+): string {
+  if (!start) return opts?.fallback ?? "—";
+  const startStr = formatDateFR(start, { fallback: opts?.fallback ?? "—" });
+  // Normalize to YYYY-MM-DD for the equality check so a date and a
+  // timestamptz pointing at the same day don't render as a range.
+  const dayKey = (v: string | Date) =>
+    (v instanceof Date ? v.toISOString() : String(v)).slice(0, 10);
+  if (!end || dayKey(end) === dayKey(start)) return startStr;
+  const endStr = formatDateFR(end, { fallback: "" });
+  if (!endStr || endStr === "—") return startStr;
+  const prefix = opts?.prefixed === false ? "" : "Du ";
+  const middle = opts?.prefixed === false ? " – " : " au ";
+  return `${prefix}${startStr}${middle}${endStr}`;
+}
+
 const eurFmt = new Intl.NumberFormat("fr-FR", {
   style: "currency",
   currency: "EUR",

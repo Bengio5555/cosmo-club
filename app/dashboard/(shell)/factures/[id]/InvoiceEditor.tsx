@@ -90,6 +90,11 @@ export function InvoiceEditor({
   const [eventDate, setEventDate] = useState<string>(
     invoice.event_date ? invoice.event_date.slice(0, 10) : "",
   );
+  const [eventEndDate, setEventEndDate] = useState<string>(
+    (invoice as { event_end_date?: string | null }).event_end_date
+      ? (invoice as { event_end_date: string }).event_end_date.slice(0, 10)
+      : "",
+  );
   const [tvaRate, setTvaRate] = useState<string>(String(invoice.tva_rate ?? 20));
 
   const [items, setItems] = useState<EditableItem[]>(() =>
@@ -153,6 +158,10 @@ export function InvoiceEditor({
       issue_date: issueDate || new Date().toISOString().slice(0, 10),
       due_date: dueDate || null,
       event_date: eventDate || null,
+      event_end_date:
+        eventEndDate && eventDate && eventEndDate > eventDate
+          ? eventEndDate
+          : null,
       tva_rate: tvaNum,
       items: items.map((it, i) => ({
         id: it.dbId,
@@ -419,6 +428,15 @@ export function InvoiceEditor({
                 readOnly={readOnly}
               />
             </Row3>
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <LabeledInput
+                label="Fin prestation (si plusieurs jours)"
+                type="date"
+                value={eventEndDate}
+                onChange={setEventEndDate}
+                readOnly={readOnly}
+              />
+            </div>
           </Card>
 
           <Card title="Prestations">

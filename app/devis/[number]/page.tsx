@@ -233,6 +233,27 @@ export default async function DevisPlaquettePage({
     displayedSubtotalPreDiscount - quote.total_ht,
   );
 
+  // Cover date label: single day or "du X au Y" range for multi-day
+  // events. Locale-aware (long-form EN dates / FR formatting).
+  const eventEndDate =
+    (quote as { event_end_date?: string | null }).event_end_date ?? null;
+  const fmtCoverDate = (iso: string) =>
+    locale === "en"
+      ? new Date(iso).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : formatDateFR(iso);
+  const eventDateLabel =
+    quote.event_date && eventEndDate && eventEndDate.slice(0, 10) !== quote.event_date.slice(0, 10)
+      ? locale === "en"
+        ? `From ${fmtCoverDate(quote.event_date)} to ${fmtCoverDate(eventEndDate)}`
+        : `Du ${fmtCoverDate(quote.event_date)} au ${fmtCoverDate(eventEndDate)}`
+      : quote.event_date
+        ? fmtCoverDate(quote.event_date)
+        : "";
+
   // Totals note from settings (penalty + any custom copy) or the default.
   const totalsNote =
     settings?.penalty_rate_text && settings.penalty_rate_text.trim()
@@ -277,11 +298,7 @@ export default async function DevisPlaquettePage({
               {quote.event_date && (
                 <div className="cover-meta-item">
                   <small>{locale === "en" ? "Date" : "Date"}</small>
-                  <strong>
-                    {locale === "en"
-                      ? new Date(quote.event_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
-                      : formatDateFR(quote.event_date)}
-                  </strong>
+                  <strong>{eventDateLabel}</strong>
                 </div>
               )}
               {quote.event_location && (

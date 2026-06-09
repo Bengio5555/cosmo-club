@@ -28,6 +28,7 @@ export type SignedQuoteData = {
     subject: string | null;
     issue_date: string;
     event_date: string | null;
+    event_end_date?: string | null;
     event_location: string | null;
     guests_count: number | null;
     tva_rate: number;
@@ -411,7 +412,12 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
             </Text>
             {data.quote.event_date && (
               <Text style={s.docMeta}>
-                Événement&nbsp;: {formatDateFR(data.quote.event_date)}
+                Événement&nbsp;:{" "}
+                {data.quote.event_end_date &&
+                data.quote.event_end_date.slice(0, 10) !==
+                  data.quote.event_date.slice(0, 10)
+                  ? `du ${formatDateFR(data.quote.event_date)} au ${formatDateFR(data.quote.event_end_date)}`
+                  : formatDateFR(data.quote.event_date)}
               </Text>
             )}
           </View>

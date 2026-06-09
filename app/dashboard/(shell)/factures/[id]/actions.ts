@@ -20,6 +20,7 @@ export type SaveInvoiceInput = {
   subject: string | null;
   terms: string | null;
   event_date: string | null;
+  event_end_date: string | null;
   issue_date: string;
   due_date: string | null;
   tva_rate: number;
@@ -123,6 +124,12 @@ export async function saveInvoice(id: string, input: SaveInvoiceInput) {
       subject: input.subject,
       terms: input.terms,
       event_date: input.event_date,
+      event_end_date:
+        input.event_end_date &&
+        input.event_date &&
+        input.event_end_date > input.event_date
+          ? input.event_end_date
+          : null,
       issue_date: input.issue_date,
       due_date: input.due_date,
       tva_rate: tvaRate,
@@ -361,6 +368,7 @@ export async function createCreditNote(
       issue_date: issueDate,
       due_date: null,
       event_date: src.event_date,
+      event_end_date: src.event_end_date,
       subject: `Avoir sur facture ${src.number}`,
       terms: src.terms,
       tva_rate: src.tva_rate,
