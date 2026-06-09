@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { MobileNav } from "@/components/dashboard/MobileNav";
-import { ThemeProvider } from "@/components/dashboard/ThemeProvider";
 import type { UserRole } from "@/lib/auth/roles";
 
 // PWA-friendly metadata scoped to the dashboard. When users "Add to
@@ -69,18 +68,20 @@ export default async function ShellLayout({
     .single();
   const role = (profile?.role as UserRole | undefined) ?? "staff";
 
+  // Dark-only dashboard. The `dark` class is baked into the SSR'd HTML
+  // (no client theme switching), so every `dark:` variant resolves and
+  // the slate-950 canvas paints on the very first frame — no theme
+  // flash on reload, no JS dependency.
   return (
-    <ThemeProvider>
-      <div className="dashboard-shell flex min-h-[100dvh] bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-200">
-        <Sidebar role={role} />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar email={user.email ?? null} />
-          <main className="flex-1 overflow-x-hidden pb-[max(env(safe-area-inset-bottom),0.5rem)] md:pb-0">
-            {children}
-          </main>
-          <MobileNav role={role} />
-        </div>
+    <div className="dark dashboard-shell flex min-h-[100dvh] bg-slate-950 text-slate-200">
+      <Sidebar role={role} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Topbar email={user.email ?? null} />
+        <main className="flex-1 overflow-x-hidden pb-[max(env(safe-area-inset-bottom),0.5rem)] md:pb-0">
+          {children}
+        </main>
+        <MobileNav role={role} />
       </div>
-    </ThemeProvider>
+    </div>
   );
 }

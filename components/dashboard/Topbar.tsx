@@ -3,9 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useTheme } from "@/components/dashboard/ThemeProvider";
 import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
 import logoSrc from "@/public/brand/cosmo-logo.avif";
 
@@ -17,7 +16,6 @@ import logoSrc from "@/public/brand/cosmo-logo.avif";
  */
 export function Topbar({ email }: { email: string | null }) {
   const router = useRouter();
-  const { theme, toggle } = useTheme();
 
   async function handleLogout() {
     const supabase = createClient();
@@ -58,19 +56,6 @@ export function Topbar({ email }: { email: string | null }) {
               {email}
             </span>
           )}
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
-            title={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white md:h-8 md:w-auto md:rounded-md md:px-2 md:py-1.5"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4 md:h-3.5 md:w-3.5" />
-            ) : (
-              <Moon className="h-4 w-4 md:h-3.5 md:w-3.5" />
-            )}
-          </button>
           <button
             type="button"
             onClick={handleLogout}

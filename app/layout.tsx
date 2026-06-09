@@ -95,21 +95,19 @@ export default function RootLayout({
   return (
     <html lang="fr" className={fontClassName} suppressHydrationWarning>
       <head>
-        {/* No-flash theme bootstrap. Runs in <head> before any paint:
-            on /dashboard routes it reads the saved preference (or the OS
-            scheme) and, if dark, sets `.dark` on <html> AND paints the
-            dark background immediately — so reloads don't flash the cream
-            body before the dark dashboard chrome mounts. No-op on the
-            public site (which is always cream). */}
+        {/* No-flash dashboard bootstrap. Runs in <head> before any
+            paint: on /dashboard routes it paints the dark canvas on
+            <html> immediately, so a reload never flashes the cream body
+            before the (dark-only) dashboard chrome mounts. No-op on the
+            public site, which stays cream. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{
   if(location.pathname.indexOf('/dashboard')!==0)return;
-  var t=localStorage.getItem('dashboardTheme');
-  var dark=t==='dark'||(t!=='light'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
   var el=document.documentElement;
-  if(dark){el.classList.add('dark');el.setAttribute('data-theme','dark');el.style.background='#020617';}
-  else{el.setAttribute('data-theme','light');}
+  el.classList.add('dark');
+  el.style.background='#020617';
+  el.style.colorScheme='dark';
 }catch(e){}})();`,
           }}
         />
