@@ -2,8 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArchiveRestore, FilePlus2, Loader2, Trash2 } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  FilePlus2,
+  Loader2,
+  Receipt,
+  Trash2,
+} from "lucide-react";
 import { createQuoteForClient, deleteClient, setClientArchived } from "../actions";
+import { createBlankInvoice } from "../../factures/[id]/actions";
 
 export function ClientActions({
   clientId,
@@ -22,6 +30,16 @@ export function ClientActions({
     startTransition(async () => {
       const res = await createQuoteForClient(clientId);
       // Success path redirects — if we get here, it failed.
+      if (res && !res.ok) setErr(res.error);
+    });
+  }
+
+  function newInvoice() {
+    startTransition(async () => {
+      setErr(null);
+      // Bill this client directly — no quote needed. Redirects into the
+      // new draft invoice's editor on success.
+      const res = await createBlankInvoice(clientId);
       if (res && !res.ok) setErr(res.error);
     });
   }
@@ -71,6 +89,15 @@ export function ClientActions({
             <FilePlus2 className="h-3 w-3" />
           )}
           Nouveau devis
+        </button>
+        <button
+          type="button"
+          onClick={newInvoice}
+          disabled={pending}
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-slate-400 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-700"
+        >
+          <Receipt className="h-3 w-3" />
+          Nouvelle facture
         </button>
         <button
           type="button"
