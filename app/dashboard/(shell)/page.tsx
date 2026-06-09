@@ -15,6 +15,7 @@ import {
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { QuickRemindButton } from "@/components/dashboard/QuickRemindButton";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { autoStartDueEvents } from "./events/actions";
 import type { Database } from "@/types/database";
@@ -361,7 +362,7 @@ export default async function DashboardHome() {
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* CA 6 months bar chart */}
           <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
                   Chiffre d&apos;affaires
@@ -370,37 +371,21 @@ export default async function DashboardHome() {
                   Sur les 6 derniers mois
                 </p>
               </div>
+              {Math.abs(trendDelta) >= 0.5 && (
+                <span
+                  className={
+                    "inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold " +
+                    (trendDelta >= 0
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                      : "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300")
+                  }
+                >
+                  {trendDelta >= 0 ? "↗" : "↘"} {Math.abs(trendDelta).toFixed(0)}%
+                  <span className="font-normal opacity-70">vs. mois dernier</span>
+                </span>
+              )}
             </div>
-            <div className="mt-6 flex h-48 items-end gap-3">
-              {monthlySeries.map((t, i) => {
-                const h = (t.total / maxTrend) * 100;
-                const isLast = i === monthlySeries.length - 1;
-                return (
-                  <div
-                    key={t.month}
-                    className="flex flex-1 flex-col items-center gap-2"
-                  >
-                    <span className="text-[10px] font-medium tabular-nums text-slate-500 dark:text-slate-400">
-                      {t.total > 0 ? formatEUR(t.total) : ""}
-                    </span>
-                    <div className="flex w-full flex-1 items-end">
-                      <div
-                        className={
-                          "w-full rounded-t-md " +
-                          (isLast
-                            ? "bg-slate-900 dark:bg-slate-100"
-                            : "bg-slate-200 dark:bg-slate-700")
-                        }
-                        style={{ height: `${Math.max(2, h)}%` }}
-                      />
-                    </div>
-                    <span className="text-[11px] font-medium capitalize text-slate-500 dark:text-slate-400">
-                      {t.month}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+            <RevenueChart series={monthlySeries} max={maxTrend} />
           </div>
 
           {/* Pipeline summary — counts leads (not quotes). A single
