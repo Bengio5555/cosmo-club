@@ -69,18 +69,27 @@ function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
+type MessageLog = {
+  id: string;
+  message: string;
+  cc: string[] | null;
+  sent_at: string;
+};
+
 export function DevisEditor({
   quote,
   items: initialItems,
   clientEmail,
   availableImages,
   moodboardUploads,
+  messageHistory = [],
 }: {
   quote: Quote;
   items: QuoteItem[];
   clientEmail?: string | null;
   availableImages: AvailableImage[];
   moodboardUploads: AvailableImage[];
+  messageHistory?: MessageLog[];
 }) {
   const router = useRouter();
   const readOnly = quote.status !== "brouillon";
@@ -872,6 +881,10 @@ export function DevisEditor({
             </p>
           </div>
 
+          {messageHistory.length > 0 && (
+            <MessageHistoryCard messages={messageHistory} />
+          )}
+
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5 text-xs text-slate-500 dark:text-slate-500">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
               Workflow
@@ -1061,6 +1074,65 @@ function SendDevisDialog({
 
 function serialize(p: SaveQuoteInput): string {
   return JSON.stringify(p);
+}
+
+/* ─── Sent-message history ────────────────────────────────────────
+   Read-only log of every personalized note the operator attached to a
+   send. Only populated when a note was actually written (the server
+   skips logging an empty message), so an empty list means "only
+   standard emails were sent" and the card isn't rendered at all. */
+function MessageHistoryCard({ messages }: { messages: MessageLog[] }) {
+  const [expanded, setExpanded] = useState(false);
+  // Collapsed view shows the 2 most recent; expand reveals the rest.
+  const shown = expanded ? messages : messages.slice(0, 2);
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+        Messages envoyés ({messages.length})
+      </p>
+      <ul className="space-y-2.5">
+        {shown.map((m) => (
+          <li
+            key={m.id}
+            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/50"
+          >
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <span className="text-[10px] font-medium uppercase tracking-wide text-[color:var(--color-grenat)]">
+                {fmt(m.sent_at)}
+              </span>
+            </div>
+            <p className="whitespace-pre-line text-xs leading-relaxed text-slate-700 dark:text-slate-200">
+              {m.message}
+            </p>
+            {m.cc && m.cc.length > 0 && (
+              <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-500">
+                Copie&nbsp;: {m.cc.join(", ")}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+      {messages.length > 2 && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-3 text-[11px] font-medium text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+        >
+          {expanded
+            ? "Réduire"
+            : `Voir les ${messages.length - 2} autres`}
+        </button>
+      )}
+    </div>
+  );
 }
 
 /* ─── Top bar (status + actions) ─────────────────────────────────── */

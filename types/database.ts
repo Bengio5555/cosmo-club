@@ -398,6 +398,18 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["quote_items"]["Row"]>
         Relationships: []
       }
+      quote_messages: {
+        Row: {
+          id: string
+          quote_id: string
+          message: string
+          cc: string[] | null
+          sent_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["quote_messages"]["Row"]> & { quote_id: string; message: string }
+        Update: Partial<Database["public"]["Tables"]["quote_messages"]["Row"]>
+        Relationships: []
+      }
       quotes: {
         Row: {
           access_token: string | null

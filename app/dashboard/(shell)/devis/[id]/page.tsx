@@ -11,17 +11,28 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: quote }, { data: items }, eventImages, moodboardUploads] =
-    await Promise.all([
-      supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
-      supabase
-        .from("quote_items")
-        .select("*")
-        .eq("quote_id", id)
-        .order("position", { ascending: true }),
-      listEventImages(),
-      listMoodboardUploads(id),
-    ]);
+  const [
+    { data: quote },
+    { data: items },
+    { data: messages },
+    eventImages,
+    moodboardUploads,
+  ] = await Promise.all([
+    supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
+    supabase
+      .from("quote_items")
+      .select("*")
+      .eq("quote_id", id)
+      .order("position", { ascending: true }),
+    // Personalized-note history, most recent first.
+    supabase
+      .from("quote_messages")
+      .select("id,message,cc,sent_at")
+      .eq("quote_id", id)
+      .order("sent_at", { ascending: false }),
+    listEventImages(),
+    listMoodboardUploads(id),
+  ]);
 
   if (!quote) {
     notFound();
@@ -48,6 +59,7 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
         clientEmail={client?.email ?? null}
         availableImages={eventImages.images}
         moodboardUploads={moodboardUploads.images}
+        messageHistory={messages ?? []}
       />
 
       {client && (

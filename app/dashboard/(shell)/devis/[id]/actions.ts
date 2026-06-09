@@ -505,6 +505,22 @@ export async function sendDevis(
         personalMessage,
       }),
     });
+    // Log the personalized note (only when one was actually written +
+    // the email went out) so the operator can review what was said to
+    // the client across successive sends. Failure here is non-blocking
+    // — the email already left.
+    if (personalMessage) {
+      const { error: logErr } = await supabase.from("quote_messages").insert({
+        quote_id: id,
+        message: personalMessage,
+        cc: cc.length > 0 ? cc : null,
+      });
+      if (logErr) {
+        console.error("[sendDevis] message log failed:", logErr.message);
+      } else {
+        revalidatePath(`/dashboard/devis/${id}`);
+      }
+    }
     return { ok: true as const, emailed: true, ccCount: cc.length };
   } catch (err) {
     console.error("[sendDevis] resend error:", err);
