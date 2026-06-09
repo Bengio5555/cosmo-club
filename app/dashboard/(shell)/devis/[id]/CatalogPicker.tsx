@@ -337,13 +337,21 @@ function Drawer({
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Keep the latest onClose in a ref so the mount effect can call it
+  // without listing onClose as a dependency. The parent passes a fresh
+  // inline `() => setOpen(false)` on every render; depending on it made
+  // this effect re-run on each keystroke, and the `ref.current.focus()`
+  // inside it stole focus away from the search input every time (you
+  // had to re-click after each letter).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
-  // Lock body scroll + handle Escape.
+  // Lock body scroll + handle Escape + focus the dialog — once, on mount.
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     window.addEventListener("keydown", onKey);
     ref.current?.focus();
@@ -351,7 +359,7 @@ function Drawer({
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div
