@@ -81,18 +81,18 @@ export function CocktailsBrowser({
 
       <p className="text-[11px] text-slate-500 dark:text-slate-500">
         {normalized
-          ? `${visibleActive} cocktail${visibleActive > 1 ? "s" : ""} sur ${totalActive} actifs`
-          : `${totalActive} cocktail${totalActive > 1 ? "s" : ""} actif${totalActive > 1 ? "s" : ""}`}
+          ? `${visibleActive} boisson${visibleActive > 1 ? "s" : ""} sur ${totalActive} active${totalActive > 1 ? "s" : ""}`
+          : `${totalActive} boisson${totalActive > 1 ? "s" : ""} active${totalActive > 1 ? "s" : ""}`}
       </p>
 
       {/* Empty state — global */}
       {cocktails.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-500 dark:shadow-none">
           <Wine className="h-6 w-6 text-slate-700" />
-          <p>Aucune recette pour l&apos;instant.</p>
+          <p>Aucune boisson pour l&apos;instant.</p>
           <p className="text-xs text-slate-400 dark:text-slate-600">
-            Ajoute tes cocktails signature pour débloquer le calcul automatique
-            de stock sur la fiche événement.
+            Ajoute tes cocktails, softs, shots… pour débloquer le calcul
+            automatique de stock sur la fiche événement.
           </p>
         </div>
       )}
@@ -102,7 +102,7 @@ export function CocktailsBrowser({
         activeGroups.length === 0 &&
         archivedMatches.length === 0 && (
           <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-500 dark:shadow-none">
-            Aucun cocktail ne correspond à{" "}
+            Aucune boisson ne correspond à{" "}
             <span className="font-medium text-slate-700 dark:text-slate-300">
               « {query} »
             </span>

@@ -80,7 +80,7 @@ export function MenuSection({
     const cocktail_id = String(form.get("cocktail_id") || "");
     const qty = Number(form.get("qty_planned") || 0);
     if (!cocktail_id || qty <= 0) {
-      setErr("Choisis un cocktail et une quantité > 0.");
+      setErr("Choisis une boisson et une quantité > 0.");
       return;
     }
     startTransition(async () => {
@@ -100,7 +100,7 @@ export function MenuSection({
   }
 
   function removeRow(cocktailId: string) {
-    if (!window.confirm("Retirer ce cocktail du menu ?")) return;
+    if (!window.confirm("Retirer cette boisson du menu ?")) return;
     startTransition(async () => {
       const res = await removeCocktailFromMenu(eventId, cocktailId);
       if (!res.ok) setErr(res.error);
@@ -136,12 +136,12 @@ export function MenuSection({
         <div>
           <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
             <Wine className="h-3.5 w-3.5 text-slate-500 dark:text-slate-500" />
-            Menu cocktails
+            Menu boissons
           </h2>
           <p className="text-[11px] text-slate-500 dark:text-slate-500">
             {menu.length === 0
-              ? "Aucun cocktail prévu."
-              : `${menu.length} recette${menu.length > 1 ? "s" : ""} · ${totalCocktails} cocktail${totalCocktails > 1 ? "s" : ""} servis au total`}
+              ? "Aucune boisson prévue."
+              : `${menu.length} recette${menu.length > 1 ? "s" : ""} · ${totalCocktails} boisson${totalCocktails > 1 ? "s" : ""} servie${totalCocktails > 1 ? "s" : ""} au total`}
           </p>
         </div>
         {menu.length > 0 && (
@@ -182,7 +182,7 @@ export function MenuSection({
 
       {cocktailOptions.length === 0 && (
         <div className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-3 text-xs text-slate-500 dark:text-slate-400">
-          Aucune recette cocktail dans le catalogue.{" "}
+          Aucune boisson dans le catalogue.{" "}
           <Link
             href="/dashboard/cocktails"
             className="text-slate-700 dark:text-slate-200 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white"
@@ -235,7 +235,7 @@ export function MenuSection({
       {menu.length === 0 ? (
         <p className="py-3 text-center text-xs text-slate-500 dark:text-slate-500">
           {cocktailOptions.length > 0 && !adding
-            ? "Clique « Ajouter un cocktail » pour commencer à composer le menu."
+            ? "Clique « Ajouter une boisson » pour commencer à composer le menu."
             : ""}
         </p>
       ) : (
@@ -288,7 +288,7 @@ export function MenuSection({
           disabled={pending || available.length === 0}
           className="mt-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-white"
         >
-          <Plus className="h-3 w-3" /> Ajouter un cocktail
+          <Plus className="h-3 w-3" /> Ajouter une boisson
         </button>
       )}
 

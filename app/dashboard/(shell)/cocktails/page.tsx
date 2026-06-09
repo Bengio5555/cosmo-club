@@ -33,8 +33,9 @@ export default async function CocktailsListPage() {
             Boissons
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Recettes réutilisables. Liées à tes produits stock → calcul
-            automatique du stock nécessaire par événement.
+            Cocktails, softs, shots… toutes tes boissons réutilisables.
+            Liées à tes produits stock → calcul automatique du stock
+            nécessaire et de la liste de courses par événement.
           </p>
         </div>
         <NewCocktailButton />
