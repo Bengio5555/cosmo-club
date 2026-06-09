@@ -3,10 +3,20 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Trash2, UserPlus } from "lucide-react";
+import {
+  Banknote,
+  Check,
+  Landmark,
+  Loader2,
+  Trash2,
+  UserPlus,
+  X,
+} from "lucide-react";
 import type { Tables, Database } from "@/types/database";
 import {
   assignStaff,
+  clearStaffPayment,
+  recordStaffPayment,
   removeStaffAssignment,
   updateStaffAssignment,
 } from "../actions";
@@ -92,6 +102,32 @@ export function StaffSection({
     });
   }
 
+  function savePayment(
+    staffId: string,
+    payment: {
+      paid_amount: number;
+      paid_at: string;
+      payment_method: "especes" | "virement";
+    },
+  ) {
+    setErr(null);
+    startTransition(async () => {
+      const res = await recordStaffPayment(eventId, staffId, payment);
+      if (!res.ok) setErr(res.error);
+      else router.refresh();
+    });
+  }
+
+  function unsetPayment(staffId: string) {
+    if (!window.confirm("Annuler le règlement de ce membre ?")) return;
+    setErr(null);
+    startTransition(async () => {
+      const res = await clearStaffPayment(eventId, staffId);
+      if (!res.ok) setErr(res.error);
+      else router.refresh();
+    });
+  }
+
   function remove(staffId: string) {
     if (!window.confirm("Retirer ce membre de l'événement ?")) return;
     startTransition(async () => {
@@ -115,6 +151,16 @@ export function StaffSection({
     return s + rate * hours;
   }, 0);
 
+  // Payment tracking summary. A member is "réglé" once paid_at is set;
+  // we surface a count + the total cash actually disbursed so the
+  // operator sees at a glance how much of the staff payroll is settled.
+  const paidAssignments = assignments.filter((a) => a.paid_at != null);
+  const paidCount = paidAssignments.length;
+  const totalPaid = paidAssignments.reduce(
+    (s, a) => s + Number(a.paid_amount ?? 0),
+    0,
+  );
+
   return (
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between">
@@ -124,6 +170,20 @@ export function StaffSection({
             {assignments.length} assigné{assignments.length > 1 ? "s" : ""}
             {totalHoursPlanned > 0 && ` · ${totalHoursPlanned}h prévues`}
             {totalCost > 0 && ` · ${totalCost.toFixed(2)} € paie estimée`}
+            {assignments.length > 0 && (
+              <span
+                className={
+                  paidCount === assignments.length
+                    ? "text-emerald-700 dark:text-emerald-300"
+                    : "text-amber-700 dark:text-amber-300"
+                }
+              >
+                {" · "}
+                {paidCount}/{assignments.length} réglé
+                {paidCount > 1 ? "s" : ""}
+                {totalPaid > 0 && ` (${totalPaid.toFixed(2)} €)`}
+              </span>
+            )}
           </p>
         </div>
         {!readOnly && !adding && (
@@ -283,6 +343,17 @@ export function StaffSection({
                         {a.notes}
                       </p>
                     )}
+                    {/* Payment tracking row — settled/unsettled badge +
+                        inline editor. Always visible (even on closed
+                        events) so the operator can keep reconciling
+                        cash after the event is marked terminé. */}
+                    <PaymentTracker
+                      assignment={a}
+                      suggestedAmount={cost}
+                      pending={pending}
+                      onSave={(p) => savePayment(a.staff_id, p)}
+                      onClear={() => unsetPayment(a.staff_id)}
+                    />
                   </div>
                   {!readOnly && (
                     <button
@@ -303,6 +374,221 @@ export function StaffSection({
       )}
     </section>
   );
+}
+
+/* ─── Per-assignment payment tracker ──────────────────────────────
+   Two states:
+   - Settled (paid_at set): green badge + "X € · date · méthode" recap,
+     with an "Annuler" action to revert to unsettled.
+   - Unsettled: amber badge + "Marquer réglé" button that expands a
+     compact form (montant prefilled with the estimated cost, date
+     defaulting to today, method toggle espèces/virement).
+   The status invariant lives server-side (recordStaffPayment /
+   clearStaffPayment write all three fields together). */
+function PaymentTracker({
+  assignment,
+  suggestedAmount,
+  pending,
+  onSave,
+  onClear,
+}: {
+  assignment: Assignment;
+  suggestedAmount: number;
+  pending: boolean;
+  onSave: (p: {
+    paid_amount: number;
+    paid_at: string;
+    payment_method: "especes" | "virement";
+  }) => void;
+  onClear: () => void;
+}) {
+  const isPaid = assignment.paid_at != null;
+  const [editing, setEditing] = useState(false);
+  // Local form state seeded from the assignment (for re-edit) or from
+  // sensible defaults (estimated cost, today, espèces).
+  const [amount, setAmount] = useState<string>(
+    assignment.paid_amount != null
+      ? String(assignment.paid_amount)
+      : suggestedAmount > 0
+        ? suggestedAmount.toFixed(2)
+        : "",
+  );
+  const [date, setDate] = useState<string>(
+    assignment.paid_at ?? todayISO(),
+  );
+  const [method, setMethod] = useState<"especes" | "virement">(
+    (assignment.payment_method as "especes" | "virement") ?? "virement",
+  );
+
+  if (isPaid && !editing) {
+    return (
+      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]">
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+          <Check className="h-3 w-3" /> Réglé
+        </span>
+        <span className="text-slate-600 dark:text-slate-300">
+          {Number(assignment.paid_amount ?? 0).toFixed(2)} €
+          {assignment.paid_at && ` · ${formatDateShort(assignment.paid_at)}`}
+          {assignment.payment_method && (
+            <span className="inline-flex items-center gap-1">
+              {" · "}
+              {assignment.payment_method === "especes" ? (
+                <>
+                  <Banknote className="inline h-3 w-3" /> Espèces
+                </>
+              ) : (
+                <>
+                  <Landmark className="inline h-3 w-3" /> Virement
+                </>
+              )}
+            </span>
+          )}
+        </span>
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          disabled={pending}
+          className="text-slate-500 underline decoration-dotted underline-offset-2 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 disabled:opacity-60"
+        >
+          Modifier
+        </button>
+        <button
+          type="button"
+          onClick={onClear}
+          disabled={pending}
+          className="text-slate-500 underline decoration-dotted underline-offset-2 hover:text-red-400 dark:text-slate-500 disabled:opacity-60"
+        >
+          Annuler
+        </button>
+      </div>
+    );
+  }
+
+  if (!editing) {
+    return (
+      <div className="mt-1.5 flex items-center gap-2 text-[11px]">
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+          Non réglé
+        </span>
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          disabled={pending}
+          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-0.5 font-medium text-slate-700 transition-colors hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 disabled:opacity-60"
+        >
+          <Banknote className="h-3 w-3" /> Marquer réglé
+        </button>
+      </div>
+    );
+  }
+
+  // Editing form (both "mark paid" and "edit existing payment").
+  return (
+    <div className="mt-2 rounded-md border border-slate-300 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="grid gap-2 sm:grid-cols-[100px_120px_minmax(0,1fr)]">
+        <label className="block">
+          <span className="mb-0.5 block text-[9px] font-medium uppercase tracking-wide text-slate-500">
+            Montant €
+          </span>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className={payInputCls}
+            autoFocus
+          />
+        </label>
+        <label className="block">
+          <span className="mb-0.5 block text-[9px] font-medium uppercase tracking-wide text-slate-500">
+            Date
+          </span>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className={payInputCls}
+          />
+        </label>
+        <label className="block">
+          <span className="mb-0.5 block text-[9px] font-medium uppercase tracking-wide text-slate-500">
+            Type
+          </span>
+          <select
+            value={method}
+            onChange={(e) =>
+              setMethod(e.target.value as "especes" | "virement")
+            }
+            className={payInputCls}
+          >
+            <option value="virement">Virement</option>
+            <option value="especes">Espèces</option>
+          </select>
+        </label>
+      </div>
+      <div className="mt-2 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setEditing(false);
+            // Reset local edits back to the persisted values.
+            setAmount(
+              assignment.paid_amount != null
+                ? String(assignment.paid_amount)
+                : suggestedAmount > 0
+                  ? suggestedAmount.toFixed(2)
+                  : "",
+            );
+            setDate(assignment.paid_at ?? todayISO());
+            setMethod(
+              (assignment.payment_method as "especes" | "virement") ??
+                "virement",
+            );
+          }}
+          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+        >
+          <X className="h-3 w-3" /> Annuler
+        </button>
+        <button
+          type="button"
+          disabled={pending || !amount || !date}
+          onClick={() => {
+            onSave({
+              paid_amount: Number(amount) || 0,
+              paid_at: date,
+              payment_method: method,
+            });
+            setEditing(false);
+          }}
+          className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+        >
+          {pending ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Check className="h-3 w-3" />
+          )}
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const payInputCls =
+  "w-full rounded border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none";
+
+/** Local date as YYYY-MM-DD (avoids UTC off-by-one from toISOString). */
+function todayISO(): string {
+  const d = new Date();
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tz).toISOString().slice(0, 10);
+}
+
+/** Compact FR date "12 juin" from a YYYY-MM-DD string. */
+function formatDateShort(iso: string): string {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 /** Tiny inline-edit field: edit-in-place with blur/enter to commit. */

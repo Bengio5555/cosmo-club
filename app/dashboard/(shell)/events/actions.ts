@@ -402,6 +402,68 @@ export async function removeStaffAssignment(eventId: string, staffId: string) {
   return { ok: true as const };
 }
 
+/**
+ * Record (or update) a payment made to an assigned staff member.
+ * A payment is considered "réglé" when paid_at is set — that's the
+ * single source of truth for the settled/unsettled status, so we
+ * never let the three fields drift out of sync. Amount + method are
+ * stored alongside for the operator's cash-flow tracking; they have
+ * no bearing on the event-margin computation (which uses the
+ * hours×rate estimate, not the actually-paid amount).
+ */
+export async function recordStaffPayment(
+  eventId: string,
+  staffId: string,
+  payment: {
+    paid_amount: number;
+    paid_at: string; // YYYY-MM-DD
+    payment_method: "especes" | "virement";
+  },
+) {
+  const supabase = await createClient();
+
+  const amount = Number(payment.paid_amount);
+  if (!Number.isFinite(amount) || amount < 0) {
+    return { ok: false as const, error: "Montant invalide." };
+  }
+  if (!payment.paid_at) {
+    return { ok: false as const, error: "Date de règlement manquante." };
+  }
+  if (payment.payment_method !== "especes" && payment.payment_method !== "virement") {
+    return { ok: false as const, error: "Type de règlement invalide." };
+  }
+
+  const { error } = await supabase
+    .from("event_staff")
+    .update({
+      paid_amount: Math.round(amount * 100) / 100,
+      paid_at: payment.paid_at,
+      payment_method: payment.payment_method,
+    })
+    .eq("event_id", eventId)
+    .eq("staff_id", staffId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
+/**
+ * Clear a recorded payment — flips the member back to "non réglé" by
+ * nulling all three payment fields together (keeps the status
+ * invariant intact).
+ */
+export async function clearStaffPayment(eventId: string, staffId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("event_staff")
+    .update({ paid_amount: null, paid_at: null, payment_method: null })
+    .eq("event_id", eventId)
+    .eq("staff_id", staffId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
 /* ─── Stock reservation ───────────────────────────────────────────── */
 
 export async function reserveProduct(

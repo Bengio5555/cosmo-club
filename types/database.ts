@@ -516,6 +516,9 @@ export type Database = {
           hours_done: number | null
           hours_planned: number
           notes: string | null
+          paid_amount: number | null
+          paid_at: string | null
+          payment_method: string | null
           rate_override: number | null
           staff_id: string
         }
