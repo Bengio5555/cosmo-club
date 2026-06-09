@@ -395,7 +395,7 @@ function parseCcEmails(input: string[] | undefined): string[] {
  */
 export async function sendDevis(
   id: string,
-  opts?: { cc?: string[] },
+  opts?: { cc?: string[]; message?: string },
 ) {
   const supabase = await createClient();
   const { data: quote, error: qErr } = await supabase
@@ -481,6 +481,13 @@ export async function sendDevis(
 
     const cc = parseCcEmails(opts?.cc);
     const isEn = quote.language === "en";
+    // Optional operator note appended to the standard email body. We
+    // cap it so a stray paste can't blow up the template, and trim to
+    // drop a message that's only whitespace (treated as "no note").
+    const personalMessage =
+      typeof opts?.message === "string" && opts.message.trim()
+        ? opts.message.trim().slice(0, 2000)
+        : null;
     await resend.emails.send({
       from: `${companyName} <${fromEmail}>`,
       to: [client.email],
@@ -495,6 +502,7 @@ export async function sendDevis(
         number: quote.number,
         sender: companyName,
         locale: isEn ? "en" : "fr",
+        personalMessage,
       }),
     });
     return { ok: true as const, emailed: true, ccCount: cc.length };
@@ -515,6 +523,10 @@ function buildEmailHtml(o: {
   number: string;
   sender: string;
   locale?: "fr" | "en";
+  /** Optional operator note, rendered in a highlighted box between the
+   *  intro copy and the CTA. Null/empty → the email looks exactly like
+   *  it did before this feature. */
+  personalMessage?: string | null;
 }): string {
   const isEn = o.locale === "en";
   const greeting = o.firstName
@@ -537,6 +549,28 @@ function buildEmailHtml(o: {
   const footerCopy = isEn
     ? `Reference: ${o.number} · This email was sent in response to your request.`
     : `Référence : ${o.number} · Cet email vous a été envoyé suite à votre demande.`;
+
+  // Optional personalized note, rendered in a parchment-toned box with
+  // a grenat left border so it reads as a hand-written aside, distinct
+  // from the templated copy. We escape the text then restore newlines
+  // as <br/> so the operator's line breaks survive. Empty → no box.
+  const noteLabel = isEn ? "A word from us" : "Un mot de notre part";
+  const messageBlock = o.personalMessage
+    ? `
+      <tr>
+        <td style="padding:4px 32px 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5efe0; border-left:3px solid #8b1a1a; border-radius:6px;">
+            <tr>
+              <td style="padding:14px 18px;">
+                <p style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#8b1a1a; margin:0 0 8px;">${escape(noteLabel)}</p>
+                <p style="margin:0; font-size:14px; line-height:1.6; color:#2a1f14; white-space:pre-line;">${escape(o.personalMessage).replace(/\n/g, "<br/>")}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`
+    : "";
+
   return `
 <!doctype html>
 <html lang="${isEn ? "en" : "fr"}">
@@ -550,6 +584,7 @@ function buildEmailHtml(o: {
           <p style="margin:0 0 12px;">${escape(introCopy)}</p>
         </td>
       </tr>
+      ${messageBlock}
       <tr>
         <td style="padding:16px 32px 32px;">
           <a href="${o.link}" style="display:inline-block; padding:14px 28px; background:#8b1a1a; color:#f5efe0; text-decoration:none; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase;">

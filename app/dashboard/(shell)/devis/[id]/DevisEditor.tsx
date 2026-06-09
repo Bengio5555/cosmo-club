@@ -310,10 +310,10 @@ export function DevisEditor({
   // The actual server call still happens in `confirmSend`.
   const [sendOpen, setSendOpen] = useState(false);
 
-  function confirmSend(cc: string[]) {
+  function confirmSend(cc: string[], message: string) {
     startTransition(async () => {
       setMsg(null);
-      const res = await sendDevis(quote.id, { cc });
+      const res = await sendDevis(quote.id, { cc, message });
       if (!res.ok) {
         setMsg({ kind: "err", text: res.error });
         return;
@@ -909,9 +909,10 @@ function SendDevisDialog({
   clientEmail: string | null;
   pending: boolean;
   onCancel: () => void;
-  onConfirm: (cc: string[]) => void;
+  onConfirm: (cc: string[], message: string) => void;
 }) {
   const [ccRaw, setCcRaw] = useState("");
+  const [message, setMessage] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -940,7 +941,7 @@ function SendDevisDialog({
       setErr("Maximum 5 adresses en copie.");
       return;
     }
-    onConfirm(parts);
+    onConfirm(parts, message);
   }
 
   return (
@@ -1006,6 +1007,24 @@ function SendDevisDialog({
             />
             <span className="mt-1 block text-[10px] text-slate-500 dark:text-slate-500">
               Sépare plusieurs adresses par une virgule. Max 5.
+            </span>
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
+              Message personnalisé (optionnel)
+            </span>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={4}
+              maxLength={2000}
+              placeholder="Un petit mot, des précisions sur le devis, les prochaines étapes…"
+              className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
+            />
+            <span className="mt-1 block text-[10px] text-slate-500 dark:text-slate-500">
+              Ajouté dans un encadré au-dessus du bouton. Vide = email
+              habituel.
             </span>
           </label>
 
