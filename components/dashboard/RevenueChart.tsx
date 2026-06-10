@@ -1,36 +1,30 @@
+"use client";
+
+import { useState } from "react";
 import { formatEUR } from "@/lib/format";
 
 type Point = { month: string; total: number };
 
 /**
- * 6-month revenue area chart — pure inline SVG (server-rendered, no
- * client JS).
+ * 6-month revenue area chart — smooth emerald area, responsive height,
+ * and touch/hover interactive: drag a finger (or hover) across the
+ * chart to surface each month's CA in a tooltip, with the matching
+ * point + a vertical guide highlighted.
  *
- * Layout strategy (mobile-first): the wrapper has a fixed, responsive
- * height (shorter on phones, taller on desktop) and the SVG fills it
- * with `preserveAspectRatio="none"` — so the smooth emerald area always
- * has real vertical presence instead of collapsing into a thin
- * sparkline on narrow screens. The crisp bits — the point dots and the
- * value labels — are NOT drawn inside the (stretched) SVG; they're
- * absolutely positioned HTML overlays placed by percentage, so they
- * never distort and keep a real, readable font-size on every viewport.
- * Intermediate value labels hide on phones (only the last stays) to
- * avoid overlap on narrow screens.
+ * Layout: the SVG stretches to fill a fixed responsive height
+ * (preserveAspectRatio="none") so the area has real presence on phones;
+ * dots, labels and the tooltip are absolutely-positioned HTML overlays
+ * placed by percentage so they stay crisp and undistorted.
  */
-export function RevenueChart({
-  series,
-  max,
-}: {
-  series: Point[];
-  max: number;
-}) {
-  // SVG coordinate space (stretched to fill the wrapper).
+export function RevenueChart({ series, max }: { series: Point[]; max: number }) {
   const W = 620;
   const H = 210;
   const padX = 18;
-  const padTop = 30; // headroom so the curve never touches the top edge
+  const padTop = 30;
   const padBottom = 8;
   const n = series.length;
+
+  const [active, setActive] = useState<number | null>(null);
 
   const xs = series.map((_, i) =>
     n <= 1 ? W / 2 : padX + (i * (W - padX * 2)) / (n - 1),
@@ -39,23 +33,38 @@ export function RevenueChart({
     (p) => padTop + (1 - p.total / max) * (H - padTop - padBottom),
   );
 
-  // Smooth path via Catmull-Rom → cubic bézier.
   const linePath = smoothPath(xs, ys);
   const areaPath =
     `${linePath} L ${xs[n - 1].toFixed(1)},${(H - padBottom).toFixed(1)}` +
     ` L ${xs[0].toFixed(1)},${(H - padBottom).toFixed(1)} Z`;
-
-  const gridYs = [0, 0.5, 1].map(
-    (f) => padTop + f * (H - padTop - padBottom),
-  );
-
+  const gridYs = [0, 0.5, 1].map((f) => padTop + f * (H - padTop - padBottom));
   const pct = (v: number, span: number) => `${(v / span) * 100}%`;
+
+  // Map a pointer x (relative ratio 0..1 across the box) to a month
+  // index — even columns, one per month.
+  function pickIndex(clientX: number, rect: DOMRect) {
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    return Math.min(n - 1, Math.max(0, Math.round(ratio * (n - 1))));
+  }
+  function onMove(e: React.PointerEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setActive(pickIndex(e.clientX, rect));
+  }
 
   return (
     <div className="mt-4">
-      {/* Fixed responsive height + relative so HTML dots/labels can be
-          positioned by percentage over the stretched SVG. */}
-      <div className="relative h-40 w-full sm:h-48 lg:h-52">
+      <div
+        className="relative h-40 w-full touch-pan-y select-none sm:h-48 lg:h-52"
+        onPointerDown={onMove}
+        onPointerMove={(e) => {
+          // Mouse: follow on hover. Touch: follow while pressed (a
+          // pointermove without buttons on touch still tracks the drag).
+          if (e.pointerType !== "mouse" || e.buttons > 0 || active !== null) {
+            onMove(e);
+          }
+        }}
+        onPointerLeave={() => setActive(null)}
+      >
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
@@ -70,7 +79,6 @@ export function RevenueChart({
             </linearGradient>
           </defs>
 
-          {/* Baseline grid */}
           {gridYs.map((y, i) => (
             <line
               key={i}
@@ -85,8 +93,21 @@ export function RevenueChart({
             />
           ))}
 
-          {/* Area + line. non-scaling-stroke keeps the line an even
-              2px regardless of the non-uniform stretch. */}
+          {/* Vertical guide at the active month */}
+          {active !== null && (
+            <line
+              x1={xs[active]}
+              x2={xs[active]}
+              y1={padTop - 6}
+              y2={H - padBottom}
+              stroke="#10b981"
+              strokeWidth="1"
+              strokeDasharray="3 3"
+              vectorEffect="non-scaling-stroke"
+              opacity="0.6"
+            />
+          )}
+
           <path d={areaPath} fill="url(#rev-fill)" />
           <path
             d={linePath}
@@ -99,54 +120,72 @@ export function RevenueChart({
           />
         </svg>
 
-        {/* Point dots — HTML overlay, perfectly round at any size. */}
+        {/* Point dots */}
         {series.map((p, i) => {
-          if (p.total <= 0) return null;
+          if (p.total <= 0 && active !== i) return null;
           const isLast = i === n - 1;
+          const isActive = active === i;
           return (
             <span
               key={`dot-${p.month}`}
               className={
                 "pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full " +
-                (isLast
-                  ? "h-2.5 w-2.5 bg-emerald-500 ring-2 ring-white dark:ring-slate-900"
-                  : "h-2 w-2 border-2 border-emerald-500 bg-white dark:bg-slate-900")
+                (isActive
+                  ? "h-3 w-3 bg-emerald-400 ring-2 ring-white dark:ring-slate-900"
+                  : isLast
+                    ? "h-2.5 w-2.5 bg-emerald-500 ring-2 ring-white dark:ring-slate-900"
+                    : "h-2 w-2 border-2 border-emerald-500 bg-white dark:bg-slate-900")
               }
               style={{ left: pct(xs[i], W), top: pct(ys[i], H) }}
             />
           );
         })}
 
-        {/* Value labels — HTML overlay, crisp & readable. Intermediate
-            labels hide on phones (only the last point stays) to dodge
-            overlap on narrow screens. */}
-        {series.map((p, i) => {
-          if (p.total <= 0) return null;
-          const isLast = i === n - 1;
-          return (
-            <span
-              key={`val-${p.month}`}
-              className={
-                "pointer-events-none absolute -translate-x-1/2 -translate-y-[calc(100%+5px)] whitespace-nowrap text-[11px] font-semibold tabular-nums text-slate-600 dark:text-slate-300 sm:text-xs " +
-                (isLast ? "" : "hidden sm:block")
-              }
-              style={{ left: pct(xs[i], W), top: pct(ys[i], H) }}
-            >
-              {formatEUR(p.total)}
+        {/* Tooltip at the active point (month + value, incl. 0 €). When
+            nothing is active, the last point's value stays visible. */}
+        {active !== null ? (
+          <span
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[calc(100%+9px)] whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-center text-[11px] font-semibold tabular-nums text-white shadow-lg dark:bg-slate-800"
+            style={{
+              left: `clamp(34px, ${pct(xs[active], W)}, calc(100% - 34px))`,
+              top: pct(ys[active], H),
+            }}
+          >
+            <span className="block text-[9px] font-medium uppercase tracking-wide text-emerald-300">
+              {series[active].month}
             </span>
-          );
-        })}
+            {formatEUR(series[active].total)}
+          </span>
+        ) : (
+          series.map((p, i) => {
+            if (p.total <= 0 || i !== n - 1) return null;
+            return (
+              <span
+                key={`val-${p.month}`}
+                className="pointer-events-none absolute -translate-x-1/2 -translate-y-[calc(100%+5px)] whitespace-nowrap text-[11px] font-semibold tabular-nums text-slate-600 dark:text-slate-300 sm:text-xs"
+                style={{ left: pct(xs[i], W), top: pct(ys[i], H) }}
+              >
+                {formatEUR(p.total)}
+              </span>
+            );
+          })
+        )}
       </div>
 
-      {/* Month labels */}
+      {/* Month labels — the active one turns emerald */}
       <div
         className="mt-2 grid"
         style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
       >
-        {series.map((p) => (
+        {series.map((p, i) => (
           <span
             key={p.month}
-            className="text-center text-[11px] font-medium capitalize text-slate-500 dark:text-slate-400"
+            className={
+              "text-center text-[11px] font-medium capitalize " +
+              (active === i
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-slate-500 dark:text-slate-400")
+            }
           >
             {p.month}
           </span>
@@ -157,8 +196,8 @@ export function RevenueChart({
 }
 
 /**
- * Catmull-Rom spline → cubic-bézier "d" string. Gives the line a soft,
- * natural curve instead of hard polyline corners. Tension 0.5.
+ * Catmull-Rom spline → cubic-bézier "d" string. Soft, natural curve
+ * instead of hard polyline corners. Tension 0.5.
  */
 function smoothPath(xs: number[], ys: number[]): string {
   const n = xs.length;
