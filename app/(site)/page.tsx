@@ -6,8 +6,10 @@ import { ConceptManifesto } from "@/components/home/ConceptManifesto";
 import { Personnalisation } from "@/components/home/Personnalisation";
 import { EventsGallery } from "@/components/home/EventsGallery";
 import { ClientsMarquee } from "@/components/marquee/ClientsMarquee";
+import { Testimonials } from "@/components/home/Testimonials";
 import { CtaDevis } from "@/components/home/CtaDevis";
 import { site } from "@/lib/site";
+import { testimonials, reviewsAggregate } from "@/lib/testimonials";
 import heroHomeImg from "@/public/brand/ai/hero-home.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
 import { getPublicClientLogos } from "@/lib/server/clientLogos";
@@ -111,6 +113,28 @@ export default async function HomePage() {
         },
       ],
     },
+    // Real, verifiable Google rating (5.0 over 15 reviews) — mirrored
+    // from lib/testimonials.ts and displayed verbatim in the on-page
+    // <Testimonials> section, which Google requires for review markup.
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: reviewsAggregate.ratingValue.toFixed(1),
+      reviewCount: reviewsAggregate.reviewCount,
+      bestRating: reviewsAggregate.bestRating,
+      worstRating: 1,
+    },
+    review: testimonials.map((t) => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: t.author },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: t.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      reviewBody: t.body,
+      ...(t.date ? { datePublished: t.date } : {}),
+    })),
     sameAs: [site.instagram],
     contactPoint: {
       "@type": "ContactPoint",
@@ -136,6 +160,7 @@ export default async function HomePage() {
       <ClientsMarquee logos={clientLogos} />
       <Personnalisation paths={persoPaths} />
       <EventsGallery tiles={galleryTiles} showSeeMore />
+      <Testimonials />
       <CtaDevis />
     </>
   );
