@@ -71,8 +71,15 @@ export default async function ArticlePage({ params }: Props) {
     "@type": "BlogPosting",
     headline: article.title,
     description: article.description,
+    // article.cover can be a site-relative path (legacy covers) or an
+    // absolute Supabase Storage URL (current uploads). Only prefix the
+    // site origin for relative paths — blindly concatenating produced
+    // "https://www.cosmoclub.frhttps://…", which broke the image and
+    // disqualified every article from Google rich results.
     image: article.cover
-      ? `${site.url}${article.cover}`
+      ? article.cover.startsWith("http")
+        ? article.cover
+        : `${site.url}${article.cover}`
       : `${site.url}/opengraph-image`,
     datePublished: article.date,
     dateModified: article.date,

@@ -125,6 +125,28 @@ export function Footer() {
 
         <div className="mt-16 flex flex-col-reverse items-start justify-between gap-6 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-espresso)]/50 md:flex-row md:items-end">
           <p>© {new Date().getFullYear()} {site.name} — Tous droits réservés</p>
+          {/* Legal links — LCEN requires mentions légales reachable from
+              every page; the CGV page existed but was orphaned before. */}
+          <nav aria-label="Liens légaux" className="flex flex-wrap gap-x-5 gap-y-2">
+            <Link
+              href="/mentions-legales"
+              className="transition-colors hover:text-[color:var(--color-grenat)]"
+            >
+              Mentions légales
+            </Link>
+            <Link
+              href="/politique-de-confidentialite"
+              className="transition-colors hover:text-[color:var(--color-grenat)]"
+            >
+              Confidentialité
+            </Link>
+            <Link
+              href="/cgv"
+              className="transition-colors hover:text-[color:var(--color-grenat)]"
+            >
+              CGV
+            </Link>
+          </nav>
         </div>
       </div>
     </footer>

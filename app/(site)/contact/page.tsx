@@ -5,9 +5,9 @@ import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Devis & contact — Cosmo Club Paris, bar à cocktails événementiel",
+  title: "Devis & contact — bar à cocktails événementiel",
   description:
-    "Demandez votre devis sur-mesure en 4 questions, réponse sous 48h. Bar à cocktails et barista événementiel à Paris et en Île-de-France pour mariages, corporate et soirées privées.",
+    "Demandez votre devis sur-mesure en 4 questions, réponse sous 48 h. Bar à cocktails et barista événementiel à Paris et en Île-de-France.",
   alternates: { canonical: "/contact" },
   openGraph: {
     title: "Devis & contact — Cosmo Club Paris",

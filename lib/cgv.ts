@@ -109,7 +109,10 @@ export function renderCgvHtml(src: string): string {
     const b = raw.trim();
     if (!b) continue;
     if (b.startsWith("# ")) {
-      out.push(`<h1>${inlineBold(escape(b.slice(2)))}</h1>`);
+      // Demoted to <h2>: every page that embeds the CGV (public /cgv,
+      // the acceptance modal) already has its own <h1>, and the
+      // doc-title was creating a duplicate-H1 on-page SEO issue.
+      out.push(`<h2>${inlineBold(escape(b.slice(2)))}</h2>`);
     } else if (b.startsWith("## ")) {
       out.push(`<h2>${inlineBold(escape(b.slice(3)))}</h2>`);
     } else if (b.split("\n").every((l) => l.trim().startsWith("- "))) {

@@ -6,9 +6,9 @@ const SLUG = "/bar-a-cocktails/mariage";
 const FALLBACK_HERO = "/brand/ai/hero-bar-cocktails.png";
 
 export const metadata: Metadata = {
-  title: "Bar à cocktails mariage Paris — Mixologie événementielle",
+  title: "Bar à cocktails mariage — Paris & Île-de-France",
   description:
-    "Bar à cocktails événementiel pour votre mariage à Paris et en Île-de-France. Mixologue, scénographie, cartes signature, mocktails et personnalisation. Devis sous 24 h.",
+    "Bar à cocktails pour votre mariage à Paris et en Île-de-France : mixologue dédié, cartes signature, mocktails et personnalisation. Devis sous 24 h.",
   keywords: [
     "bar à cocktails mariage Paris",
     "bar cocktail mariage",

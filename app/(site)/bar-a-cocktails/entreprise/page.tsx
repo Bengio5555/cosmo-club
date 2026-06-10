@@ -6,9 +6,9 @@ const SLUG = "/bar-a-cocktails/entreprise";
 const FALLBACK_HERO = "/brand/ai/hero-bar.png";
 
 export const metadata: Metadata = {
-  title: "Bar à cocktails entreprise Paris — Soirée corporate, séminaire",
+  title: "Bar à cocktails entreprise & corporate Paris",
   description:
-    "Bar à cocktails événementiel pour entreprises à Paris et en Île-de-France. Lancements, soirées corporate, séminaires, cocktails de fin d'année. Carte sur mesure, scénographie de marque, devis sous 24 h.",
+    "Bar à cocktails pour entreprises à Paris : soirées corporate, séminaires, lancements. Carte sur-mesure, bar aux couleurs de votre marque. Devis 24 h.",
   keywords: [
     "bar à cocktails entreprise Paris",
     "bar à cocktails corporate",

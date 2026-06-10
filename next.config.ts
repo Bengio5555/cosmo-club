@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // Supabase Storage serves its objects with `cache-control: no-cache`,
+    // which made Vercel's image optimizer fall back to its 4h minimum
+    // and revalidate constantly. Our event/brand photos are immutable
+    // (re-uploads get new filenames), so pin a 30-day CDN TTL.
+    minimumCacheTTL: 2592000,
     // Default permissive entry for static `/brand/...` and `/_next/...`
     // paths (Next.js 16 drops the default once we declare any entry).
     localPatterns: [

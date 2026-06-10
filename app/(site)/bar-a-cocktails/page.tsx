@@ -10,11 +10,81 @@ import { IntentLinks } from "@/components/landing/IntentLinks";
 import { CtaDevis } from "@/components/home/CtaDevis";
 import heroBarImg from "@/public/brand/ai/hero-bar.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
+import { site } from "@/lib/site";
+
+// Hub-page structured data: a Service node with an OfferCatalog
+// pointing at the three specialised landing pages, plus breadcrumbs.
+// The child pages already emit their own Service via LandingPage.tsx;
+// this hub was schema-less besides the global Organization.
+const barServiceLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${site.url}/bar-a-cocktails#service`,
+  name: "Bar à cocktails événementiel — Cosmo Club Paris",
+  description:
+    "Bar à cocktails mobile événementiel haut de gamme à Paris et en Île-de-France pour mariages, soirées corporate, anniversaires et événements privés.",
+  serviceType: "Bar à cocktails événementiel",
+  provider: { "@id": `${site.url}/#organization` },
+  areaServed: [
+    { "@type": "City", name: "Paris" },
+    { "@type": "AdministrativeArea", name: "Île-de-France" },
+  ],
+  url: `${site.url}/bar-a-cocktails`,
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Formules bar à cocktails",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Bar à cocktails mariage",
+          url: `${site.url}/bar-a-cocktails/mariage`,
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Bar à cocktails entreprise",
+          url: `${site.url}/bar-a-cocktails/entreprise`,
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Bar à cocktails anniversaire",
+          url: `${site.url}/bar-a-cocktails/anniversaire`,
+        },
+      },
+    ],
+  },
+  availableChannel: {
+    "@type": "ServiceChannel",
+    serviceUrl: `${site.url}/contact`,
+    servicePhone: site.phone,
+  },
+};
+
+const barBreadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Accueil", item: site.url },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Bar à cocktails",
+      item: `${site.url}/bar-a-cocktails`,
+    },
+  ],
+};
 
 export const metadata: Metadata = {
-  title: "Bar à cocktails événementiel Paris — Mariage, Corporate, Privé",
+  title: "Bar à cocktails événementiel à Paris",
   description:
-    "Bar à cocktails mobile premium à Paris et en Île-de-France. Mixologie événementielle pour mariages, soirées d'entreprise et événements privés : quatre cartes signatures, shots, cocktails en bouteille, juice bar, bars modulables.",
+    "Bar à cocktails mobile premium à Paris et en Île-de-France : quatre cartes signatures, cocktails sur-mesure et bars modulables pour vos événements.",
   keywords: [
     "bar à cocktails événementiel",
     "bar à cocktails mariage Paris",
@@ -49,6 +119,14 @@ export default async function Page() {
   ]);
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(barServiceLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(barBreadcrumbLd) }}
+      />
       <BarHero heroSrc={heroSrc} />
       <MixologieIntro />
       <StickyCartes />

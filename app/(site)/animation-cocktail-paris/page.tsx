@@ -6,9 +6,9 @@ const SLUG = "/animation-cocktail-paris";
 const FALLBACK_HERO = "/brand/ai/bento-bar-cocktails.png";
 
 export const metadata: Metadata = {
-  title: "Animation cocktail Paris — Atelier mixologie et masterclass",
+  title: "Animation cocktail & atelier mixologie Paris",
   description:
-    "Animation cocktail et atelier mixologie à Paris : masterclass à domicile, en entreprise, team building, EVJF/EVG. Apprenez à composer vos cocktails avec un mixologue professionnel. Devis sous 24 h.",
+    "Atelier mixologie et animation cocktail à Paris : team building, EVJF/EVG, anniversaires. Composez vos cocktails avec un mixologue pro. Devis 24 h.",
   keywords: [
     "animation cocktail Paris",
     "atelier cocktail Paris",

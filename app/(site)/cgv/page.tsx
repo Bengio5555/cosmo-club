@@ -37,7 +37,10 @@ export default function CgvPage() {
       />
 
       <style>{`
-        .cgv-prose h1 { display: none; }
+        /* The markdown doc-title now renders as the first h2 (see
+           lib/cgv.ts — demoted from h1 to fix the duplicate-H1 issue);
+           it repeats the page header, so hide it visually. */
+        .cgv-prose > h2:first-child { display: none; }
         .cgv-prose h2 {
           font-family: var(--font-display);
           font-size: 1.4rem;

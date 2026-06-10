@@ -63,27 +63,24 @@ export function ClientsMarquee({
             ? // Height-locked, width-natural: every logo renders at the
               // same visual height across the row. We use Next's <Image>
               // so the source 4000×2262 PNGs get downscaled to the actual
-              // ~80px display height (≈99×56 device pixels) — was a 5+ MB
-              // payload waste before. Eager only for the first window
-              // (above-the-fold), the rest lazy as they scroll into view.
-              logoBlock!.map((logo, i) => {
-                const isFirstWindow = i < (logos.length || 6);
-                return (
-                  <Image
-                    key={`${logo.id}-${i}`}
-                    src={logo.url}
-                    alt={logo.name}
-                    width={320}
-                    height={80}
-                    sizes="(min-width: 768px) 160px, 120px"
-                    quality={80}
-                    priority={isFirstWindow}
-                    loading={isFirstWindow ? "eager" : "lazy"}
-                    unoptimized={false}
-                    className="h-14 w-auto min-w-[120px] max-w-[280px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100 md:h-16 md:min-w-[140px] md:max-w-[320px]"
-                  />
-                );
-              })
+              // ~80px display height. No `priority`: it was emitting 14
+              // <link rel=preload> with full srcsets in the <head>,
+              // competing with the hero for first-paint bandwidth — the
+              // marquee sits below the fold, plain lazy loading is right.
+              logoBlock!.map((logo, i) => (
+                <Image
+                  key={`${logo.id}-${i}`}
+                  src={logo.url}
+                  alt={logo.name}
+                  width={320}
+                  height={80}
+                  sizes="(min-width: 768px) 160px, 120px"
+                  quality={80}
+                  loading="lazy"
+                  unoptimized={false}
+                  className="h-14 w-auto min-w-[120px] max-w-[280px] shrink-0 object-contain opacity-80 transition-opacity hover:opacity-100 md:h-16 md:min-w-[140px] md:max-w-[320px]"
+                />
+              ))
             : wordBlock!.map((c, i) => (
                 <span
                   key={i}

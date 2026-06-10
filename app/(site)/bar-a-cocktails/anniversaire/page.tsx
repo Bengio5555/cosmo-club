@@ -6,9 +6,9 @@ const SLUG = "/bar-a-cocktails/anniversaire";
 const FALLBACK_HERO = "/brand/ai/bento-bar-cocktails.png";
 
 export const metadata: Metadata = {
-  title: "Bar à cocktails anniversaire Paris — 30, 40, 50 ans et +",
+  title: "Bar à cocktails anniversaire à Paris",
   description:
-    "Bar à cocktails événementiel pour anniversaire à Paris et en Île-de-France. Mixologue, scénographie premium, cartes signature et mocktails. Pour 30, 40, 50 ans et plus. Devis sous 24 h.",
+    "Bar à cocktails pour anniversaire à Paris et en Île-de-France — 30, 40, 50 ans. Mixologue, scénographie premium, cocktails et mocktails. Devis sous 24 h.",
   keywords: [
     "bar à cocktails anniversaire",
     "barman anniversaire Paris",

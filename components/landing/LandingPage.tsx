@@ -68,7 +68,10 @@ export function LandingPage({ config }: { config: LandingConfig }) {
     name: config.serviceJsonLd.name,
     description: config.serviceJsonLd.description,
     serviceType: config.serviceJsonLd.serviceType,
-    provider: { "@id": `${site.url}/#business` },
+    // Points at the Organization node emitted in the root layout on
+    // EVERY page — the previous `#business` target only exists on the
+    // homepage, leaving the reference dangling on landing pages.
+    provider: { "@id": `${site.url}/#organization` },
     areaServed: [
       { "@type": "City", name: "Paris" },
       { "@type": "AdministrativeArea", name: "Île-de-France" },
@@ -107,27 +110,10 @@ export function LandingPage({ config }: { config: LandingConfig }) {
     ],
   };
 
-  // HowTo schema — derived from the timeline. Google uses this to
-  // trigger the "steps" rich result (numbered cards) on procedural
-  // queries like "comment réserver un bar à cocktails pour un mariage"
-  // and AI Overviews / Perplexity favor pages with explicit HowTo
-  // structure when responding to "how do I…" prompts.
-  // Important: position is 1-indexed per schema.org spec.
-  const howToLd = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    "@id": `${canonicalUrl}#howto`,
-    name: config.howToName ?? `Comment réserver ${config.h1.toLowerCase()}`,
-    description: config.subtitle,
-    totalTime: "P14D",
-    step: config.timeline.map((s, i) => ({
-      "@type": "HowToStep",
-      position: i + 1,
-      name: s.label,
-      text: s.body,
-      url: `${canonicalUrl}#step-${i + 1}`,
-    })),
-  };
+  // NOTE: the HowTo block that used to be emitted here was removed —
+  // Google retired HowTo rich results in Sept 2023, so it produced no
+  // benefit and added ~2 KB of dead JSON-LD per landing page. The
+  // visible numbered timeline (with its #step-N anchors) stays.
 
   return (
     <>
@@ -142,10 +128,6 @@ export function LandingPage({ config }: { config: LandingConfig }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }}
       />
 
       {/* ─── Hero ────────────────────────────────────────────── */}

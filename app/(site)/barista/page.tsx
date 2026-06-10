@@ -11,11 +11,51 @@ import ubeImg from "@/public/brand/ai/latte-ube.png";
 import blueImg from "@/public/brand/ai/latte-blue.png";
 import goldenImg from "@/public/brand/ai/latte-golden.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
+import { site } from "@/lib/site";
+
+// Service + BreadcrumbList structured data. Every comparable landing
+// page (mariage, entreprise, barman privé…) emits these via
+// LandingPage.tsx — this hand-built page was the odd one out, leaving
+// the barista offer invisible in the entity graph.
+const baristaServiceLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${site.url}/barista#service`,
+  name: "Barista événementiel — Cosmo Club Paris",
+  description:
+    "Service barista événementiel haut de gamme à Paris et en Île-de-France : matcha, ube, blue et golden lattes, café de spécialité, latte art personnalisé pour mariages, corporate et soirées privées.",
+  serviceType: "Barista événementiel",
+  provider: { "@id": `${site.url}/#organization` },
+  areaServed: [
+    { "@type": "City", name: "Paris" },
+    { "@type": "AdministrativeArea", name: "Île-de-France" },
+  ],
+  url: `${site.url}/barista`,
+  availableChannel: {
+    "@type": "ServiceChannel",
+    serviceUrl: `${site.url}/contact`,
+    servicePhone: site.phone,
+  },
+};
+
+const baristaBreadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Accueil", item: site.url },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Barista événementiel",
+      item: `${site.url}/barista`,
+    },
+  ],
+};
 
 export const metadata: Metadata = {
-  title: "Barista événementiel Paris — Matcha, Ube, Latte Art sur mesure",
+  title: "Barista événementiel Paris — matcha & latte art",
   description:
-    "Service barista événementiel haut de gamme à Paris et en Île-de-France. Matcha, Ube, Blue & Golden Lattes, café de spécialité, latte art personnalisé, stands sur-mesure pour mariages, corporate et soirées privées.",
+    "Barista événementiel haut de gamme à Paris : matcha, ube, blue et golden lattes, café de spécialité et latte art personnalisé pour vos événements.",
   keywords: [
     "barista événementiel",
     "barista événementiel Paris",
@@ -54,6 +94,16 @@ export default async function Page() {
   };
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(baristaServiceLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(baristaBreadcrumbLd),
+        }}
+      />
       <BaristaHero heroSrc={heroSrc} />
       <LattesGrid lattePaths={lattePaths} />
       <StandsSection />

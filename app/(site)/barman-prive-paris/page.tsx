@@ -6,9 +6,9 @@ const SLUG = "/barman-prive-paris";
 const FALLBACK_HERO = "/brand/ai/hero-bar-cocktails.png";
 
 export const metadata: Metadata = {
-  title: "Barman privé Paris — Service mixologue à domicile et événement",
+  title: "Barman privé Paris — mixologue à domicile",
   description:
-    "Barman privé à Paris et en Île-de-France pour vos événements à domicile, anniversaires, dîners et soirées privées. Mixologues professionnels, cartes signature, prestation clé en main. Devis sous 24 h.",
+    "Barman privé à Paris et en Île-de-France : mixologue professionnel pour soirées à domicile, dîners et réceptions privées. Clé en main, devis 24 h.",
   keywords: [
     "barman privé Paris",
     "barman à domicile Paris",
