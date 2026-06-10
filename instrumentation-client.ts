@@ -41,6 +41,14 @@ Sentry.init({
     // Safari ITP / private mode storage refusals; surface only if it
     // becomes a real product issue.
     "QuotaExceededError",
+    // Transient network failures bubbling to the global handler:
+    // "Load failed" (Safari/WebKit/Arc) and "Failed to fetch"
+    // (Chromium) are aborted/dropped fetches — flaky connection, tab
+    // closed mid-request, or an extension blocking a call. Not app
+    // bugs, and they'd otherwise be the top noise source on mobile.
+    "Load failed",
+    "Failed to fetch",
+    /NetworkError when attempting to fetch/i,
   ],
   /**
    * Drop entire events whose request URL points at a third-party
