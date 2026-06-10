@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { testimonials, reviewsAggregate } from "@/lib/testimonials";
+import { testimonials } from "@/lib/testimonials";
 
 // Five gold stars — decorative; rating is also stated in a sr-only label.
 function Stars() {
@@ -92,12 +92,7 @@ export function Testimonials() {
               className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 font-display text-3xl leading-tight md:text-4xl"
             >
               5,0 sur Google
-              <span className="inline-flex items-center gap-2">
-                <Stars />
-                <span className="text-sm font-sans text-[color:var(--color-cream)]/65">
-                  {reviewsAggregate.reviewCount} avis
-                </span>
-              </span>
+              <Stars />
             </h2>
           </div>
 
