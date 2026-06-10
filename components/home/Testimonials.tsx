@@ -11,7 +11,7 @@ function Stars() {
         <svg
           key={i}
           viewBox="0 0 20 20"
-          className="h-3.5 w-3.5 fill-[color:var(--color-or)]"
+          className="h-3.5 w-3.5 fill-[color:var(--color-or-deep)]"
         >
           <path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.6l-4.94 2.6.94-5.5-4-3.9 5.53-.8z" />
         </svg>
@@ -32,7 +32,7 @@ function Arrow({
       type="button"
       onClick={onClick}
       aria-label={dir === "left" ? "Avis précédents" : "Avis suivants"}
-      className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-or)]/30 text-[color:var(--color-or)] transition hover:bg-[color:var(--color-or)]/10 active:scale-95"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-grenat)]/30 text-[color:var(--color-grenat)] transition hover:bg-[color:var(--color-grenat)]/10 active:scale-95"
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth={1.8}>
         {dir === "left" ? (
@@ -47,10 +47,10 @@ function Arrow({
 
 /**
  * Real 5-star Google reviews (see lib/testimonials.ts) shown as a compact
- * horizontal carousel with prev/next controls. Visible social proof +
- * citable structured content for AI search; the matching
- * AggregateRating/Review JSON-LD lives on the home page's business node,
- * sourced from the same data file.
+ * horizontal carousel with prev/next controls. Light cream surface to
+ * match the adjacent ClientsMarquee band. Visible social proof + citable
+ * structured content for AI search; the matching AggregateRating/Review
+ * JSON-LD lives on the home page's business node, from the same data.
  */
 export function Testimonials() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -68,24 +68,15 @@ export function Testimonials() {
     <section
       id="avis"
       aria-labelledby="avis-title"
-      className="relative overflow-hidden bg-[color:var(--color-ink-text)] py-16 text-[color:var(--color-cream)] md:py-20"
+      className="border-y border-[color:var(--color-ash-warm)] bg-[color:var(--color-cream)] py-16 text-[color:var(--color-ink-text)] md:py-20"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{
-          backgroundImage:
-            "radial-gradient(ellipse at 12% 0%, rgba(201,169,97,0.12), transparent 50%), radial-gradient(ellipse at 88% 100%, rgba(139,26,26,0.22), transparent 55%)",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-[1400px] px-6 md:px-10">
+      <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         {/* Header: rating on the left, nav arrows on the right */}
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.32em] font-medium text-[color:var(--color-or)]">
-              <span className="mr-3 inline-block h-px w-12 align-middle bg-[color:var(--color-or)] opacity-70" />
-              Ils nous ont fait confiance
+            <p className="text-[11px] uppercase tracking-[0.32em] font-medium text-[color:var(--color-grenat)]">
+              <span className="mr-3 inline-block h-px w-12 align-middle bg-[color:var(--color-grenat)] opacity-70" />
+              Avis clients
             </p>
             <h2
               id="avis-title"
@@ -111,25 +102,25 @@ export function Testimonials() {
             <figure
               key={t.author}
               data-card
-              className="flex h-[280px] w-[300px] shrink-0 snap-start flex-col rounded-2xl border border-[color:var(--color-or)]/15 bg-white/[0.04] p-6 backdrop-blur-sm sm:w-[340px]"
+              className="flex h-[280px] w-[300px] shrink-0 snap-start flex-col rounded-2xl border border-[color:var(--color-ash-warm)] bg-[color:var(--color-bone)] p-6 shadow-[0_1px_3px_rgba(42,31,20,0.06)] sm:w-[340px]"
             >
               <div className="flex items-center justify-between gap-3">
                 <Stars />
                 {t.context && (
-                  <span className="rounded-full border border-[color:var(--color-or)]/25 px-2.5 py-1 text-[9px] uppercase tracking-[0.16em] text-[color:var(--color-or)]">
+                  <span className="rounded-full border border-[color:var(--color-or-deep)]/40 px-2.5 py-1 text-[9px] uppercase tracking-[0.16em] text-[color:var(--color-or-deep)]">
                     {t.context}
                   </span>
                 )}
               </div>
               <span className="sr-only">Note : 5 étoiles sur 5.</span>
-              <blockquote className="mt-4 flex-1 overflow-hidden text-[14px] leading-relaxed text-[color:var(--color-cream)]/90 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:6]">
+              <blockquote className="mt-4 flex-1 overflow-hidden text-[14px] leading-relaxed text-[color:var(--color-espresso)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:6]">
                 {t.body}
               </blockquote>
-              <figcaption className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 text-sm">
-                <span className="font-medium text-[color:var(--color-cream)]">
+              <figcaption className="mt-5 flex items-center justify-between border-t border-[color:var(--color-ash-warm)] pt-4 text-sm">
+                <span className="font-medium text-[color:var(--color-ink-text)]">
                   {t.author}
                 </span>
-                <span className="text-[color:var(--color-cream)]/45">
+                <span className="text-[color:var(--color-espresso)]/55">
                   {t.dateLabel}
                 </span>
               </figcaption>
