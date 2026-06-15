@@ -35,6 +35,19 @@ Sentry.init({
     // sandbox. We can't fix what we can't reach.
     /chrome-extension:\/\//i,
     /moz-extension:\/\//i,
+    // Extension globals injected into the page scope, so they report
+    // with our own URL as the culprit (denyUrls can't catch them) —
+    // these were the entire top of our Sentry noise (~90% of events,
+    // all from clients opening /briefing in their own browsers):
+    //   - __firefox__         → Firefox iOS reader-mode injection
+    //   - window.ethereum     → crypto wallet extensions (MetaMask…)
+    //   - DarkReader          → Dark Reader extension
+    /__firefox__/i,
+    /window\.ethereum/i,
+    /\bethereum\b.*selectedAddress/i,
+    /DarkReader/i,
+    // Our own one-off connectivity test fired from the Sentry setup.
+    /\[sentry-test\]/i,
     "ChunkLoadError",
     // User left the tab mid-fetch; aborting is expected, not a crash.
     "AbortError",
