@@ -242,19 +242,25 @@ export default async function EventDetailPage({
         />
       </div>
 
-      <div className="grid gap-5 px-4 pb-6 md:grid-cols-2 md:px-8">
+      <div
+        className={`grid gap-5 px-4 pb-6 md:px-8 ${isStaff ? "" : "md:grid-cols-2"}`}
+      >
         <StaffSection
           eventId={event.id}
           eventStatus={event.status}
           staffOptions={allStaff ?? []}
           assignments={assignments ?? []}
         />
-        <StockSection
-          eventId={event.id}
-          eventStatus={event.status}
-          productOptions={allProducts ?? []}
-          reservations={reservations ?? []}
-        />
+        {/* Stock réservé hidden for staff — operational/cost info they
+            don't need; section stays full-width for the other roles. */}
+        {!isStaff && (
+          <StockSection
+            eventId={event.id}
+            eventStatus={event.status}
+            productOptions={allProducts ?? []}
+            reservations={reservations ?? []}
+          />
+        )}
       </div>
 
       {/* Always await the margin promise (avoids a floating promise),
