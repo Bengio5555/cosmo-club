@@ -76,7 +76,7 @@ export default async function ShellLayout({
     <div className="dark dashboard-shell flex min-h-[100dvh] bg-slate-950 text-slate-200">
       <Sidebar role={role} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar email={user.email ?? null} />
+        <Topbar email={user.email ?? null} role={role} />
         <main className="flex-1 overflow-x-hidden pb-[max(env(safe-area-inset-bottom),0.5rem)] md:pb-0">
           {children}
         </main>
