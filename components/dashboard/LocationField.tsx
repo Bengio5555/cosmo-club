@@ -36,6 +36,10 @@ export function LocationField({
   const [mapOpen, setMapOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const justPickedRef = useRef(false);
+  // Only the user actually typing should trigger suggestions. Without
+  // this, a pre-filled value (an already-saved event location) fires the
+  // lookup on mount and the dropdown pops open on its own.
+  const typedRef = useRef(false);
 
   // Debounced lookup against the French government BAN/BAL geocoder.
   useEffect(() => {
@@ -44,6 +48,7 @@ export function LocationField({
       justPickedRef.current = false;
       return;
     }
+    if (!typedRef.current) return;
     const q = value.trim();
     if (q.length < 3) {
       setSuggestions([]);
@@ -90,6 +95,7 @@ export function LocationField({
 
   function pick(label: string) {
     justPickedRef.current = true;
+    typedRef.current = false;
     onChange(label);
     setOpen(false);
     setActiveIdx(-1);
@@ -118,9 +124,14 @@ export function LocationField({
           required={required}
           autoFocus={autoFocus}
           placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            typedRef.current = true;
+            onChange(e.target.value);
+          }}
           onFocus={() => {
-            if (suggestions.length > 0) setOpen(true);
+            // Only reopen if the user already had live suggestions from
+            // typing — never auto-open on a pre-filled value.
+            if (typedRef.current && suggestions.length > 0) setOpen(true);
           }}
           onKeyDown={(e) => {
             if (!open || suggestions.length === 0) return;
