@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/types/database";
-import { rolesForPath, type UserRole } from "@/lib/auth/roles";
+import {
+  rolesForPath,
+  defaultRouteForRole,
+  type UserRole,
+} from "@/lib/auth/roles";
 
 /**
  * Next.js 16 proxy (formerly middleware).
@@ -77,7 +81,10 @@ export async function proxy(request: NextRequest) {
       const role = (profile?.role as UserRole | undefined) ?? null;
       if (!role || !allowed.includes(role)) {
         const url = request.nextUrl.clone();
-        url.pathname = "/dashboard";
+        // Role-aware landing: staff can't open the dashboard home, so
+        // bouncing them there would loop — send them to their default
+        // allowed route instead.
+        url.pathname = defaultRouteForRole(role);
         url.searchParams.set("denied", "1");
         return NextResponse.redirect(url);
       }

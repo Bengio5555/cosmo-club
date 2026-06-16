@@ -25,18 +25,21 @@ export const TEAM_MANAGERS: UserRole[] = ["owner", "admin"];
  * If a path has no match, access is denied — be explicit.
  */
 export const ROUTE_ROLES: Record<string, UserRole[]> = {
-  // Dashboard home: everyone
-  "/dashboard": ["owner", "admin", "manager", "staff", "compta"],
+  // Dashboard home: everyone except staff. Staff (barmen/baristas) are
+  // locked down to the Événements page only — see defaultRouteForRole,
+  // which lands them there instead of here.
+  "/dashboard": ["owner", "admin", "manager", "compta"],
 
   // Operations
   "/dashboard/leads": ["owner", "admin", "manager"],
   "/dashboard/devis": ["owner", "admin", "manager", "compta"],
   "/dashboard/factures": ["owner", "admin", "compta"],
   "/dashboard/clients": ["owner", "admin", "manager", "compta"],
+  // Events: the ONLY page staff can reach.
   "/dashboard/events": ["owner", "admin", "manager", "staff"],
-  "/dashboard/cocktails": ["owner", "admin", "manager", "staff"],
+  "/dashboard/cocktails": ["owner", "admin", "manager"],
   "/dashboard/catalog": ["owner", "admin", "manager"],
-  "/dashboard/stock": ["owner", "admin", "manager", "staff"],
+  "/dashboard/stock": ["owner", "admin", "manager"],
   "/dashboard/staff": ["owner", "admin", "manager"],
   "/dashboard/providers": ["owner", "admin", "manager"],
   "/dashboard/partners": ["owner", "admin", "manager"],
@@ -80,6 +83,17 @@ export function canManageTeam(role: UserRole | null): boolean {
 }
 
 /**
+ * Where to send a user when they have no specific destination — after
+ * login, or when bounced off a forbidden route. Staff cannot access the
+ * dashboard home, so sending them there would loop; they land on the
+ * Événements page (the only thing they can open) instead.
+ */
+export function defaultRouteForRole(role: UserRole | null): string {
+  if (role === "staff") return "/dashboard/events";
+  return "/dashboard";
+}
+
+/**
  * Human-readable label for a role (used in the team table + invite UI).
  */
 export const ROLE_LABEL: Record<UserRole, string> = {
@@ -94,6 +108,6 @@ export const ROLE_DESCRIPTION: Record<UserRole, string> = {
   owner: "Tout accès, gestion d'équipe. Un seul propriétaire.",
   admin: "Tout accès dont gestion d'équipe.",
   manager: "Exploitation : leads, devis, événements, équipe, stock.",
-  staff: "Événements (planning), cocktails, stock — pour les barmen/baristas.",
+  staff: "Accès limité à la page Événements uniquement — pour les barmen/baristas.",
   compta: "Factures, devis, clients — accès financier uniquement.",
 };

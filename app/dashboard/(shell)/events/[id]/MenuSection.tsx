@@ -56,6 +56,7 @@ export function MenuSection({
   cocktailOptions,
   computed,
   existingReservationCount,
+  isStaff = false,
 }: {
   eventId: string;
   eventStatus: EventStatus;
@@ -63,6 +64,8 @@ export function MenuSection({
   cocktailOptions: CocktailOption[];
   computed: ComputedLine[];
   existingReservationCount: number;
+  /** Staff get the menu list but not the courses/stock action buttons. */
+  isStaff?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -144,7 +147,7 @@ export function MenuSection({
               : `${menu.length} recette${menu.length > 1 ? "s" : ""} · ${totalCocktails} boisson${totalCocktails > 1 ? "s" : ""} servie${totalCocktails > 1 ? "s" : ""} au total`}
           </p>
         </div>
-        {menu.length > 0 && (
+        {!isStaff && menu.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <a
               href={`/api/dashboard/events/${eventId}/courses-pdf`}

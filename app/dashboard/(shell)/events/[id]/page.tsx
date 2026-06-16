@@ -18,6 +18,7 @@ import { MenuSection } from "./MenuSection";
 import { MarginSection } from "./MarginSection";
 import { autoStartDueEvents } from "../actions";
 import { computeEventMargin } from "@/lib/server/eventMargin";
+import { getCurrentRole } from "@/lib/auth/server";
 
 type Params = Promise<{ id: string }>;
 
@@ -41,6 +42,12 @@ export default async function EventDetailPage({
   if (!event) {
     notFound();
   }
+
+  // Staff (barmen/baristas) get a stripped-down view: no profitability,
+  // no client contact, no source quote — only the operational sections
+  // they need to run the event.
+  const role = await getCurrentRole();
+  const isStaff = role === "staff";
 
   // Margin breakdown — runs alongside the other queries.
   const marginPromise = computeEventMargin(supabase, event.id);
@@ -231,6 +238,7 @@ export default async function EventDetailPage({
           cocktailOptions={cocktailOptions ?? []}
           computed={computed}
           existingReservationCount={(reservations ?? []).length}
+          isStaff={isStaff}
         />
       </div>
 
@@ -249,11 +257,17 @@ export default async function EventDetailPage({
         />
       </div>
 
-      <div className="px-4 pb-6 md:px-8">
-        <MarginSection margin={await marginPromise} />
-      </div>
+      {/* Always await the margin promise (avoids a floating promise),
+          but only render the profitability block for non-staff roles. */}
+      {await marginPromise.then((margin) =>
+        isStaff ? null : (
+          <div className="px-4 pb-6 md:px-8">
+            <MarginSection margin={margin} />
+          </div>
+        ),
+      )}
 
-      {(client || quote) && (
+      {!isStaff && (client || quote) && (
         <div className="border-t border-slate-100 dark:border-slate-900 px-4 py-6 md:px-8">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {client && (
