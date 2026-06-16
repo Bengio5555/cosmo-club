@@ -12,6 +12,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [sent, setSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +52,46 @@ export function LoginForm() {
       return;
     }
     setSent(true);
+  }
+
+  // Create / reset a password. Sends a recovery email pointing at the
+  // auth callback with next=/dashboard/auth/set-password, where the user
+  // chooses a password. Works even if they never had one — afterwards
+  // they can sign in with the password tab and skip email links entirely.
+  async function sendPasswordReset() {
+    if (!email) {
+      setError("Entre d'abord ton adresse email ci-dessus.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+    const redirectTo = `${window.location.origin}/dashboard/auth/callback?next=${encodeURIComponent(
+      "/dashboard/auth/set-password",
+    )}`;
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+    setLoading(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    setResetSent(true);
+  }
+
+  if (resetSent) {
+    return (
+      <div className="rounded-md border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
+        ✅ Email envoyé à <span className="text-white">{email}</span>.
+        <br />
+        <span className="mt-2 block text-xs text-neutral-500">
+          Ouvre le dernier email et clique sur le lien pour définir ton mot
+          de passe. Astuce&nbsp;: ouvre-le sur ordinateur si le lien échoue
+          depuis Mail sur iPhone.
+        </span>
+      </div>
+    );
   }
 
   if (sent) {
@@ -130,6 +171,14 @@ export function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-[color:var(--color-grenat)] focus:outline-none"
             />
+            <button
+              type="button"
+              onClick={sendPasswordReset}
+              disabled={loading}
+              className="mt-1.5 text-[11px] text-neutral-400 underline decoration-dotted underline-offset-2 transition-colors hover:text-white disabled:opacity-50"
+            >
+              Créer ou réinitialiser mon mot de passe
+            </button>
           </label>
         )}
 
