@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
-import type { UserRole } from "@/lib/auth/roles";
 import logoSrc from "@/public/brand/cosmo-logo.avif";
 
 /**
@@ -15,19 +14,8 @@ import logoSrc from "@/public/brand/cosmo-logo.avif";
  * status bar / notch when installed as a PWA. Desktop: shows the
  * user email and a labelled logout button.
  */
-export function Topbar({
-  email,
-  role,
-}: {
-  email: string | null;
-  role: UserRole;
-}) {
+export function Topbar({ email }: { email: string | null }) {
   const router = useRouter();
-  // Staff (Équipe) only have the Événements page — a global search across
-  // clients/devis/factures/… is pointless and confusing for them (and a
-  // path to forbidden pages), so it's hidden. The API behind it is RLS-
-  // gated anyway, so staff results would be empty regardless.
-  const canSearch = role !== "staff";
 
   async function handleLogout() {
     const supabase = createClient();
@@ -62,7 +50,7 @@ export function Topbar({
         <div className="hidden flex-1 md:block" />
 
         <div className="flex items-center gap-2 md:gap-3">
-          {canSearch && <GlobalSearch />}
+          <GlobalSearch />
           {email && (
             <span className="hidden text-xs text-slate-500 dark:text-slate-500 lg:inline">
               {email}
