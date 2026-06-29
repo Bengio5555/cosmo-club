@@ -21,7 +21,15 @@ export type InvoiceRow = {
   who: string;
   /** Sum of payments recorded against this invoice. */
   paid: number;
+  /** Sum of credit notes (avoirs) offsetting this invoice. */
+  credited: number;
 };
+
+/** Amount still owed: total minus payments minus credit notes, floored at 0. */
+function remainingOf(r: InvoiceRow): number {
+  if (r.is_credit_note) return 0;
+  return Math.round((Number(r.total_ttc) - r.paid - r.credited) * 100) / 100;
+}
 
 /**
  * Invoice list with instant client-side search (number + client name).
@@ -58,7 +66,7 @@ export function FacturesBrowser({
       if (!r.is_credit_note) {
         paid += r.paid;
         if (r.status !== "annule") {
-          remaining += Math.max(0, Number(r.total_ttc ?? 0) - r.paid);
+          remaining += Math.max(0, remainingOf(r));
         }
       }
     }
@@ -116,14 +124,14 @@ export function FacturesBrowser({
             </thead>
             <tbody>
               {visible.map((inv) => {
+                const remaining = remainingOf(inv);
+                // A fully-credited invoice is settled — don't flag it overdue.
                 const overdue =
                   !inv.is_credit_note &&
                   inv.status === "envoye" &&
                   !!inv.due_date &&
-                  inv.due_date < today;
-                const remaining = inv.is_credit_note
-                  ? 0
-                  : Math.round((Number(inv.total_ttc) - inv.paid) * 100) / 100;
+                  inv.due_date < today &&
+                  remaining > 0;
                 return (
                   <tr
                     key={inv.id}
@@ -177,7 +185,9 @@ export function FacturesBrowser({
                       {inv.is_credit_note ? (
                         <span className="text-xs text-slate-400 dark:text-slate-600">—</span>
                       ) : remaining <= 0 ? (
-                        <span className="text-xs text-emerald-700 dark:text-emerald-300">Soldé</span>
+                        <span className="text-xs text-emerald-700 dark:text-emerald-300">
+                          {inv.credited > 0 && inv.paid <= 0 ? "Soldé (avoir)" : "Soldé"}
+                        </span>
                       ) : (
                         <span
                           className={`text-xs font-medium ${

@@ -77,6 +77,30 @@ export default async function InvoicesListPage({
     );
   }
 
+  // Credit notes (avoirs) offset what's still owed on their source
+  // invoice. Queried independently of the date/type filter so a credit
+  // always cancels its invoice's "reste", even if the avoir falls
+  // outside the current view. Cancelled avoirs don't count.
+  const nonCreditIds = (invoices ?? [])
+    .filter((i) => !i.is_credit_note)
+    .map((i) => i.id);
+  const { data: creditNotes } = nonCreditIds.length
+    ? await supabase
+        .from("invoices")
+        .select("source_invoice_id,total_ttc,status")
+        .eq("is_credit_note", true)
+        .in("source_invoice_id", nonCreditIds)
+    : { data: [] };
+  const creditedByInvoice = new Map<string, number>();
+  for (const c of creditNotes ?? []) {
+    if (!c.source_invoice_id || c.status === "annule") continue;
+    creditedByInvoice.set(
+      c.source_invoice_id,
+      (creditedByInvoice.get(c.source_invoice_id) ?? 0) +
+        Math.abs(Number(c.total_ttc ?? 0)),
+    );
+  }
+
   // Prepare row view-models (resolve client name + payments) so the
   // client-side browser can search/filter and total without re-querying.
   const rows: InvoiceRow[] = (invoices ?? []).map((inv) => {
@@ -96,6 +120,7 @@ export default async function InvoicesListPage({
       is_credit_note: inv.is_credit_note,
       who,
       paid: paidByInvoice.get(inv.id) ?? 0,
+      credited: creditedByInvoice.get(inv.id) ?? 0,
     };
   });
   const hasServerFilter = !!(from || to || (kind && kind !== "all"));
