@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, Loader2, Plus, Trash2 } from "lucide-react";
 import {
   type EventExtraCosts,
-  type Supplement,
+  type CostLine,
   extraCostTotal,
 } from "@/lib/extraCosts";
 import { formatEUR } from "@/lib/format";
@@ -13,8 +13,8 @@ import { saveEventExtraCosts } from "../actions";
 
 /**
  * Editable additional-charges block under the margin: glassware rental,
- * ice, and any number of free-form supplements (description + amount).
- * Saving refreshes the page so the margin recomputes with the new costs.
+ * ice and any number of free-form supplements — each with a description
+ * and an amount. Saving refreshes the page so the margin recomputes.
  */
 export function ExtraCostsEditor({
   eventId,
@@ -24,31 +24,23 @@ export function ExtraCostsEditor({
   initial: EventExtraCosts;
 }) {
   const router = useRouter();
-  const [verrerie, setVerrerie] = useState<string>(
-    initial.verrerie ? String(initial.verrerie) : "",
-  );
-  const [glacons, setGlacons] = useState<string>(
-    initial.glacons ? String(initial.glacons) : "",
-  );
-  const [supplements, setSupplements] = useState<Supplement[]>(
-    initial.supplements.length ? initial.supplements : [],
+  const [verrerie, setVerrerie] = useState<CostLine>(initial.verrerie);
+  const [glacons, setGlacons] = useState<CostLine>(initial.glacons);
+  const [supplements, setSupplements] = useState<CostLine[]>(
+    initial.supplements,
   );
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(
     null,
   );
 
-  const current: EventExtraCosts = {
-    verrerie: Number(verrerie) || 0,
-    glacons: Number(glacons) || 0,
-    supplements,
-  };
+  const current: EventExtraCosts = { verrerie, glacons, supplements };
   const total = extraCostTotal(current);
 
   function addSupplement() {
     setSupplements((prev) => [...prev, { description: "", amount: 0 }]);
   }
-  function patchSupplement(idx: number, patch: Partial<Supplement>) {
+  function patchSupplement(idx: number, patch: Partial<CostLine>) {
     setSupplements((prev) =>
       prev.map((s, i) => (i === idx ? { ...s, ...patch } : s)),
     );
@@ -96,17 +88,27 @@ export function ExtraCostsEditor({
         </button>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <AmountField
-          label="Location verrerie (€ HT)"
-          value={verrerie}
-          onChange={setVerrerie}
-        />
-        <AmountField
-          label="Glaçons (€ HT)"
-          value={glacons}
-          onChange={setGlacons}
-        />
+      <div className="mt-4 space-y-3">
+        <div>
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
+            Location verrerie
+          </span>
+          <CostRow
+            line={verrerie}
+            placeholder="Description (ex. Acaris, commande n°…)"
+            onChange={setVerrerie}
+          />
+        </div>
+        <div>
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
+            Glaçons
+          </span>
+          <CostRow
+            line={glacons}
+            placeholder="Description (ex. 10 sacs, Mondial Glaçons…)"
+            onChange={setGlacons}
+          />
+        </div>
       </div>
 
       <div className="mt-4">
@@ -131,38 +133,13 @@ export function ExtraCostsEditor({
         ) : (
           <ul className="space-y-2">
             {supplements.map((s, idx) => (
-              <li
-                key={idx}
-                className="grid grid-cols-[minmax(0,1fr)_110px_28px] items-center gap-2"
-              >
-                <input
-                  type="text"
-                  value={s.description}
-                  onChange={(e) =>
-                    patchSupplement(idx, { description: e.target.value })
-                  }
+              <li key={idx}>
+                <CostRow
+                  line={s}
                   placeholder="Description (ex. Transport, décoration…)"
-                  className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600"
+                  onChange={(next) => patchSupplement(idx, next)}
+                  onRemove={() => removeSupplement(idx)}
                 />
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={s.amount || ""}
-                  onChange={(e) =>
-                    patchSupplement(idx, { amount: Number(e.target.value) || 0 })
-                  }
-                  placeholder="€ HT"
-                  className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-right text-sm text-slate-900 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeSupplement(idx)}
-                  aria-label="Retirer le supplément"
-                  className="shrink-0 rounded p-1 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
               </li>
             ))}
           </ul>
@@ -185,29 +162,54 @@ export function ExtraCostsEditor({
   );
 }
 
-function AmountField({
-  label,
-  value,
+function CostRow({
+  line,
+  placeholder,
   onChange,
+  onRemove,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
+  line: CostLine;
+  placeholder?: string;
+  onChange: (next: CostLine) => void;
+  onRemove?: () => void;
 }) {
   return (
-    <label className="block">
-      <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
-        {label}
-      </span>
+    <div
+      className={
+        "grid items-center gap-2 " +
+        (onRemove
+          ? "grid-cols-[minmax(0,1fr)_110px_28px]"
+          : "grid-cols-[minmax(0,1fr)_110px]")
+      }
+    >
+      <input
+        type="text"
+        value={line.description}
+        onChange={(e) => onChange({ ...line, description: e.target.value })}
+        placeholder={placeholder ?? "Description (optionnel)"}
+        className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600"
+      />
       <input
         type="number"
         min="0"
         step="0.01"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="0"
-        className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-right text-sm text-slate-900 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+        value={line.amount || ""}
+        onChange={(e) =>
+          onChange({ ...line, amount: Number(e.target.value) || 0 })
+        }
+        placeholder="€ HT"
+        className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-right text-sm text-slate-900 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
       />
-    </label>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label="Retirer la ligne"
+          className="shrink-0 rounded p-1 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </div>
   );
 }
