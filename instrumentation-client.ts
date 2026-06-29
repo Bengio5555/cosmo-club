@@ -48,6 +48,19 @@ Sentry.init({
     /DarkReader/i,
     // Our own one-off connectivity test fired from the Sentry setup.
     /\[sentry-test\]/i,
+    // React DOM mutation crashes during node cleanup — the stack is
+    // entirely inside react-dom (commitDeletionEffectsOnFiber →
+    // removeChild/insertBefore), never our code. Caused by an external
+    // agent mutating the DOM out from under React: Google Translate,
+    // browser extensions, or headless crawlers (our occurrences came
+    // from a HeadlessChrome bot in a datacenter).
+    /removeChild/i,
+    /insertBefore/i,
+    "The node to be removed is not a child of this node",
+    // Stale Server Action reference: fires when a visitor had the page
+    // open across a deploy and posts to an action id that no longer
+    // exists. Self-heals on refresh — not an app bug.
+    /Failed to find Server Action/i,
     "ChunkLoadError",
     // User left the tab mid-fetch; aborting is expected, not a crash.
     "AbortError",
