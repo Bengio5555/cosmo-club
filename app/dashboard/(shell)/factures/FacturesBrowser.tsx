@@ -15,6 +15,7 @@ export type InvoiceRow = {
   status: InvoiceStatus;
   issue_date: string;
   due_date: string | null;
+  event_date: string | null;
   total_ttc: number;
   is_credit_note: boolean;
   /** Resolved client display name (server-side). */
@@ -113,6 +114,7 @@ export function FacturesBrowser({
               <tr>
                 <th className="px-3 py-2.5 font-medium md:px-4">Numéro</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Client</th>
+                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Événement</th>
                 <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Émise</th>
                 <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Échéance</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Statut</th>
@@ -152,6 +154,13 @@ export function FacturesBrowser({
                     </td>
                     <td data-label="Client" className="px-3 py-3 text-slate-700 dark:text-slate-200 md:px-4">
                       {inv.who}
+                    </td>
+                    <td data-label="Événement" className="hidden px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:table-cell md:px-4">
+                      {inv.event_date ? (
+                        formatDateFR(inv.event_date)
+                      ) : (
+                        <span className="text-slate-400 dark:text-slate-600">—</span>
+                      )}
                     </td>
                     <td data-label="Émise" className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-400 md:table-cell md:px-4">
                       {formatDateFR(inv.issue_date)}
