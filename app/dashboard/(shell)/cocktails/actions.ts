@@ -42,6 +42,57 @@ export async function saveNewCocktail(input: CocktailInput) {
   return { ok: true as const, id: data.id };
 }
 
+/**
+ * Duplicate a recipe: clones the cocktail (name suffixed "(copie)") and
+ * all its ingredients into a fresh, non-archived recipe. Returns the new
+ * id so the caller can navigate straight into the copy.
+ */
+export async function duplicateCocktail(id: string) {
+  const supabase = await createClient();
+
+  const { data: src, error: srcErr } = await supabase
+    .from("cocktails")
+    .select("name,description,category")
+    .eq("id", id)
+    .maybeSingle();
+  if (srcErr || !src) {
+    return { ok: false as const, error: srcErr?.message ?? "Recette introuvable" };
+  }
+
+  const { data: created, error: insErr } = await supabase
+    .from("cocktails")
+    .insert({
+      name: `${src.name} (copie)`,
+      description: src.description,
+      category: src.category,
+    })
+    .select("id")
+    .single();
+  if (insErr || !created) {
+    return { ok: false as const, error: insErr?.message ?? "Duplication échouée" };
+  }
+
+  const { data: ings } = await supabase
+    .from("cocktail_ingredients")
+    .select("product_id,qty,position")
+    .eq("cocktail_id", id);
+
+  if (ings && ings.length > 0) {
+    const { error: ingErr } = await supabase.from("cocktail_ingredients").insert(
+      ings.map((i) => ({
+        cocktail_id: created.id,
+        product_id: i.product_id,
+        qty: i.qty,
+        position: i.position,
+      })),
+    );
+    if (ingErr) return { ok: false as const, error: ingErr.message };
+  }
+
+  revalidatePath("/dashboard/cocktails");
+  return { ok: true as const, id: created.id };
+}
+
 export async function saveCocktail(id: string, input: Partial<CocktailInput>) {
   const supabase = await createClient();
   const patch: Partial<{ name: string; description: string | null; category: string | null }> = {};

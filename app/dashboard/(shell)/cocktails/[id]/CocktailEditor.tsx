@@ -7,6 +7,7 @@ import {
   Archive,
   ArchiveRestore,
   Check,
+  Copy,
   GripVertical,
   Loader2,
   Plus,
@@ -16,6 +17,7 @@ import {
 import type { Tables } from "@/types/database";
 import {
   deleteCocktail,
+  duplicateCocktail,
   saveCocktail,
   saveCocktailIngredients,
   toggleCocktailArchived,
@@ -156,6 +158,25 @@ export function CocktailEditor({
     });
   }
 
+  function duplicate() {
+    if (
+      dirty &&
+      !window.confirm(
+        "Les modifications non enregistrées ne seront pas copiées. Dupliquer la version enregistrée ?",
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const res = await duplicateCocktail(cocktail.id);
+      if (!res.ok) {
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      router.push(`/dashboard/cocktails/${res.id}`);
+    });
+  }
+
   function doDelete() {
     if (!window.confirm("Supprimer définitivement cette recette ?")) return;
     startTransition(async () => {
@@ -217,6 +238,14 @@ export function CocktailEditor({
               <Check className="h-3 w-3" />
             )}
             {dirty ? "Enregistrer" : "Enregistré"}
+          </button>
+          <button
+            type="button"
+            onClick={duplicate}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+          >
+            <Copy className="h-3 w-3" /> Dupliquer
           </button>
           <button
             type="button"
