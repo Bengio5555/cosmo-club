@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentRole } from "@/lib/auth/server";
 import type { Database, TablesUpdate } from "@/types/database";
 import type { EventTodoData } from "@/lib/server/eventTodoTemplate";
+import { parseExtraCosts, type EventExtraCosts } from "@/lib/extraCosts";
 
 type EventStatus = Database["public"]["Enums"]["event_status"];
 type EventUpdate = TablesUpdate<"events">;
@@ -324,6 +326,32 @@ export async function autoStartDueEvents() {
     .eq("date", today)
     .not("start_time", "is", null)
     .lte("start_time", hhmmss);
+}
+
+/**
+ * Persist the per-event additional charges (verrerie, glaçons,
+ * suppléments) that weigh on the margin. Stored as a single JSONB blob
+ * in events.extra_costs. Restricted to finance-capable roles — staff
+ * don't see the margin and shouldn't edit its costs.
+ */
+export async function saveEventExtraCosts(
+  id: string,
+  costs: EventExtraCosts,
+) {
+  const role = await getCurrentRole();
+  if (!role || !["owner", "admin", "manager"].includes(role)) {
+    return { ok: false as const, error: "Accès non autorisé." };
+  }
+  const supabase = await createClient();
+  // Sanitise through the shared parser so we never persist junk.
+  const safe = parseExtraCosts(costs);
+  // `extra_costs` isn't in the generated types yet (added by migration,
+  // types not regenerated) — cast the patch through unknown.
+  const patch = { extra_costs: safe } as unknown as EventUpdate;
+  const { error } = await supabase.from("events").update(patch).eq("id", id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/events/${id}`);
+  return { ok: true as const };
 }
 
 export async function deleteEvent(id: string) {

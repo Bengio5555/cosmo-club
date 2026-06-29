@@ -16,9 +16,11 @@ import { StaffSection } from "./StaffSection";
 import { StockSection } from "./StockSection";
 import { MenuSection } from "./MenuSection";
 import { MarginSection } from "./MarginSection";
+import { ExtraCostsEditor } from "./ExtraCostsEditor";
 import { autoStartDueEvents } from "../actions";
 import { computeEventMargin } from "@/lib/server/eventMargin";
 import { getCurrentRole } from "@/lib/auth/server";
+import { parseExtraCosts } from "@/lib/extraCosts";
 
 type Params = Promise<{ id: string }>;
 
@@ -49,8 +51,16 @@ export default async function EventDetailPage({
   const role = await getCurrentRole();
   const isStaff = role === "staff";
 
-  // Margin breakdown — runs alongside the other queries.
-  const marginPromise = computeEventMargin(supabase, event.id);
+  // Per-event extra charges (verrerie, glaçons, suppléments). Read from
+  // the select("*") row so a not-yet-migrated `extra_costs` column is
+  // simply absent → parsed as empty (no error before the migration).
+  const extraCosts = parseExtraCosts(
+    (event as { extra_costs?: unknown }).extra_costs,
+  );
+
+  // Margin breakdown — runs alongside the other queries, folding in the
+  // extra charges so the net margin reflects them.
+  const marginPromise = computeEventMargin(supabase, event.id, extraCosts);
 
   const [
     { data: client },
@@ -267,8 +277,9 @@ export default async function EventDetailPage({
           but only render the profitability block for non-staff roles. */}
       {await marginPromise.then((margin) =>
         isStaff ? null : (
-          <div className="px-4 pb-6 md:px-8">
+          <div className="grid gap-5 px-4 pb-6 md:px-8 lg:grid-cols-2">
             <MarginSection margin={margin} />
+            <ExtraCostsEditor eventId={event.id} initial={extraCosts} />
           </div>
         ),
       )}

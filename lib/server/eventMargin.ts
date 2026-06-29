@@ -1,6 +1,12 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import {
+  type EventExtraCosts,
+  emptyExtraCosts,
+  extraCostLines,
+  extraCostTotal,
+} from "@/lib/extraCosts";
 
 export type MarginLine = {
   label: string;
@@ -21,6 +27,10 @@ export type EventMargin = {
   stockCostHt: number;
   /** Staff hourly cost: Σ (hours_done ?? hours_planned) × rate. */
   staffCostHt: number;
+  /** Additional charges (verrerie, glaçons, suppléments) total HT. */
+  extraCostHt: number;
+  /** Labelled additional-charge lines for the breakdown UI. */
+  extraCostLines: Array<{ label: string; amount: number }>;
   marginHt: number;
   /** marginHt / revenueNetHt × 100 (null when revenue is 0). */
   marginPct: number | null;
@@ -43,6 +53,7 @@ export type EventMargin = {
 export async function computeEventMargin(
   supabase: SupabaseClient<Database>,
   eventId: string,
+  extraCosts: EventExtraCosts = emptyExtraCosts(),
 ): Promise<EventMargin | null> {
   // 1. Event + quote (for revenue + commission rate)
   const { data: event } = await supabase
@@ -156,7 +167,10 @@ export async function computeEventMargin(
     staffCostHt = Math.round(staffCostHt * 100) / 100;
   }
 
-  const marginHt = Math.round((revenueNetHt - stockCostHt - staffCostHt) * 100) / 100;
+  const extraCostHt = extraCostTotal(extraCosts);
+  const marginHt =
+    Math.round((revenueNetHt - stockCostHt - staffCostHt - extraCostHt) * 100) /
+    100;
   const marginPct =
     revenueNetHt > 0
       ? Math.round((marginHt / revenueNetHt) * 1000) / 10
@@ -174,6 +188,8 @@ export async function computeEventMargin(
     commissionHt,
     stockCostHt,
     staffCostHt,
+    extraCostHt,
+    extraCostLines: extraCostLines(extraCosts),
     marginHt,
     marginPct,
     basis,
@@ -376,6 +392,10 @@ export async function computeEventMarginsBatch(
       commissionHt,
       stockCostHt,
       staffCostHt,
+      // The list view doesn't load per-event extra costs (kept light);
+      // only the detail page folds them in.
+      extraCostHt: 0,
+      extraCostLines: [],
       marginHt,
       marginPct,
       basis,

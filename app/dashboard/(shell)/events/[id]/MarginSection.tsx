@@ -5,6 +5,7 @@ import {
   Wine,
   Users,
   Receipt,
+  Plus,
 } from "lucide-react";
 import { formatEUR } from "@/lib/format";
 import type { EventMargin } from "@/lib/server/eventMargin";
@@ -97,6 +98,15 @@ export function MarginSection({ margin }: { margin: EventMargin | null }) {
           tone="cost"
           hint="Heures × taux horaire (override prioritaire si défini)"
         />
+        {margin.extraCostLines.map((l, i) => (
+          <Line
+            key={`extra-${i}`}
+            icon={Plus}
+            label={l.label}
+            value={-l.amount}
+            tone="cost"
+          />
+        ))}
         {margin.commissionHt > 0 && (
           <Line
             icon={Receipt}
