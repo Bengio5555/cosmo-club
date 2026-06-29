@@ -46,6 +46,9 @@ export type BriefingData = {
   dress_code: string;
   general_notes: string; // warnings, special instructions
   attachments: BriefingAttachment[];
+  /** Whether the drinks/recipes menu shows in the staff briefing.
+   *  Defaults to true (legacy briefings keep showing it). */
+  show_drinks_menu: boolean;
 };
 
 export const BRIEFING_PRESET_SCHEDULE: BriefingScheduleStep[] = [
@@ -206,6 +209,7 @@ export function emptyBriefing(): BriefingData {
     dress_code: "Chemise noire, pantalon noir, chaussures noires.",
     general_notes: "",
     attachments: [],
+    show_drinks_menu: true,
   };
 }
 
@@ -255,5 +259,7 @@ export function parseBriefing(raw: unknown): BriefingData {
     dress_code: typeof obj.dress_code === "string" ? obj.dress_code : empty.dress_code,
     general_notes: typeof obj.general_notes === "string" ? obj.general_notes : "",
     attachments,
+    // Absent (legacy rows) → true. Only an explicit false hides the menu.
+    show_drinks_menu: obj.show_drinks_menu !== false,
   };
 }

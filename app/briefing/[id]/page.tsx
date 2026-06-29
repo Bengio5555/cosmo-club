@@ -208,7 +208,8 @@ export default async function PublicBriefingPage({
         )}
 
         {/* ─── Cocktails / recettes ─── */}
-        {cocktails.length > 0 && (
+        {/* Hidden when the operator toggles off the drinks menu for this event. */}
+        {data.show_drinks_menu && cocktails.length > 0 && (
           <section className="briefing-section">
             <h2 className="briefing-h2">
               Recettes ({cocktails.length} cocktail
