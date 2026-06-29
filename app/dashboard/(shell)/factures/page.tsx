@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { formatDateFR, formatEUR } from "@/lib/format";
 import { NewInvoiceButton } from "./NewInvoiceButton";
+import { FacturesBrowser, type InvoiceRow } from "./FacturesBrowser";
 
 type SP = Promise<{ from?: string; to?: string; kind?: string }>;
 
@@ -69,6 +68,7 @@ export default async function InvoicesListPage({
       c.company_name && (c.first_name || c.last_name) ? c.company_name : c.email;
     return { id: c.id, label: name, sub: sub ?? null };
   });
+
   const paidByInvoice = new Map<string, number>();
   for (const p of payments ?? []) {
     paidByInvoice.set(
@@ -77,7 +77,28 @@ export default async function InvoicesListPage({
     );
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  // Prepare row view-models (resolve client name + payments) so the
+  // client-side browser can search/filter and total without re-querying.
+  const rows: InvoiceRow[] = (invoices ?? []).map((inv) => {
+    const client = inv.client_id ? clientsMap.get(inv.client_id) : null;
+    const who =
+      client?.company_name ||
+      [client?.first_name, client?.last_name].filter(Boolean).join(" ") ||
+      client?.email ||
+      "—";
+    return {
+      id: inv.id,
+      number: inv.number,
+      status: inv.status,
+      issue_date: inv.issue_date,
+      due_date: inv.due_date,
+      total_ttc: Number(inv.total_ttc ?? 0),
+      is_credit_note: inv.is_credit_note,
+      who,
+      paid: paidByInvoice.get(inv.id) ?? 0,
+    };
+  });
+  const hasServerFilter = !!(from || to || (kind && kind !== "all"));
 
   const exportQs = new URLSearchParams();
   if (from) exportQs.set("from", from);
@@ -86,22 +107,6 @@ export default async function InvoicesListPage({
   const exportHref = `/api/dashboard/factures/export${
     exportQs.toString() ? `?${exportQs}` : ""
   }`;
-
-  // Totals bar (sum over current filter).
-  let sumHt = 0;
-  let sumTtc = 0;
-  let sumPaid = 0;
-  let sumRemaining = 0;
-  for (const inv of invoices ?? []) {
-    sumHt += Number(inv.total_ttc ?? 0); // TTC only; HT aggregation would need a separate query
-    sumTtc += Number(inv.total_ttc ?? 0);
-    const paid = paidByInvoice.get(inv.id) ?? 0;
-    sumPaid += inv.is_credit_note ? 0 : paid;
-    if (!inv.is_credit_note && inv.status !== "annule") {
-      sumRemaining += Math.max(0, Number(inv.total_ttc ?? 0) - paid);
-    }
-  }
-  void sumHt; // placeholder, we display TTC aggregates
 
   return (
     <div className="px-6 py-6 md:px-10 md:py-8">
@@ -178,7 +183,7 @@ export default async function InvoicesListPage({
           >
             Filtrer
           </button>
-          {(from || to || (kind && kind !== "all")) && (
+          {hasServerFilter && (
             <Link
               href="/dashboard/factures"
               className="inline-flex items-center rounded-md border border-transparent px-3 py-1.5 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
@@ -189,163 +194,14 @@ export default async function InvoicesListPage({
         </div>
       </form>
 
-      {/* Totals bar */}
-      {(invoices?.length ?? 0) > 0 && (
-        <div className="mb-4 grid grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-3 text-center">
-          <Stat label={`Total TTC (${invoices?.length})`} value={formatEUR(sumTtc)} />
-          <Stat label="Encaissé" value={formatEUR(sumPaid)} tone="ok" />
-          <Stat label="Reste à encaisser" value={formatEUR(sumRemaining)} tone="pending" />
-        </div>
-      )}
-
       {error && (
         <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
           {error.message}
         </div>
       )}
 
-      <div className="table-as-cards overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
-        {invoices && invoices.length > 0 ? (
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-transparent dark:text-slate-500">
-              <tr>
-                <th className="px-3 py-2.5 font-medium md:px-4">Numéro</th>
-                <th className="px-3 py-2.5 font-medium md:px-4">Client</th>
-                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Émise</th>
-                <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Échéance</th>
-                <th className="px-3 py-2.5 font-medium md:px-4">Statut</th>
-                <th className="px-3 py-2.5 text-right font-medium md:px-4">Total TTC</th>
-                <th className="hidden px-3 py-2.5 text-right font-medium md:table-cell md:px-4">
-                  Reste
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((inv) => {
-                const client = inv.client_id ? clientsMap.get(inv.client_id) : null;
-                const who =
-                  client?.company_name ||
-                  [client?.first_name, client?.last_name].filter(Boolean).join(" ") ||
-                  client?.email ||
-                  "—";
-                const overdue =
-                  !inv.is_credit_note &&
-                  inv.status === "envoye" &&
-                  inv.due_date &&
-                  inv.due_date < today;
-                const paid = paidByInvoice.get(inv.id) ?? 0;
-                const remaining = inv.is_credit_note
-                  ? 0
-                  : Math.round((Number(inv.total_ttc) - paid) * 100) / 100;
-                return (
-                  <tr
-                    key={inv.id}
-                    className="border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-slate-900 dark:hover:bg-slate-900"
-                  >
-                    <td data-label-hidden className="px-3 py-3 md:px-4">
-                      <Link
-                        href={`/dashboard/factures/${inv.id}`}
-                        className="inline-flex items-center gap-2 font-medium text-slate-900 transition-colors hover:text-[color:var(--color-grenat)] dark:text-white dark:hover:text-[color:var(--color-grenat-glow)]"
-                      >
-                        {inv.number}
-                        {inv.is_credit_note && (
-                          <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-200">
-                            Avoir
-                          </span>
-                        )}
-                      </Link>
-                    </td>
-                    <td data-label="Client" className="px-3 py-3 text-slate-700 dark:text-slate-200 md:px-4">{who}</td>
-                    <td data-label="Émise" className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-400 md:table-cell md:px-4">
-                      {formatDateFR(inv.issue_date)}
-                    </td>
-                    <td data-label="Échéance" className="hidden px-3 py-3 text-xs md:table-cell md:px-4">
-                      {inv.due_date ? (
-                        <span className={overdue ? "text-red-600 dark:text-red-300" : "text-slate-500 dark:text-slate-400"}>
-                          {formatDateFR(inv.due_date)}
-                          {overdue && <span className="ml-1 text-red-600 dark:text-red-400">(en retard)</span>}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-500">—</span>
-                      )}
-                    </td>
-                    <td data-label="Statut" className="px-3 py-3 md:px-4">
-                      <StatusBadge
-                        status={overdue && inv.status === "envoye" ? "en_retard" : inv.status}
-                      />
-                    </td>
-                    <td
-                      data-label="Total TTC"
-                      className={`px-3 py-3 text-right font-medium md:px-4 ${
-                        inv.is_credit_note
-                          ? "text-violet-700 dark:text-violet-200"
-                          : "text-slate-900 dark:text-slate-200"
-                      }`}
-                    >
-                      {formatEUR(Number(inv.total_ttc))}
-                    </td>
-                    <td data-label="Reste" className="hidden px-3 py-3 text-right md:table-cell md:px-4">
-                      {inv.is_credit_note ? (
-                        <span className="text-xs text-slate-400 dark:text-slate-600">—</span>
-                      ) : remaining <= 0 ? (
-                        <span className="text-xs text-emerald-700 dark:text-emerald-300">Soldé</span>
-                      ) : (
-                        <span
-                          className={`text-xs font-medium ${
-                            overdue
-                              ? "text-red-600 dark:text-red-300"
-                              : "text-amber-700 dark:text-amber-300"
-                          }`}
-                        >
-                          {formatEUR(remaining)}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        ) : (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-500">
-            Aucune facture{from || to || (kind && kind !== "all") ? " sur ce filtre" : ""}.
-            Depuis un{" "}
-            <Link
-              href="/dashboard/devis"
-              className="text-slate-700 underline hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-            >
-              devis accepté
-            </Link>
-            , clique « Créer la facture » pour en générer une.
-          </div>
-        )}
+      <FacturesBrowser rows={rows} hasServerFilter={hasServerFilter} />
       </div>
-      </div>
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: "ok" | "pending";
-}) {
-  const toneCls =
-    tone === "ok"
-      ? "text-emerald-700 dark:text-emerald-300"
-      : tone === "pending"
-      ? "text-amber-700 dark:text-amber-300"
-      : "text-slate-900 dark:text-slate-100";
-  return (
-    <div>
-      <p className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-500">
-        {label}
-      </p>
-      <p className={`mt-0.5 text-sm font-semibold ${toneCls}`}>{value}</p>
     </div>
   );
 }
