@@ -21,6 +21,7 @@ import {
   toggleCocktailArchived,
   type IngredientInput,
 } from "../actions";
+import { ProductCombobox } from "./ProductCombobox";
 
 type Cocktail = Tables<"cocktails">;
 type Ingredient = Tables<"cocktail_ingredients">;
@@ -188,13 +189,6 @@ export function CocktailEditor({
     setItems((prev) => prev.filter((i) => i.localId !== localId));
   }
 
-  // Group product options by category for nicer dropdowns
-  const grouped = new Map<string, ProductOption[]>();
-  for (const p of productOptions) {
-    const arr = grouped.get(p.category) ?? [];
-    arr.push(p);
-    grouped.set(p.category, arr);
-  }
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
@@ -325,27 +319,13 @@ export function CocktailEditor({
                     className="grid grid-cols-[auto_minmax(0,1fr)_80px_60px_auto] items-center gap-2"
                   >
                     <GripVertical className="h-3.5 w-3.5 text-slate-700" />
-                    <select
+                    <ProductCombobox
                       value={i.product_id}
-                      onChange={(e) =>
-                        patchIngredient(i.localId, { product_id: e.target.value })
+                      options={productOptions}
+                      onChange={(productId) =>
+                        patchIngredient(i.localId, { product_id: productId })
                       }
-                      className="rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none"
-                    >
-                      <option value="">— Choisir un produit —</option>
-                      {Array.from(grouped.entries()).map(([cat, list]) => (
-                        <optgroup key={cat} label={cat}>
-                          {list.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.name}
-                              {p.content_per_unit && p.content_unit
-                                ? ` (${p.content_per_unit}${p.content_unit}/${p.unit})`
-                                : ` (${p.unit})`}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
+                    />
                     <input
                       type="number"
                       min="0"
