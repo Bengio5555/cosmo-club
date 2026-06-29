@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { Search, Wine } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Copy, Loader2, Search, Wine } from "lucide-react";
+import { duplicateCocktail } from "./actions";
 
 export type CocktailRow = {
   id: string;
@@ -27,6 +29,22 @@ export function CocktailsBrowser({
 }) {
   const [query, setQuery] = useState("");
   const normalized = query.trim().toLowerCase();
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [dupId, setDupId] = useState<string | null>(null);
+
+  function duplicate(id: string) {
+    setDupId(id);
+    startTransition(async () => {
+      const res = await duplicateCocktail(id);
+      if (!res.ok) {
+        setDupId(null);
+        window.alert(`Duplication impossible : ${res.error}`);
+        return;
+      }
+      router.push(`/dashboard/cocktails/${res.id}`);
+    });
+  }
 
   const { activeGroups, archivedMatches } = useMemo(() => {
     const filterPredicate = (c: CocktailRow) => {
@@ -124,10 +142,13 @@ export function CocktailsBrowser({
               {list.map((c) => {
                 const count = ingredientCount[c.id] ?? 0;
                 return (
-                  <li key={c.id}>
+                  <li
+                    key={c.id}
+                    className="flex items-center transition-colors hover:bg-slate-100 dark:hover:bg-slate-900"
+                  >
                     <Link
                       href={`/dashboard/cocktails/${c.id}`}
-                      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-100 dark:hover:bg-slate-900"
+                      className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3"
                     >
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-slate-900 dark:text-white">
@@ -150,6 +171,20 @@ export function CocktailsBrowser({
                         {count === 0 && " · à compléter"}
                       </span>
                     </Link>
+                    <button
+                      type="button"
+                      onClick={() => duplicate(c.id)}
+                      disabled={pending}
+                      title="Dupliquer cette recette"
+                      aria-label="Dupliquer cette recette"
+                      className="mr-2 shrink-0 rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-900 disabled:opacity-50 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-white"
+                    >
+                      {dupId === c.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                    </button>
                   </li>
                 );
               })}
