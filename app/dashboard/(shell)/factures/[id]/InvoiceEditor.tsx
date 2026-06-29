@@ -44,6 +44,7 @@ type EditableItem = {
   qty: number;
   unit: string;
   unit_price_ht: number;
+  discount_ht: number;
 };
 
 function uid() {
@@ -109,18 +110,28 @@ export function InvoiceEditor({
         qty: Number(i.qty ?? 1),
         unit: i.unit ?? "unité",
         unit_price_ht: Number(i.unit_price_ht ?? 0),
+        discount_ht: Number(
+          (i as { discount_ht?: number }).discount_ht ?? 0,
+        ),
       })),
   );
 
   // ─── Live totals ───
-  // Sub-total is the raw sum of line items (no per-line discount on
-  // invoice items — those were already baked into unit_price at quote
-  // → invoice conversion). The global discount % is FROZEN from the
-  // source quote and the operator cannot edit it on the invoice; we
-  // read it here to render an accurate live preview matching what the
-  // server will persist on save.
+  // Sub-total sums each line NET of its per-line discount, mirroring the
+  // DB's generated `line_total_ht` column (GREATEST(qty*price − discount,
+  // 0)) so the on-screen preview matches what the server persists and the
+  // PDF prints. The global discount % is FROZEN from the source quote and
+  // the operator cannot edit it on the invoice; we read it here to render
+  // an accurate live preview.
   const subtotalHt = useMemo(
-    () => round2(items.reduce((s, it) => s + it.qty * it.unit_price_ht, 0)),
+    () =>
+      round2(
+        items.reduce(
+          (s, it) =>
+            s + Math.max(0, it.qty * it.unit_price_ht - (it.discount_ht ?? 0)),
+          0,
+        ),
+      ),
     [items],
   );
   const discountGlobalPctNum = Math.min(
@@ -171,6 +182,7 @@ export function InvoiceEditor({
         qty: it.qty,
         unit: it.unit.trim() || null,
         unit_price_ht: it.unit_price_ht,
+        discount_ht: it.discount_ht ?? 0,
       })),
     };
   }
@@ -300,6 +312,7 @@ export function InvoiceEditor({
         qty: 1,
         unit: "unité",
         unit_price_ht: 0,
+        discount_ht: 0,
       },
     ]);
   }
@@ -893,7 +906,8 @@ function ItemRow({
   onPatch: (patch: Partial<EditableItem>) => void;
   onRemove: () => void;
 }) {
-  const total = item.qty * item.unit_price_ht;
+  const discount = item.discount_ht ?? 0;
+  const total = Math.max(0, item.qty * item.unit_price_ht - discount);
   // Grid columns: handle | title+desc | qty | unit | unit_price |
   // line_total+trash. The last column needs to fit a 4-figure euro
   // like "1 050,00 €" (~90px) plus the trash icon — a 24px column
@@ -950,6 +964,11 @@ function ItemRow({
         className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       <div className="flex items-center justify-end gap-2 md:flex-col md:items-end md:gap-1 md:pt-1">
+        {discount > 0 && (
+          <span className="whitespace-nowrap text-[10px] tabular-nums text-[color:var(--color-grenat)] md:text-[10px]">
+            remise −{formatEUR(discount)}
+          </span>
+        )}
         <span className="whitespace-nowrap text-xs font-medium tabular-nums text-slate-600 dark:text-slate-300 md:text-[11px]">
           {formatEUR(total)}
         </span>

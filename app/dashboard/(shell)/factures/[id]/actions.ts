@@ -15,6 +15,7 @@ type InvoiceItemInput = {
   qty: number;
   unit: string | null;
   unit_price_ht: number;
+  discount_ht: number;
 };
 
 export type SaveInvoiceInput = {
@@ -144,6 +145,7 @@ export async function saveInvoice(id: string, input: SaveInvoiceInput) {
           qty: item.qty,
           unit: item.unit,
           unit_price_ht: item.unit_price_ht,
+          discount_ht: item.discount_ht ?? 0,
         })
         .eq("id", item.id);
       if (error) return { ok: false as const, error: error.message };
@@ -156,6 +158,7 @@ export async function saveInvoice(id: string, input: SaveInvoiceInput) {
         qty: item.qty,
         unit: item.unit,
         unit_price_ht: item.unit_price_ht,
+        discount_ht: item.discount_ht ?? 0,
       });
       if (error) return { ok: false as const, error: error.message };
     }
