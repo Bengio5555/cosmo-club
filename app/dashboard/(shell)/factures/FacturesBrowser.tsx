@@ -66,7 +66,10 @@ export function FacturesBrowser({
       ttc += Number(r.total_ttc ?? 0);
       if (!r.is_credit_note) {
         paid += r.paid;
-        if (r.status !== "annule") {
+        // "Reste à encaisser" = only issued invoices (envoyé / en
+        // retard). Drafts and cancelled ones aren't owed yet, so they're
+        // excluded — same definition as the dashboard KPI.
+        if (r.status === "envoye" || r.status === "en_retard") {
           remaining += Math.max(0, remainingOf(r));
         }
       }

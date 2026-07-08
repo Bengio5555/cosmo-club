@@ -166,6 +166,26 @@ export default async function DashboardHome() {
     );
   }
 
+  // Credit notes (avoirs) offset what's still owed on their source
+  // invoice — same rule as the Factures page, so the two "reste à
+  // encaisser" figures agree.
+  const { data: creditNotes } = unpaidIds.length
+    ? await supabase
+        .from("invoices")
+        .select("source_invoice_id,total_ttc,status")
+        .eq("is_credit_note", true)
+        .in("source_invoice_id", unpaidIds)
+    : { data: [] };
+  const creditedByInvoice = new Map<string, number>();
+  for (const c of creditNotes ?? []) {
+    if (!c.source_invoice_id || c.status === "annule") continue;
+    creditedByInvoice.set(
+      c.source_invoice_id,
+      (creditedByInvoice.get(c.source_invoice_id) ?? 0) +
+        Math.abs(Number(c.total_ttc ?? 0)),
+    );
+  }
+
   // Event meta (staff/cocktails/stock counts per event)
   const eventIds = (upcomingEvents ?? []).map((e) => e.id);
   const cocktailWindowIds = (cocktailWindowEvents ?? []).map((e) => e.id);
@@ -264,7 +284,9 @@ export default async function DashboardHome() {
   let totalRemaining = 0;
   const invoicesWithRemaining = (unpaidInvoices ?? []).filter((inv) => {
     const paid = paidByInvoice.get(inv.id) ?? 0;
-    const remaining = Math.round((Number(inv.total_ttc) - paid) * 100) / 100;
+    const credited = creditedByInvoice.get(inv.id) ?? 0;
+    const remaining =
+      Math.round((Number(inv.total_ttc) - paid - credited) * 100) / 100;
     if (remaining > 0) {
       totalRemaining += remaining;
       return true;
