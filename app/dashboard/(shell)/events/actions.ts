@@ -7,6 +7,7 @@ import { getCurrentRole } from "@/lib/auth/server";
 import type { Database, TablesUpdate } from "@/types/database";
 import type { EventTodoData } from "@/lib/server/eventTodoTemplate";
 import { parseExtraCosts, type EventExtraCosts } from "@/lib/extraCosts";
+import { notifyTeamEventCreated } from "@/lib/server/notifyEventCreated";
 
 type EventStatus = Database["public"]["Enums"]["event_status"];
 type EventUpdate = TablesUpdate<"events">;
@@ -63,6 +64,18 @@ export async function saveNewEvent(input: EventInput) {
   if (error || !data) {
     return { ok: false as const, error: error?.message ?? "Création échouée" };
   }
+  // Notify the Équipe (best-effort, non-blocking).
+  await notifyTeamEventCreated({
+    id: data.id,
+    title: input.title.trim(),
+    date: input.date,
+    end_date:
+      input.end_date && input.end_date > input.date ? input.end_date : null,
+    start_time: clean(input.start_time),
+    end_time: clean(input.end_time),
+    location: clean(input.location),
+    guests_count: input.guests_count,
+  });
   revalidatePath("/dashboard/events");
   revalidatePath("/dashboard");
   return { ok: true as const, id: data.id };
@@ -121,6 +134,19 @@ export async function createEventFromQuote(quoteId: string) {
   if (eErr || !created) {
     return { ok: false as const, error: eErr?.message ?? "Création échouée" };
   }
+
+  // Notify the Équipe before the redirect (redirect() throws to bail out
+  // of the action, so nothing after it would run).
+  await notifyTeamEventCreated({
+    id: created.id,
+    title: quote.subject || `Événement — devis ${quote.number}`,
+    date: quote.event_date ?? new Date().toISOString().slice(0, 10),
+    end_date: quote.event_end_date,
+    start_time: null,
+    end_time: null,
+    location: quote.event_location,
+    guests_count: quote.guests_count,
+  });
 
   revalidatePath("/dashboard/events");
   revalidatePath(`/dashboard/devis/${quoteId}`);
