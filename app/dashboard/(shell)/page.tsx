@@ -46,7 +46,6 @@ export default async function DashboardHome() {
 
   // Parallel fetch
   const [
-    { data: monthInvoices },
     { data: trendInvoices },
     { data: unpaidInvoices },
     { data: pendingQuotes },
@@ -57,17 +56,15 @@ export default async function DashboardHome() {
     { data: cocktailWindowEvents },
     { data: stockWindowEvents },
   ] = await Promise.all([
+    // 6-month revenue trend (HT — chiffre d'affaires excl. VAT),
+    // attributed to the EVENT month (event_date), falling back to
+    // issue_date when an invoice has no event. Fetch anything whose
+    // event OR issue date is within the window; the current-month
+    // bucket of this series also drives the "CA du mois" KPI.
     supabase
       .from("invoices")
-      .select("id,total_ht,total_ttc,is_credit_note")
-      .gte("issue_date", firstOfMonth)
-      .neq("status", "brouillon")
-      .neq("status", "annule"),
-    // 6-month revenue trend (HT — chiffre d'affaires excl. VAT)
-    supabase
-      .from("invoices")
-      .select("issue_date,total_ht,total_ttc,is_credit_note,status")
-      .gte("issue_date", sixMonthsAgo)
+      .select("issue_date,event_date,total_ht,total_ttc,is_credit_note,status")
+      .or(`event_date.gte.${sixMonthsAgo},issue_date.gte.${sixMonthsAgo}`)
       .neq("status", "brouillon")
       .neq("status", "annule"),
     supabase
@@ -140,7 +137,9 @@ export default async function DashboardHome() {
     const monthKey = d.toISOString().slice(0, 7);
     const label = d.toLocaleDateString("fr-FR", { month: "short" });
     const total = (trendInvoices ?? [])
-      .filter((inv) => (inv.issue_date ?? "").startsWith(monthKey))
+      .filter((inv) =>
+        ((inv.event_date ?? inv.issue_date) ?? "").startsWith(monthKey),
+      )
       .reduce((sum, inv) => sum + Number(inv.total_ht ?? 0), 0);
     monthlySeries.push({ month: label, total });
   }
@@ -257,10 +256,11 @@ export default async function DashboardHome() {
 
   // KPI aggregates. "Chiffre d'affaires" is HT by French accounting
   // convention (VAT collected isn't revenue), so we sum total_ht.
-  const caMonth = (monthInvoices ?? []).reduce(
-    (s, i) => s + Number(i.total_ht ?? 0),
-    0,
-  );
+  // CA du mois = current-month bucket of the event-attributed series
+  // (same source as the chart, so card and chart always agree).
+  const caMonth = monthlySeries.length
+    ? monthlySeries[monthlySeries.length - 1].total
+    : 0;
   let totalRemaining = 0;
   const invoicesWithRemaining = (unpaidInvoices ?? []).filter((inv) => {
     const paid = paidByInvoice.get(inv.id) ?? 0;
@@ -369,7 +369,7 @@ export default async function DashboardHome() {
                   Chiffre d&apos;affaires
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  Sur les 6 derniers mois · HT
+                  Sur les 6 derniers mois · HT · par date d&apos;événement
                 </p>
               </div>
               {Math.abs(trendDelta) >= 0.5 && (
