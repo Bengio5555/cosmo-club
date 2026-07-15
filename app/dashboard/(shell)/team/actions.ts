@@ -67,7 +67,16 @@ export async function inviteMember(input: {
   }
 
   const admin = createAdminClient();
-  const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cosmoclub.fr"}/dashboard/auth/callback`;
+  // Land the invitee on the set-password step, not the dashboard home:
+  // without `next`, the callback defaults to /dashboard, which silently
+  // skips password creation (and, for a staff invite, gets bounced to
+  // /dashboard/events by the role check). /dashboard/auth/** is exempt
+  // from the proxy's role gate, so every invited role can reach it.
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cosmoclub.fr";
+  const redirectTo = `${origin}/dashboard/auth/callback?next=${encodeURIComponent(
+    "/dashboard/auth/set-password",
+  )}`;
 
   const { error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: {
