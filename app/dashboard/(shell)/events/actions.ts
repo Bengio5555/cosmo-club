@@ -357,15 +357,16 @@ export async function autoStartDueEvents() {
 /**
  * Persist the per-event additional charges (verrerie, glaçons,
  * suppléments) that weigh on the margin. Stored as a single JSONB blob
- * in events.extra_costs. Restricted to finance-capable roles — staff
- * don't see the margin and shouldn't edit its costs.
+ * in events.extra_costs. Staff are allowed: the lines double as on-site
+ * logistics ("Guillaume — 1 sac de 23 kg"), so the team fills them in
+ * too. They still never see the Rentabilité block itself.
  */
 export async function saveEventExtraCosts(
   id: string,
   costs: EventExtraCosts,
 ) {
   const role = await getCurrentRole();
-  if (!role || !["owner", "admin", "manager"].includes(role)) {
+  if (!role || !["owner", "admin", "manager", "staff"].includes(role)) {
     return { ok: false as const, error: "Accès non autorisé." };
   }
   const supabase = await createClient();

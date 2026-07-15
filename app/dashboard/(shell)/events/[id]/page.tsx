@@ -275,14 +275,17 @@ export default async function EventDetailPage({
 
       {/* Always await the margin promise (avoids a floating promise),
           but only render the profitability block for non-staff roles. */}
-      {await marginPromise.then((margin) =>
-        isStaff ? null : (
-          <div className="grid gap-5 px-4 pb-6 md:px-8 lg:grid-cols-2">
-            <MarginSection margin={margin} />
-            <ExtraCostsEditor eventId={event.id} initial={extraCosts} />
-          </div>
-        ),
-      )}
+      {/* Always await the margin promise (avoids a floating promise).
+          Staff get the charges editor (logistics info they need + can
+          fill in) but never the profitability block. */}
+      {await marginPromise.then((margin) => (
+        <div
+          className={`grid gap-5 px-4 pb-6 md:px-8 ${isStaff ? "" : "lg:grid-cols-2"}`}
+        >
+          {!isStaff && <MarginSection margin={margin} />}
+          <ExtraCostsEditor eventId={event.id} initial={extraCosts} />
+        </div>
+      ))}
 
       {!isStaff && (client || quote) && (
         <div className="border-t border-slate-100 dark:border-slate-900 px-4 py-6 md:px-8">
