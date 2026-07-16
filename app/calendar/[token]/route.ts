@@ -59,7 +59,7 @@ export async function GET(
   const { data: events } = await supabase
     .from("events")
     .select(
-      "id,title,date,start_time,end_time,location,status,guests_count,briefing,client_id,updated_at",
+      "id,title,date,end_date,start_time,end_time,location,status,guests_count,briefing,client_id,updated_at",
     )
     .gte("date", from)
     .lte("date", to)
@@ -102,10 +102,19 @@ export async function GET(
       hour: 18,
       minute: 0,
     });
-    const end = combineEventDateTime(e.date, e.end_time, {
+    // Multi-day events end on end_date. For single-day rows the end time
+    // is often *past midnight* (20:00 → 05:00 is the norm for late
+    // prestations): computing it on the start date yields DTEND < DTSTART,
+    // which calendar clients drop or render as a zero-length blob. Roll
+    // it to the next day whenever the end lands at/before the start.
+    const endDay = e.end_date && e.end_date > e.date ? e.end_date : e.date;
+    let end = combineEventDateTime(endDay, e.end_time, {
       hour: 23,
       minute: 59,
     });
+    if (end.getTime() <= start.getTime()) {
+      end = new Date(end.getTime() + 24 * 3600 * 1000);
+    }
     const descriptionParts: string[] = [];
     if (e.client_id && clientLabel.has(e.client_id)) {
       descriptionParts.push(`Client : ${clientLabel.get(e.client_id)}`);
