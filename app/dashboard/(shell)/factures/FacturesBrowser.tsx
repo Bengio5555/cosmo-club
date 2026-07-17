@@ -16,6 +16,7 @@ export type InvoiceRow = {
   issue_date: string;
   due_date: string | null;
   event_date: string | null;
+  total_ht: number;
   total_ttc: number;
   is_credit_note: boolean;
   /** Resolved client display name (server-side). */
@@ -59,11 +60,11 @@ export function FacturesBrowser({
   // Totals recompute over the visible set so the bar always matches the
   // list (date/type filter + live search).
   const totals = useMemo(() => {
-    let ttc = 0;
+    let ht = 0;
     let paid = 0;
     let remaining = 0;
     for (const r of visible) {
-      ttc += Number(r.total_ttc ?? 0);
+      ht += Number(r.total_ht ?? 0);
       if (!r.is_credit_note) {
         paid += r.paid;
         // "Reste à encaisser" = only issued invoices (envoyé / en
@@ -74,7 +75,7 @@ export function FacturesBrowser({
         }
       }
     }
-    return { ttc, paid, remaining };
+    return { ht, paid, remaining };
   }, [visible]);
 
   return (
@@ -103,7 +104,7 @@ export function FacturesBrowser({
       {/* Totals bar (over the visible set) */}
       {rows.length > 0 && (
         <div className="grid grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-3 text-center">
-          <Stat label={`Total TTC (${visible.length})`} value={formatEUR(totals.ttc)} />
+          <Stat label={`Total HT (${visible.length})`} value={formatEUR(totals.ht)} />
           <Stat label="Encaissé" value={formatEUR(totals.paid)} tone="ok" />
           <Stat label="Reste à encaisser" value={formatEUR(totals.remaining)} tone="pending" />
         </div>
@@ -121,7 +122,7 @@ export function FacturesBrowser({
                 <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Émise</th>
                 <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">Échéance</th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Statut</th>
-                <th className="px-3 py-2.5 text-right font-medium md:px-4">Total TTC</th>
+                <th className="px-3 py-2.5 text-right font-medium md:px-4">Total HT</th>
                 <th className="hidden px-3 py-2.5 text-right font-medium md:table-cell md:px-4">
                   Reste
                 </th>
@@ -184,14 +185,17 @@ export function FacturesBrowser({
                       />
                     </td>
                     <td
-                      data-label="Total TTC"
+                      data-label="Total HT"
                       className={`px-3 py-3 text-right font-medium md:px-4 ${
                         inv.is_credit_note
                           ? "text-violet-700 dark:text-violet-200"
                           : "text-slate-900 dark:text-slate-200"
                       }`}
                     >
-                      {formatEUR(Number(inv.total_ttc))}
+                      {formatEUR(Number(inv.total_ht))}
+                      <p className="text-[11px] font-normal text-slate-500 dark:text-slate-500">
+                        {formatEUR(Number(inv.total_ttc))} TTC
+                      </p>
                     </td>
                     <td data-label="Reste" className="hidden px-3 py-3 text-right md:table-cell md:px-4">
                       {inv.is_credit_note ? (

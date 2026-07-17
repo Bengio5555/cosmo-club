@@ -17,7 +17,7 @@ export default async function InvoicesListPage({
   let q = supabase
     .from("invoices")
     .select(
-      "id,number,status,issue_date,due_date,event_date,total_ttc,client_id,is_credit_note,source_invoice_id",
+      "id,number,status,issue_date,due_date,event_date,total_ht,total_ttc,client_id,is_credit_note,source_invoice_id",
     )
     .order("created_at", { ascending: false })
     .limit(300);
@@ -117,6 +117,7 @@ export default async function InvoicesListPage({
       issue_date: inv.issue_date,
       due_date: inv.due_date,
       event_date: inv.event_date,
+      total_ht: Number(inv.total_ht ?? 0),
       total_ttc: Number(inv.total_ttc ?? 0),
       is_credit_note: inv.is_credit_note,
       who,
