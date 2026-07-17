@@ -21,6 +21,8 @@ export type QuoteRow = {
   total_ht: number;
   total_ttc: number;
   client_id: string | null;
+  /** The (non-credit-note) invoice spawned from this quote, if any. */
+  invoice: { id: string; number: string; status: string } | null;
 };
 
 export type ClientLite = {
@@ -78,7 +80,13 @@ export function DevisBrowser({
     if (normalized) {
       rows = rows.filter((q) => {
         const who = clientName(q.client_id).toLowerCase();
-        const hay = [q.number, who, q.status, q.event_type ?? ""]
+        const hay = [
+          q.number,
+          who,
+          q.status,
+          q.event_type ?? "",
+          q.invoice?.number ?? "",
+        ]
           .join(" ")
           .toLowerCase();
         return hay.includes(normalized);
@@ -158,7 +166,8 @@ export function DevisBrowser({
         )}
       </p>
 
-      {/* Table card */}
+      {/* Table card — accepted quotes carry an invoicing-control tag
+          under their status (facturée / brouillon / à facturer). */}
       <div className="table-as-cards overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
         {visible.length > 0 ? (
           <table className="w-full text-left text-sm">
@@ -236,6 +245,11 @@ export function DevisBrowser({
                   </td>
                   <td data-label="Statut" className="px-4 py-3">
                     <StatusBadge status={q.status} />
+                    {q.status === "accepte" && (
+                      <div className="mt-1.5">
+                        <InvoiceTag invoice={q.invoice} />
+                      </div>
+                    )}
                   </td>
                   <td
                     data-label="Total HT"
@@ -267,5 +281,47 @@ export function DevisBrowser({
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Invoicing control for an accepted quote:
+ *  - no invoice        → amber "À facturer" (the actionable alert)
+ *  - draft invoice     → neutral "Facture en brouillon", links to it
+ *  - cancelled invoice → red "Facture annulée", links to it
+ *  - issued invoice    → emerald "Facturée · <number>", links to it
+ */
+function InvoiceTag({
+  invoice,
+}: {
+  invoice: { id: string; number: string; status: string } | null;
+}) {
+  if (!invoice) {
+    return (
+      <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+        À facturer
+      </span>
+    );
+  }
+  const cls =
+    invoice.status === "brouillon"
+      ? "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
+      : invoice.status === "annule"
+        ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300"
+        : "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300";
+  const label =
+    invoice.status === "brouillon"
+      ? "Facture en brouillon"
+      : invoice.status === "annule"
+        ? "Facture annulée"
+        : `Facturée · ${invoice.number}`;
+  return (
+    <Link
+      href={`/dashboard/factures/${invoice.id}`}
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-opacity hover:opacity-80 ${cls}`}
+      title={`Ouvrir la facture ${invoice.number}`}
+    >
+      {label}
+    </Link>
   );
 }

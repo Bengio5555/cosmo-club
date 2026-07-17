@@ -17,12 +17,36 @@ export default async function DevisListPage() {
   const clientIds = Array.from(
     new Set((quotes ?? []).map((q) => q.client_id).filter((x): x is string => !!x)),
   );
-  const { data: clientsList } = clientIds.length
-    ? await supabase
-        .from("clients")
-        .select("id,first_name,last_name,company_name,email")
-        .in("id", clientIds)
-    : { data: [] };
+  const quoteIds = (quotes ?? []).map((q) => q.id);
+  const [{ data: clientsList }, { data: invoicesList }] = await Promise.all([
+    clientIds.length
+      ? supabase
+          .from("clients")
+          .select("id,first_name,last_name,company_name,email")
+          .in("id", clientIds)
+      : Promise.resolve({ data: [] }),
+    // Invoicing control: which quotes already have their invoice, and in
+    // what state. Credit notes excluded — they never represent "the"
+    // invoice of a quote.
+    quoteIds.length
+      ? supabase
+          .from("invoices")
+          .select("id,quote_id,number,status")
+          .eq("is_credit_note", false)
+          .in("quote_id", quoteIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const invoiceByQuote = new Map(
+    (invoicesList ?? [])
+      .filter((i) => i.quote_id)
+      .map((i) => [
+        i.quote_id as string,
+        { id: i.id, number: i.number, status: i.status as string },
+      ]),
+  );
+  const rows: QuoteRow[] = ((quotes ?? []) as Omit<QuoteRow, "invoice">[]).map(
+    (q) => ({ ...q, invoice: invoiceByQuote.get(q.id) ?? null }),
+  );
 
   // Aggregates for the small stats row. The "Signés" pill shows both
   // the count AND the cumulative HT of accepted quotes (chiffre
@@ -87,7 +111,7 @@ export default async function DevisListPage() {
 
         <div className="mt-6">
           <DevisBrowser
-            quotes={(quotes ?? []) as QuoteRow[]}
+            quotes={rows}
             clients={(clientsList ?? []) as ClientLite[]}
           />
         </div>
