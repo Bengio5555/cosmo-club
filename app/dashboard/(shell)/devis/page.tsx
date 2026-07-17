@@ -9,7 +9,7 @@ export default async function DevisListPage() {
   const { data: quotes, error } = await supabase
     .from("quotes")
     .select(
-      "id,number,status,issue_date,event_date,event_type,total_ttc,client_id",
+      "id,number,status,issue_date,event_date,event_type,total_ht,total_ttc,client_id",
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -25,13 +25,12 @@ export default async function DevisListPage() {
     : { data: [] };
 
   // Aggregates for the small stats row. The "Signés" pill shows both
-  // the count AND the cumulative TTC of accepted quotes — used to be
-  // computed across ALL statuses, which inflated the value by mixing
-  // in drafts + sent + refused. Restricting to status === "accepte"
-  // matches the count and what the label promises.
+  // the count AND the cumulative HT of accepted quotes (chiffre
+  // d'affaires is HT by French convention — VAT isn't revenue).
+  // Restricted to status === "accepte" so the value matches the count.
   const signedQuotes = (quotes ?? []).filter((q) => q.status === "accepte");
-  const signedTotalTtc = signedQuotes.reduce(
-    (s, q) => s + Number(q.total_ttc ?? 0),
+  const signedTotalHt = signedQuotes.reduce(
+    (s, q) => s + Number(q.total_ht ?? 0),
     0,
   );
   const signedCount = signedQuotes.length;
@@ -73,8 +72,8 @@ export default async function DevisListPage() {
               tone="amber"
             />
             <StatPill
-              label="Signés"
-              value={`${signedCount} · ${formatEUR(signedTotalTtc)}`}
+              label="Devis signés (HT)"
+              value={`${signedCount} · ${formatEUR(signedTotalHt)}`}
               tone="emerald"
             />
           </div>

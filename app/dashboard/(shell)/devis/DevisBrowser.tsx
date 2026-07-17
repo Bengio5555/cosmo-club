@@ -18,6 +18,7 @@ export type QuoteRow = {
   issue_date: string;
   event_date: string | null;
   event_type: EventType | null;
+  total_ht: number;
   total_ttc: number;
   client_id: string | null;
 };
@@ -191,7 +192,7 @@ export function DevisBrowser({
                   </button>
                 </th>
                 <th className="px-4 py-3 font-medium">Statut</th>
-                <th className="px-4 py-3 text-right font-medium">Total TTC</th>
+                <th className="px-4 py-3 text-right font-medium">Total HT</th>
               </tr>
             </thead>
             <tbody>
@@ -237,10 +238,13 @@ export function DevisBrowser({
                     <StatusBadge status={q.status} />
                   </td>
                   <td
-                    data-label="Total TTC"
+                    data-label="Total HT"
                     className="px-4 py-3 text-right font-medium tabular-nums text-slate-900 dark:text-slate-100"
                   >
-                    {formatEUR(q.total_ttc)}
+                    {formatEUR(q.total_ht)}
+                    <p className="text-[11px] font-normal text-slate-500 dark:text-slate-500">
+                      {formatEUR(q.total_ttc)} TTC
+                    </p>
                   </td>
                 </tr>
               ))}
