@@ -29,6 +29,7 @@ import {
   markInvoicePaid,
   deleteInvoice,
   createCreditNote,
+  linkInvoiceToQuote,
   type SaveInvoiceInput,
 } from "./actions";
 
@@ -62,11 +63,14 @@ export function InvoiceEditor({
   items: initialItems,
   sourceInvoice = null,
   creditNotes = [],
+  quoteOptions = [],
 }: {
   invoice: Invoice;
   items: InvoiceItem[];
   sourceInvoice?: SourceInvoiceRef | null;
   creditNotes?: CreditNoteRef[];
+  /** Accepted quotes this invoice can be attached to (Devis source). */
+  quoteOptions?: Array<{ id: string; label: string; taken: boolean }>;
 }) {
   const router = useRouter();
   const readOnly = invoice.status !== "brouillon";
@@ -97,6 +101,12 @@ export function InvoiceEditor({
       : "",
   );
   const [tvaRate, setTvaRate] = useState<string>(String(invoice.tva_rate ?? 20));
+
+  // "Devis source" link — metadata, saved immediately on change (works
+  // even on locked invoices; it never touches the fiscal content).
+  const [quoteLinkId, setQuoteLinkId] = useState<string>(
+    invoice.quote_id ?? "",
+  );
 
   const [items, setItems] = useState<EditableItem[]>(() =>
     initialItems
@@ -154,6 +164,25 @@ export function InvoiceEditor({
   // ─── Transition + save ───
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  function changeQuoteLink(next: string) {
+    const prev = quoteLinkId;
+    setQuoteLinkId(next);
+    startTransition(async () => {
+      const res = await linkInvoiceToQuote(invoice.id, next || null);
+      if (!res.ok) {
+        setQuoteLinkId(prev);
+        setMsg({ kind: "err", text: res.error });
+        return;
+      }
+      setMsg({
+        kind: "ok",
+        text: next ? "Facture rattachée au devis" : "Rattachement au devis retiré",
+      });
+      router.refresh();
+      setTimeout(() => setMsg(null), 3000);
+    });
+  }
 
   const [baseline, setBaseline] = useState<string>("");
   useEffect(() => {
@@ -416,6 +445,31 @@ export function InvoiceEditor({
               placeholder="Facture — Mariage Dubois 14/06/2026"
             />
           </Card>
+
+          {!isCreditNote && (
+            <Card title="Devis source">
+              <p className="mb-2 text-[11px] text-slate-500 dark:text-slate-500">
+                Rattache cette facture au devis qu&apos;elle règle — utile
+                quand elle a été émise pour une autre société (holding) que
+                celle du devis. Le suivi « À facturer » de la page Devis se
+                met à jour. Enregistré immédiatement.
+              </p>
+              <select
+                value={quoteLinkId}
+                onChange={(e) => changeQuoteLink(e.target.value)}
+                disabled={pending}
+                className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 focus:border-[color:var(--color-grenat)] focus:outline-none disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+              >
+                <option value="">— Aucun devis lié —</option>
+                {quoteOptions.map((q) => (
+                  <option key={q.id} value={q.id} disabled={q.taken}>
+                    {q.label}
+                    {q.taken ? " (déjà facturé)" : ""}
+                  </option>
+                ))}
+              </select>
+            </Card>
+          )}
 
           <Card title="Dates">
             <Row3>

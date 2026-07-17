@@ -50,6 +50,63 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
         : Promise.resolve({ data: [] }),
     ]);
 
+  // Options for the "Devis source" link selector: accepted quotes (plus
+  // whatever is currently linked, whatever its status), flagged when
+  // already claimed by another invoice. Lets the operator attach a
+  // direct invoice (e.g. billed to the client's holding) to its quote.
+  let quoteOptions: Array<{ id: string; label: string; taken: boolean }> = [];
+  if (!invoice.is_credit_note) {
+    const [{ data: quotesList }, { data: linkedInvoices }] = await Promise.all([
+      supabase
+        .from("quotes")
+        .select("id,number,status,client_id")
+        .or(
+          invoice.quote_id
+            ? `status.eq.accepte,id.eq.${invoice.quote_id}`
+            : "status.eq.accepte",
+        )
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase
+        .from("invoices")
+        .select("id,quote_id")
+        .eq("is_credit_note", false)
+        .not("quote_id", "is", null),
+    ]);
+    const takenByOther = new Set(
+      (linkedInvoices ?? [])
+        .filter((i) => i.id !== invoice.id && i.quote_id)
+        .map((i) => i.quote_id as string),
+    );
+    const qClientIds = Array.from(
+      new Set(
+        (quotesList ?? [])
+          .map((q) => q.client_id)
+          .filter((x): x is string => !!x),
+      ),
+    );
+    const { data: qClients } = qClientIds.length
+      ? await supabase
+          .from("clients")
+          .select("id,first_name,last_name,company_name,email")
+          .in("id", qClientIds)
+      : { data: [] };
+    const qClientName = new Map(
+      (qClients ?? []).map((c) => [
+        c.id,
+        c.company_name ||
+          [c.first_name, c.last_name].filter(Boolean).join(" ") ||
+          c.email ||
+          "—",
+      ]),
+    );
+    quoteOptions = (quotesList ?? []).map((q) => ({
+      id: q.id,
+      label: `${q.number} · ${q.client_id ? (qClientName.get(q.client_id) ?? "—") : "—"}`,
+      taken: takenByOther.has(q.id),
+    }));
+  }
+
   return (
     <>
       <div className="border-b border-slate-100 dark:border-slate-900 px-4 pt-6 md:px-8">
@@ -66,6 +123,7 @@ export default async function InvoiceDetailPage({ params }: { params: Params }) 
         items={items ?? []}
         sourceInvoice={sourceInvoice ?? null}
         creditNotes={creditNotes ?? []}
+        quoteOptions={quoteOptions}
       />
 
       {!invoice.is_credit_note &&

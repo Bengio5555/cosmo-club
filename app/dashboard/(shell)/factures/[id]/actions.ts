@@ -102,6 +102,68 @@ export async function createBlankInvoice(clientId: string | null) {
  * invoice has left the brouillon status (the DB trigger
  * prevent_locked_invoice_edits also enforces this at the write layer).
  */
+/**
+ * Attach (or detach) an invoice to a quote — metadata only, never the
+ * fiscal content, so it's allowed even on issued (locked) invoices.
+ * Covers the "bill the holding" case: the invoice was created directly
+ * for another company at the client's request, but it IS the quote's
+ * invoice — linking it makes the devis page's invoicing tag correct and
+ * prevents "Créer la facture" from generating a duplicate.
+ */
+export async function linkInvoiceToQuote(
+  invoiceId: string,
+  quoteId: string | null,
+) {
+  const supabase = await createClient();
+
+  const { data: invoice, error: iErr } = await supabase
+    .from("invoices")
+    .select("id,is_credit_note,quote_id")
+    .eq("id", invoiceId)
+    .maybeSingle();
+  if (iErr || !invoice) {
+    return { ok: false as const, error: iErr?.message ?? "Facture introuvable" };
+  }
+  if (invoice.is_credit_note) {
+    return { ok: false as const, error: "Un avoir ne se rattache pas à un devis." };
+  }
+
+  if (quoteId) {
+    const { data: quote } = await supabase
+      .from("quotes")
+      .select("id,status")
+      .eq("id", quoteId)
+      .maybeSingle();
+    if (!quote) {
+      return { ok: false as const, error: "Devis introuvable." };
+    }
+    // One invoice per quote: refuse if another invoice already claims it.
+    const { data: taken } = await supabase
+      .from("invoices")
+      .select("id,number")
+      .eq("quote_id", quoteId)
+      .eq("is_credit_note", false)
+      .neq("id", invoiceId)
+      .maybeSingle();
+    if (taken) {
+      return {
+        ok: false as const,
+        error: `Ce devis est déjà rattaché à la facture ${taken.number}.`,
+      };
+    }
+  }
+
+  const { error: upErr } = await supabase
+    .from("invoices")
+    .update({ quote_id: quoteId })
+    .eq("id", invoiceId);
+  if (upErr) return { ok: false as const, error: upErr.message };
+
+  revalidatePath(`/dashboard/factures/${invoiceId}`);
+  revalidatePath("/dashboard/devis");
+  return { ok: true as const };
+}
+
 export async function saveInvoice(id: string, input: SaveInvoiceInput) {
   const supabase = await createClient();
 
