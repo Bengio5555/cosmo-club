@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Download, Search } from "lucide-react";
+import { Download, Loader2, Search } from "lucide-react";
 import type { Database } from "@/types/database";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { formatDateFR, formatEUR } from "@/lib/format";
@@ -49,6 +49,37 @@ export function FacturesBrowser({
   const [query, setQuery] = useState("");
   const normalized = query.trim().toLowerCase();
   const today = new Date().toISOString().slice(0, 10);
+
+  // PDF generation is server-side and takes a moment — swap the row's
+  // download icon for a spinner while its blob is being produced.
+  const [pdfId, setPdfId] = useState<string | null>(null);
+
+  async function downloadPdf(inv: InvoiceRow) {
+    if (pdfId) return;
+    setPdfId(inv.id);
+    try {
+      const res = await fetch(`/api/dashboard/factures/${inv.id}/pdf`);
+      if (!res.ok) {
+        window.alert("Échec de la génération du PDF — réessaie.");
+        return;
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const name = /filename="([^"]+)"/.exec(cd)?.[1] ?? `${inv.number}.pdf`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.alert("Échec de la génération du PDF — réessaie.");
+    } finally {
+      setPdfId(null);
+    }
+  }
 
   const visible = useMemo(() => {
     if (!normalized) return rows;
@@ -220,14 +251,20 @@ export function FacturesBrowser({
                       )}
                     </td>
                     <td data-label-hidden className="px-2 py-3 text-right md:px-3">
-                      <a
-                        href={`/api/dashboard/factures/${inv.id}/pdf`}
+                      <button
+                        type="button"
+                        onClick={() => downloadPdf(inv)}
+                        disabled={pdfId !== null}
                         title={`Télécharger ${inv.number} en PDF`}
                         aria-label={`Télécharger ${inv.number} en PDF`}
-                        className="inline-flex rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-white"
+                        className="inline-flex rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-white"
                       >
-                        <Download className="h-3.5 w-3.5" />
-                      </a>
+                        {pdfId === inv.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Download className="h-3.5 w-3.5" />
+                        )}
+                      </button>
                     </td>
                   </tr>
                 );
