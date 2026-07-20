@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import type { Database } from "@/types/database";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { formatDateFR, formatEUR } from "@/lib/format";
@@ -126,6 +126,9 @@ export function FacturesBrowser({
                 <th className="hidden px-3 py-2.5 text-right font-medium md:table-cell md:px-4">
                   Reste
                 </th>
+                <th className="px-2 py-2.5 md:px-3">
+                  <span className="sr-only">Télécharger le PDF</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -215,6 +218,16 @@ export function FacturesBrowser({
                           {formatEUR(remaining)}
                         </span>
                       )}
+                    </td>
+                    <td data-label-hidden className="px-2 py-3 text-right md:px-3">
+                      <a
+                        href={`/api/dashboard/factures/${inv.id}/pdf`}
+                        title={`Télécharger ${inv.number} en PDF`}
+                        aria-label={`Télécharger ${inv.number} en PDF`}
+                        className="inline-flex rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-white"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </a>
                     </td>
                   </tr>
                 );

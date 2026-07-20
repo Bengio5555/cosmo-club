@@ -134,6 +134,9 @@ export default async function InvoicesListPage({
   const exportHref = `/api/dashboard/factures/export${
     exportQs.toString() ? `?${exportQs}` : ""
   }`;
+  const exportPdfHref = `/api/dashboard/factures/export-pdf${
+    exportQs.toString() ? `?${exportQs}` : ""
+  }`;
 
   return (
     <div className="px-6 py-6 md:px-10 md:py-8">
@@ -158,6 +161,14 @@ export default async function InvoicesListPage({
           >
             <Download className="h-3.5 w-3.5" />
             Exporter CSV
+          </a>
+          <a
+            href={exportPdfHref}
+            title="Télécharge un ZIP contenant le PDF de chaque facture émise sur la période filtrée (Du / Au / Type)"
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-700"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Exporter PDF (ZIP)
           </a>
           <NewInvoiceButton clients={clientPickerOptions} />
         </div>
