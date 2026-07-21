@@ -7,9 +7,9 @@ import { getAllEventTiles } from "@/lib/server/homeGallery";
 import { getPublicClientLogos } from "@/lib/server/clientLogos";
 
 export const metadata: Metadata = {
-  title: "Événements & références — Mariages, Corporate, Soirées Paris",
+  title: "Événements & références — mariages, corporate",
   description:
-    "Portfolio Cosmo Club : mariages, événements corporate, défilés, lancements de marque et soirées privées à Paris. Découvrez nos réalisations signature en bar à cocktails et barista événementiel.",
+    "Portfolio Cosmo Club : mariages, événements corporate, défilés, lancements de marque et soirées privées à Paris, en bar à cocktails et barista.",
   keywords: [
     "événementiel cocktails Paris",
     "mariage cocktail Paris",

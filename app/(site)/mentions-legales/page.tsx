@@ -8,6 +8,13 @@ export const metadata: Metadata = {
     "Mentions légales du site cosmoclub.fr : éditeur, hébergeur, propriété intellectuelle et contact.",
   alternates: { canonical: "/mentions-legales" },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: "Mentions légales — Cosmo Club Paris",
+    description:
+      "Mentions légales du site cosmoclub.fr : éditeur, hébergeur, propriété intellectuelle et contact.",
+    url: "/mentions-legales",
+    type: "website",
+  },
 };
 
 /**

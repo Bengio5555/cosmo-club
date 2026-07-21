@@ -134,6 +134,28 @@ export default async function ArticlePage({ params }: Props) {
     },
   };
 
+  // Breadcrumb parity with the service pages — the article's trail is
+  // Accueil > Blog > title.
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: site.url },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${site.url}/blog`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: article.title,
+        item: `${site.url}/blog/${article.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
       <script
@@ -143,6 +165,10 @@ export default async function ArticlePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <article className="bg-[color:var(--color-cream)]">
         <header className="bg-[color:var(--color-cream-paper)] px-6 pt-40 pb-16 md:px-10 md:pt-56 md:pb-20">

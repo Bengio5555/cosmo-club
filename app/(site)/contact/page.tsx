@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 const faqJsonLd = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "@id": "https://www.cosmoclub.fr/contact#faq",
   mainEntity: [
     {
       "@type": "Question",

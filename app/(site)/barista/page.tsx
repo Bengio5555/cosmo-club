@@ -12,6 +12,42 @@ import blueImg from "@/public/brand/ai/latte-blue.png";
 import goldenImg from "@/public/brand/ai/latte-golden.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
 import { site } from "@/lib/site";
+import {
+  FaqSection,
+  buildFaqLd,
+  type FaqItem,
+} from "@/components/site/FaqSection";
+
+// FAQ — answers stick strictly to facts already published on the site
+// (llms.txt, stands section, service pages). No invented figures.
+const baristaFaq: FaqItem[] = [
+  {
+    q: "Comment se déroule une prestation barista événementiel ?",
+    a: "L'équipe Cosmo Club gère l'intégralité de la logistique : livraison, installation du stand, service pendant l'événement et reprise du matériel. Vous n'avez rien à prévoir côté équipement — nous arrivons avec la machine, le stand, la vaisselle et les ingrédients.",
+  },
+  {
+    q: "Quelles boissons servez-vous sur un stand barista ?",
+    a: "Café de spécialité (espresso, latte, cappuccino, filtre) et nos quatre lattes signatures : Matcha, Ube, Blue et Golden. Chaque boisson peut être finie d'un latte art personnalisé au logo de votre entreprise ou au monogramme des mariés.",
+  },
+  {
+    q: "Le stand s'adapte-t-il à la taille de mon lieu et de mon événement ?",
+    a: "Oui. Trois formats de stand existent (1,8 m, 2,5 m et 3,5 m) et l'équipe compte de un à trois baristas selon le nombre d'invités et le rythme de service souhaité. Lors du devis, nous recommandons la configuration adaptée à votre effectif et à votre espace.",
+  },
+  {
+    q: "Peut-on combiner un stand barista avec un bar à cocktails ?",
+    a: "C'est même l'une de nos formules les plus demandées : bar à cocktails pour la soirée, corner barista pour l'accueil, le brunch du lendemain ou la fin de soirée. Les deux univers partagent la même direction artistique et la même équipe de coordination.",
+  },
+  {
+    q: "Où intervenez-vous ?",
+    a: "À Paris et dans toute l'Île-de-France, sur rendez-vous : mariages, événements d'entreprise, lancements de marque et soirées privées. Le service est disponible en français et en anglais.",
+  },
+  {
+    q: "Sous quel délai puis-je obtenir un devis ?",
+    a: "Vous recevez un devis personnalisé sous 24 à 48 heures après votre demande via le formulaire de contact, avec une proposition de configuration (taille de stand, nombre de baristas, carte de boissons) adaptée à votre événement.",
+  },
+];
+
+const baristaFaqLd = buildFaqLd(`${site.url}/barista`, baristaFaq);
 
 // Service + BreadcrumbList structured data. Every comparable landing
 // page (mariage, entreprise, barman privé…) emits these via
@@ -104,11 +140,16 @@ export default async function Page() {
           __html: JSON.stringify(baristaBreadcrumbLd),
         }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(baristaFaqLd) }}
+      />
       <BaristaHero heroSrc={heroSrc} />
       <LattesGrid lattePaths={lattePaths} />
       <StandsSection />
       <IdentitySection />
       <InstagrammableSection />
+      <FaqSection items={baristaFaq} />
       <CtaDevis />
     </>
   );

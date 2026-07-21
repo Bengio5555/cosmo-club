@@ -2,6 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { getAllArticles } from "@/lib/blog";
+import { site } from "@/lib/site";
+
+// Breadcrumb parity with the service pages (they all emit one; the blog
+// section was the last without).
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Accueil", item: site.url },
+    { "@type": "ListItem", position: 2, name: "Blog", item: `${site.url}/blog` },
+  ],
+};
 
 export const metadata: Metadata = {
   title: "Blog — Conseils mariage, événementiel & mixologie",
@@ -28,6 +40,10 @@ export default async function BlogIndexPage() {
   const articles = await getAllArticles();
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <PageHeader
         eyebrow="Le Mag"
         title="Inspirations,"

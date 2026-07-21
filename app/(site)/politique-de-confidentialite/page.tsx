@@ -7,6 +7,13 @@ export const metadata: Metadata = {
     "Comment Cosmo Club Paris collecte, utilise et protège vos données personnelles (formulaire de devis, mesure d'audience). Vos droits RGPD.",
   alternates: { canonical: "/politique-de-confidentialite" },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: "Politique de confidentialité — Cosmo Club Paris",
+    description:
+      "Comment Cosmo Club Paris collecte, utilise et protège vos données personnelles. Vos droits RGPD.",
+    url: "/politique-de-confidentialite",
+    type: "website",
+  },
 };
 
 /**

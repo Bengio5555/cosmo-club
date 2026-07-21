@@ -2,6 +2,33 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  /**
+   * Security headers (audit item, open since June). No CSP yet — the
+   * site runs inline JSON-LD, GTM and Sentry, so a blind CSP would
+   * break things; to be introduced separately in report-only mode.
+   * X-Frame-Options is SAMEORIGIN (not DENY) because internal print
+   * views may be opened in same-origin contexts.
+   */
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains",
+          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   experimental: {
     serverActions: {
       // Vercel's default 1 MB cap on Server Action bodies kills any

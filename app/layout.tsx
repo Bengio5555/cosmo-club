@@ -87,6 +87,19 @@ const organizationJsonLd = {
   knowsLanguage: ["fr", "en"],
 };
 
+// WebSite node — the standard entity-graph anchor binding the site as a
+// whole to the Organization. No SearchAction: the site has no on-site
+// search, and fabricating one would be invalid.
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${site.url}/#website`,
+  url: site.url,
+  name: site.name,
+  publisher: { "@id": `${site.url}/#organization` },
+  inLanguage: "fr-FR",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -126,6 +139,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteJsonLd),
           }}
         />
         {children}

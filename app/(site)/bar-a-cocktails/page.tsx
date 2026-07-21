@@ -11,6 +11,42 @@ import { CtaDevis } from "@/components/home/CtaDevis";
 import heroBarImg from "@/public/brand/ai/hero-bar.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
 import { site } from "@/lib/site";
+import {
+  FaqSection,
+  buildFaqLd,
+  type FaqItem,
+} from "@/components/site/FaqSection";
+
+// FAQ — facts sourced from published site content only (cartes, bar
+// formats, mocktails, in-a-bottle, IDF coverage, card lock policy).
+const barFaq: FaqItem[] = [
+  {
+    q: "Quelles cartes de cocktails proposez-vous ?",
+    a: "Quatre cartes signatures : Classico (les essentiels exécutés sans compromis), Cosmo (nos relectures signatures), Émotion (compositions narratives) et Création (cocktails écrits sur-mesure pour votre événement). Chaque carte est ajustée à votre format, votre saison et vos invités.",
+  },
+  {
+    q: "Quel format de bar choisir pour mon événement ?",
+    a: "Nous installons quatre formats : Comptoir (intégré à votre espace), Îlot (bar central autonome), Scène (le bar spectacle, pensé pour être photographié) et Sur-mesure (brandable : sticker pleine façade, néon, glaçons gravés). Le choix dépend du lieu, du nombre d'invités et de la place disponible — nous vous conseillons au devis.",
+  },
+  {
+    q: "Proposez-vous des cocktails sans alcool ?",
+    a: "Oui. Nos cartes de mocktails sont construites avec la même exigence que la carte alcoolisée : ingrédients premium, vraie identité de goût, présentation identique. Idéal pour des événements inclusifs, les femmes enceintes ou un public professionnel.",
+  },
+  {
+    q: "Peut-on repartir avec des cocktails ou en offrir aux invités ?",
+    a: "Avec nos cocktails « in a bottle », oui : trois formats (20 cl, 50 cl et 1 L), bouteilles étiquetées au nom de votre entreprise ou de votre couple. Une façon de prolonger l'événement en cadeau d'invité.",
+  },
+  {
+    q: "Où intervenez-vous et jusqu'à quand peut-on modifier la carte ?",
+    a: "Nous intervenons à Paris et dans toute l'Île-de-France. La carte des cocktails est verrouillée 15 jours avant l'événement ; au-delà, nous proposons les ajustements compatibles avec notre approvisionnement.",
+  },
+  {
+    q: "L'équipe et le matériel sont-ils inclus ?",
+    a: "Oui. La prestation comprend les mixologues (sélectionnés sur la technique et la posture), le bar, la verrerie, les ingrédients, la livraison, l'installation et la reprise du matériel. Assurance RC professionnelle et licence III — attestations fournies sur demande au lieu de réception.",
+  },
+];
+
+const barFaqLd = buildFaqLd(`${site.url}/bar-a-cocktails`, barFaq);
 
 // Hub-page structured data: a Service node with an OfferCatalog
 // pointing at the three specialised landing pages, plus breadcrumbs.
@@ -134,6 +170,11 @@ export default async function Page() {
       <BottlesSection bottleSrcs={bottleSrcs} />
       <AlcoholFreeSection />
       <BarsSection />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(barFaqLd) }}
+      />
+      <FaqSection items={barFaq} />
       <IntentLinks />
       <CtaDevis />
     </>

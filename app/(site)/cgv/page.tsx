@@ -5,6 +5,16 @@ export const metadata: Metadata = {
   title: "Conditions générales de vente — Cosmo Club",
   description:
     "Conditions générales de vente applicables aux prestations Cosmo Club Paris (bar à cocktails, barista, événementiel).",
+  alternates: { canonical: "/cgv" },
+  // Own OG block — without it the page inherits the homepage's
+  // openGraph from the root layout and shares as the wrong page.
+  openGraph: {
+    title: "Conditions générales de vente — Cosmo Club Paris",
+    description:
+      "Conditions générales de vente des prestations Cosmo Club Paris.",
+    url: "/cgv",
+    type: "website",
+  },
 };
 
 export default function CgvPage() {

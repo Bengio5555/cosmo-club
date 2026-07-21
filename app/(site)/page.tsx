@@ -15,6 +15,13 @@ import { getImagePath } from "@/lib/server/imagesConfig";
 import { getPublicClientLogos } from "@/lib/server/clientLogos";
 import { getHomeGalleryTiles } from "@/lib/server/homeGallery";
 
+// Self-referencing canonical for the highest-priority URL of the site.
+// Without it the homepage was the only money page shipping no canonical
+// at all (it inherits the root layout metadata, which doesn't set one).
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
 const PERSONNALISATION_FALLBACKS: Record<string, string> = {
   glacons: "/brand/ai/glaçons.png",
   pastilles: "/brand/ai/pastilles.png",
@@ -58,7 +65,10 @@ export default async function HomePage() {
     name: site.name,
     alternateName: site.shortName,
     url: site.url,
-    image: `${site.url}/og.jpg`,
+    // /opengraph-image is the generated OG endpoint (200); the old
+    // /og.jpg path 404s, which fails Google's LocalBusiness image
+    // validation and can suppress the review rich result.
+    image: `${site.url}/opengraph-image`,
     logo: `${site.url}/brand/cosmo-logo.png`,
     description: site.description,
     telephone: site.phone.replace(/\s/g, ""),

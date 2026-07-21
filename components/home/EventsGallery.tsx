@@ -149,7 +149,14 @@ export function EventsGallery({
                   >
                     <Image
                       src={tile.src}
-                      alt=""
+                      // Descriptive alt from the tile's category label —
+                      // these were empty, hiding a 50+-photo portfolio
+                      // from image search and text extraction.
+                      alt={
+                        tile.label
+                          ? `${tile.label} — bar à cocktails et barista Cosmo Club Paris`
+                          : "Événement Cosmo Club Paris"
+                      }
                       fill
                       sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                       loading={i < 2 ? "eager" : "lazy"}
