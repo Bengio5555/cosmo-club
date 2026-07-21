@@ -4,7 +4,7 @@ export const site = {
   url: "https://www.cosmoclub.fr",
   tagline: "Bar à cocktails & barista événementiel — Paris",
   description:
-    "Cosmo Club Paris — bar à cocktails et barista événementiel haut de gamme. Mariages, corporate, soirées privées. Paris 8, sur rendez-vous.",
+    "Cosmo Club Paris — bar à cocktails et barista événementiel haut de gamme. Mariages, corporate, soirées privées. Paris 7, sur rendez-vous.",
   baseline: "Là où les cocktails deviennent des œuvres liquides.",
   phone: "+33 7 75 74 49 77",
   phoneDisplay: "07 75 74 49 77",
@@ -12,7 +12,7 @@ export const site = {
   instagram: "https://www.instagram.com/cosmoclubparis",
   instagramHandle: "@cosmoclubparis",
   address: {
-    city: "Paris 8",
+    city: "Paris 7",
     country: "France",
     detail: "Sur rendez-vous",
   },

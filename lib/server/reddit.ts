@@ -1,18 +1,72 @@
 import "server-only";
 
 /**
- * Reddit public-search client. Uses the unauthenticated JSON endpoint
- * (`reddit.com/r/{sub}/search.json`) — no OAuth, no rate-limit budget
- * to manage. Reddit asks for a descriptive User-Agent on every call;
- * a generic browser UA would be ratelimited harder than a clearly
- * identified script, so we use a Cosmo Club identifier instead.
+ * Reddit search client — OAuth application-only flow.
+ *
+ * History: this module originally used the unauthenticated
+ * `reddit.com/search.json` endpoint. Reddit now hard-blocks those
+ * requests (HTTP 403 with an HTML block page, even from residential
+ * IPs), which silently killed the veille: every keyword 403'd, every
+ * sweep returned 0 threads. The official Data API via OAuth
+ * (client_credentials grant → oauth.reddit.com) is the only reliable
+ * path, and its free tier (100 QPM) is far above our ~12 calls/sweep.
+ *
+ * Setup: create an app on https://www.reddit.com/prefs/apps (type
+ * "script"), then set REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET in the
+ * environment. Without them, fetchAllRedditMatches throws a clear
+ * config error that the dashboard surfaces.
  *
  * Keywords + subreddits live here so they can be tuned without a
  * migration. Add/remove as the GTM evolves.
  */
 
 const USER_AGENT =
-  "web:fr.cosmoclub.lead-monitor:v1.0 (by /u/cosmoclubparis)";
+  "web:fr.cosmoclub.lead-monitor:v2.0 (by /u/cosmoclubparis)";
+
+/** Module-scope token cache — tokens last 24h, sweeps run weekly, so a
+ *  warm serverless instance can reuse one across a whole sweep. */
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
+async function getAccessToken(): Promise<string> {
+  const clientId = process.env.REDDIT_CLIENT_ID;
+  const clientSecret = process.env.REDDIT_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new Error(
+      "REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET non configurés. Crée une app (type « script ») sur reddit.com/prefs/apps puis ajoute les deux variables d'environnement.",
+    );
+  }
+  if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) {
+    return cachedToken.token;
+  }
+
+  const res = await fetch("https://www.reddit.com/api/v1/access_token", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": USER_AGENT,
+    },
+    body: "grant_type=client_credentials",
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(
+      `Authentification Reddit échouée (HTTP ${res.status}) — vérifie REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.`,
+    );
+  }
+  const json = (await res.json()) as {
+    access_token?: string;
+    expires_in?: number;
+  };
+  if (!json.access_token) {
+    throw new Error("Authentification Reddit : réponse sans access_token.");
+  }
+  cachedToken = {
+    token: json.access_token,
+    expiresAt: Date.now() + (json.expires_in ?? 3600) * 1000,
+  };
+  return cachedToken.token;
+}
 
 // Subreddits francophones susceptibles d'héberger des discussions sur
 // nos services. La liste est large parce que la communauté Reddit FR
@@ -121,19 +175,28 @@ type RedditSearchResponse = {
  * are low-traffic; restricting to "month" can return literally zero
  * results for half the keywords.
  */
-async function searchGlobal(keyword: string): Promise<RedditThread[]> {
+async function searchGlobal(
+  keyword: string,
+  token: string,
+): Promise<RedditThread[]> {
   const params = new URLSearchParams({
     q: keyword,
     sort: "new",
     t: "year",
     limit: "25",
   });
-  const url = `https://www.reddit.com/search.json?${params.toString()}`;
+  // oauth.reddit.com = the authenticated Data API host; the public
+  // www.reddit.com/search.json endpoint is hard-blocked (403) now.
+  const url = `https://oauth.reddit.com/search?${params.toString()}`;
 
   let res: Response;
   try {
     res = await fetch(url, {
-      headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "User-Agent": USER_AGENT,
+        Accept: "application/json",
+      },
       cache: "no-store",
     });
   } catch (err) {
@@ -192,10 +255,13 @@ async function searchGlobal(keyword: string): Promise<RedditThread[]> {
  * sweep time ~10 seconds. Well under Reddit's unauth rate ceiling.
  */
 export async function fetchAllRedditMatches(): Promise<RedditThread[]> {
+  // Throws a clear config/auth error if credentials are missing or
+  // rejected — surfaced verbatim by the dashboard so the fix is obvious.
+  const token = await getAccessToken();
   const seen = new Map<string, RedditThread>();
 
   for (const keyword of TRACKED_KEYWORDS) {
-    const threads = await searchGlobal(keyword);
+    const threads = await searchGlobal(keyword, token);
     for (const t of threads) {
       if (!seen.has(t.reddit_id)) {
         seen.set(t.reddit_id, t);
