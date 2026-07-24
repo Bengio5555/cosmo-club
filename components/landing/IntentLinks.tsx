@@ -65,6 +65,19 @@ export function IntentLinks() {
             </Reveal>
           ))}
         </div>
+
+        <Reveal>
+          <p className="mt-12 text-sm leading-relaxed text-[color:var(--color-espresso)]/80">
+            Vous hésitez encore entre location de bar, barman à domicile et
+            prestation clé en main ?{" "}
+            <Link
+              href="/blog/bar-cocktails-evenementiel-paris-guide-choisir-formule"
+              className="text-[color:var(--color-grenat)] underline underline-offset-4 transition-colors hover:text-[color:var(--color-grenat-glow)]"
+            >
+              Lire le guide complet du bar à cocktails événementiel à Paris
+            </Link>
+          </p>
+        </Reveal>
       </div>
     </section>
   );

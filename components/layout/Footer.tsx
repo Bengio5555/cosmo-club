@@ -64,6 +64,11 @@ export function Footer() {
                   Atelier mixologie
                 </Link>
               </li>
+              <li>
+                <Link href="/blog/bar-cocktails-evenementiel-paris-guide-choisir-formule" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
+                  Le guide du bar événementiel
+                </Link>
+              </li>
             </ul>
           </nav>
 
