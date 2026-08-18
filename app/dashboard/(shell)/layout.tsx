@@ -68,19 +68,29 @@ export default async function ShellLayout({
     .single();
   const role = (profile?.role as UserRole | undefined) ?? "staff";
 
+  // Unhandled-demand badge: count leads still at status "nouveau" (not
+  // yet contacted). The pastille clears itself as each demande is moved
+  // out of "nouveau" — same figure as the dashboard "à contacter" KPI.
+  // RLS returns 0 for roles that can't see leads, so the badge simply
+  // never shows for them (the nav item is hidden anyway).
+  const { count: newLeadsCount } = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "nouveau");
+
   // Dark-only dashboard. The `dark` class is baked into the SSR'd HTML
   // (no client theme switching), so every `dark:` variant resolves and
   // the slate-950 canvas paints on the very first frame — no theme
   // flash on reload, no JS dependency.
   return (
     <div className="dark dashboard-shell flex min-h-[100dvh] bg-slate-950 text-slate-200">
-      <Sidebar role={role} />
+      <Sidebar role={role} newLeadsCount={newLeadsCount ?? 0} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar email={user.email ?? null} />
         <main className="flex-1 overflow-x-hidden pb-[max(env(safe-area-inset-bottom),0.5rem)] md:pb-0">
           {children}
         </main>
-        <MobileNav role={role} />
+        <MobileNav role={role} newLeadsCount={newLeadsCount ?? 0} />
       </div>
     </div>
   );

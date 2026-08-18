@@ -76,7 +76,13 @@ const nav: { section: string; items: NavItem[] }[] = [
   },
 ];
 
-export function Sidebar({ role }: { role: UserRole }) {
+export function Sidebar({
+  role,
+  newLeadsCount = 0,
+}: {
+  role: UserRole;
+  newLeadsCount?: number;
+}) {
   const pathname = usePathname();
 
   // Each section is built from items the current role can actually
@@ -130,6 +136,10 @@ export function Sidebar({ role }: { role: UserRole }) {
                     ? pathname === "/dashboard"
                     : pathname.startsWith(item.href);
                 const Icon = item.icon;
+                // Notification pastille — currently only "Demandes",
+                // fed by the count of leads still at status "nouveau".
+                const count =
+                  item.href === "/dashboard/leads" ? newLeadsCount : 0;
                 return (
                   <li key={item.href}>
                     <Link
@@ -143,7 +153,15 @@ export function Sidebar({ role }: { role: UserRole }) {
                     >
                       <Icon className="h-4 w-4" />
                       <span className="flex-1 truncate">{item.label}</span>
-                      {item.badge && (
+                      {count > 0 && (
+                        <span
+                          aria-label={`${count} nouvelle${count > 1 ? "s" : ""} demande${count > 1 ? "s" : ""}`}
+                          className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-[color:var(--color-grenat)] px-1.5 text-[10px] font-semibold leading-[18px] text-white"
+                        >
+                          {count > 99 ? "99+" : count}
+                        </span>
+                      )}
+                      {item.badge && count === 0 && (
                         <span className="rounded bg-red-500/20 px-1.5 text-[10px] font-semibold text-red-700 dark:text-red-300">
                           {item.badge}
                         </span>

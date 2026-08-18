@@ -33,6 +33,9 @@ export async function updateLead(
   revalidatePath(`/dashboard/leads/${id}`);
   revalidatePath("/dashboard/leads");
   revalidatePath("/dashboard");
+  // Refresh the shared shell layout so the sidebar "Demandes" pastille
+  // (count of "nouveau" leads) updates the moment a demande is contacted.
+  revalidatePath("/dashboard", "layout");
   return { ok: true as const };
 }
 
@@ -139,6 +142,9 @@ export async function convertLeadToQuote(leadId: string) {
   revalidatePath("/dashboard/leads");
   revalidatePath("/dashboard/devis");
   revalidatePath("/dashboard");
+  // Refresh the shared shell layout so the sidebar pastille drops when a
+  // demande leaves "nouveau" (converting to a quote sets it "contacte").
+  revalidatePath("/dashboard", "layout");
 
   redirect(`/dashboard/devis/${quote.id}`);
 }

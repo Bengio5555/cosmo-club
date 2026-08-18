@@ -47,7 +47,13 @@ const ALL_TABS: Tab[] = [
  * usual top underline) and an enlarged icon. Inactive icons fade
  * briefly when tapped so users get touch feedback while routing.
  */
-export function MobileNav({ role }: { role: UserRole }) {
+export function MobileNav({
+  role,
+  newLeadsCount = 0,
+}: {
+  role: UserRole;
+  newLeadsCount?: number;
+}) {
   const pathname = usePathname();
   const tabs = ALL_TABS.filter((t) => canAccess(t.href, role)).slice(0, 5);
 
@@ -59,6 +65,7 @@ export function MobileNav({ role }: { role: UserRole }) {
       {tabs.map((t) => {
         const active = t.exact ? pathname === t.href : pathname.startsWith(t.href);
         const Icon = t.icon;
+        const count = t.href === "/dashboard/leads" ? newLeadsCount : 0;
         return (
           <Link
             key={t.href}
@@ -73,13 +80,21 @@ export function MobileNav({ role }: { role: UserRole }) {
           >
             <span
               className={cn(
-                "flex h-7 w-12 items-center justify-center rounded-full transition-colors",
+                "relative flex h-7 w-12 items-center justify-center rounded-full transition-colors",
                 active
                   ? "bg-slate-900/10 dark:bg-white/10"
                   : "bg-transparent group-active:bg-slate-900/5 dark:group-active:bg-white/5",
               )}
             >
               <Icon className="h-[18px] w-[18px]" />
+              {count > 0 && (
+                <span
+                  aria-label={`${count} nouvelle${count > 1 ? "s" : ""} demande${count > 1 ? "s" : ""}`}
+                  className="absolute -right-0.5 -top-0.5 inline-flex min-w-[16px] items-center justify-center rounded-full bg-[color:var(--color-grenat)] px-1 text-[9px] font-semibold leading-4 text-white"
+                >
+                  {count > 99 ? "99+" : count}
+                </span>
+              )}
             </span>
             <span>{t.label}</span>
           </Link>
