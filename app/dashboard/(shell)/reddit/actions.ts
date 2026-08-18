@@ -1,12 +1,36 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentRole } from "@/lib/auth/server";
 import { fetchAllRedditMatches } from "@/lib/server/reddit";
 import { draftRedditReply } from "@/lib/server/redditDrafter";
 
 const MAX_DRAFTS_PER_RUN = 12;
+
+/**
+ * Authorize a Reddit sweep. Two legitimate callers exist:
+ *  - a signed-in owner/admin/manager clicking "Actualiser", and
+ *  - the Vercel cron route, which runs with no user session but forwards
+ *    its `Authorization: Bearer <CRON_SECRET>` header (verified here so a
+ *    caller-supplied `cron: true` can never bypass the check on its own).
+ * Anything else is refused — this action makes paid Claude calls and
+ * writes via the RLS-bypassing admin client.
+ */
+async function assertRedditAccess(
+  opts?: { cron?: boolean },
+): Promise<{ ok: false; error: string } | null> {
+  if (opts?.cron) {
+    const secret = process.env.CRON_SECRET;
+    const auth = (await headers()).get("authorization");
+    if (secret && auth === `Bearer ${secret}`) return null;
+  }
+  const role = await getCurrentRole();
+  if (role === "owner" || role === "admin" || role === "manager") return null;
+  return { ok: false as const, error: "Accès refusé." };
+}
 
 /**
  * Sweep Reddit + draft replies for any new matches. Idempotent:
@@ -19,7 +43,10 @@ const MAX_DRAFTS_PER_RUN = 12;
  * "pending" avec draft_reply = null. Un clic suivant sur "Régénérer"
  * peut combler le reste.
  */
-export async function refreshRedditFeed() {
+export async function refreshRedditFeed(opts?: { cron?: boolean }) {
+  const denied = await assertRedditAccess(opts);
+  if (denied) return denied;
+
   const supabase = await createClient();
   const admin = createAdminClient();
 
@@ -114,6 +141,9 @@ export async function refreshRedditFeed() {
  * key missing, etc).
  */
 export async function regenerateRedditDraft(id: string) {
+  const denied = await assertRedditAccess();
+  if (denied) return denied;
+
   const supabase = await createClient();
   const { data: row, error } = await supabase
     .from("reddit_threads")

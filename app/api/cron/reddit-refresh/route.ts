@@ -14,14 +14,20 @@ export const maxDuration = 300;
  * on accepte aussi les appels manuels.
  */
 export async function GET(req: NextRequest) {
+  // Fail closed: without CRON_SECRET configured, this paid + admin-write
+  // endpoint would be world-triggerable, so we refuse rather than run.
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${secret}`) {
-      return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-    }
+  if (!secret) {
+    return NextResponse.json(
+      { ok: false, error: "CRON_SECRET not configured" },
+      { status: 503 },
+    );
+  }
+  const authHeader = req.headers.get("authorization");
+  if (authHeader !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
-  const result = await refreshRedditFeed();
+  const result = await refreshRedditFeed({ cron: true });
   return NextResponse.json(result);
 }

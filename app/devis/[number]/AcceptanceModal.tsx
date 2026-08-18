@@ -25,12 +25,14 @@ export function AcceptanceModal({
   number,
   defaultName,
   locale = "fr",
+  accessToken = null,
   onClose,
 }: {
   quoteId: string;
   number: string;
   defaultName?: string;
   locale?: QuoteLocale;
+  accessToken?: string | null;
   onClose: () => void;
 }) {
   const isEn = locale === "en";
@@ -214,6 +216,7 @@ export function AcceptanceModal({
         quoteId,
         signerName: name.trim(),
         signatureDataUrl: dataUrl,
+        accessToken,
       });
       if (!res.ok) {
         setErr(res.error);

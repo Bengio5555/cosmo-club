@@ -22,6 +22,28 @@ export async function GET(request: NextRequest) {
       // If decoding fails, use the URL as-is (it might be a regular URL)
     }
 
+    // SECURITY: this handler attaches BLOB_READ_WRITE_TOKEN (a
+    // read+write+delete credential for the blob store) to the outgoing
+    // request. The destination MUST therefore be locked to the trusted
+    // Vercel Blob host — otherwise a caller-supplied URL turns this into
+    // an SSRF that exfiltrates the token to any host. Reject anything
+    // that isn't https on *.blob.vercel-storage.com.
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      return NextResponse.json({ error: "Invalid url" }, { status: 400 });
+    }
+    if (
+      parsed.protocol !== "https:" ||
+      !/(^|\.)blob\.vercel-storage\.com$/.test(parsed.hostname)
+    ) {
+      return NextResponse.json(
+        { error: "Forbidden host" },
+        { status: 403 }
+      );
+    }
+
     const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
     if (!blobToken) {
       console.error("BLOB_READ_WRITE_TOKEN not set");

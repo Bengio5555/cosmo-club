@@ -11,11 +11,13 @@ export function AcceptanceActions({
   number,
   defaultName,
   locale = "fr",
+  accessToken = null,
 }: {
   quoteId: string;
   number: string;
   defaultName?: string;
   locale?: QuoteLocale;
+  accessToken?: string | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -31,7 +33,7 @@ export function AcceptanceActions({
     if (!window.confirm(prompt)) return;
     startTransition(async () => {
       setErr(null);
-      const res = await refuseDevis(quoteId);
+      const res = await refuseDevis(quoteId, accessToken);
       if (!res.ok) {
         setErr(res.error);
         return;
@@ -66,6 +68,7 @@ export function AcceptanceActions({
           number={number}
           defaultName={defaultName}
           locale={locale}
+          accessToken={accessToken}
           onClose={() => setOpen(false)}
         />
       )}

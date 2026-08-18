@@ -23,6 +23,10 @@ export type AcceptDevisInput = {
   quoteId: string;
   signerName: string;
   signatureDataUrl: string;
+  /** The plaquette access token from the URL (`?t=`). Must match the
+   *  quote's access_token — mirrors the page-render IDOR guard so the
+   *  mutation can't be driven by quote id alone. */
+  accessToken?: string | null;
 };
 
 function trimToDataUrl(input: string): string | null {
@@ -54,10 +58,15 @@ export async function acceptDevis(input: AcceptDevisInput) {
 
   const { data: q } = await supabase
     .from("quotes")
-    .select("id,status,number,client_id,subject,total_ttc,lead_id")
+    .select("id,status,number,client_id,subject,total_ttc,lead_id,access_token")
     .eq("id", input.quoteId)
     .maybeSingle();
   if (!q) return { ok: false as const, error: "Devis introuvable" };
+  // IDOR guard: token-protected quotes require the matching token
+  // (legacy null-token quotes stay reachable by id, as on the page).
+  if (q.access_token && q.access_token !== (input.accessToken ?? null)) {
+    return { ok: false as const, error: "Devis introuvable" };
+  }
   if (q.status !== "envoye") {
     return { ok: false as const, error: "Devis déjà décidé." };
   }
@@ -118,14 +127,18 @@ export async function acceptDevis(input: AcceptDevisInput) {
   return { ok: true as const };
 }
 
-export async function refuseDevis(id: string) {
+export async function refuseDevis(id: string, accessToken?: string | null) {
   const supabase = createAdminClient();
   const { data: q } = await supabase
     .from("quotes")
-    .select("id,status,number,lead_id")
+    .select("id,status,number,lead_id,access_token")
     .eq("id", id)
     .maybeSingle();
   if (!q) return { ok: false as const, error: "Devis introuvable" };
+  // IDOR guard: token-protected quotes require the matching token.
+  if (q.access_token && q.access_token !== (accessToken ?? null)) {
+    return { ok: false as const, error: "Devis introuvable" };
+  }
   if (q.status !== "envoye") {
     return { ok: false as const, error: "Devis déjà décidé." };
   }

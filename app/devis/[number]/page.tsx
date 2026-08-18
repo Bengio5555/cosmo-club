@@ -705,6 +705,7 @@ export default async function DevisPlaquettePage({
                 number={quote.number}
                 defaultName={clientDisplayName}
                 locale={locale}
+                accessToken={providedToken}
               />
             </div>
           )}

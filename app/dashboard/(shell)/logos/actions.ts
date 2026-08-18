@@ -7,11 +7,38 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const STORAGE_BUCKET = "cosmoclub-logos";
 
 /**
+ * Authorization gate. `/dashboard/logos` is owner/admin-only
+ * (ROUTE_ROLES), but these actions write to Storage via the
+ * RLS-bypassing admin client and can be invoked outside the proxy — so
+ * each re-checks the caller is a signed-in owner/admin before mutating.
+ */
+async function requireLogoAdmin(): Promise<{ ok: false; error: string } | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, error: "Non authentifié." };
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const role = profile?.role;
+  if (role !== "owner" && role !== "admin") {
+    return { ok: false as const, error: "Accès refusé." };
+  }
+  return null;
+}
+
+/**
  * Upload one client logo to Supabase Storage and persist a row in
  * `client_logos`. Position defaults to "after the last existing one"
  * so the marquee order stays stable as new logos are added.
  */
 export async function uploadClientLogo(formData: FormData) {
+  const denied = await requireLogoAdmin();
+  if (denied) return denied;
+
   const name = String(formData.get("name") ?? "").trim();
   const file = formData.get("file");
   if (!name) return { ok: false as const, error: "Nom requis." };
@@ -82,6 +109,9 @@ export async function uploadClientLogo(formData: FormData) {
  * query the bucket directly so a stale file is harmless.
  */
 export async function deleteClientLogo(id: string) {
+  const denied = await requireLogoAdmin();
+  if (denied) return denied;
+
   const supabase = await createClient();
   const { data: row } = await supabase
     .from("client_logos")
@@ -118,6 +148,9 @@ export async function deleteClientLogo(id: string) {
  * lower = displayed first.
  */
 export async function moveClientLogo(id: string, direction: "up" | "down") {
+  const denied = await requireLogoAdmin();
+  if (denied) return denied;
+
   const supabase = await createClient();
   const { data: rows } = await supabase
     .from("client_logos")

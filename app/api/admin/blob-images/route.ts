@@ -4,9 +4,9 @@ import { list } from "@vercel/blob";
 export async function GET(request: NextRequest) {
   try {
     const adminPassword = request.headers.get("x-admin-password");
-    const expectedPassword = process.env.ADMIN_PASSWORD || "admin2024";
+    const expectedPassword = process.env.ADMIN_PASSWORD;
 
-    if (adminPassword !== expectedPassword) {
+    if (!expectedPassword || adminPassword !== expectedPassword) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -10,13 +10,25 @@ import type { Config, ImageConfig } from "@/types/admin";
 const CONFIG_PATH = join(process.cwd(), "public", "images-config.json");
 const STORAGE_BUCKET = "cosmoclub-images";
 
-/** Ensure the caller is signed in to the dashboard. */
+/**
+ * Ensure the caller is signed in AND allowed to manage site imagery.
+ * `/dashboard/images` is owner/admin-only (ROUTE_ROLES), but these
+ * actions use the RLS-bypassing admin client and can be invoked outside
+ * the proxy — so each re-checks the role itself.
+ */
 async function requireAuth() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const role = profile?.role;
+  if (role !== "owner" && role !== "admin") throw new Error("Accès refusé");
   return user;
 }
 

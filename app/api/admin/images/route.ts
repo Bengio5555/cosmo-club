@@ -18,9 +18,9 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   const password = req.headers.get("x-admin-password");
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin2024";
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (password !== adminPassword) {
+  if (!adminPassword || password !== adminPassword) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
