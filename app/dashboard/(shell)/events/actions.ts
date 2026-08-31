@@ -7,6 +7,7 @@ import { getCurrentRole } from "@/lib/auth/server";
 import type { Database, TablesUpdate } from "@/types/database";
 import type { EventTodoData } from "@/lib/server/eventTodoTemplate";
 import { parseExtraCosts, type EventExtraCosts } from "@/lib/extraCosts";
+import { isHalfStep, roundToHalf, HALF_STEP_ERROR } from "@/lib/stock";
 import { notifyTeamEventCreated } from "@/lib/server/notifyEventCreated";
 
 type EventStatus = Database["public"]["Enums"]["event_status"];
@@ -258,7 +259,10 @@ export async function closeEvent(
   const returnedByProduct = new Map<string, number>();
   for (const r of returns ?? []) {
     if (!Number.isFinite(r.qty_returned) || r.qty_returned < 0) continue;
-    returnedByProduct.set(r.product_id, Number(r.qty_returned));
+    // Snap to halves: the popup commits from React state, so `step`
+    // never validates it. Rounding beats rejecting here — a closure
+    // shouldn't fail over a stray decimal.
+    returnedByProduct.set(r.product_id, roundToHalf(Number(r.qty_returned)));
   }
 
   // Fetch reservations + current product stocks.
@@ -562,6 +566,9 @@ export async function reserveProduct(
   if (!Number.isFinite(qty) || qty <= 0) {
     return { ok: false as const, error: "Quantité invalide." };
   }
+  if (!isHalfStep(qty)) {
+    return { ok: false as const, error: HALF_STEP_ERROR };
+  }
   const supabase = await createClient();
   const { error } = await supabase.from("event_stock").upsert(
     {
@@ -583,6 +590,9 @@ export async function updateReservation(
 ) {
   if (!Number.isFinite(qty) || qty < 0) {
     return { ok: false as const, error: "Quantité invalide." };
+  }
+  if (!isHalfStep(qty)) {
+    return { ok: false as const, error: HALF_STEP_ERROR };
   }
   const supabase = await createClient();
   if (qty === 0) {

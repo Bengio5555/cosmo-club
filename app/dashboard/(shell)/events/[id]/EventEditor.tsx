@@ -493,7 +493,7 @@ function CloseEventDialog({
                           type="number"
                           min={0}
                           max={r.qty_reserved}
-                          step={1}
+                          step={0.5}
                           value={raw}
                           onChange={(e) =>
                             setReturn(r.product_id, e.target.value)

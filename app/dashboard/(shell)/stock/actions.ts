@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isHalfStep, HALF_STEP_ERROR } from "@/lib/stock";
 import type { Database, TablesUpdate } from "@/types/database";
 
 type ProductCategory = Database["public"]["Enums"]["product_category"];
@@ -120,6 +121,10 @@ export async function adjustStock(
 ) {
   if (!Number.isFinite(qty) || qty <= 0) {
     return { ok: false as const, error: "Quantité invalide." };
+  }
+  // Halves only — `step` guards the form, this guards everything else.
+  if (!isHalfStep(qty)) {
+    return { ok: false as const, error: HALF_STEP_ERROR };
   }
   const supabase = await createClient();
   const { data: product, error: pErr } = await supabase

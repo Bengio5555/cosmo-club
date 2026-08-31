@@ -167,8 +167,8 @@ export function StockSection({
               <input
                 type="number"
                 name="qty"
-                step="1"
-                min="1"
+                step="0.5"
+                min="0.5"
                 required
                 className={inputCls}
               />
@@ -294,7 +294,7 @@ function ReservationQtyField({
   return (
     <input
       type="number"
-      step="1"
+      step="0.5"
       min="0"
       value={value}
       onChange={(e) => setValue(e.target.value)}
