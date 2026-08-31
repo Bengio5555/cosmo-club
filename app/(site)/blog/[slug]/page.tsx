@@ -82,7 +82,10 @@ export default async function ArticlePage({ params }: Props) {
         : `${site.url}${article.cover}`
       : `${site.url}/opengraph-image`,
     datePublished: article.date,
-    dateModified: article.date,
+    // Real edit timestamp when we have one — reporting the publish date
+    // here made every content refresh invisible to Google, and freshness
+    // weighs on both ranking and AI-citation selection.
+    dateModified: article.updatedAt ?? article.date,
     author: {
       "@type": "Person",
       "@id": personId,

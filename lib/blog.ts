@@ -7,6 +7,10 @@ export type ArticleMeta = {
   title: string;
   description: string;
   date: string;
+  /** Real last-edit timestamp, for BlogPosting.dateModified. Freshness
+   *  is a documented ranking/citation signal, and reporting the publish
+   *  date as the modified date made every refresh invisible to Google. */
+  updatedAt?: string;
   readingTime?: string;
   cover?: string;
   tags?: string[];
@@ -25,6 +29,7 @@ type Row = {
   keywords: string[] | null;
   tags: string[] | null;
   publish_at: string;
+  updated_at?: string | null;
 };
 
 function rowToMeta(row: Omit<Row, "body_md">): ArticleMeta {
@@ -33,6 +38,7 @@ function rowToMeta(row: Omit<Row, "body_md">): ArticleMeta {
     title: row.title,
     description: row.description,
     date: row.publish_at,
+    updatedAt: row.updated_at ?? undefined,
     readingTime: row.reading_time ?? undefined,
     cover: row.cover_url ?? undefined,
     keywords: row.keywords ?? undefined,
@@ -62,7 +68,7 @@ export async function getAllArticles(): Promise<ArticleMeta[]> {
   const supabase = publicClient();
   const { data, error } = await supabase
     .from("articles")
-    .select("slug,title,description,cover_url,reading_time,keywords,tags,publish_at")
+    .select("slug,title,description,cover_url,reading_time,keywords,tags,publish_at,updated_at")
     .or(PUBLIC_FILTER)
     .order("publish_at", { ascending: false });
   if (error || !data) return [];
@@ -73,7 +79,7 @@ export async function getArticle(slug: string): Promise<Article | null> {
   const supabase = publicClient();
   const { data, error } = await supabase
     .from("articles")
-    .select("slug,title,description,body_md,cover_url,reading_time,keywords,tags,publish_at")
+    .select("slug,title,description,body_md,cover_url,reading_time,keywords,tags,publish_at,updated_at")
     .eq("slug", slug)
     .or(PUBLIC_FILTER)
     .maybeSingle();
