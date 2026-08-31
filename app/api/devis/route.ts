@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { devisSchema } from "@/lib/content/devis";
 import { site } from "@/lib/site";
@@ -154,6 +155,10 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
       return;
     }
     console.log("[persistLead] ok id=", inserted?.id, "client_id=", clientId);
+    // Invalidate the dashboard so the sidebar "Demandes" pastille (which
+    // lives in the cached shell layout) and the KPI both pick up the new
+    // demande on the owner's next navigation — otherwise the badge lags.
+    revalidatePath("/dashboard", "layout");
   } catch (err) {
     console.error("[persistLead] thrown:", err);
   }
