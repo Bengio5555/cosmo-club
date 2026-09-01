@@ -51,8 +51,9 @@ export type CoursesData = {
  * server-generated PDF.
  *
  * The computation:
- *   1. Aggregate ingredient needs per product = Σ (qty × qty_planned)
- *   2. For each product, ceil(need / content_per_unit) → packs needed
+ *   1. Needs come from the event's stock reservations when it has any
+ *      (they are the curated list); otherwise aggregate ingredient needs
+ *      per product = Σ (qty × qty_planned) and ceil(need / content_per_unit)
  *   3. In shortage mode (default), subtract the stock still usable by
  *      this event — physical stock minus what earlier open events have
  *      already reserved — and clamp to ≥0
@@ -131,12 +132,18 @@ export async function computeCoursesData(
   const earlierIds =
     selfIdx > 0 ? ordered.slice(0, selfIdx).map((e) => e.id) : [];
 
-  const { data: earlierRes } = earlierIds.length
-    ? await supabase
-        .from("event_stock")
-        .select("product_id,qty_reserved")
-        .in("event_id", earlierIds)
-    : { data: [] };
+  const [{ data: earlierRes }, { data: ownRes }] = await Promise.all([
+    earlierIds.length
+      ? supabase
+          .from("event_stock")
+          .select("product_id,qty_reserved")
+          .in("event_id", earlierIds)
+      : Promise.resolve({ data: [] }),
+    supabase
+      .from("event_stock")
+      .select("product_id,qty_reserved")
+      .eq("event_id", eventId),
+  ]);
 
   const claimedBefore = new Map<string, number>();
   for (const r of earlierRes ?? []) {
@@ -161,13 +168,42 @@ export async function computeCoursesData(
     );
   }
 
+  // What this event actually needs, in packs.
+  //
+  // The reservation list is the curated one: "Calculer le stock" seeds it
+  // from the menu with this very formula, and the owner then edits it by
+  // hand (swapping a brand, dropping a product). Recomputing from the
+  // recipes here would silently throw those edits away — a manually added
+  // product never reached the shopping list, and a removed one kept
+  // showing up. So reservations win whenever the event has any; events
+  // whose stock was never calculated still fall back to the recipes.
+  const packsByProduct = new Map<string, number>();
+  const fromReservations = (ownRes ?? []).length > 0;
+  if (fromReservations) {
+    for (const r of ownRes ?? []) {
+      if (!r.product_id) continue;
+      packsByProduct.set(
+        r.product_id,
+        (packsByProduct.get(r.product_id) ?? 0) + Number(r.qty_reserved ?? 0),
+      );
+    }
+  } else {
+    for (const [productId, need] of totalNeed.entries()) {
+      const p = productsById.get(productId);
+      if (!p) continue;
+      const perUnit = p.content_per_unit ? Number(p.content_per_unit) : null;
+      packsByProduct.set(
+        productId,
+        perUnit && perUnit > 0 ? Math.ceil(need / perUnit) : Math.ceil(need),
+      );
+    }
+  }
+
   const lines: CoursesLine[] = [];
-  for (const [productId, need] of totalNeed.entries()) {
+  for (const [productId, packsNeeded] of packsByProduct.entries()) {
     const p = productsById.get(productId);
     if (!p) continue;
     const perUnit = p.content_per_unit ? Number(p.content_per_unit) : null;
-    const packsNeeded =
-      perUnit && perUnit > 0 ? Math.ceil(need / perUnit) : Math.ceil(need);
     const claimed = claimedBefore.get(productId) ?? 0;
     const stockQty = Math.max(0, Number(p.stock_qty ?? 0) - claimed);
     const toBuy = showOnlyShortage
@@ -239,6 +275,9 @@ export async function computeCoursesData(
     supplierGroups,
     grandTotal,
     mode,
-    missingMenu: totalNeed.size === 0,
+    // "No menu" only warrants a warning when we have nothing to buy
+    // from either source — a hand-built reservation list is a valid
+    // basis even with an empty menu.
+    missingMenu: totalNeed.size === 0 && packsByProduct.size === 0,
   };
 }
