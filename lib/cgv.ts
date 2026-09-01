@@ -60,6 +60,8 @@ Une fois le devis validé, les horaires de livraison et de reprise de la verreri
 ## Consommables et bouteilles
 Les bouteilles de boissons (alcoolisées ou non), ouvertes ou non consommées durant la prestation, demeurent la propriété de Cosmo Club. Elles sont récupérées par notre équipe à l'issue de l'événement et ne sont pas remises au Client.
 
+La prestation est facturée au forfait convenu au devis, et non à la bouteille effectivement consommée : le montant couvre l'organisation, le personnel, le matériel et l'approvisionnement prévus pour l'événement.
+
 ## Responsabilités et assurance
 La consommation excessive de boissons alcoolisées par les participants est du ressort de l'organisateur de l'événement. En aucun cas Cosmo Club ne pourra être jugé responsable des débordements et casses entraînés par une consommation excessive.
 
