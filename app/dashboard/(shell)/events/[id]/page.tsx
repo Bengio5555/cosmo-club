@@ -217,6 +217,23 @@ export default async function EventDetailPage({
       );
     });
 
+  // Has the menu moved since "Calculer le stock" was last run?
+  //
+  // The shopping list now follows the reservations (so hand edits stick),
+  // which means a menu edited afterwards silently stops being reflected.
+  // Compare what the menu would generate against what is actually
+  // reserved and warn rather than let the team shop from a stale list.
+  // Only meaningful once reservations exist — without them the courses
+  // page falls back to the recipes anyway.
+  const expectedPacks = new Map(computed.map((c) => [c.productId, c.packsNeeded]));
+  const reservedPacks = new Map(
+    (reservations ?? []).map((r) => [r.product_id, Number(r.qty_reserved ?? 0)]),
+  );
+  const menuDiverges =
+    reservedPacks.size > 0 &&
+    (expectedPacks.size !== reservedPacks.size ||
+      [...expectedPacks].some(([id, packs]) => reservedPacks.get(id) !== packs));
+
   return (
     <>
       {/* Floating validation checklist — fixed flag on the right edge. */}
@@ -269,6 +286,7 @@ export default async function EventDetailPage({
             eventStatus={event.status}
             productOptions={allProducts ?? []}
             reservations={reservations ?? []}
+            menuDiverges={menuDiverges}
           />
         )}
       </div>

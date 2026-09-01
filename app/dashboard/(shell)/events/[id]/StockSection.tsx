@@ -34,11 +34,15 @@ export function StockSection({
   eventStatus,
   productOptions,
   reservations,
+  menuDiverges = false,
 }: {
   eventId: string;
   eventStatus: EventStatus;
   productOptions: ProductOption[];
   reservations: Reservation[];
+  /** The menu no longer matches these reservations — the shopping list
+   *  follows the reservations, so it would be shopped from a stale list. */
+  menuDiverges?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -154,6 +158,18 @@ export function StockSection({
           )}
         </div>
       </div>
+
+      {menuDiverges && !readOnly && (
+        <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            Le menu a changé depuis le dernier calcul du stock. La liste de
+            courses suit ces réservations : reclique «&nbsp;Calculer le
+            stock&nbsp;» pour les réaligner, ou garde-les si tu les as ajustées
+            volontairement.
+          </span>
+        </div>
+      )}
 
       {err && (
         <div className="mb-3 rounded-md border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 px-3 py-2 text-xs text-red-800 dark:text-red-200">
