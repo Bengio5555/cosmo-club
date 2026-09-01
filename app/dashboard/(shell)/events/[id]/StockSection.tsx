@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AlertTriangle, Loader2, PackagePlus, Trash2 } from "lucide-react";
 import type { Tables, Database } from "@/types/database";
 import {
+  clearReservations,
   removeReservation,
   reserveProduct,
   updateReservation,
@@ -85,6 +86,21 @@ export function StockSection({
     });
   }
 
+  function clearAll() {
+    if (
+      !window.confirm(
+        `Supprimer les ${reservations.length} lignes de stock réservé pour cet événement ?`,
+      )
+    )
+      return;
+    setErr(null);
+    startTransition(async () => {
+      const res = await clearReservations(eventId);
+      if (!res.ok) setErr(res.error);
+      else router.refresh();
+    });
+  }
+
   // Group reservations by category for readability.
   const grouped = new Map<Category, Reservation[]>();
   for (const r of reservations) {
@@ -109,16 +125,34 @@ export function StockSection({
               : " · déduit du stock au clic « Clôturer »"}
           </p>
         </div>
-        {!readOnly && !adding && (
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            disabled={pending || available.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
-          >
-            <PackagePlus className="h-3 w-3" /> Réserver
-          </button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {!readOnly && reservations.length > 0 && (
+            <button
+              type="button"
+              onClick={clearAll}
+              disabled={pending}
+              title="Vider tout le stock réservé de cet événement"
+              className="inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
+            >
+              {pending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Trash2 className="h-3 w-3" />
+              )}
+              Tout vider
+            </button>
+          )}
+          {!readOnly && !adding && (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              disabled={pending || available.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
+            >
+              <PackagePlus className="h-3 w-3" /> Réserver
+            </button>
+          )}
+        </div>
       </div>
 
       {err && (

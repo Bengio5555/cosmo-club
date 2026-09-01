@@ -623,7 +623,47 @@ export async function removeReservation(eventId: string, productId: string) {
     .eq("product_id", productId);
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(`/dashboard/events/${eventId}`);
+  // Reservations drive the "réservé / dispo" figures on the stock page
+  // and every other event's shopping list — refresh both.
+  revalidatePath("/dashboard/stock");
   return { ok: true as const };
+}
+
+/**
+ * Drop every reservation of an event in one go — clearing a mis-computed
+ * stock list line by line was the only option before.
+ *
+ * Refused once the event is closed: its reservations are the record of
+ * what was actually taken out of stock at closure, so wiping them would
+ * erase the justification of the OUT movements.
+ */
+export async function clearReservations(eventId: string) {
+  const supabase = await createClient();
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("status")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event) return { ok: false as const, error: "Événement introuvable." };
+  if (event.status === "termine") {
+    return {
+      ok: false as const,
+      error:
+        "Événement clôturé : les réservations justifient les sorties de stock et ne peuvent plus être vidées.",
+    };
+  }
+
+  const { data: deleted, error } = await supabase
+    .from("event_stock")
+    .delete()
+    .eq("event_id", eventId)
+    .select("product_id");
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath("/dashboard/stock");
+  return { ok: true as const, removed: (deleted ?? []).length };
 }
 
 /* ─── Cocktail menu ─────────────────────────────────────────────── */
