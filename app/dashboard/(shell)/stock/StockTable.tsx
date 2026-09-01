@@ -44,9 +44,14 @@ const CATEGORIES: { value: Category; label: string }[] = [
 export function StockTable({
   products,
   movements,
+  reserved = {},
 }: {
   products: Product[];
   movements: Movement[];
+  /** product_id → units committed to still-open events. A reservation
+   *  never leaves products.stock_qty, so this is the only thing standing
+   *  between the owner and promising the same bottle twice. */
+  reserved?: Record<string, number>;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -156,6 +161,15 @@ export function StockTable({
     (p) => !p.archived && Number(p.stock_qty) <= Number(p.min_threshold ?? 0),
   ).length;
 
+  /** Physical stock minus what upcoming events already claimed. */
+  const availableOf = (p: Product) =>
+    Number(p.stock_qty ?? 0) - Number(reserved[p.id] ?? 0);
+
+  // Over-committed = promised to events beyond what's on the shelf.
+  const overCommittedCount = products.filter(
+    (p) => !p.archived && availableOf(p) < 0,
+  ).length;
+
   // Inventory value (all non-archived products, qty × cost_ht).
   // Surfaced in the toolbar and exported via the CSV button.
   const totalValueHt = products
@@ -173,6 +187,8 @@ export function StockTable({
       "Unité",
       "Contenu",
       "Stock",
+      "Réservé (événements à venir)",
+      "Disponible",
       "Coût HT (€)",
       "Valeur totale HT (€)",
       "Fournisseur",
@@ -192,6 +208,8 @@ export function StockTable({
         csvEscape(p.unit),
         csvEscape(content),
         formatNumber(qty),
+        formatNumber(Number(reserved[p.id] ?? 0)),
+        formatNumber(qty - Number(reserved[p.id] ?? 0)),
         cost != null ? formatNumber(cost) : "",
         total != null ? formatNumber(total) : "",
         csvEscape(p.supplier ?? ""),
@@ -200,6 +218,8 @@ export function StockTable({
     });
     const footer = [
       `"TOTAL valorisation HT (non archivés)"`,
+      "",
+      "",
       "",
       "",
       "",
@@ -233,6 +253,15 @@ export function StockTable({
           {lowStockCount > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 dark:border-amber-500/40 bg-amber-100 dark:bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-200">
               <AlertTriangle className="h-3 w-3" /> {lowStockCount} sous seuil
+            </span>
+          )}
+          {overCommittedCount > 0 && (
+            <span
+              title="Produits réservés sur des événements à venir au-delà du stock disponible"
+              className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
+            >
+              <AlertTriangle className="h-3 w-3" /> {overCommittedCount} sur-engagé
+              {overCommittedCount > 1 ? "s" : ""}
             </span>
           )}
           <span className="rounded-full border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-0.5 text-[10px] text-slate-600 dark:text-slate-300">
@@ -288,6 +317,8 @@ export function StockTable({
                 {grouped.get(c.value)!.map((p) => {
                   const low =
                     Number(p.stock_qty) <= Number(p.min_threshold ?? 0);
+                  const res = Number(reserved[p.id] ?? 0);
+                  const avail = Number(p.stock_qty ?? 0) - res;
                   return (
                     <tr
                       key={p.id}
@@ -314,6 +345,22 @@ export function StockTable({
                           <span className="ml-1 text-[10px] text-slate-400 dark:text-slate-600">
                             / {p.min_threshold}
                           </span>
+                        )}
+                        {res > 0 && (
+                          <p className="mt-0.5 text-[10px] leading-tight">
+                            <span className="text-slate-500 dark:text-slate-400">
+                              réservé {formatNumber(res)}
+                            </span>
+                            <span
+                              className={
+                                avail < 0
+                                  ? "ml-1.5 font-semibold text-red-600 dark:text-red-400"
+                                  : "ml-1.5 text-emerald-700 dark:text-emerald-400"
+                              }
+                            >
+                              · dispo {formatNumber(avail)}
+                            </span>
+                          </p>
                         )}
                       </td>
                       <td className="hidden px-3 py-3 text-right text-xs text-slate-500 dark:text-slate-400 md:table-cell md:px-4">

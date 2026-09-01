@@ -5,19 +5,43 @@ import { StockTable } from "./StockTable";
 
 export default async function StockPage() {
   const supabase = await createClient();
-  const [{ data: products, error }, { data: movements }] = await Promise.all([
-    supabase
-      .from("products")
-      .select("*")
-      .order("archived", { ascending: true })
-      .order("category", { ascending: true })
-      .order("name", { ascending: true }),
-    supabase
-      .from("stock_movements")
-      .select("id,product_id,qty,direction,reason,created_at,event_id")
-      .order("created_at", { ascending: false })
-      .limit(50),
-  ]);
+  const [{ data: products, error }, { data: movements }, { data: openEvents }] =
+    await Promise.all([
+      supabase
+        .from("products")
+        .select("*")
+        .order("archived", { ascending: true })
+        .order("category", { ascending: true })
+        .order("name", { ascending: true }),
+      supabase
+        .from("stock_movements")
+        .select("id,product_id,qty,direction,reason,created_at,event_id")
+        .order("created_at", { ascending: false })
+        .limit(50),
+      // Reservations only bite while an event is still open: closing one
+      // converts its reservation into a real OUT movement, and cancelled
+      // events release theirs.
+      supabase.from("events").select("id").in("status", ["a_venir", "en_cours"]),
+    ]);
+
+  // products.stock_qty is what physically sits in the storeroom — a
+  // reservation never touches it, it only lands in event_stock. Without
+  // this aggregate the page shows the same bottles as available to every
+  // upcoming event at once, which is how stock gets over-committed.
+  const openIds = (openEvents ?? []).map((e) => e.id);
+  const { data: reservations } = openIds.length
+    ? await supabase
+        .from("event_stock")
+        .select("product_id,qty_reserved")
+        .in("event_id", openIds)
+    : { data: [] };
+
+  const reserved: Record<string, number> = {};
+  for (const r of reservations ?? []) {
+    if (!r.product_id) continue;
+    reserved[r.product_id] =
+      (reserved[r.product_id] ?? 0) + Number(r.qty_reserved ?? 0);
+  }
 
   return (
     <div className="px-6 py-6 md:px-10 md:py-8">
@@ -28,8 +52,8 @@ export default async function StockPage() {
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Inventaire spiritueux, sirops, garnitures, verrerie, consommables.
-            Alertes quand stock &lt; seuil. Les clôtures d&apos;événement génèrent
-            automatiquement des mouvements OUT.
+            Alertes quand stock &lt; seuil. « Réservé » = engagé sur les événements
+            à venir ; « dispo » = ce qu&apos;il reste vraiment à promettre.
           </p>
         </div>
         <Link
@@ -47,7 +71,11 @@ export default async function StockPage() {
         </div>
       )}
 
-      <StockTable products={products ?? []} movements={movements ?? []} />
+      <StockTable
+        products={products ?? []}
+        movements={movements ?? []}
+        reserved={reserved}
+      />
     </div>
   );
 }
