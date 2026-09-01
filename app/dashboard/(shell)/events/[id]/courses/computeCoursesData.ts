@@ -12,7 +12,11 @@ export type CoursesLine = {
   contentUnit: string;
   perUnit: number | null;
   packsNeeded: number;
+  /** Stock actually usable by THIS event: physical stock minus what
+   *  earlier open events already committed. */
   stockQty: number;
+  /** Units of that product already booked by earlier open events. */
+  stockClaimedElsewhere: number;
   toBuy: number;
   costPerPack: number | null;
   lineCost: number | null;
@@ -49,7 +53,9 @@ export type CoursesData = {
  * The computation:
  *   1. Aggregate ingredient needs per product = Σ (qty × qty_planned)
  *   2. For each product, ceil(need / content_per_unit) → packs needed
- *   3. In shortage mode (default), subtract stock_qty, clamp to ≥0
+ *   3. In shortage mode (default), subtract the stock still usable by
+ *      this event — physical stock minus what earlier open events have
+ *      already reserved — and clamp to ≥0
  *   4. Group by supplier, sort alphabetically, compute subtotals
  */
 export async function computeCoursesData(
@@ -101,6 +107,46 @@ export async function computeCoursesData(
       : Promise.resolve({ data: [] }),
   ]);
 
+  // Stock is shared: a bottle sitting in the storeroom can already be
+  // promised to another event. Without this, every event's list subtracts
+  // the full physical stock, the same bottles get counted twice and the
+  // team turns up short. Events are served in calendar order — the one
+  // happening first physically takes the stock.
+  const { data: openEvents } = await supabase
+    .from("events")
+    .select("id,date,created_at")
+    .in("status", ["a_venir", "en_cours"]);
+
+  const ordered = (openEvents ?? []).slice().sort((a, b) => {
+    const da = a.date ?? "9999-12-31";
+    const db = b.date ?? "9999-12-31";
+    if (da !== db) return da < db ? -1 : 1;
+    // Same day: fall back to creation order so the split is stable.
+    const ca = a.created_at ?? "";
+    const cb = b.created_at ?? "";
+    if (ca !== cb) return ca < cb ? -1 : 1;
+    return a.id < b.id ? -1 : 1;
+  });
+  const selfIdx = ordered.findIndex((e) => e.id === eventId);
+  const earlierIds =
+    selfIdx > 0 ? ordered.slice(0, selfIdx).map((e) => e.id) : [];
+
+  const { data: earlierRes } = earlierIds.length
+    ? await supabase
+        .from("event_stock")
+        .select("product_id,qty_reserved")
+        .in("event_id", earlierIds)
+    : { data: [] };
+
+  const claimedBefore = new Map<string, number>();
+  for (const r of earlierRes ?? []) {
+    if (!r.product_id) continue;
+    claimedBefore.set(
+      r.product_id,
+      (claimedBefore.get(r.product_id) ?? 0) + Number(r.qty_reserved ?? 0),
+    );
+  }
+
   const productsById = new Map((allProducts ?? []).map((p) => [p.id, p]));
   const cocktailQty = new Map(
     (menu ?? []).map((m) => [m.cocktail_id, m.qty_planned]),
@@ -122,7 +168,8 @@ export async function computeCoursesData(
     const perUnit = p.content_per_unit ? Number(p.content_per_unit) : null;
     const packsNeeded =
       perUnit && perUnit > 0 ? Math.ceil(need / perUnit) : Math.ceil(need);
-    const stockQty = Number(p.stock_qty ?? 0);
+    const claimed = claimedBefore.get(productId) ?? 0;
+    const stockQty = Math.max(0, Number(p.stock_qty ?? 0) - claimed);
     const toBuy = showOnlyShortage
       ? Math.max(0, packsNeeded - stockQty)
       : packsNeeded;
@@ -140,6 +187,7 @@ export async function computeCoursesData(
       perUnit,
       packsNeeded,
       stockQty,
+      stockClaimedElsewhere: claimed,
       toBuy,
       costPerPack: costHt,
       lineCost,

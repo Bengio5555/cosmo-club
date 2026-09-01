@@ -144,6 +144,8 @@ export default async function CoursesPage({
                           {showOnlyShortage && (
                             <>
                               {" "}· besoin {l.packsNeeded}, stock {l.stockQty}
+                              {l.stockClaimedElsewhere > 0 &&
+                                ` (${l.stockClaimedElsewhere} réservé${l.stockClaimedElsewhere > 1 ? "s" : ""} sur un événement antérieur)`}
                             </>
                           )}
                         </div>

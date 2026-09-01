@@ -315,7 +315,11 @@ export function CoursesPdf({ data }: { data: CoursesData }) {
                         ? ` · ${l.perUnit} ${l.contentUnit}/${l.unit}`
                         : ""}
                       {showOnlyShortage
-                        ? ` · besoin ${l.packsNeeded}, stock ${l.stockQty}`
+                        ? ` · besoin ${l.packsNeeded}, stock ${l.stockQty}${
+                            l.stockClaimedElsewhere > 0
+                              ? ` (${l.stockClaimedElsewhere} réservé${l.stockClaimedElsewhere > 1 ? "s" : ""} ailleurs)`
+                              : ""
+                          }`
                         : ""}
                     </Text>
                   </View>
