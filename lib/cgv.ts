@@ -14,7 +14,7 @@ export const CGV_TEXT = `# Conditions générales de vente — Cosmo Club
 ## Prestations
 Le Prestataire s'engage à fournir les services suivants, tels que convenus dans le devis avec le Client : mise à disposition du bar, personnel qualifié, approvisionnement en boissons, mise en place et démontage du matériel.
 
-Un testing (dégustation préalable) peut être proposé pour les événements de grande ampleur ou à la demande du client. Il est offert sous réserve de validation du devis. En cas de non-confirmation de la prestation à l'issue de ce testing, celui-ci sera facturé au tarif de 100 € HT.
+Un testing (dégustation préalable) peut être proposé pour les événements de grande ampleur ou à la demande du client. Il est offert sous réserve de validation du devis. En cas de non-confirmation de la prestation à l'issue de ce testing, celui-ci sera facturé. Le coût du testing dépend du nombre de boissons proposées à la dégustation ainsi que du nombre de participants.
 
 ## Devis
 Toute commande de prestation devra faire l'objet d'un devis établi par le Prestataire. Le Client s'engage à vérifier attentivement les éléments du devis et à le valider par écrit.
@@ -54,6 +54,11 @@ Le choix des recettes (cocktails ou boissons) doit être définitivement validé
 La verrerie mise à disposition est incluse dans la prestation.
 
 Toute casse ou perte sera facturée après l'événement. Le tarif pourra varier en fonction de la quantité, des modèles et des contraintes de livraison ou reprise imposées par le lieu.
+
+Une fois le devis validé, les horaires de livraison et de reprise de la verrerie ne peuvent plus être modifiés. Si la livraison ou la reprise ne peut être effectuée en raison d'un problème logistique indépendant de la volonté du Prestataire (absence de contact sur place, aucune personne pour réceptionner ou restituer le matériel, accès impossible, etc.), les frais supplémentaires engendrés sont à la charge du Client.
+
+## Consommables et bouteilles
+Les bouteilles de boissons (alcoolisées ou non), ouvertes ou non consommées durant la prestation, demeurent la propriété de Cosmo Club. Elles sont récupérées par notre équipe à l'issue de l'événement et ne sont pas remises au Client.
 
 ## Responsabilités et assurance
 La consommation excessive de boissons alcoolisées par les participants est du ressort de l'organisateur de l'événement. En aucun cas Cosmo Club ne pourra être jugé responsable des débordements et casses entraînés par une consommation excessive.
@@ -105,24 +110,41 @@ export function renderCgvHtml(src: string): string {
 
   const blocks = src.split(/\n\n+/);
   const out: string[] = [];
-  for (const raw of blocks) {
-    const b = raw.trim();
-    if (!b) continue;
-    if (b.startsWith("# ")) {
-      // Demoted to <h2>: every page that embeds the CGV (public /cgv,
-      // the acceptance modal) already has its own <h1>, and the
-      // doc-title was creating a duplicate-H1 on-page SEO issue.
-      out.push(`<h2>${inlineBold(escape(b.slice(2)))}</h2>`);
-    } else if (b.startsWith("## ")) {
-      out.push(`<h2>${inlineBold(escape(b.slice(3)))}</h2>`);
-    } else if (b.split("\n").every((l) => l.trim().startsWith("- "))) {
-      const items = b
-        .split("\n")
+
+  /** Emit body text: a run of `- ` lines becomes a <ul>, anything else a <p>. */
+  const pushBody = (text: string) => {
+    const t = text.trim();
+    if (!t) return;
+    const lines = t.split("\n");
+    if (lines.every((l) => l.trim().startsWith("- "))) {
+      const items = lines
         .map((l) => `<li>${inlineBold(escape(l.trim().slice(2)))}</li>`)
         .join("");
       out.push(`<ul>${items}</ul>`);
     } else {
-      out.push(`<p>${inlineBold(escape(b))}</p>`);
+      out.push(`<p>${inlineBold(escape(t))}</p>`);
+    }
+  };
+
+  for (const raw of blocks) {
+    const b = raw.trim();
+    if (!b) continue;
+    // A heading and the sentence that follows it live in the same block:
+    // the source separates them by a single newline, and blocks split on
+    // blank lines. Take the first line as the heading and re-emit the
+    // remainder as body — otherwise the opening sentence of every
+    // section is swallowed into the <h2> and renders as heading text.
+    if (b.startsWith("# ") || b.startsWith("## ")) {
+      const nl = b.indexOf("\n");
+      const head = nl === -1 ? b : b.slice(0, nl);
+      // Both levels render as <h2>: every page embedding the CGV (public
+      // /cgv, the acceptance modal) already has its own <h1>, and the
+      // doc-title was creating a duplicate-H1 on-page SEO issue.
+      const offset = head.startsWith("## ") ? 3 : 2;
+      out.push(`<h2>${inlineBold(escape(head.slice(offset)))}</h2>`);
+      if (nl !== -1) pushBody(b.slice(nl + 1));
+    } else {
+      pushBody(b);
     }
   }
   return out.join("\n");
