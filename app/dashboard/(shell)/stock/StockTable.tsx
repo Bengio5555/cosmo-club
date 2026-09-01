@@ -352,11 +352,11 @@ export function StockTable({
                               réservé {formatNumber(res)}
                             </span>
                             {/* A negative availability is a shortfall, not a
-                                stock: say how many units are missing rather
+                                stock: say how many units are needed rather
                                 than making the reader parse a minus sign. */}
                             {avail < 0 ? (
                               <span className="ml-1.5 font-semibold text-red-600 dark:text-red-400">
-                                · manque {formatNumber(-avail)}
+                                · besoin {formatNumber(-avail)}
                               </span>
                             ) : (
                               <span className="ml-1.5 text-emerald-700 dark:text-emerald-400">
