@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Check,
   Copy as CopyIcon,
@@ -20,6 +21,7 @@ import {
   type BriefingAttachment,
 } from "@/lib/server/briefingPreset";
 import { rotateBriefingToken, saveBriefing } from "./actions";
+import type { ReservedLine } from "@/lib/server/briefingStock";
 
 export type CocktailLite = {
   id: string;
@@ -35,12 +37,15 @@ export function BriefingEditor({
   shareUrl,
   staffPool,
   cocktails,
+  reserved,
 }: {
   eventId: string;
   initial: BriefingData;
   shareUrl: string | null;
   staffPool: string[];
   cocktails: CocktailLite[];
+  /** Live reserved stock of the event — shown on the brief automatically. */
+  reserved: ReservedLine[];
 }) {
   const router = useRouter();
   const [data, setData] = useState<BriefingData>(initial);
@@ -182,11 +187,45 @@ export function BriefingEditor({
         onChange={(next) => patch({ schedule: next })}
       />
 
-      {/* Stocks notes */}
+      {/* Stocks : reserved list (live, read-only here) + free-form extras */}
       <Section
         title="Stocks à prendre"
-        hint="Texte libre, prefilled par le mixologue. S'affiche dans la cellule 'Arrivée du personnel' sur le print."
+        hint="Le stock réservé de l'événement s'affiche automatiquement sur le brief — inutile de le ressaisir. Le champ ci-dessous sert aux compléments (frais du jour, matériel hors stock…)."
       >
+        {reserved.length > 0 ? (
+          <div className="mb-3 overflow-hidden rounded-md border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
+              <span>Stock réservé · {reserved.length} ligne{reserved.length > 1 ? "s" : ""}</span>
+              <Link
+                href={`/dashboard/events/${eventId}`}
+                className="normal-case tracking-normal text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+              >
+                Modifier dans la fiche événement →
+              </Link>
+            </div>
+            <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-900">
+              {reserved.map((l) => (
+                <li key={l.product_id} className="flex items-baseline justify-between gap-3 px-3 py-1.5">
+                  <span className="min-w-0 truncate text-slate-800 dark:text-slate-200">
+                    <span className="mr-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{l.category}</span>
+                    {l.name}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-slate-600 dark:text-slate-300">
+                    {l.qty} {l.unit}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-500">
+            Aucun stock réservé sur cet événement pour l&apos;instant —{" "}
+            <Link href={`/dashboard/events/${eventId}`} className="underline decoration-dotted underline-offset-2">
+              le réserver dans la fiche événement
+            </Link>
+            , il apparaîtra ici et sur le brief.
+          </p>
+        )}
         <textarea
           value={data.stocks_notes}
           onChange={(e) => patch({ stocks_notes: e.target.value })}

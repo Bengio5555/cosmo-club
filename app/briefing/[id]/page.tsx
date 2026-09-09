@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+import { loadReservedStock } from "@/lib/server/briefingStock";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -60,7 +62,7 @@ export default async function PublicBriefingPage({
   // Auto-fill: pull cocktails + ingredients + client. Avoid PostgREST
   // nested joins (typed client doesn't infer them) — use plain .in()
   // queries with in-memory join.
-  const [{ data: cocktailLinks }, { data: client }] = await Promise.all([
+  const [{ data: cocktailLinks }, { data: client }, reserved] = await Promise.all([
     supabase
       .from("event_cocktails")
       .select("cocktail_id,qty_planned")
@@ -72,6 +74,9 @@ export default async function PublicBriefingPage({
           .eq("id", event.client_id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
+    // Reserved stock is read live so the "stocks à prendre" list is
+    // always the one on the event, never a stale copy.
+    loadReservedStock(supabase, id),
   ]);
 
   const cocktailIds = (cocktailLinks ?? [])
@@ -200,10 +205,41 @@ export default async function PublicBriefingPage({
         </section>
 
         {/* ─── Stocks ─── */}
-        {data.stocks_notes.trim() && (
+        {(reserved.length > 0 || data.stocks_notes.trim()) && (
           <section className="briefing-section">
             <h2 className="briefing-h2">Stocks à prendre</h2>
-            <pre className="briefing-pre">{data.stocks_notes}</pre>
+            {reserved.length > 0 && (
+              <table className="briefing-stock">
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th className="briefing-stock-qty">Qté</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from(new Set(reserved.map((l) => l.category))).map((cat) => (
+                    <Fragment key={cat}>
+                      <tr>
+                        <td colSpan={2} className="briefing-stock-cat">{cat}</td>
+                      </tr>
+                      {reserved
+                        .filter((l) => l.category === cat)
+                        .map((l) => (
+                          <tr key={l.product_id}>
+                            <td>{l.name}</td>
+                            <td className="briefing-stock-qty">
+                              {l.qty} {l.unit}
+                            </td>
+                          </tr>
+                        ))}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {data.stocks_notes.trim() && (
+              <pre className="briefing-pre">{data.stocks_notes}</pre>
+            )}
           </section>
         )}
 

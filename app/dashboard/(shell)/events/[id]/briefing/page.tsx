@@ -1,3 +1,4 @@
+import { loadReservedStock } from "@/lib/server/briefingStock";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Printer } from "lucide-react";
@@ -30,6 +31,8 @@ export default async function EventBriefingPage({
     .eq("id", id)
     .maybeSingle();
   if (error || !event) notFound();
+
+  const reserved = await loadReservedStock(supabase, id);
 
   // Auto-fill staff (assignees pool) and cocktails (recipes display).
   // We don't use PostgREST nested joins here because the Supabase typed
@@ -151,6 +154,7 @@ export default async function EventBriefingPage({
             }
             staffPool={staffPool}
             cocktails={cocktails}
+            reserved={reserved}
           />
         )}
       </div>
