@@ -3,78 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Inbox,
-  FileText,
-  Receipt,
-  Package,
-  Users,
-  Contact,
-  ImageIcon,
-  Building2,
-  Settings,
-  CalendarDays,
-  BookText,
-  Wine,
-  UserCog,
-  Newspaper,
-  Truck,
-  Network,
-  MessageSquareText,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccess, type UserRole } from "@/lib/auth/roles";
 import logoSrc from "@/public/brand/cosmo-logo.avif";
-
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-};
-
-const nav: { section: string; items: NavItem[] }[] = [
-  {
-    section: "Pilotage",
-    items: [
-      { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-      { href: "/dashboard/leads", label: "Demandes", icon: Inbox },
-      { href: "/dashboard/devis", label: "Devis", icon: FileText },
-      { href: "/dashboard/factures", label: "Factures", icon: Receipt },
-      { href: "/dashboard/events", label: "Événements", icon: CalendarDays },
-    ],
-  },
-  {
-    section: "Ressources",
-    items: [
-      { href: "/dashboard/clients", label: "Clients", icon: Contact },
-      { href: "/dashboard/catalog", label: "Catalogue", icon: BookText },
-      { href: "/dashboard/cocktails", label: "Boissons", icon: Wine },
-      { href: "/dashboard/stock", label: "Stock", icon: Package },
-      { href: "/dashboard/staff", label: "Équipe", icon: Users },
-      { href: "/dashboard/providers", label: "Prestataires", icon: Truck },
-      { href: "/dashboard/partners", label: "Partenaires réseau", icon: Network },
-    ],
-  },
-  {
-    section: "Contenu",
-    items: [
-      { href: "/dashboard/blog", label: "Le Mag", icon: Newspaper },
-      { href: "/dashboard/reddit", label: "Reddit veille", icon: MessageSquareText },
-      { href: "/dashboard/images", label: "Images site", icon: ImageIcon },
-      { href: "/dashboard/home-gallery", label: "Galerie home", icon: ImageIcon },
-      { href: "/dashboard/logos", label: "Logos clients", icon: Building2 },
-    ],
-  },
-  {
-    section: "Configuration",
-    items: [
-      { href: "/dashboard/team", label: "Utilisateurs", icon: UserCog },
-      { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
-    ],
-  },
-];
+import { DASHBOARD_NAV } from "./nav";
 
 export function Sidebar({
   role,
@@ -88,7 +20,7 @@ export function Sidebar({
   // Each section is built from items the current role can actually
   // access. If the filter removes every item from a section, the whole
   // section is dropped so we don't render an empty header.
-  const sections = nav
+  const sections = DASHBOARD_NAV
     .map((group) => ({
       ...group,
       items: group.items.filter((item) => canAccess(item.href, role)),
