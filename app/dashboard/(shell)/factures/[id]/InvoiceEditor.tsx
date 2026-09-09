@@ -537,7 +537,7 @@ export function InvoiceEditor({
                     <button
                       type="button"
                       onClick={addItem}
-                      className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-white"
+                      className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-slate-300 px-3 text-[11px] uppercase tracking-wide text-slate-600 transition-colors hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:text-white md:min-h-0 md:border-0 md:px-0 md:text-slate-500 md:dark:text-slate-400"
                     >
                       <Plus className="h-3 w-3" /> Ajouter une ligne
                     </button>
@@ -991,7 +991,10 @@ function ItemRow({
           className="w-full resize-y rounded-md border border-slate-200 dark:border-slate-800/70 bg-slate-100 dark:bg-slate-900/60 px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
       </div>
-      <input
+      <div className="grid grid-cols-3 gap-2 md:contents">
+      <div className="min-w-0 md:contents">
+        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500 md:hidden">Qté</span>
+        <input
         type="number"
         min="0"
         step="0.5"
@@ -1000,7 +1003,10 @@ function ItemRow({
         readOnly={readOnly}
         className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
-      <input
+      </div>
+      <div className="min-w-0 md:contents">
+        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500 md:hidden">Unité</span>
+        <input
         type="text"
         value={item.unit}
         onChange={(e) => onPatch({ unit: e.target.value })}
@@ -1008,7 +1014,10 @@ function ItemRow({
         readOnly={readOnly}
         className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
-      <input
+      </div>
+      <div className="min-w-0 md:contents">
+        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500 md:hidden">Prix HT</span>
+        <input
         type="number"
         min="0"
         step="0.01"
@@ -1017,7 +1026,9 @@ function ItemRow({
         readOnly={readOnly}
         className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
-      <div className="flex items-center justify-end gap-2 md:flex-col md:items-end md:gap-1 md:pt-1">
+      </div>
+      </div>
+      <div className="flex items-center justify-between gap-2 md:flex-col md:items-end md:justify-start md:gap-1 md:pt-1">
         {discount > 0 && (
           <span className="whitespace-nowrap text-[10px] tabular-nums text-[color:var(--color-grenat)] md:text-[10px]">
             remise −{formatEUR(discount)}
@@ -1030,10 +1041,11 @@ function ItemRow({
           <button
             type="button"
             onClick={onRemove}
-            className="rounded text-slate-500 dark:text-slate-500 transition-colors hover:text-red-300"
+            className="-mr-2 inline-flex min-h-[40px] items-center gap-1.5 rounded-md px-2 text-xs text-red-600 transition-colors hover:text-red-500 dark:text-red-400 md:mr-0 md:min-h-0 md:px-0 md:text-slate-500 md:hover:text-red-300 md:dark:text-slate-500"
             aria-label="Supprimer la ligne"
           >
             <Trash2 className="h-3.5 w-3.5" />
+            <span className="md:hidden">Supprimer</span>
           </button>
         )}
       </div>

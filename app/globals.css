@@ -288,6 +288,22 @@ html.dark body {
   }
 }
 
+/* Touch devices: any icon-only button/link gets a real tap target.
+   Dozens of dashboard controls are a bare 14 px lucide icon with no
+   padding — fine with a mouse, near-impossible with a thumb. Scoped to
+   coarse pointers so desktop layout is untouched. :has() is supported
+   by every mobile browser we target (iOS 15.4+, Chrome 105+). */
+@media (pointer: coarse) {
+  .dashboard-shell button:has(> svg:only-child),
+  .dashboard-shell a:has(> svg:only-child) {
+    min-width: 40px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 /* Disable iOS pull-to-refresh on the dashboard shell — feels jarring
    when the route is a server-rendered Next page. Public site keeps
    normal browser behavior. */
