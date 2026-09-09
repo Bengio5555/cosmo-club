@@ -969,7 +969,7 @@ function ItemRow({
   // input. Widening to minmax(104px,auto) gives the total room while
   // still letting the trash sit tight on the right edge.
   return (
-    <div className="grid gap-2 py-2.5 md:grid-cols-[auto_minmax(0,1fr)_64px_72px_88px_minmax(104px,auto)] md:items-start md:gap-3">
+    <div className="grid min-w-0 grid-cols-1 gap-2 py-2.5 md:grid-cols-[auto_minmax(0,1fr)_64px_72px_88px_minmax(104px,auto)] md:items-start md:gap-3">
       <div className="mt-2 hidden text-slate-400 dark:text-slate-600 md:block">
         <GripVertical className="h-3.5 w-3.5" />
       </div>
@@ -980,7 +980,7 @@ function ItemRow({
           onChange={(e) => onPatch({ title: e.target.value })}
           placeholder="Intitulé de la prestation"
           readOnly={readOnly}
-          className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          className="w-full min-w-0 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
         <textarea
           value={item.description}
@@ -988,7 +988,7 @@ function ItemRow({
           placeholder="Description (optionnelle)"
           rows={1}
           readOnly={readOnly}
-          className="w-full resize-y rounded-md border border-slate-200 dark:border-slate-800/70 bg-slate-100 dark:bg-slate-900/60 px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+          className="w-full min-w-0 resize-y rounded-md border border-slate-200 dark:border-slate-800/70 bg-slate-100 dark:bg-slate-900/60 px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
         />
       </div>
       <div className="grid grid-cols-3 gap-2 md:contents">
@@ -1001,7 +1001,7 @@ function ItemRow({
         value={item.qty}
         onChange={(e) => onPatch({ qty: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full min-w-0 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       </div>
       <div className="min-w-0 md:contents">
@@ -1012,7 +1012,7 @@ function ItemRow({
         onChange={(e) => onPatch({ unit: e.target.value })}
         placeholder="unité"
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full min-w-0 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-300 focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       </div>
       <div className="min-w-0 md:contents">
@@ -1024,7 +1024,7 @@ function ItemRow({
         value={item.unit_price_ht}
         onChange={(e) => onPatch({ unit_price_ht: Number(e.target.value) || 0 })}
         readOnly={readOnly}
-        className="w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
+        className="w-full min-w-0 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2 py-1.5 text-right text-sm text-slate-900 dark:text-white focus:border-[color:var(--color-grenat)] focus:outline-none read-only:opacity-70"
       />
       </div>
       </div>
