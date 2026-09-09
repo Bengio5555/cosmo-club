@@ -9,6 +9,11 @@ import type { EventTodoData } from "@/lib/server/eventTodoTemplate";
 import { parseExtraCosts, type EventExtraCosts } from "@/lib/extraCosts";
 import { isHalfStep, roundToHalf, HALF_STEP_ERROR } from "@/lib/stock";
 import { notifyTeamEventCreated } from "@/lib/server/notifyEventCreated";
+import {
+  emptyBriefing,
+  type BriefingData,
+  type BriefingScheduleStep,
+} from "@/lib/server/briefingPreset";
 
 type EventStatus = Database["public"]["Enums"]["event_status"];
 type EventUpdate = TablesUpdate<"events">;
@@ -88,13 +93,96 @@ export async function saveNewEvent(input: EventInput) {
  * quote_id + client_id. Redirects into the fresh event's detail page so
  * the owner can immediately assign staff / reserve stock.
  */
+/* ─── Quote planning → event hours + staff briefing ──────────────── */
+
+type QuoteStep = { time: string; label: string };
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Tolerant read of quotes.schedule (JSONB, may be null / legacy). */
+function parseQuoteSchedule(raw: unknown): QuoteStep[] {
+  if (!Array.isArray(raw)) return [];
+  const out: QuoteStep[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const label = typeof o.label === "string" ? o.label.trim() : "";
+    let time = typeof o.time === "string" ? o.time.trim() : "";
+    if (/^\d:\d\d$/.test(time)) time = "0" + time;
+    if (!HHMM.test(time)) time = "";
+    if (!label && !time) continue;
+    out.push({ time, label });
+  }
+  return out;
+}
+
+/**
+ * Map a quote step onto one of the briefing's operational kinds, only
+ * on unambiguous wording. Anything else (guest arrival, speeches, cake…)
+ * stays null and is added to the brief as its own "other" step — better
+ * an unclassified line than a wrong time on the wrong ops step.
+ * Order matters: end-of-service and pick-up patterns are tested before
+ * the generic "début" / "livraison" ones they could otherwise shadow.
+ */
+function inferKind(label: string): BriefingScheduleStep["kind"] | null {
+  const l = label.toLowerCase();
+  if (/reprise|retour (du )?mat|r[ée]cup[ée]ration/.test(l)) return "delivery_out";
+  if (/gla[cç]on/.test(l)) return "delivery_ice";
+  if (/livraison|r[ée]ception (du )?mat/.test(l)) return "delivery_in";
+  if (/d[ée]montage|rangement|remballage/.test(l)) return "teardown";
+  if (/installation|montage|mise en place|set ?up/.test(l)) return "setup";
+  if (/arriv[ée]e (de l'|du |des )?([ée]quipe|staff|barm)/.test(l)) return "team_arrival";
+  if (/repas|d[iî]ner staff|pause staff/.test(l)) return "meal";
+  if (/fin (du |de |des )?(service|cocktail|bar|soir)|fermeture (du )?bar/.test(l)) return "service_end";
+  if (/d[ée]but (du |de |des )?(service|cocktail|bar)|ouverture (du )?bar|lancement/.test(l)) return "service_start";
+  return null;
+}
+
+/**
+ * Seed the staff briefing from the quote's run-of-show.
+ *
+ * The 10 preset steps are kept whole — they carry the logistics the
+ * team relies on (Acaris order number, ice delivery, loading…). A quote
+ * step that clearly matches one of them lends it its time (and keeps
+ * its own wording in the comment for traceability); every other quote
+ * step is appended as an extra timed line. Nothing from either side is
+ * dropped; the operator can still reorder or edit in the briefing.
+ */
+function briefingFromQuoteSchedule(steps: QuoteStep[]): BriefingData {
+  const brief = emptyBriefing();
+  const used = new Set<number>();
+  steps.forEach((step, i) => {
+    const kind = inferKind(step.label);
+    if (!kind || !step.time) return;
+    const target = brief.schedule.find((p) => p.kind === kind && !p.time);
+    if (!target) return;
+    target.time = step.time;
+    if (step.label && step.label.toLowerCase() !== target.label.toLowerCase()) {
+      target.comment = [target.comment.trim(), `Devis : ${step.label}`]
+        .filter(Boolean)
+        .join(" · ");
+    }
+    used.add(i);
+  });
+  steps.forEach((step, i) => {
+    if (used.has(i)) return;
+    brief.schedule.push({
+      time: step.time,
+      label: step.label || "Étape",
+      kind: "other",
+      assignees: [],
+      comment: "",
+    });
+  });
+  return brief;
+}
+
 export async function createEventFromQuote(quoteId: string) {
   const supabase = await createClient();
 
   const { data: quote, error: qErr } = await supabase
     .from("quotes")
     .select(
-      "id,number,subject,event_date,event_end_date,event_location,event_type,guests_count,client_id,status",
+      "id,number,subject,event_date,event_end_date,event_location,event_type,guests_count,client_id,status,schedule",
     )
     .eq("id", quoteId)
     .maybeSingle();
@@ -118,17 +206,34 @@ export async function createEventFromQuote(quoteId: string) {
     redirect(`/dashboard/events/${existing.id}`);
   }
 
+  // The quote has no dedicated start/end fields: its hours live in the
+  // run-of-show. First timed step = start, last timed step = end, in
+  // authored order (not sorted, so an 18:00 → 02:00 night keeps 02:00 as
+  // its end; the calendar feed already rolls such ends to the next day).
+  const steps = parseQuoteSchedule((quote as { schedule?: unknown }).schedule);
+  const timed = steps.filter((st) => st.time);
+  const start_time = timed[0]?.time ?? null;
+  const end_time = timed.length > 1 ? timed[timed.length - 1].time : null;
+  const briefing_data =
+    steps.length > 0
+      ? (briefingFromQuoteSchedule(steps) as unknown as
+          Database["public"]["Tables"]["events"]["Insert"]["briefing_data"])
+      : undefined;
+
   const { data: created, error: eErr } = await supabase
     .from("events")
     .insert({
       title: quote.subject || `Événement — devis ${quote.number}`,
       date: quote.event_date ?? new Date().toISOString().slice(0, 10),
       end_date: quote.event_end_date,
+      start_time,
+      end_time,
       location: quote.event_location,
       guests_count: quote.guests_count,
       client_id: quote.client_id,
       quote_id: quote.id,
       status: "a_venir",
+      briefing_data,
     })
     .select("id")
     .single();
@@ -143,8 +248,8 @@ export async function createEventFromQuote(quoteId: string) {
     title: quote.subject || `Événement — devis ${quote.number}`,
     date: quote.event_date ?? new Date().toISOString().slice(0, 10),
     end_date: quote.event_end_date,
-    start_time: null,
-    end_time: null,
+    start_time,
+    end_time,
     location: quote.event_location,
     guests_count: quote.guests_count,
   });
