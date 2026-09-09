@@ -125,12 +125,18 @@ function parseQuoteSchedule(raw: unknown): QuoteStep[] {
  */
 function inferKind(label: string): BriefingScheduleStep["kind"] | null {
   const l = label.toLowerCase();
-  if (/reprise|retour (du )?mat|r[ée]cup[ée]ration/.test(l)) return "delivery_out";
+  // Ice first (a "livraison glaçons" is ice, not glassware). Then
+  // teardown before pick-up: "Rangement & reprise matériel" is the team
+  // packing up, not the glassware vendor collecting on J+1. Team arrival
+  // before setup: "Arrivée du personnel & mise en place" is the arrival.
+  // Setup before delivery: "Livraison, montage & installation du bar" is
+  // the bar going up, while a bare "Livraison Acaris" is the delivery.
   if (/gla[cç]on/.test(l)) return "delivery_ice";
-  if (/livraison|r[ée]ception (du )?mat/.test(l)) return "delivery_in";
   if (/d[ée]montage|rangement|remballage/.test(l)) return "teardown";
+  if (/reprise|retour (du )?mat|r[ée]cup[ée]ration/.test(l)) return "delivery_out";
+  if (/arriv[ée]e (de l'|du |des |de la )?([ée]quipe|staff|barm|personnel)/.test(l)) return "team_arrival";
   if (/installation|montage|mise en place|set ?up/.test(l)) return "setup";
-  if (/arriv[ée]e (de l'|du |des )?([ée]quipe|staff|barm)/.test(l)) return "team_arrival";
+  if (/livraison|r[ée]ception (du )?mat/.test(l)) return "delivery_in";
   if (/repas|d[iî]ner staff|pause staff/.test(l)) return "meal";
   if (/fin (du |de |des )?(service|cocktail|bar|soir)|fermeture (du )?bar/.test(l)) return "service_end";
   if (/d[ée]but (du |de |des )?(service|cocktail|bar)|ouverture (du )?bar|lancement/.test(l)) return "service_start";
@@ -207,13 +213,28 @@ export async function createEventFromQuote(quoteId: string) {
   }
 
   // The quote has no dedicated start/end fields: its hours live in the
-  // run-of-show. First timed step = start, last timed step = end, in
-  // authored order (not sorted, so an 18:00 → 02:00 night keeps 02:00 as
-  // its end; the calendar feed already rolls such ends to the next day).
+  // run-of-show. Anchor them on the team's presence, not on the vendor
+  // logistics that bracket it — a planning that starts with "11:00
+  // Livraison Acaris" and ends with "10:00 J+1 Reprise Acaris" must not
+  // yield a 23-hour event. Start = team arrival (else setup, else service
+  // start); end = teardown (else end of service). Fall back to the
+  // first/last timed step in authored order (not sorted, so an
+  // 18:00 → 02:00 night keeps 02:00; the calendar feed rolls it to J+1).
   const steps = parseQuoteSchedule((quote as { schedule?: unknown }).schedule);
+  const kinds = steps.map((st) => inferKind(st.label));
+  const timeOf = (k: BriefingScheduleStep["kind"]) =>
+    steps.find((st, i) => st.time && kinds[i] === k)?.time ?? null;
   const timed = steps.filter((st) => st.time);
-  const start_time = timed[0]?.time ?? null;
-  const end_time = timed.length > 1 ? timed[timed.length - 1].time : null;
+  const start_time =
+    timeOf("team_arrival") ??
+    timeOf("setup") ??
+    timeOf("service_start") ??
+    timed[0]?.time ??
+    null;
+  const end_time =
+    timeOf("teardown") ??
+    timeOf("service_end") ??
+    (timed.length > 1 ? timed[timed.length - 1].time : null);
   const briefing_data =
     steps.length > 0
       ? (briefingFromQuoteSchedule(steps) as unknown as
