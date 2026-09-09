@@ -37,10 +37,15 @@ export function ProductCombobox({
   value,
   options,
   onChange,
+  hint,
 }: {
   value: string;
   options: ProductChoice[];
   onChange: (productId: string) => void;
+  /** Optional muted suffix per row (e.g. current stock) — lets callers
+   *  surface context the picker doesn't know about without widening
+   *  ProductChoice. */
+  hint?: (p: ProductChoice) => string | null | undefined;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -140,13 +145,18 @@ export function ProductCombobox({
                           type="button"
                           onClick={() => pick(p.id)}
                           className={
-                            "block w-full px-3 py-1.5 text-left text-sm transition-colors " +
+                            "flex w-full items-baseline justify-between gap-3 px-3 py-1.5 text-left text-sm transition-colors " +
                             (p.id === value
                               ? "bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-white"
                               : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900")
                           }
                         >
-                          {label(p)}
+                          <span className="min-w-0 truncate">{label(p)}</span>
+                          {hint?.(p) && (
+                            <span className="shrink-0 text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
+                              {hint(p)}
+                            </span>
+                          )}
                         </button>
                       </li>
                     ))}

@@ -11,6 +11,7 @@ import {
   reserveProduct,
   updateReservation,
 } from "../actions";
+import { ProductCombobox } from "@/app/dashboard/(shell)/cocktails/[id]/ProductCombobox";
 
 type ProductOption = Pick<
   Tables<"products">,
@@ -196,22 +197,26 @@ export function StockSection({
         >
           <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_90px]">
             <Field label="Produit">
-              <select
-                name="product_id"
+              {/* Searchable picker: ~200 products made the native select
+                  unusable. The hidden input keeps `product_id` in the form
+                  payload that handleAdd reads. */}
+              <input type="hidden" name="product_id" value={pickedProduct} />
+              <ProductCombobox
                 value={pickedProduct}
-                onChange={(e) => setPickedProduct(e.target.value)}
-                className={inputCls}
-                autoFocus
-              >
-                <option value="" disabled>
-                  Choisir…
-                </option>
-                {available.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    [{CATEGORY_LABEL[p.category]}] {p.name} · stock {p.stock_qty} {p.unit}
-                  </option>
-                ))}
-              </select>
+                onChange={setPickedProduct}
+                options={available.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  category: CATEGORY_LABEL[p.category],
+                  unit: p.unit,
+                  content_per_unit: null,
+                  content_unit: null,
+                }))}
+                hint={(p) => {
+                  const src = productsById.get(p.id);
+                  return src ? `stock ${Number(src.stock_qty)}` : null;
+                }}
+              />
             </Field>
             <Field label={`Qté${picked ? ` (${picked.unit})` : ""}`}>
               <input
