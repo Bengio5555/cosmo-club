@@ -81,6 +81,7 @@ export function InvoiceEditor({
     !isCreditNote && (invoice.status === "envoye" || invoice.status === "en_retard");
 
   const [creditModal, setCreditModal] = useState(false);
+  const [sendModal, setSendModal] = useState(false);
   const [creditReason, setCreditReason] = useState("");
 
   // ─── Metadata state ───
@@ -237,15 +238,14 @@ export function InvoiceEditor({
   }
 
   function send() {
-    if (
-      !window.confirm(
-        "Figer et envoyer la facture ? Une fois émise, elle ne pourra plus être modifiée (conformité FR).",
-      )
-    )
-      return;
+    setSendModal(true);
+  }
+
+  function confirmSend(message: string) {
     startTransition(async () => {
       setMsg(null);
-      const res = await sendInvoice(invoice.id);
+      const res = await sendInvoice(invoice.id, { message });
+      setSendModal(false);
       if (!res.ok) {
         setMsg({ kind: "err", text: res.error });
         return;
@@ -619,6 +619,15 @@ export function InvoiceEditor({
           </div>
         </aside>
       </div>
+
+      {sendModal && (
+        <SendInvoiceModal
+          invoiceNumber={invoice.number}
+          pending={pending}
+          onCancel={() => setSendModal(false)}
+          onConfirm={confirmSend}
+        />
+      )}
 
       {creditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -1048,6 +1057,116 @@ function ItemRow({
             <span className="md:hidden">Supprimer</span>
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Send modal: freeze + email, with an optional note ──────────── */
+
+/**
+ * Replaces the bare window.confirm. Same shape as the quote's send
+ * modal, minus the CC field: the invoice email goes to the client on
+ * file. The note lands in a highlighted box in the email; empty means
+ * the usual email, unchanged.
+ */
+function SendInvoiceModal({
+  invoiceNumber,
+  pending,
+  onCancel,
+  onConfirm,
+}: {
+  invoiceNumber: string;
+  pending: boolean;
+  onCancel: () => void;
+  onConfirm: (message: string) => void;
+}) {
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && !pending) onCancel();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onCancel, pending]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Envoyer la facture ${invoiceNumber}`}
+      onClick={() => !pending && onCancel()}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-950"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-900">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+              Figer & envoyer
+            </p>
+            <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">
+              Facture {invoiceNumber}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            aria-label="Fermer"
+            className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50 dark:text-slate-500 dark:hover:bg-slate-900 dark:hover:text-white"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="space-y-4 px-5 py-4">
+          <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+            Une fois émise, la facture ne pourra plus être modifiée
+            (conformité FR). Elle sera envoyée à l&apos;email du client.
+          </p>
+
+          <label className="block">
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
+              Message d&apos;accompagnement (optionnel)
+            </span>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={4}
+              maxLength={2000}
+              autoFocus
+              placeholder="Un petit mot, une précision sur le règlement, un remerciement…"
+              className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none dark:placeholder:text-slate-600"
+            />
+            <span className="mt-1 block text-[10px] text-slate-500 dark:text-slate-500">
+              Ajouté dans un encadré au-dessus du bouton « Voir la facture ».
+              Vide = email habituel.
+            </span>
+          </label>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3 dark:border-slate-900">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            className="rounded-md px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 disabled:opacity-50 dark:text-slate-400 dark:hover:text-white"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={() => onConfirm(message)}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {pending ? "Envoi…" : "Figer & envoyer"}
+          </button>
+        </div>
       </div>
     </div>
   );

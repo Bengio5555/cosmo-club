@@ -332,7 +332,7 @@ export async function markInvoicePaid(id: string) {
  *     the owner later updates SIRET / IBAN)
  *   - best-effort Resend email with a link to the public invoice
  */
-export async function sendInvoice(id: string) {
+export async function sendInvoice(id: string, opts?: { message?: string }) {
   const supabase = await createClient();
   const { data: invoice, error: iErr } = await supabase
     .from("invoices")
@@ -423,6 +423,14 @@ export async function sendInvoice(id: string) {
       ? `Échéance : ${new Date(invoice.due_date).toLocaleDateString("fr-FR")}`
       : "Paiement à réception.";
 
+    // Optional operator note — same treatment as the quote email: cap it
+    // so a stray paste can't blow up the template, and trim so a
+    // whitespace-only message counts as "no note".
+    const personalMessage =
+      typeof opts?.message === "string" && opts.message.trim()
+        ? opts.message.trim().slice(0, 2000)
+        : null;
+
     await resend.emails.send({
       from: `${companyName} <${fromEmail}>`,
       to: [client.email],
@@ -434,6 +442,7 @@ export async function sendInvoice(id: string) {
         dueLine,
         link,
         sender: companyName,
+        personalMessage,
       }),
     });
     return { ok: true as const, emailed: true };
@@ -753,8 +762,29 @@ function buildInvoiceEmailHtml(o: {
   dueLine: string;
   link: string;
   sender: string;
+  /** Optional operator note, rendered in a highlighted box between the
+   *  intro copy and the CTA — identical to the quote email. Null/empty →
+   *  the email looks exactly like it did before this feature. */
+  personalMessage?: string | null;
 }): string {
   const greeting = o.firstName ? `Bonjour ${o.firstName},` : "Bonjour,";
+  // Escape the text, then restore newlines as <br/> so the operator's
+  // line breaks survive. Empty → no box at all.
+  const messageBlock = o.personalMessage
+    ? `
+    <tr>
+      <td style="padding:4px 32px 8px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5efe0; border-left:3px solid #8b1a1a; border-radius:6px;">
+          <tr>
+            <td style="padding:14px 18px;">
+              <p style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#8b1a1a; margin:0 0 8px;">Un mot de notre part</p>
+              <p style="margin:0; font-size:14px; line-height:1.6; color:#2a1f14; white-space:pre-line;">${escape(o.personalMessage).replace(/\n/g, "<br/>")}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`
+    : "";
   return `
 <!doctype html>
 <html><body style="font-family: Inter, system-ui, sans-serif; background:#f5efe0; margin:0; padding:32px; color:#2a1f14;">
@@ -767,7 +797,7 @@ function buildInvoiceEmailHtml(o: {
         <p style="margin:0 0 6px;">Merci pour votre confiance. Voici la facture <strong>${escape(o.number)}</strong>.</p>
         <p style="margin:0 0 12px; font-size:13px; color:#3a2a1e;">${escape(o.dueLine)}</p>
       </td>
-    </tr>
+    </tr>${messageBlock}
     <tr>
       <td style="padding:16px 32px 32px;">
         <a href="${o.link}" style="display:inline-block; padding:14px 28px; background:#8b1a1a; color:#f5efe0; text-decoration:none; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase;">
