@@ -287,6 +287,30 @@ export default async function EventDetailPage({
     }));
   }
 
+  // Client's cocktail choice on the linked quote — surfaced here because
+  // the menu is operational: it's what the team will actually shake.
+  let menuAnswer: { quoteId: string; quoteNumber: string; names: string[]; answeredAt: string | null; unseen: boolean } | null = null;
+  if (event.quote_id) {
+    const { data: prop } = await supabase
+      .from("quote_menu_proposals")
+      .select("status,chosen_ids,answered_at,seen_at")
+      .eq("quote_id", event.quote_id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (prop?.status === "answered" && prop.chosen_ids?.length) {
+      const { data: cs } = await supabase.from("cocktails").select("id,name").in("id", prop.chosen_ids);
+      const nameById = new Map((cs ?? []).map((c) => [c.id, c.name]));
+      menuAnswer = {
+        quoteId: event.quote_id,
+        quoteNumber: quote?.number ?? "",
+        names: prop.chosen_ids.map((id) => nameById.get(id) ?? "—"),
+        answeredAt: prop.answered_at,
+        unseen: !prop.seen_at,
+      };
+    }
+  }
+
   return (
     <>
       {/* Floating validation checklist — fixed flag on the right edge. */}
@@ -307,6 +331,23 @@ export default async function EventDetailPage({
           Briefing staff
         </Link>
       </div>
+
+      {menuAnswer && (
+        <div className={`mx-4 mt-4 flex flex-wrap items-start gap-3 rounded-xl border px-4 py-3 md:mx-8 ${menuAnswer.unseen ? "border-[color:var(--color-grenat)] bg-[color:var(--color-grenat)]/5" : "border-emerald-300 bg-emerald-50 dark:border-emerald-500/40 dark:bg-emerald-500/10"}`}>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+              {menuAnswer.unseen ? "Nouveau · " : ""}Le client a choisi ses cocktails
+              {menuAnswer.answeredAt ? ` · ${new Date(menuAnswer.answeredAt).toLocaleDateString("fr-FR")}` : ""}
+            </p>
+            <p className="mt-1 text-sm text-slate-900 dark:text-white">{menuAnswer.names.join(" · ")}</p>
+          </div>
+          {!isStaff && (
+            <Link href={`/dashboard/devis/${menuAnswer.quoteId}`} className="shrink-0 text-xs text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">
+              Voir sur le devis {menuAnswer.quoteNumber} →
+            </Link>
+          )}
+        </div>
+      )}
 
       <EventEditor event={event} closeReservations={closeReservations} />
 

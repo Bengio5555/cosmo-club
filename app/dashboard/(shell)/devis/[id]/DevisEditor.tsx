@@ -25,10 +25,13 @@ import {
   createInvoiceFromQuote,
   type SaveQuoteInput,
   type ScheduleItem,
+  sendMenuProposal,
+  markMenuProposalSeen,
+  type MenuProposalInput,
 } from "./actions";
 import { CatalogPicker, type PickedItem } from "./CatalogPicker";
 import { MoodboardPicker, type AvailableImage } from "./MoodboardPicker";
-import { Receipt, CalendarPlus } from "lucide-react";
+import { Receipt, CalendarPlus, Wine, ListChecks } from "lucide-react";
 import { createEventFromQuote } from "../../events/actions";
 
 type Quote = Tables<"quotes">;
@@ -76,6 +79,20 @@ type MessageLog = {
   sent_at: string;
 };
 
+type MenuProposal = {
+  id: string;
+  gamme: string;
+  cocktail_ids: string[];
+  max_choices: number;
+  access_token: string;
+  status: string;
+  chosen_ids: string[] | null;
+  answered_at: string | null;
+  seen_at: string | null;
+  created_at: string;
+};
+type CatalogCocktail = { id: string; name: string; category: string | null };
+
 export function DevisEditor({
   quote,
   items: initialItems,
@@ -83,6 +100,8 @@ export function DevisEditor({
   availableImages,
   moodboardUploads,
   messageHistory = [],
+  menuProposals = [],
+  cocktailCatalog = [],
 }: {
   quote: Quote;
   items: QuoteItem[];
@@ -90,6 +109,8 @@ export function DevisEditor({
   availableImages: AvailableImage[];
   moodboardUploads: AvailableImage[];
   messageHistory?: MessageLog[];
+  menuProposals?: MenuProposal[];
+  cocktailCatalog?: CatalogCocktail[];
 }) {
   const router = useRouter();
   const readOnly = quote.status !== "brouillon";
@@ -332,6 +353,22 @@ export function DevisEditor({
   // owner can append CC addresses (apporteur, chef de projet client…).
   // The actual server call still happens in `confirmSend`.
   const [sendOpen, setSendOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuError, setMenuError] = useState<string | null>(null);
+
+  function confirmMenu(input: MenuProposalInput) {
+    setMenuError(null);
+    startTransition(async () => {
+      const res = await sendMenuProposal(quote.id, input);
+      if (!res.ok) {
+        setMenuError(res.error);
+        return;
+      }
+      setMenuOpen(false);
+      if (!res.emailed && res.warning) window.alert(res.warning);
+      router.refresh();
+    });
+  }
 
   function confirmSend(cc: string[], message: string) {
     startTransition(async () => {
@@ -496,6 +533,7 @@ export function DevisEditor({
         pending={pending}
         onSave={save}
         onSend={() => setSendOpen(true)}
+        onProposeMenu={() => setMenuOpen(true)}
         onAccept={() => transition("accepte")}
         onRefuse={() => transition("refuse")}
         onReopen={() => transition("brouillon")}
@@ -912,6 +950,10 @@ export function DevisEditor({
             </p>
           </div>
 
+          {menuProposals.length > 0 && (
+            <MenuProposalCard proposals={menuProposals} catalog={cocktailCatalog} />
+          )}
+
           {messageHistory.length > 0 && (
             <MessageHistoryCard messages={messageHistory} />
           )}
@@ -928,6 +970,21 @@ export function DevisEditor({
           </div>
         </aside>
       </div>
+
+      {menuOpen && (
+        <MenuProposalDialog
+          quoteNumber={quote.number}
+          clientEmail={clientEmail ?? null}
+          catalog={cocktailCatalog}
+          pending={pending}
+          error={menuError}
+          onCancel={() => {
+            setMenuOpen(false);
+            setMenuError(null);
+          }}
+          onConfirm={confirmMenu}
+        />
+      )}
 
       {sendOpen && (
         <SendDevisDialog
@@ -1288,6 +1345,7 @@ function TopBar({
   onDuplicate,
   onCreateInvoice,
   onCreateEvent,
+  onProposeMenu,
 }: {
   quote: Quote;
   dirty: boolean;
@@ -1301,6 +1359,7 @@ function TopBar({
   onDuplicate: () => void;
   onCreateInvoice: () => void;
   onCreateEvent: () => void;
+  onProposeMenu: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-slate-900 pb-4 md:flex-row md:items-end md:justify-between">
@@ -1426,6 +1485,15 @@ function TopBar({
         >
           <Eye className="h-3 w-3" /> Plaquette
         </a>
+        <button
+          type="button"
+          onClick={onProposeMenu}
+          disabled={pending || quote.status === "refuse" || quote.status === "expire"}
+          title="Envoyer la carte au client pour qu'il choisisse ses cocktails"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white"
+        >
+          <Wine className="h-3 w-3" /> Proposer la carte
+        </button>
         <button
           type="button"
           onClick={onDuplicate}
@@ -1977,6 +2045,241 @@ function AddSectionButton({
           ×
         </button>
       </form>
+    </div>
+  );
+}
+
+/* ─── Carte à choisir : dialog + card ─────────────────────────────── */
+
+function MenuProposalDialog({
+  quoteNumber,
+  clientEmail,
+  catalog,
+  pending,
+  error,
+  onCancel,
+  onConfirm,
+}: {
+  quoteNumber: string;
+  clientEmail: string | null;
+  catalog: CatalogCocktail[];
+  pending: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onConfirm: (input: MenuProposalInput) => void;
+}) {
+  // Gammes = the catalogue's categories, most populated first.
+  const gammes = useMemo(() => {
+    const count = new Map<string, number>();
+    for (const c of catalog) if (c.category) count.set(c.category, (count.get(c.category) ?? 0) + 1);
+    return [...count.entries()].sort((a, b) => b[1] - a[1]).map(([g]) => g);
+  }, [catalog]);
+  const [gamme, setGamme] = useState<string>(gammes[0] ?? "");
+  const inGamme = useMemo(() => catalog.filter((c) => c.category === gamme), [catalog, gamme]);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set(inGamme.map((c) => c.id)));
+  const [max, setMax] = useState<number>(Math.min(3, Math.max(1, inGamme.length)));
+  const [message, setMessage] = useState("");
+
+  function pickGamme(g: string) {
+    setGamme(g);
+    const ids = catalog.filter((c) => c.category === g).map((c) => c.id);
+    setSelected(new Set(ids));
+    setMax((m) => Math.min(Math.max(1, m), Math.max(1, ids.length)));
+  }
+  function toggle(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && !pending) onCancel();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onCancel, pending]);
+
+  const nSel = selected.size;
+  const maxClamped = Math.min(Math.max(1, max), Math.max(1, nSel));
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Proposer la carte — devis ${quoteNumber}`}
+      onClick={() => !pending && onCancel()}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-950"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-900">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+              Proposer la carte
+            </p>
+            <h2 className="mt-1 font-display text-lg text-slate-900 dark:text-white">Devis {quoteNumber}</h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {clientEmail ? `Envoi à ${clientEmail}` : "Aucun email client — impossible d'envoyer."}
+            </p>
+          </div>
+          <button type="button" onClick={onCancel} disabled={pending} aria-label="Fermer" className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50 dark:hover:bg-slate-900 dark:hover:text-white">×</button>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px]">
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">Gamme</span>
+              <select
+                value={gamme}
+                onChange={(e) => pickGamme(e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+              >
+                {gammes.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">Max à choisir</span>
+              <input
+                type="number"
+                min={1}
+                max={Math.max(1, nSel)}
+                value={maxClamped}
+                onChange={(e) => setMax(Number(e.target.value) || 1)}
+                className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-right text-sm text-slate-900 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+              />
+            </label>
+          </div>
+
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
+                Cocktails proposés · {nSel}/{inGamme.length}
+              </span>
+              <span className="flex gap-2 text-[11px]">
+                <button type="button" onClick={() => setSelected(new Set(inGamme.map((c) => c.id)))} className="text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">tout</button>
+                <button type="button" onClick={() => setSelected(new Set())} className="text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">aucun</button>
+              </span>
+            </div>
+            <ul className="max-h-64 divide-y divide-slate-100 overflow-y-auto rounded-md border border-slate-200 dark:divide-slate-900 dark:border-slate-800">
+              {inGamme.map((c) => (
+                <li key={c.id}>
+                  <label className="flex min-h-[40px] cursor-pointer items-center gap-3 px-3 py-2 text-sm text-slate-800 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900">
+                    <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggle(c.id)} className="h-4 w-4 accent-[color:var(--color-grenat)]" />
+                    <span className="min-w-0 truncate">{c.name}</span>
+                  </label>
+                </li>
+              ))}
+              {inGamme.length === 0 && (
+                <li className="px-3 py-4 text-center text-xs text-slate-500">Aucun cocktail actif dans cette gamme.</li>
+              )}
+            </ul>
+          </div>
+
+          <label className="block">
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">Message (optionnel)</span>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
+              maxLength={2000}
+              placeholder="Un mot pour accompagner la carte…"
+              className="w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600"
+            />
+          </label>
+
+          {error && (
+            <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200">{error}</p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3 dark:border-slate-900">
+          <button type="button" onClick={onCancel} disabled={pending} className="rounded-md px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 disabled:opacity-50 dark:text-slate-400 dark:hover:text-white">Annuler</button>
+          <button
+            type="button"
+            onClick={() => onConfirm({ gamme, cocktailIds: [...selected], maxChoices: maxClamped, message })}
+            disabled={pending || !clientEmail || nSel === 0}
+            className="inline-flex items-center gap-1.5 rounded-md bg-[color:var(--color-grenat)] px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+            Envoyer la carte
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MenuProposalCard({ proposals, catalog }: { proposals: MenuProposal[]; catalog: CatalogCocktail[] }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
+  const latest = proposals[0];
+  const nameOf = (id: string) => catalog.find((c) => c.id === id)?.name ?? "—";
+  const answered = latest.status === "answered";
+  const unseen = answered && !latest.seen_at;
+  const link = typeof window !== "undefined" ? `${window.location.origin}/carte/${latest.access_token}` : `/carte/${latest.access_token}`;
+
+  function ack() {
+    startTransition(async () => {
+      const res = await markMenuProposalSeen(latest.id);
+      if (res.ok) router.refresh();
+    });
+  }
+
+  return (
+    <div className={`rounded-xl border bg-white p-4 shadow-sm dark:bg-slate-950/60 dark:shadow-none md:p-5 ${unseen ? "border-[color:var(--color-grenat)]" : "border-slate-200 dark:border-slate-800"}`}>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+          <ListChecks className="h-3.5 w-3.5" /> Carte proposée
+        </p>
+        {unseen && (
+          <span className="rounded-full bg-[color:var(--color-grenat)] px-2 py-0.5 text-[10px] font-semibold text-white">Réponse du client</span>
+        )}
+      </div>
+      <p className="text-sm text-slate-800 dark:text-slate-200">
+        Gamme <strong>{latest.gamme}</strong> · {latest.cocktail_ids.length} proposé{latest.cocktail_ids.length > 1 ? "s" : ""} · max {latest.max_choices}
+      </p>
+      <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-500">
+        Envoyée le {new Date(latest.created_at).toLocaleDateString("fr-FR")}
+        {proposals.length > 1 ? ` · ${proposals.length - 1} envoi${proposals.length > 2 ? "s" : ""} précédent${proposals.length > 2 ? "s" : ""}` : ""}
+      </p>
+
+      {answered ? (
+        <div className="mt-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+            Choix du client · {latest.answered_at ? new Date(latest.answered_at).toLocaleDateString("fr-FR") : ""}
+          </p>
+          <ul className="mt-1.5 space-y-1 text-sm text-slate-800 dark:text-slate-200">
+            {(latest.chosen_ids ?? []).map((id) => (
+              <li key={id} className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-600" /> {nameOf(id)}</li>
+            ))}
+          </ul>
+          {unseen && (
+            <button type="button" onClick={ack} disabled={pending} className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:border-slate-400 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+              {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Marquer comme vu
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">En attente du client</span>
+          <button
+            type="button"
+            onClick={() => { navigator.clipboard?.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+            className="inline-flex items-center gap-1.5 text-[11px] text-slate-600 underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          >
+            <Copy className="h-3 w-3" /> {copied ? "Lien copié" : "Copier le lien"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

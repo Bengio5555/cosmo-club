@@ -1071,3 +1071,172 @@ export async function duplicateQuote(id: string) {
   revalidatePath("/dashboard/devis");
   return { ok: true as const, id: created.id };
 }
+
+/* ─── Carte à choisir (menu proposal) ────────────────────────────── */
+
+export type MenuProposalInput = {
+  gamme: string;
+  cocktailIds: string[];
+  maxChoices: number;
+  message?: string;
+};
+
+function escHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Send the client a cocktail card to choose from: a gamme, the cocktails
+ * the operator ticked, and how many the client may pick. The email shows
+ * names + ingredients in HTML and links to /carte/[token], where the
+ * actual ticking happens (checkboxes don't work inside emails). The
+ * answer lands on the quote and on the linked event.
+ */
+export async function sendMenuProposal(quoteId: string, input: MenuProposalInput) {
+  const supabase = await createClient();
+
+  const gamme = (input.gamme ?? "").trim();
+  const ids = Array.from(new Set((input.cocktailIds ?? []).filter((v) => typeof v === "string" && v)));
+  const max = Math.floor(Number(input.maxChoices));
+  if (!gamme) return { ok: false as const, error: "Choisis une gamme." };
+  if (ids.length === 0) return { ok: false as const, error: "Coche au moins un cocktail à proposer." };
+  if (!Number.isFinite(max) || max < 1) return { ok: false as const, error: "Le maximum doit être au moins 1." };
+  if (max > ids.length) return { ok: false as const, error: "Le maximum ne peut pas dépasser le nombre de cocktails proposés." };
+
+  const { data: quote, error: qErr } = await supabase
+    .from("quotes")
+    .select("id,number,subject,status,client_id,language")
+    .eq("id", quoteId)
+    .maybeSingle();
+  if (qErr || !quote) return { ok: false as const, error: qErr?.message ?? "Devis introuvable" };
+  if (quote.status === "refuse" || quote.status === "expire") {
+    return { ok: false as const, error: "Ce devis est refusé ou expiré." };
+  }
+
+  const [{ data: client }, { data: cocktails }, { data: settings }] = await Promise.all([
+    quote.client_id
+      ? supabase.from("clients").select("first_name,email").eq("id", quote.client_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.from("cocktails").select("id,name,description").in("id", ids).eq("archived", false),
+    supabase.from("settings").select("company_name").eq("id", 1).maybeSingle(),
+  ]);
+  if (!client?.email) return { ok: false as const, error: "Aucun email client sur ce devis." };
+  const found = cocktails ?? [];
+  if (found.length !== ids.length) {
+    return { ok: false as const, error: "Certains cocktails n'existent plus ou sont archivés." };
+  }
+
+  const personalMessage =
+    typeof input.message === "string" && input.message.trim() ? input.message.trim().slice(0, 2000) : null;
+
+  const { data: proposal, error: insErr } = await supabase
+    .from("quote_menu_proposals")
+    .insert({ quote_id: quote.id, gamme, cocktail_ids: ids, max_choices: max, message: personalMessage })
+    .select("id,access_token")
+    .single();
+  if (insErr || !proposal) {
+    return { ok: false as const, error: insErr?.message ?? "Enregistrement impossible (table quote_menu_proposals absente ?)" };
+  }
+
+  // Ingredients for the email (names + doses), in recipe order.
+  const { data: ings } = await supabase
+    .from("cocktail_ingredients")
+    .select("cocktail_id,position,qty,product_id")
+    .in("cocktail_id", ids)
+    .order("position", { ascending: true });
+  const productIds = Array.from(new Set((ings ?? []).map((i) => i.product_id).filter((v): v is string => !!v)));
+  const { data: products } = productIds.length
+    ? await supabase.from("products").select("id,name,unit,content_unit").in("id", productIds)
+    : { data: [] };
+  const productById = new Map((products ?? []).map((p) => [p.id, p]));
+  const ingredientsByCocktail = new Map<string, string[]>();
+  for (const i of ings ?? []) {
+    const pr = i.product_id ? productById.get(i.product_id) : null;
+    if (!pr) continue;
+    const arr = ingredientsByCocktail.get(i.cocktail_id) ?? [];
+    arr.push(`${Number(i.qty)} ${pr.content_unit ?? pr.unit} ${pr.name}`);
+    ingredientsByCocktail.set(i.cocktail_id, arr);
+  }
+  // Keep the operator's tick order.
+  const ordered = ids.map((id) => found.find((c) => c.id === id)!).filter(Boolean);
+
+  revalidatePath(`/dashboard/devis/${quote.id}`);
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "devis@cosmoclub.fr";
+  if (!apiKey) return { ok: true as const, emailed: false, warning: "RESEND_API_KEY non configurée — carte enregistrée, email non envoyé." };
+
+  try {
+    const resend = new Resend(apiKey);
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
+    const link = `${origin}/carte/${proposal.access_token}`;
+    const companyName = settings?.company_name || "Cosmo Club Paris";
+    const greeting = client.first_name ? `Bonjour ${escHtml(client.first_name)},` : "Bonjour,";
+    const rows = ordered
+      .map((c) => {
+        const ing = ingredientsByCocktail.get(c.id) ?? [];
+        return `
+          <tr>
+            <td style="padding:12px 0; border-bottom:1px solid #eadfc8;">
+              <p style="margin:0; font-family:Georgia,serif; font-size:17px; color:#2a1f14;">${escHtml(c.name)}</p>
+              ${c.description ? `<p style="margin:4px 0 0; font-size:13px; color:#3a2a1e;">${escHtml(c.description)}</p>` : ""}
+              ${ing.length ? `<p style="margin:6px 0 0; font-size:12px; color:#3a2a1e; opacity:0.75;">${escHtml(ing.join(" · "))}</p>` : ""}
+            </td>
+          </tr>`;
+      })
+      .join("");
+    const noteBlock = personalMessage
+      ? `<tr><td style="padding:4px 32px 8px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5efe0; border-left:3px solid #8b1a1a; border-radius:6px;"><tr><td style="padding:14px 18px;"><p style="margin:0; font-size:14px; line-height:1.6; color:#2a1f14; white-space:pre-line;">${escHtml(personalMessage).replace(/\n/g, "<br/>")}</p></td></tr></table></td></tr>`
+      : "";
+    const html = `
+<!doctype html>
+<html lang="fr"><body style="font-family: Inter, system-ui, sans-serif; background:#f5efe0; margin:0; padding:32px; color:#2a1f14;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden;">
+    <tr><td style="padding:32px 32px 8px;">
+      <p style="font-size:10px; letter-spacing:0.28em; text-transform:uppercase; color:#8b1a1a; margin:0 0 12px;">${escHtml(companyName)}</p>
+      <h1 style="font-family:Georgia,serif; font-size:26px; line-height:1.2; margin:0 0 18px; color:#2a1f14;">Votre carte de cocktails — gamme ${escHtml(gamme)}</h1>
+      <p style="margin:0 0 8px;">${greeting}</p>
+      <p style="margin:0 0 6px;">Voici les cocktails que nous vous proposons pour votre événement (devis <strong>${escHtml(quote.number)}</strong>). Choisissez-en <strong>jusqu'à ${max}</strong> en cliquant sur le bouton ci-dessous.</p>
+    </td></tr>
+    ${noteBlock}
+    <tr><td style="padding:8px 32px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table></td></tr>
+    <tr><td style="padding:24px 32px 32px;">
+      <a href="${link}" style="display:inline-block; padding:14px 28px; background:#8b1a1a; color:#f5efe0; text-decoration:none; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase;">Choisir mes cocktails</a>
+      <p style="margin:24px 0 0; font-size:12px; color:#3a2a1e; opacity:0.7;">Ou copiez ce lien dans votre navigateur :<br/><a href="${link}" style="color:#8b1a1a;">${link}</a></p>
+    </td></tr>
+    <tr><td style="padding:20px 32px; background:#f5efe0; font-size:11px; color:#3a2a1e; opacity:0.7;">Référence : ${escHtml(quote.number)} · ${escHtml(companyName)}</td></tr>
+  </table>
+</body></html>`.trim();
+
+    await resend.emails.send({
+      from: `${companyName} <${fromEmail}>`,
+      to: [client.email],
+      subject: `${companyName} — Votre carte de cocktails (${quote.number})`,
+      html,
+    });
+    return { ok: true as const, emailed: true };
+  } catch (err) {
+    console.error("[sendMenuProposal] resend error:", err);
+    return { ok: true as const, emailed: false, warning: "Email non envoyé (Resend) — la carte est enregistrée, tu peux copier le lien depuis la fiche." };
+  }
+}
+
+/** The operator has read the client's answer — clears the notification. */
+export async function markMenuProposalSeen(proposalId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("quote_menu_proposals")
+    .update({ seen_at: new Date().toISOString() })
+    .eq("id", proposalId)
+    .select("quote_id")
+    .maybeSingle();
+  if (error || !data) return { ok: false as const, error: error?.message ?? "Introuvable" };
+  revalidatePath(`/dashboard/devis/${data.quote_id}`);
+  const { data: evs } = await supabase.from("events").select("id").eq("quote_id", data.quote_id);
+  for (const e of evs ?? []) revalidatePath(`/dashboard/events/${e.id}`);
+  return { ok: true as const };
+}

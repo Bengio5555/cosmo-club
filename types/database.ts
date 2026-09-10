@@ -413,6 +413,25 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["quote_messages"]["Row"]>
         Relationships: []
       }
+      quote_menu_proposals: {
+        Row: {
+          id: string
+          quote_id: string
+          gamme: string
+          cocktail_ids: string[]
+          max_choices: number
+          access_token: string
+          message: string | null
+          status: string
+          chosen_ids: string[] | null
+          answered_at: string | null
+          seen_at: string | null
+          created_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["quote_menu_proposals"]["Row"]> & { quote_id: string; gamme: string; cocktail_ids: string[]; max_choices: number }
+        Update: Partial<Database["public"]["Tables"]["quote_menu_proposals"]["Row"]>
+        Relationships: []
+      }
       quotes: {
         Row: {
           access_token: string | null

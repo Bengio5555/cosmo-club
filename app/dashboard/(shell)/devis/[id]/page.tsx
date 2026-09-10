@@ -17,6 +17,8 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
     { data: messages },
     eventImages,
     moodboardUploads,
+    { data: menuProposals },
+    { data: cocktailCatalog },
   ] = await Promise.all([
     supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
     supabase
@@ -32,6 +34,21 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
       .order("sent_at", { ascending: false }),
     listEventImages(),
     listMoodboardUploads(id),
+    // Cocktail cards sent to the client (latest first) + the catalogue the
+    // "Proposer la carte" dialog picks from. Both come back null until the
+    // quote_menu_proposals migration is applied — the editor then simply
+    // shows no card.
+    supabase
+      .from("quote_menu_proposals")
+      .select("id,gamme,cocktail_ids,max_choices,access_token,status,chosen_ids,answered_at,seen_at,created_at")
+      .eq("quote_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("cocktails")
+      .select("id,name,category")
+      .eq("archived", false)
+      .order("category", { ascending: true })
+      .order("name", { ascending: true }),
   ]);
 
   if (!quote) {
@@ -60,6 +77,8 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
         availableImages={eventImages.images}
         moodboardUploads={moodboardUploads.images}
         messageHistory={messages ?? []}
+        menuProposals={menuProposals ?? []}
+        cocktailCatalog={cocktailCatalog ?? []}
       />
 
       {client && (
