@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { generateImage } from "@/lib/blog/ai";
 import type { Config, ImageConfig } from "@/types/admin";
 
 const CONFIG_PATH = join(process.cwd(), "public", "images-config.json");
@@ -216,11 +217,18 @@ export async function uploadDashboardImage(formData: FormData) {
     };
   }
 
+  revalidateImagePages();
+  return { ok: true as const };
+}
+
+/**
+ * Revalidate every public page that pulls from the image config so a
+ * hero/bento/lattes/event-tile change shows up immediately. Without
+ * this, only `/` was revalidated and `/bar-a-cocktails`, `/barista`,
+ * `/evenements` kept serving the previous build's cached HTML.
+ */
+function revalidateImagePages() {
   revalidatePath("/dashboard/images");
-  // Revalidate every public page that pulls from the image config so a
-  // hero/bento/lattes/event-tile change shows up immediately. Without
-  // this, only `/` was revalidated and `/bar-a-cocktails`, `/barista`,
-  // `/evenements` kept serving the previous build's cached HTML.
   for (const path of [
     "/",
     "/bar-a-cocktails",
@@ -235,6 +243,53 @@ export async function uploadDashboardImage(formData: FormData) {
   ]) {
     revalidatePath(path);
   }
+}
+
+/**
+ * Generate a slot image with Gemini (same call as the Mag covers) and
+ * store it exactly like a manual upload would — `{page}__{key}__…` in
+ * the bucket — so getImagePath picks it up with no other bookkeeping.
+ * Server-side only: the Gemini key never leaves the Vercel environment.
+ */
+export async function generateSlotImage(page: string, key: string, prompt: string) {
+  await requireAuth();
+  if (!page || !key) return { ok: false as const, error: "Slot invalide." };
+  const text = prompt.trim();
+  if (text.length < 20) {
+    return { ok: false as const, error: "Décris la scène en quelques phrases avant de générer." };
+  }
+
+  let image;
+  try {
+    image = await generateImage(text, "16:9");
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Génération échouée.",
+    };
+  }
+
+  const ext =
+    image.mimeType === "image/jpeg" ? "jpg" : image.mimeType === "image/webp" ? "webp" : "png";
+  const filename = `${page}__${key}__ia-${Date.now()}.${ext}`;
+  try {
+    const adminSupabase = createAdminClient();
+    const { error } = await adminSupabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filename, image.bytes, {
+        contentType: image.mimeType,
+        upsert: true,
+        cacheControl: "31536000",
+      });
+    if (error) return { ok: false as const, error: error.message };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Échec d'enregistrement.",
+    };
+  }
+
+  revalidateImagePages();
   return { ok: true as const };
 }
 

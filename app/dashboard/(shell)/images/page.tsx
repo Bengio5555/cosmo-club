@@ -1,3 +1,7 @@
+// Gemini image generation (generateSlotImage) takes 10-20 s; lift the
+// serverless limit so the action is not cut off mid-call.
+export const maxDuration = 60;
+
 import { loadDashboardImagesConfig } from "./actions";
 import { ImagesManager } from "./ImagesManager";
 

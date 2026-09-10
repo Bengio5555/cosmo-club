@@ -235,9 +235,16 @@ ${intent}
 OUTPUT: a single editorial still-life image. No text, no logos.`;
 }
 
-type GenImageResult = { bytes: Buffer; mimeType: string };
+export type GenImageResult = { bytes: Buffer; mimeType: string };
 
-async function generateImage(prompt: string, aspectRatio: "4:3" | "1:1"): Promise<GenImageResult> {
+export type ImageAspect = "4:3" | "1:1" | "16:9";
+
+/**
+ * Single Gemini image call shared by the Mag covers and the site image
+ * slots ("Générer avec l'IA" in the Images dashboard). Runs server-side
+ * only — GEMINI_API_KEY lives in the Vercel environment.
+ */
+export async function generateImage(prompt: string, aspectRatio: ImageAspect): Promise<GenImageResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY manquante côté serveur.");
 
