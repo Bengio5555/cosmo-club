@@ -777,7 +777,6 @@ function buildInvoiceEmailHtml(o: {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5efe0; border-left:3px solid #8b1a1a; border-radius:6px;">
           <tr>
             <td style="padding:14px 18px;">
-              <p style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#8b1a1a; margin:0 0 8px;">Un mot de notre part</p>
               <p style="margin:0; font-size:14px; line-height:1.6; color:#2a1f14; white-space:pre-line;">${escape(o.personalMessage).replace(/\n/g, "<br/>")}</p>
             </td>
           </tr>
