@@ -182,6 +182,144 @@ function briefingFromQuoteSchedule(steps: QuoteStep[]): BriefingData {
   return brief;
 }
 
+/** Team presence window derived from a quote planning — see the comment
+ *  in createEventFromQuote for why it anchors on people, not logistics. */
+function hoursFromSchedule(steps: QuoteStep[]): {
+  start_time: string | null;
+  end_time: string | null;
+} {
+  const kinds = steps.map((st) => inferKind(st.label));
+  const timeOf = (k: BriefingScheduleStep["kind"]) =>
+    steps.find((st, i) => st.time && kinds[i] === k)?.time ?? null;
+  const timed = steps.filter((st) => st.time);
+  return {
+    start_time:
+      timeOf("team_arrival") ??
+      timeOf("setup") ??
+      timeOf("service_start") ??
+      timed[0]?.time ??
+      null,
+    end_time:
+      timeOf("teardown") ??
+      timeOf("service_end") ??
+      (timed.length > 1 ? timed[timed.length - 1].time : null),
+  };
+}
+
+/**
+ * Attach (or detach) a quote to an existing event, after the fact.
+ *
+ * Events are often created before the client signs; once linked, the
+ * margin reads the quote's price and commission automatically. Linking
+ * also fills in whatever the event is still missing from the quote —
+ * client, venue, guests, end date, hours, staff planning — but never
+ * overwrites a value the operator already typed. Quotes awaiting
+ * signature (envoye) are allowed, that's the whole use case; a quote can
+ * back only one event.
+ */
+export async function linkEventToQuote(eventId: string, quoteId: string | null) {
+  const role = await getCurrentRole();
+  if (role !== "owner" && role !== "admin" && role !== "manager") {
+    return { ok: false as const, error: "Accès refusé." };
+  }
+  const supabase = await createClient();
+
+  const { data: event, error: eErr } = await supabase
+    .from("events")
+    .select("id,quote_id,client_id,location,guests_count,end_date,start_time,end_time,briefing_data")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (eErr || !event) {
+    return { ok: false as const, error: eErr?.message ?? "Événement introuvable." };
+  }
+  const previousQuoteId = event.quote_id;
+
+  if (!quoteId) {
+    const { error } = await supabase.from("events").update({ quote_id: null }).eq("id", eventId);
+    if (error) return { ok: false as const, error: error.message };
+    revalidatePath(`/dashboard/events/${eventId}`);
+    revalidatePath("/dashboard/events");
+    if (previousQuoteId) revalidatePath(`/dashboard/devis/${previousQuoteId}`);
+    revalidatePath("/dashboard/devis");
+    revalidatePath("/dashboard");
+    return { ok: true as const, filled: [] as string[] };
+  }
+
+  const { data: quote } = await supabase
+    .from("quotes")
+    .select("id,number,status,client_id,event_location,guests_count,event_end_date,schedule")
+    .eq("id", quoteId)
+    .maybeSingle();
+  if (!quote) return { ok: false as const, error: "Devis introuvable." };
+  if (quote.status !== "envoye" && quote.status !== "accepte") {
+    return {
+      ok: false as const,
+      error: "Seul un devis envoyé ou signé peut être rattaché à un événement.",
+    };
+  }
+
+  // One event per quote: refuse if another event already claims it.
+  const { data: taken } = await supabase
+    .from("events")
+    .select("id,title")
+    .eq("quote_id", quoteId)
+    .neq("id", eventId)
+    .maybeSingle();
+  if (taken) {
+    return {
+      ok: false as const,
+      error: `Ce devis est déjà rattaché à l'événement « ${taken.title} ».`,
+    };
+  }
+
+  // Fill only what the event is missing.
+  const patch: EventUpdate = { quote_id: quote.id };
+  const filled: string[] = [];
+  if (!event.client_id && quote.client_id) {
+    patch.client_id = quote.client_id;
+    filled.push("client");
+  }
+  if (!event.location?.trim() && quote.event_location) {
+    patch.location = quote.event_location;
+    filled.push("lieu");
+  }
+  if (event.guests_count == null && quote.guests_count != null) {
+    patch.guests_count = quote.guests_count;
+    filled.push("invités");
+  }
+  if (!event.end_date && quote.event_end_date) {
+    patch.end_date = quote.event_end_date;
+    filled.push("date de fin");
+  }
+  const steps = parseQuoteSchedule((quote as { schedule?: unknown }).schedule);
+  if (steps.length > 0) {
+    const hours = hoursFromSchedule(steps);
+    if (!event.start_time && hours.start_time) {
+      patch.start_time = hours.start_time;
+      filled.push("heure de début");
+    }
+    if (!event.end_time && hours.end_time) {
+      patch.end_time = hours.end_time;
+      filled.push("heure de fin");
+    }
+    if (!event.briefing_data) {
+      patch.briefing_data = briefingFromQuoteSchedule(steps) as unknown as EventUpdate["briefing_data"];
+      filled.push("planning du brief");
+    }
+  }
+
+  const { error } = await supabase.from("events").update(patch).eq("id", eventId);
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath("/dashboard/events");
+  revalidatePath(`/dashboard/devis/${quoteId}`);
+  if (previousQuoteId && previousQuoteId !== quoteId) revalidatePath(`/dashboard/devis/${previousQuoteId}`);
+  revalidatePath("/dashboard/devis");
+  revalidatePath("/dashboard");
+  return { ok: true as const, filled };
+}
+
 export async function createEventFromQuote(quoteId: string) {
   const supabase = await createClient();
 
@@ -221,20 +359,7 @@ export async function createEventFromQuote(quoteId: string) {
   // first/last timed step in authored order (not sorted, so an
   // 18:00 → 02:00 night keeps 02:00; the calendar feed rolls it to J+1).
   const steps = parseQuoteSchedule((quote as { schedule?: unknown }).schedule);
-  const kinds = steps.map((st) => inferKind(st.label));
-  const timeOf = (k: BriefingScheduleStep["kind"]) =>
-    steps.find((st, i) => st.time && kinds[i] === k)?.time ?? null;
-  const timed = steps.filter((st) => st.time);
-  const start_time =
-    timeOf("team_arrival") ??
-    timeOf("setup") ??
-    timeOf("service_start") ??
-    timed[0]?.time ??
-    null;
-  const end_time =
-    timeOf("teardown") ??
-    timeOf("service_end") ??
-    (timed.length > 1 ? timed[timed.length - 1].time : null);
+  const { start_time, end_time } = hoursFromSchedule(steps);
   const briefing_data =
     steps.length > 0
       ? (briefingFromQuoteSchedule(steps) as unknown as

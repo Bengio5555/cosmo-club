@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   ClipboardList,
-  FileText,
   User,
   Mail,
   Phone,
@@ -14,6 +13,7 @@ import { EventEditor } from "./EventEditor";
 import { EventTodo } from "./EventTodo";
 import { StaffSection } from "./StaffSection";
 import { StockSection } from "./StockSection";
+import { QuoteLinkCard, type QuoteOption } from "./QuoteLinkCard";
 import { MenuSection } from "./MenuSection";
 import { MarginSection } from "./MarginSection";
 import { ExtraCostsEditor } from "./ExtraCostsEditor";
@@ -234,6 +234,59 @@ export default async function EventDetailPage({
     (expectedPacks.size !== reservedPacks.size ||
       [...expectedPacks].some(([id, packs]) => reservedPacks.get(id) !== packs));
 
+  // Quotes this event can be attached to after the fact: awaiting
+  // signature or signed (the current link always stays listed), labelled
+  // with client and date; quotes already backing another event are shown
+  // disabled so one quote can't drive two events.
+  let quoteOptions: QuoteOption[] = [];
+  if (!isStaff) {
+    const [{ data: quotesList }, { data: linkedEvents }] = await Promise.all([
+      supabase
+        .from("quotes")
+        .select("id,number,status,client_id,event_date")
+        .or(
+          event.quote_id
+            ? `status.in.(envoye,accepte),id.eq.${event.quote_id}`
+            : "status.in.(envoye,accepte)",
+        )
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase.from("events").select("id,quote_id").not("quote_id", "is", null),
+    ]);
+    const takenByOther = new Set(
+      (linkedEvents ?? [])
+        .filter((e) => e.id !== event.id && e.quote_id)
+        .map((e) => e.quote_id as string),
+    );
+    const qClientIds = Array.from(
+      new Set((quotesList ?? []).map((q) => q.client_id).filter((v): v is string => !!v)),
+    );
+    const { data: qClients } = qClientIds.length
+      ? await supabase
+          .from("clients")
+          .select("id,first_name,last_name,company_name")
+          .in("id", qClientIds)
+      : { data: [] };
+    const qClientName = new Map(
+      (qClients ?? []).map((c) => [
+        c.id,
+        c.company_name || [c.first_name, c.last_name].filter(Boolean).join(" ") || "—",
+      ]),
+    );
+    quoteOptions = (quotesList ?? []).map((q) => ({
+      id: q.id,
+      label: [
+        q.number,
+        q.client_id ? (qClientName.get(q.client_id) ?? "—") : "—",
+        q.event_date ? new Date(q.event_date).toLocaleDateString("fr-FR") : null,
+        q.status === "accepte" ? "signé" : "envoyé",
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      taken: takenByOther.has(q.id),
+    }));
+  }
+
   return (
     <>
       {/* Floating validation checklist — fixed flag on the right edge. */}
@@ -305,7 +358,7 @@ export default async function EventDetailPage({
         </div>
       ))}
 
-      {!isStaff && (client || quote) && (
+      {!isStaff && (
         <div className="border-t border-slate-100 dark:border-slate-900 px-4 py-6 md:px-8">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {client && (
@@ -346,21 +399,11 @@ export default async function EventDetailPage({
                 </div>
               </div>
             )}
-            {quote && (
-              <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
-                  Devis source
-                </p>
-                <Link
-                  href={`/dashboard/devis/${quote.id}`}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 transition-colors hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white"
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  {quote.number}
-                  <ExternalLink className="h-3 w-3" />
-                </Link>
-              </div>
-            )}
+            <QuoteLinkCard
+              eventId={event.id}
+              current={quote ? { id: quote.id, number: quote.number, status: quote.status } : null}
+              options={quoteOptions}
+            />
           </div>
         </div>
       )}
