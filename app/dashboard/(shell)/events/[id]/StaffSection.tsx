@@ -11,6 +11,8 @@ import {
   Trash2,
   UserPlus,
   X,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import type { Tables, Database } from "@/types/database";
 import {
@@ -53,7 +55,14 @@ export function StaffSection({
   const [err, setErr] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
-  const readOnly = eventStatus === "termine" || eventStatus === "annule";
+  // Closed / cancelled events are locked by default so a past event can't
+  // be edited by accident — but the real world leaks: a last-minute staff
+  // swap, extra hours actually worked, a pay adjustment. "Modifier
+  // (exceptionnel)" lifts the lock for this visit only; the server
+  // actions never refused these edits, the guard was purely visual.
+  const locked = eventStatus === "termine" || eventStatus === "annule";
+  const [unlocked, setUnlocked] = useState(false);
+  const readOnly = locked && !unlocked;
   const allowHoursDone = eventStatus === "en_cours" || eventStatus === "termine";
 
   const assignedIds = new Set(assignments.map((a) => a.staff_id));
@@ -186,17 +195,54 @@ export function StaffSection({
             )}
           </p>
         </div>
-        {!readOnly && !adding && (
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            disabled={pending || available.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
-          >
-            <UserPlus className="h-3 w-3" /> Assigner
-          </button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {locked && (
+            <button
+              type="button"
+              onClick={() => {
+                setUnlocked((v) => !v);
+                setAdding(false);
+              }}
+              disabled={pending}
+              title={
+                unlocked
+                  ? "Reverrouiller le bloc Équipe"
+                  : "Événement clôturé : autoriser une modification exceptionnelle (staff, heures, montants)"
+              }
+              className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors disabled:opacity-50 ${
+                unlocked
+                  ? "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+                  : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+              }`}
+            >
+              {unlocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+              {unlocked ? "Verrouiller" : "Modifier (exceptionnel)"}
+            </button>
+          )}
+          {!readOnly && !adding && (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              disabled={pending || available.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-900 dark:text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
+            >
+              <UserPlus className="h-3 w-3" /> Assigner
+            </button>
+          )}
+        </div>
       </div>
+
+      {locked && unlocked && (
+        <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+          <Unlock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            Événement {eventStatus === "annule" ? "annulé" : "clôturé"} —
+            modification exceptionnelle. Tu peux ajuster le staff, les heures
+            réellement faites et les montants ; la paie estimée et la marge se
+            recalculent. Pense à reverrouiller ensuite.
+          </span>
+        </div>
+      )}
 
       {err && (
         <div className="mb-3 rounded-md border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 px-3 py-2 text-xs text-red-800 dark:text-red-200">
