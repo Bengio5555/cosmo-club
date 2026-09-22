@@ -42,9 +42,13 @@ export function LoginForm() {
 
     // Magic link
     const redirectTo = `${window.location.origin}/dashboard/auth/callback?next=${encodeURIComponent(from)}`;
+    // shouldCreateUser: false — a magic link must never create an account.
+    // Access is invitation-only; a removed user (or a stranger) asking for a
+    // link gets nothing, even if "Allow new users to sign up" were ever
+    // re-enabled in Supabase by mistake.
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: redirectTo },
+      options: { emailRedirectTo: redirectTo, shouldCreateUser: false },
     });
     setLoading(false);
     if (err) {
