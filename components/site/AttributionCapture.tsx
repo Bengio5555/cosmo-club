@@ -33,7 +33,17 @@ export function AttributionCapture() {
         const v = url.searchParams.get(k)?.trim();
         if (v) fresh[k] = v.slice(0, 120);
       }
-      const hasUtm = UTM_KEYS.some((k) => fresh[k]);
+      // Platform click ids (Google Ads / Meta / TikTok / Microsoft add them
+      // automatically). Stored as "name:value" so the channel logic knows
+      // which platform tagged the click.
+      for (const k of ["gclid", "fbclid", "ttclid", "msclkid"]) {
+        const v = url.searchParams.get(k)?.trim();
+        if (v) {
+          fresh.click_id = `${k}:${v.slice(0, 100)}`;
+          break;
+        }
+      }
+      const hasUtm = UTM_KEYS.some((k) => fresh[k]) || Boolean(fresh.click_id);
 
       if (document.referrer) {
         try {

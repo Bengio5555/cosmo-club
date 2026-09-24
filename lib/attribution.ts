@@ -14,6 +14,8 @@ export type Attribution = {
   utm_term?: string;
   /** Full external referrer URL (never our own host). */
   referrer?: string;
+  /** Ad click ids auto-appended by the platforms (gclid, fbclid, ttclid, msclkid). */
+  click_id?: string;
   /** Pathname of the first page seen on the site. */
   landing_page?: string;
   captured_at?: string;
@@ -39,6 +41,7 @@ export const CHANNELS = [
   { value: "linkedin", label: "LinkedIn", group: "social" },
   { value: "tiktok", label: "TikTok", group: "social" },
   { value: "mariages_net", label: "Mariages.net", group: "referral" },
+  { value: "ai_assistant", label: "Assistant IA (ChatGPT, Perplexity…)", group: "referral" },
   { value: "newsletter", label: "Newsletter / e-mail", group: "referral" },
   { value: "referral", label: "Autre site", group: "referral" },
   { value: "direct", label: "Accès direct", group: "direct" },
@@ -94,11 +97,22 @@ const PAID_MEDIUMS = /^(cpc|ppc|paid|paid_social|paidsocial|paid-social|ads|disp
  * No UTM and no external referrer → direct (typed URL, bookmark, or a
  * source that strips referrers such as most messaging apps).
  */
+const AI_HOSTS =
+  /(^|\.)(chatgpt\.com|openai\.com|perplexity\.ai|claude\.ai|gemini\.google\.com|copilot\.microsoft\.com|you\.com|mistral\.ai|chat\.mistral\.ai)$/;
+
 export function deriveChannel(a: Attribution | null | undefined): Channel {
   if (!a) return "direct";
   const src = norm(a.utm_source);
   const med = norm(a.utm_medium);
   const paid = PAID_MEDIUMS.test(med);
+  const click = norm(a.click_id);
+  const host = hostOf(a.referrer);
+
+  // Ad platforms auto-tag clicks even when no UTM is set: gclid = Google
+  // Ads, msclkid = Microsoft Ads. fbclid is added to every Meta click
+  // (organic too), so it only tells us the family — the referrer decides.
+  if (!src && click.startsWith("gclid")) return "google_ads";
+  if (!src && click.startsWith("msclkid")) return "google_ads";
 
   if (src) {
     if (/google/.test(src)) return paid ? "google_ads" : "google_organic";
@@ -114,8 +128,8 @@ export function deriveChannel(a: Attribution | null | undefined): Channel {
     return "referral";
   }
 
-  const host = hostOf(a.referrer);
   if (host) {
+    if (AI_HOSTS.test(host)) return "ai_assistant";
     if (/(^|\.)google\./.test(host)) return "google_organic";
     if (/(^|\.)bing\.com$/.test(host)) return "bing_organic";
     if (/(^|\.)instagram\.com$/.test(host)) return "instagram";
@@ -125,6 +139,11 @@ export function deriveChannel(a: Attribution | null | undefined): Channel {
     if (/(^|\.)mariages\.net$/.test(host)) return "mariages_net";
     return "referral";
   }
+
+  // fbclid with the referrer stripped (in-app browsers do that): Meta, at
+  // least — Instagram is the account we actually publish on.
+  if (click.startsWith("fbclid")) return "instagram";
+  if (click.startsWith("ttclid")) return "tiktok";
 
   return "direct";
 }

@@ -76,6 +76,7 @@ export const devisSchema = z.object({
       utm_content: z.string().max(120).optional(),
       utm_term: z.string().max(120).optional(),
       referrer: z.string().max(300).optional(),
+      click_id: z.string().max(120).optional(),
       landing_page: z.string().max(200).optional(),
       captured_at: z.string().max(40).optional(),
     })
