@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Check, FileText, Loader2 } from "lucide-react";
 import type { Tables } from "@/types/database";
+import { CHANNELS } from "@/lib/attribution";
 import { updateLead, convertLeadToQuote } from "./actions";
 
 type Lead = Tables<"leads">;
@@ -18,16 +19,24 @@ const STATUS_OPTIONS: { value: Lead["status"]; label: string }[] = [
 export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boolean }) {
   const [status, setStatus] = useState<Lead["status"]>(lead.status);
   const [notes, setNotes] = useState<string>(lead.internal_notes ?? "");
+  const [channel, setChannel] = useState<string>(lead.channel ?? "");
   const [pending, startTransition] = useTransition();
   const [converting, startConverting] = useTransition();
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
-  const dirty = status !== lead.status || (notes ?? "") !== (lead.internal_notes ?? "");
+  const dirty =
+    status !== lead.status ||
+    (notes ?? "") !== (lead.internal_notes ?? "") ||
+    channel !== (lead.channel ?? "");
 
   function save() {
     startTransition(async () => {
       setMsg(null);
-      const res = await updateLead(lead.id, { status, internal_notes: notes || null });
+      const res = await updateLead(lead.id, {
+        status,
+        internal_notes: notes || null,
+        channel: channel || null,
+      });
       if (!res.ok) {
         setMsg({ kind: "err", text: res.error });
         return;
@@ -69,6 +78,25 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
           {STATUS_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Provenance — auto for site leads, hand-picked for manual ones */}
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-4">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+          Provenance
+        </p>
+        <select
+          value={channel}
+          onChange={(e) => setChannel(e.target.value)}
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none focus:border-[color:var(--color-grenat)] focus:outline-none"
+        >
+          <option value="">Non renseigné</option>
+          {CHANNELS.map((c) => (
+            <option key={c.value} value={c.value}>
+              {c.label}
             </option>
           ))}
         </select>

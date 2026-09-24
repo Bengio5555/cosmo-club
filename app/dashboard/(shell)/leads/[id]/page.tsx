@@ -5,6 +5,8 @@ import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { formatDateFR } from "@/lib/format";
 import { LeadDetailForm } from "./LeadDetailForm";
+import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
+import { hostOf } from "@/lib/attribution";
 import { ArrowLeft, Mail, Phone, Building2, Calendar, Users } from "lucide-react";
 
 // The /contact form lets visitors type the date in free French
@@ -169,6 +171,62 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
                 </Row>
               )}
             </dl>
+          </Card>
+
+          <Card title="Provenance">
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <dt className="text-xs text-slate-500 dark:text-slate-500">Canal</dt>
+              <dd className="text-right">
+                <ChannelBadge value={lead.channel} />
+              </dd>
+
+              <dt className="text-xs text-slate-500 dark:text-slate-500">Saisie</dt>
+              <dd className="text-right text-slate-700 dark:text-slate-200">
+                {lead.source === "dashboard" ? "À la main (dashboard)" : "Formulaire du site"}
+              </dd>
+
+              {lead.utm_campaign && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Campagne</dt>
+                  <dd className="text-right text-slate-700 dark:text-slate-200">
+                    {lead.utm_campaign}
+                    {lead.utm_content ? ` · ${lead.utm_content}` : ""}
+                  </dd>
+                </>
+              )}
+
+              {(lead.utm_source || lead.utm_medium) && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Source / support</dt>
+                  <dd className="text-right text-slate-700 dark:text-slate-200">
+                    {[lead.utm_source, lead.utm_medium].filter(Boolean).join(" / ")}
+                  </dd>
+                </>
+              )}
+
+              {hostOf(lead.referrer) && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Site référent</dt>
+                  <dd className="truncate text-right text-slate-700 dark:text-slate-200" title={lead.referrer ?? undefined}>
+                    {hostOf(lead.referrer)}
+                  </dd>
+                </>
+              )}
+
+              {lead.landing_page && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Page d&apos;arrivée</dt>
+                  <dd className="truncate text-right text-slate-700 dark:text-slate-200" title={lead.landing_page}>
+                    {lead.landing_page}
+                  </dd>
+                </>
+              )}
+            </dl>
+            {!lead.channel && (
+              <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-500">
+                Provenance inconnue : choisis le canal dans le panneau de droite si tu la connais.
+              </p>
+            )}
           </Card>
 
           {relatedQuotes && relatedQuotes.length > 0 && (

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isChannel } from "@/lib/attribution";
 import {
   seedQuotePresetItems,
   QUOTE_PRESET_SCHEDULE,
@@ -23,8 +24,13 @@ export async function updateLead(
     contact_name?: string | null;
     contact_email?: string | null;
     contact_phone?: string | null;
+    /** Provenance — free to correct by hand (see lib/attribution CHANNELS). */
+    channel?: string | null;
   },
 ) {
+  if (patch.channel !== undefined && patch.channel !== null && !isChannel(patch.channel)) {
+    return { ok: false as const, error: "Canal inconnu." };
+  }
   const supabase = await createClient();
   const { error } = await supabase.from("leads").update(patch).eq("id", id);
   if (error) {

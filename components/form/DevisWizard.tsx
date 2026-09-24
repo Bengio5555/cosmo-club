@@ -7,6 +7,7 @@ import { useState, useCallback } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { track } from "@vercel/analytics";
 import { devisSchema, stepFields, type DevisInput, eventTypes, offers } from "@/lib/content/devis";
+import { deriveChannel, readStoredAttribution } from "@/lib/attribution";
 import { FieldShell, Input, OptionCard, Textarea } from "./fields";
 import { cn } from "@/lib/utils";
 
@@ -72,10 +73,13 @@ export function DevisWizard() {
       setStatus("submitting");
       setServerError(null);
       try {
+        // Attach where this visitor came from (UTMs, referrer, landing
+        // page — captured by AttributionCapture on first visit).
+        const attribution = readStoredAttribution() ?? undefined;
         const res = await fetch("/api/devis", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
+          body: JSON.stringify({ ...values, attribution }),
         });
         const body = await res.json().catch(() => ({}));
         if (!res.ok || !body.ok) {
@@ -87,7 +91,10 @@ export function DevisWizard() {
         // KPI principal du tunnel : un visiteur qui a terminé le wizard
         // jusqu'à l'envoi avec succès. Donne le vrai taux de conversion
         // à comparer aux pages vues et aux clics CTA.
-        track("devis_submitted", { event_type: values.eventType ?? "non_renseigne" });
+        track("devis_submitted", {
+          event_type: values.eventType ?? "non_renseigne",
+          channel: deriveChannel(attribution),
+        });
       } catch {
         setStatus("error");
         setServerError("network");

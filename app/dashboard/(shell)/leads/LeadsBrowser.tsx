@@ -6,6 +6,8 @@ import { Search } from "lucide-react";
 import type { Database } from "@/types/database";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
+import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
+import { channelLabel } from "@/lib/attribution";
 import { formatDateFR } from "@/lib/format";
 
 type LeadStatus = Database["public"]["Enums"]["lead_status"];
@@ -23,7 +25,13 @@ type Lead = {
   message: string | null;
   raw_payload: unknown;
   created_at: string;
+  channel: string | null;
+  utm_campaign: string | null;
 };
+
+// Sentinel for the provenance filter: demandes with no channel yet
+// (historical rows, or manual ones not qualified).
+const UNSET = "__unset__";
 
 const STATUS_TABS: { value: LeadStatus | "all"; label: string }[] = [
   { value: "all", label: "Tous" },
@@ -72,7 +80,24 @@ const TYPE_OPTIONS: { value: EventType | "all"; label: string }[] = [
 export function LeadsBrowser({ leads }: { leads: Lead[] }) {
   const [status, setStatus] = useState<LeadStatus | "all">("all");
   const [type, setType] = useState<EventType | "all">("all");
+  const [channel, setChannel] = useState<string>("all");
   const [search, setSearch] = useState("");
+
+  // Provenance filter options built from the data actually present, with
+  // a count each, so the list never offers a channel with zero rows.
+  const channelOptions = useMemo(() => {
+    const c = new Map<string, number>();
+    for (const l of leads) {
+      const k = l.channel ?? UNSET;
+      c.set(k, (c.get(k) ?? 0) + 1);
+    }
+    return [...c.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([value, n]) => ({
+        value,
+        label: `${value === UNSET ? "Non renseigné" : channelLabel(value)} (${n})`,
+      }));
+  }, [leads]);
 
   // Compteurs par statut sur la liste COMPLÈTE (pas filtrée par
   // search/type) — sinon le compteur "Nouveau (3)" deviendrait
@@ -97,20 +122,24 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
     return leads.filter((l) => {
       if (status !== "all" && l.status !== status) return false;
       if (type !== "all" && l.event_type !== type) return false;
+      if (channel !== "all" && (l.channel ?? UNSET) !== channel) return false;
       if (!normalized) return true;
       const haystack = [
         l.contact_name ?? "",
         l.contact_email ?? "",
         l.company ?? "",
         l.message ?? "",
+        l.utm_campaign ?? "",
+        channelLabel(l.channel),
       ]
         .join(" ")
         .toLowerCase();
       return haystack.includes(normalized);
     });
-  }, [leads, status, type, normalized]);
+  }, [leads, status, type, channel, normalized]);
 
-  const hasAnyFilter = status !== "all" || type !== "all" || normalized !== "";
+  const hasAnyFilter =
+    status !== "all" || type !== "all" || channel !== "all" || normalized !== "";
 
   return (
     <div className="space-y-3">
@@ -174,12 +203,27 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
           ))}
         </select>
 
+        <select
+          value={channel}
+          onChange={(e) => setChannel(e.target.value)}
+          aria-label="Filtrer par provenance"
+          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-[color:var(--color-grenat)] focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:shadow-none"
+        >
+          <option value="all">Toutes provenances</option>
+          {channelOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+
         {hasAnyFilter && (
           <button
             type="button"
             onClick={() => {
               setStatus("all");
               setType("all");
+              setChannel("all");
               setSearch("");
             }}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-white dark:shadow-none"
@@ -205,6 +249,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                   Invités
                 </th>
                 <th className="px-3 py-2.5 font-medium md:px-4">Statut</th>
+                <th className="px-3 py-2.5 font-medium md:px-4">Provenance</th>
                 <th className="hidden px-3 py-2.5 font-medium md:table-cell md:px-4">
                   Reçu
                 </th>
@@ -270,6 +315,9 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                   <td data-label="Statut" className="px-3 py-3 md:px-4">
                     <StatusBadge status={l.status} />
                   </td>
+                  <td data-label="Provenance" className="px-3 py-3 md:px-4">
+                    <ChannelBadge value={l.channel} campaign={l.utm_campaign} />
+                  </td>
                   <td data-label="Reçu" className="hidden px-3 py-3 text-xs text-slate-500 dark:text-slate-500 md:table-cell md:px-4">
                     {formatDateFR(l.created_at, { withTime: true })}
                   </td>
@@ -289,6 +337,7 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                   onClick={() => {
                     setStatus("all");
                     setType("all");
+                    setChannel("all");
                     setSearch("");
                   }}
                   className="text-slate-700 underline hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"

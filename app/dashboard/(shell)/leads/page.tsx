@@ -13,7 +13,7 @@ export default async function LeadsPage() {
   const { data: leads, error } = await supabase
     .from("leads")
     .select(
-      "id,status,contact_name,contact_email,company,event_type,event_date,guests_count,message,raw_payload,created_at",
+      "id,status,contact_name,contact_email,company,event_type,event_date,guests_count,message,raw_payload,created_at,channel,utm_campaign",
     )
     .order("created_at", { ascending: false })
     .limit(500);
@@ -34,7 +34,7 @@ export default async function LeadsPage() {
               <code className="rounded bg-slate-100 px-1 py-0.5 text-[12px] text-slate-700 dark:bg-slate-800 dark:text-slate-400">
                 /contact
               </code>
-              ).
+              ) et demandes saisies à la main, avec leur provenance.
             </p>
           </div>
         </header>

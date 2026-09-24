@@ -66,6 +66,21 @@ export const devisSchema = z.object({
     .optional()
     .or(z.literal("")),
   website: z.string().max(0).optional().or(z.literal("")),
+  // Where the visitor came from (captured client-side by AttributionCapture).
+  // Optional and lenient: a missing or odd value must never block a devis.
+  attribution: z
+    .object({
+      utm_source: z.string().max(120).optional(),
+      utm_medium: z.string().max(120).optional(),
+      utm_campaign: z.string().max(120).optional(),
+      utm_content: z.string().max(120).optional(),
+      utm_term: z.string().max(120).optional(),
+      referrer: z.string().max(300).optional(),
+      landing_page: z.string().max(200).optional(),
+      captured_at: z.string().max(40).optional(),
+    })
+    .partial()
+    .optional(),
 });
 
 export type DevisInput = z.infer<typeof devisSchema>;

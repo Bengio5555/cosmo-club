@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
+import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { QuickRemindButton } from "@/components/dashboard/QuickRemindButton";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { formatDateFR, formatEUR } from "@/lib/format";
@@ -77,8 +78,8 @@ export default async function DashboardHome() {
       .order("due_date", { ascending: true, nullsFirst: false })
       .limit(50),
     supabase.from("quotes").select("id,total_ttc,status").eq("status", "envoye"),
-    // All leads — used both for the pipeline counts and recent feed
-    supabase.from("leads").select("status"),
+    // All leads — pipeline counts + provenance split (channel, last 90 days)
+    supabase.from("leads").select("status,channel,created_at"),
     supabase
       .from("leads")
       .select(
@@ -129,6 +130,22 @@ export default async function DashboardHome() {
   for (const l of leadsAll ?? []) {
     leadCounts[l.status as LeadStatus] += 1;
   }
+
+  // Provenance over the last 90 days — which channels actually bring
+  // demandes. Unqualified rows are counted so the owner sees how much of
+  // the picture is still blank.
+  const ninetyDaysAgo = today.getTime() - 90 * 24 * 3600 * 1000;
+  const channelCounts = new Map<string, number>();
+  let leads90 = 0;
+  for (const l of leadsAll ?? []) {
+    if (Date.parse(l.created_at) < ninetyDaysAgo) continue;
+    leads90 += 1;
+    const k = l.channel ?? "";
+    channelCounts.set(k, (channelCounts.get(k) ?? 0) + 1);
+  }
+  const topChannels = [...channelCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
 
   // 6-month revenue series, month label localized
   const monthlySeries: { month: string; total: number }[] = [];
@@ -439,6 +456,32 @@ export default async function DashboardHome() {
                 tone="emerald"
               />
             </ul>
+
+            {leads90 > 0 && (
+              <div className="mt-6 border-t border-slate-100 pt-4 dark:border-slate-800">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500">
+                  Provenance · 90 derniers jours
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {topChannels.map(([k, n]) => (
+                    <li key={k || "unset"} className="flex items-center justify-between gap-3 text-sm">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <ChannelBadge value={k || null} />
+                        {!k && (
+                          <span className="text-xs text-slate-500 dark:text-slate-500">
+                            Non renseigné
+                          </span>
+                        )}
+                      </span>
+                      <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                        <strong className="font-semibold text-slate-900 dark:text-slate-100">{n}</strong>
+                        {" "}· {Math.round((n / leads90) * 100)}%
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <Link
               href="/dashboard/leads"
               className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"

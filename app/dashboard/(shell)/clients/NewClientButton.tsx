@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, X } from "lucide-react";
+import { CHANNELS } from "@/lib/attribution";
 import { saveNewClient, type ClientInput } from "./actions";
 
 export function NewClientButton() {
@@ -29,8 +30,9 @@ export function NewClientButton() {
       tva_intracom: form.get("tva_intracom") as string,
       notes: form.get("notes") as string,
     };
+    const channel = (form.get("channel") as string) || null;
     startTransition(async () => {
-      const res = await saveNewClient(input);
+      const res = await saveNewClient(input, { channel });
       if (!res.ok) {
         setErr(res.error);
         if ("duplicateId" in res && res.duplicateId) setDupId(res.duplicateId);
@@ -139,6 +141,17 @@ export function NewClientButton() {
                   <input name="tva_intracom" className={inputCls} />
                 </Field>
               </div>
+
+              <Field label="Comment ce contact est-il arrivé ?">
+                <select name="channel" defaultValue="" className={inputCls}>
+                  <option value="">Je ne sais pas</option>
+                  {CHANNELS.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
               <Field label="Notes internes">
                 <textarea name="notes" rows={2} className={inputCls} />

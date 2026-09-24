@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { isChannel } from "@/lib/attribution";
 import {
   seedQuotePresetItems,
   QUOTE_PRESET_SCHEDULE,
@@ -53,9 +54,15 @@ function normalize(input: ClientInput): ClientInput {
  * historical leads may have ingested the same email more than once, but
  * we warn the owner before creating a dup.
  */
-export async function saveNewClient(input: ClientInput) {
+export async function saveNewClient(
+  input: ClientInput,
+  opts: { channel?: string | null } = {},
+) {
   const supabase = await createServerClient();
   const v = normalize(input);
+  // Provenance of the mirrored demande (phone, recommendation…). Kept out
+  // of ClientInput on purpose: it belongs to the lead, not the client row.
+  const channel = isChannel(opts.channel) ? opts.channel : null;
 
   if (!v.first_name && !v.last_name && !v.company_name && !v.email) {
     return {
@@ -102,6 +109,7 @@ export async function saveNewClient(input: ClientInput) {
   const { error: leadErr } = await supabase.from("leads").insert({
     source: "dashboard",
     status: "nouveau",
+    channel,
     client_id: created.id,
     contact_name: contactName,
     contact_email: v.email,

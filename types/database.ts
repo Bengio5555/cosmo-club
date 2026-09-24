@@ -230,6 +230,14 @@ export type Database = {
           source: string | null
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
+          // Provenance (docs/migrations/2026-09-24_leads_attribution.sql)
+          channel: string | null
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          referrer: string | null
+          landing_page: string | null
         }
         Insert: Partial<Database["public"]["Tables"]["leads"]["Row"]>
         Update: Partial<Database["public"]["Tables"]["leads"]["Row"]>

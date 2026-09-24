@@ -4,6 +4,7 @@ import { Resend } from "resend";
 import { devisSchema } from "@/lib/content/devis";
 import { site } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { channelLabel, deriveChannel, hostOf } from "@/lib/attribution";
 import type { Database } from "@/types/database";
 
 export const runtime = "nodejs";
@@ -127,7 +128,21 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
       }
     }
 
-    const payload = {
+    // Provenance: the site captured UTMs / referrer / landing page; we
+    // derive a filterable channel and keep the raw fields for cross-checks
+    // with Meta Ads or GA4.
+    const attr = data.attribution ?? {};
+    const attribution = {
+      channel: deriveChannel(attr),
+      utm_source: attr.utm_source ?? null,
+      utm_medium: attr.utm_medium ?? null,
+      utm_campaign: attr.utm_campaign ?? null,
+      utm_content: attr.utm_content ?? null,
+      referrer: attr.referrer ?? null,
+      landing_page: attr.landing_page ?? null,
+    };
+
+    const basePayload = {
       source: "site",
       status: "nouveau" as const,
       client_id: clientId,
@@ -145,11 +160,22 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
       message: data.message || null,
       raw_payload: data as unknown as Database["public"]["Tables"]["leads"]["Insert"]["raw_payload"],
     };
-    const { data: inserted, error } = await supabase
+    const payload = { ...basePayload, ...attribution };
+    let { data: inserted, error } = await supabase
       .from("leads")
       .insert(payload)
       .select("id")
       .single();
+    // Safety net: if the attribution columns are not migrated yet (or ever
+    // get dropped), never lose the demande — retry without them.
+    if (error && /column|schema cache/i.test(error.message)) {
+      console.warn("[persistLead] attribution columns missing, retrying without:", error.message);
+      ({ data: inserted, error } = await supabase
+        .from("leads")
+        .insert(basePayload)
+        .select("id")
+        .single());
+    }
     if (error) {
       console.error("[persistLead] insert error:", error.message, error.details, error.hint);
       return;
@@ -197,6 +223,7 @@ export async function POST(req: Request) {
     `Date : ${data.date}`,
     `Lieu : ${data.location}`,
     `Invités : ${data.guests}`,
+    `Provenance : ${provenanceLine(data)}`,
     `—`,
     `Contact : ${data.firstName} ${data.lastName}`,
     `Email : ${data.email}`,
@@ -233,6 +260,19 @@ export async function POST(req: Request) {
     console.error("resend_error", err);
     return NextResponse.json({ ok: false, error: "send_failed" }, { status: 502 });
   }
+}
+
+// "Instagram (pub) · campagne mariage · via instagram.com" — for the
+// notification email, so the owner sees the channel without opening the
+// dashboard.
+function provenanceLine(d: ReturnType<typeof devisSchema.parse>) {
+  const a = d.attribution ?? {};
+  const parts = [channelLabel(deriveChannel(a))];
+  if (a.utm_campaign) parts.push(`campagne ${a.utm_campaign}`);
+  const host = hostOf(a.referrer);
+  if (host) parts.push(`via ${host}`);
+  if (a.landing_page) parts.push(`arrivée ${a.landing_page}`);
+  return parts.join(" · ");
 }
 
 function labelFor(t: string) {
@@ -280,6 +320,7 @@ function renderHtml(d: ReturnType<typeof devisSchema.parse>) {
       <tr><td style="padding:6px 0; color:#726d63;">Invités</td><td>${d.guests}</td></tr>
       <tr><td style="padding:6px 0; color:#726d63;">Email</td><td><a href="mailto:${escape(d.email)}" style="color:#c9a961;">${escape(d.email)}</a></td></tr>
       <tr><td style="padding:6px 0; color:#726d63;">Téléphone</td><td>${escape(d.phone)}</td></tr>
+      <tr><td style="padding:6px 0; color:#726d63;">Provenance</td><td>${escape(provenanceLine(d))}</td></tr>
     </table>
 
     ${
