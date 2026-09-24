@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, FileText, Loader2 } from "lucide-react";
+import { Check, FileText, Loader2, Trash2 } from "lucide-react";
 import type { Tables } from "@/types/database";
 import { CHANNELS } from "@/lib/attribution";
-import { updateLead, convertLeadToQuote } from "./actions";
+import { updateLead, convertLeadToQuote, deleteLead } from "./actions";
 
 type Lead = Tables<"leads">;
 
@@ -22,6 +22,7 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
   const [channel, setChannel] = useState<string>(lead.channel ?? "");
   const [pending, startTransition] = useTransition();
   const [converting, startConverting] = useTransition();
+  const [deleting, startDeleting] = useTransition();
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const dirty =
@@ -57,6 +58,25 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
       setMsg(null);
       const res = await convertLeadToQuote(lead.id);
       // On success the action redirects, so we never reach this branch.
+      if (res && "error" in res && res.error) {
+        setMsg({ kind: "err", text: res.error });
+      }
+    });
+  }
+
+  function remove() {
+    const who = lead.contact_name || lead.contact_email || "cette demande";
+    if (
+      !window.confirm(
+        `Supprimer définitivement ${who} ?\n\nLes devis déjà créés à partir de cette demande sont conservés.`,
+      )
+    ) {
+      return;
+    }
+    startDeleting(async () => {
+      setMsg(null);
+      const res = await deleteLead(lead.id);
+      // Redirects on success.
       if (res && "error" in res && res.error) {
         setMsg({ kind: "err", text: res.error });
       }
@@ -154,6 +174,23 @@ export function LeadDetailForm({ lead, hasQuote }: { lead: Lead; hasQuote: boole
         Crée ou ré-utilise une fiche client et génère un devis brouillon. Le
         statut passera automatiquement à <em>Devis envoyé</em>.
       </p>
+
+      {/* Delete — tests, duplicates, spam. Kept visually apart from the
+          primary actions so it is never hit by reflex. */}
+      <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+        <button
+          type="button"
+          disabled={deleting || converting}
+          onClick={remove}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-500/40 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-500/10"
+        >
+          {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+          Supprimer la demande
+        </button>
+        <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
+          Définitif. Les devis déjà créés restent en place.
+        </p>
+      </div>
     </div>
   );
 }

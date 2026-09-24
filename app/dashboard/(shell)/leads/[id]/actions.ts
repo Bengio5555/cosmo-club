@@ -46,6 +46,29 @@ export async function updateLead(
 }
 
 /**
+ * Delete a demande for good (tests, duplicates, spam). Quotes minted from
+ * it are kept — the DB sets their lead_id to null (ON DELETE SET NULL).
+ * RLS restricts this to owner/admin/manager; anyone else gets a
+ * zero-row delete, which we surface as an error rather than a silent no-op.
+ */
+export async function deleteLead(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .delete()
+    .eq("id", id)
+    .select("id");
+  if (error) return { ok: false as const, error: error.message };
+  if (!data || data.length === 0) {
+    return { ok: false as const, error: "Suppression refusée (droits insuffisants ou demande introuvable)." };
+  }
+  revalidatePath("/dashboard/leads");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard/leads");
+}
+
+/**
  * Convert a lead into a draft devis:
  * - upsert a client row (by email when available)
  * - create a quote row linked to the lead + client
