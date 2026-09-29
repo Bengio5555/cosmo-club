@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/track";
 import { site } from "@/lib/site";
 import logoSrc from "@/public/brand/cosmo-logo.png";
 

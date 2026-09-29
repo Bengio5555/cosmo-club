@@ -1,7 +1,7 @@
 "use client";
 
 import Link, { type LinkProps } from "next/link";
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/track";
 import type { MouseEvent, ReactNode } from "react";
 
 /**

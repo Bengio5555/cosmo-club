@@ -1,6 +1,6 @@
 "use client";
 
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/track";
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
 
 /**

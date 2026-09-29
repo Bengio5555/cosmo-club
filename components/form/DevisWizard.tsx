@@ -3,9 +3,9 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "motion/react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { track } from "@vercel/analytics";
+import { track, EVENTS } from "@/lib/track";
 import { devisSchema, stepFields, type DevisInput, eventTypes, offers } from "@/lib/content/devis";
 import { deriveChannel, readStoredAttribution } from "@/lib/attribution";
 import { FieldShell, Input, OptionCard, Textarea } from "./fields";
@@ -39,11 +39,23 @@ export function DevisWizard() {
     },
   });
 
+  // Funnel: one event per step shown. Step 1 fires on mount, so the
+  // count of step 1 views = visitors who reached the wizard, and the
+  // drop between consecutive steps = where people give up.
+  useEffect(() => {
+    track(EVENTS.wizardStep, { step });
+  }, [step]);
+
   const goNext = async () => {
     const fields = stepFields[step];
     const valid = await form.trigger([...fields] as (keyof DevisInput)[], { shouldFocus: true });
-    if (!valid) return;
+    if (!valid) {
+      const firstInvalid = fields.find((f) => form.getFieldState(f as keyof DevisInput).invalid);
+      track(EVENTS.wizardError, { kind: "validation", step, field: firstInvalid ?? "" });
+      return;
+    }
     if (step < TOTAL_STEPS) {
+      track(EVENTS.wizardStepComplete, { step });
       setDirection(1);
       setStep((s) => (s + 1) as typeof step);
     }
@@ -58,12 +70,14 @@ export function DevisWizard() {
 
   const handleSelectEventType = useCallback((eventTypeId: string) => {
     form.setValue("eventType", eventTypeId as DevisInput["eventType"], { shouldValidate: true });
+    track(EVENTS.wizardStepComplete, { step: 1, event_type: eventTypeId });
     setDirection(1);
     setStep(2);
   }, [form]);
 
   const handleSelectOffer = useCallback((offerId: string) => {
     form.setValue("offer", offerId as DevisInput["offer"], { shouldValidate: true });
+    track(EVENTS.wizardStepComplete, { step: 2, offer: offerId });
     setDirection(1);
     setStep(3);
   }, [form]);
@@ -84,20 +98,25 @@ export function DevisWizard() {
         const body = await res.json().catch(() => ({}));
         if (!res.ok || !body.ok) {
           setStatus("error");
-          setServerError(typeof body?.error === "string" ? body.error : "send_failed");
+          const code = typeof body?.error === "string" ? body.error : "send_failed";
+          setServerError(code);
+          track(EVENTS.wizardError, { kind: "server", step: 4, code });
           return;
         }
         setStatus("success");
         // KPI principal du tunnel : un visiteur qui a terminé le wizard
         // jusqu'à l'envoi avec succès. Donne le vrai taux de conversion
         // à comparer aux pages vues et aux clics CTA.
-        track("devis_submitted", {
+        track(EVENTS.wizardStepComplete, { step: 4 });
+        track(EVENTS.submitted, {
           event_type: values.eventType ?? "non_renseigne",
+          offer: values.offer ?? "non_renseigne",
           channel: deriveChannel(attribution),
         });
       } catch {
         setStatus("error");
         setServerError("network");
+        track(EVENTS.wizardError, { kind: "network", step: 4 });
       }
     },
     // Invalid-submit handler: find the first step that still has errors and
@@ -122,6 +141,7 @@ export function DevisWizard() {
             ? errors[firstField]?.message || "Champ invalide"
             : "Formulaire invalide";
           setServerError(`validation:${firstField ?? ""}:${msg}`);
+          track(EVENTS.wizardError, { kind: "validation", step: i + 1, field: firstField ?? "" });
           return;
         }
       }

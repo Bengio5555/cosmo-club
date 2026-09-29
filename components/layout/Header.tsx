@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/track";
 import { Logo } from "./Logo";
 import { nav } from "@/lib/site";
 import { cn } from "@/lib/utils";

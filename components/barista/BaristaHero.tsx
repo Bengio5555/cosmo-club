@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/track";
 import { SplitText } from "@/components/motion/SplitText";
 
 /**
