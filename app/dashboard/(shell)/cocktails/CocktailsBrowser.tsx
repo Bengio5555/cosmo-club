@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Copy, Loader2, Search, Wine } from "lucide-react";
 import { duplicateCocktail } from "./actions";
+import { formatEUR } from "@/lib/format";
+import type { RecipeCost } from "@/lib/recipeCost";
 
 export type CocktailRow = {
   id: string;
@@ -23,9 +25,12 @@ export type CocktailRow = {
 export function CocktailsBrowser({
   cocktails,
   ingredientCount,
+  recipeCost,
 }: {
   cocktails: CocktailRow[];
   ingredientCount: Record<string, number>;
+  /** Coût de revient matière HT par recette (voir lib/recipeCost). */
+  recipeCost: Record<string, RecipeCost>;
 }) {
   const [query, setQuery] = useState("");
   const normalized = query.trim().toLowerCase();
@@ -141,6 +146,7 @@ export function CocktailsBrowser({
             <ul className="divide-y divide-slate-100 dark:divide-slate-900">
               {list.map((c) => {
                 const count = ingredientCount[c.id] ?? 0;
+                const cost = recipeCost[c.id];
                 return (
                   <li
                     key={c.id}
@@ -170,6 +176,23 @@ export function CocktailsBrowser({
                         {count} ingrédient{count > 1 ? "s" : ""}
                         {count === 0 && " · à compléter"}
                       </span>
+                      {cost && (
+                        <span
+                          title={
+                            cost.complete
+                              ? "Coût de revient matière HT, d'après les prix d'achat du stock"
+                              : "Coût partiel : au moins un ingrédient n'a pas de prix d'achat dans le stock"
+                          }
+                          className={`w-20 shrink-0 text-right text-xs tabular-nums ${
+                            cost.complete
+                              ? "text-slate-700 dark:text-slate-300"
+                              : "text-amber-500/80"
+                          }`}
+                        >
+                          {cost.complete ? "" : "≥ "}
+                          {formatEUR(cost.ht)}
+                        </span>
+                      )}
                     </Link>
                     <button
                       type="button"

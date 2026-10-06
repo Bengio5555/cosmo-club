@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NewCocktailButton } from "./NewCocktailButton";
 import { CocktailsBrowser, type CocktailRow } from "./CocktailsBrowser";
+import { computeRecipeCosts } from "@/lib/recipeCost";
 
 export default async function CocktailsListPage() {
   const supabase = await createClient();
@@ -12,18 +13,30 @@ export default async function CocktailsListPage() {
     .order("category", { ascending: true, nullsFirst: false })
     .order("name", { ascending: true });
 
-  // Count ingredients per cocktail in one round-trip.
+  // Ingredients + product costs in two round-trips: the count and the
+  // coût de revient matière of every recipe come from the same rows.
   const cocktailIds = (cocktails ?? []).map((c) => c.id);
   const { data: ingredients } = cocktailIds.length
     ? await supabase
         .from("cocktail_ingredients")
-        .select("cocktail_id")
+        .select("cocktail_id,product_id,qty")
         .in("cocktail_id", cocktailIds)
     : { data: [] };
   const ingredientCount: Record<string, number> = {};
   for (const ing of ingredients ?? []) {
     ingredientCount[ing.cocktail_id] = (ingredientCount[ing.cocktail_id] ?? 0) + 1;
   }
+
+  const productIds = Array.from(
+    new Set((ingredients ?? []).map((i) => i.product_id)),
+  );
+  const { data: products } = productIds.length
+    ? await supabase
+        .from("products")
+        .select("id,cost_ht,content_per_unit")
+        .in("id", productIds)
+    : { data: [] };
+  const recipeCost = computeRecipeCosts(ingredients ?? [], products ?? []);
 
   return (
     <div className="px-6 py-6 md:px-10 md:py-8">
@@ -50,6 +63,7 @@ export default async function CocktailsListPage() {
       <CocktailsBrowser
         cocktails={(cocktails ?? []) as CocktailRow[]}
         ingredientCount={ingredientCount}
+        recipeCost={recipeCost}
       />
     </div>
   );

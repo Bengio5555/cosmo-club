@@ -25,7 +25,7 @@ export default async function CocktailDetailPage({
       supabase
         .from("products")
         .select(
-          "id,name,category,unit,content_per_unit,content_unit,archived",
+          "id,name,category,unit,content_per_unit,content_unit,cost_ht,archived",
         )
         .eq("archived", false)
         .order("category")

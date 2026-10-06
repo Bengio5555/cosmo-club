@@ -24,12 +24,20 @@ import {
   type IngredientInput,
 } from "../actions";
 import { ProductCombobox } from "./ProductCombobox";
+import { formatEUR } from "@/lib/format";
+import { computeRecipeCosts } from "@/lib/recipeCost";
 
 type Cocktail = Tables<"cocktails">;
 type Ingredient = Tables<"cocktail_ingredients">;
 type ProductOption = Pick<
   Tables<"products">,
-  "id" | "name" | "category" | "unit" | "content_per_unit" | "content_unit"
+  | "id"
+  | "name"
+  | "category"
+  | "unit"
+  | "content_per_unit"
+  | "content_unit"
+  | "cost_ht"
 > & { archived: boolean };
 
 type EditableIngredient = {
@@ -74,6 +82,22 @@ export function CocktailEditor({
   );
 
   const productsById = new Map(productOptions.map((p) => [p.id, p]));
+
+  // Coût de revient matière, recalculé en direct à chaque modification
+  // des lignes (même convention que la liste des boissons et la liste
+  // de courses : prix d'achat × qty ÷ contenu par unité).
+  const recipeCost = computeRecipeCosts(
+    items
+      .filter((i) => i.product_id)
+      .map((i) => ({ cocktail_id: cocktail.id, product_id: i.product_id, qty: i.qty })),
+    productOptions,
+  )[cocktail.id] ?? { ht: 0, complete: true };
+  function lineCost(i: EditableIngredient): number | null {
+    const p = productsById.get(i.product_id);
+    if (!p || p.cost_ht == null) return null;
+    const perUnit = p.content_per_unit ? Number(p.content_per_unit) : null;
+    return (Number(p.cost_ht) * i.qty) / (perUnit && perUnit > 0 ? perUnit : 1);
+  }
 
   // ─── Dirty tracking ────────────────────────────
   const [baseline, setBaseline] = useState("");
@@ -342,10 +366,11 @@ export function CocktailEditor({
               {items.map((i) => {
                 const product = productsById.get(i.product_id);
                 const contentUnit = product?.content_unit ?? product?.unit ?? "";
+                const cost = lineCost(i);
                 return (
                   <div
                     key={i.localId}
-                    className="grid grid-cols-[auto_minmax(0,1fr)_80px_60px_auto] items-center gap-2"
+                    className="grid grid-cols-[auto_minmax(0,1fr)_80px_60px_64px_auto] items-center gap-2"
                   >
                     <GripVertical className="h-3.5 w-3.5 text-slate-700" />
                     <ProductCombobox
@@ -370,6 +395,20 @@ export function CocktailEditor({
                     <span className="text-[11px] text-slate-500 dark:text-slate-500">
                       {contentUnit}
                     </span>
+                    <span
+                      title={
+                        cost == null
+                          ? "Pas de prix d'achat pour ce produit dans le stock"
+                          : "Coût HT de cette ligne"
+                      }
+                      className={`text-right text-[11px] tabular-nums ${
+                        cost == null
+                          ? "text-amber-500/80"
+                          : "text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      {cost == null ? "prix ?" : formatEUR(cost)}
+                    </span>
                     <button
                       type="button"
                       onClick={() => removeIngredient(i.localId)}
@@ -391,6 +430,26 @@ export function CocktailEditor({
                   <Plus className="h-3 w-3" /> Ajouter un ingrédient
                 </button>
               )}
+            </div>
+          )}
+
+          {items.some((i) => i.product_id) && (
+            <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-slate-200 pt-3 dark:border-slate-800">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
+                  Coût de revient matière
+                </p>
+                {!recipeCost.complete && (
+                  <p className="mt-0.5 text-[11px] text-amber-500/80">
+                    Partiel : au moins un ingrédient n&apos;a pas de prix d&apos;achat dans le stock.
+                  </p>
+                )}
+              </div>
+              <p className="text-lg font-semibold tabular-nums text-slate-900 dark:text-white">
+                {!recipeCost.complete && "≥ "}
+                {formatEUR(recipeCost.ht)}{" "}
+                <span className="text-xs font-normal text-slate-500 dark:text-slate-500">HT</span>
+              </p>
             </div>
           )}
 
