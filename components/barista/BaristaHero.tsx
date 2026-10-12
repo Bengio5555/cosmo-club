@@ -54,16 +54,19 @@ export function BaristaHero({ heroSrc }: { heroSrc: string }) {
           transition={{ delay: 0.2, duration: 1, ease: [0.19, 1, 0.22, 1] }}
           className="eyebrow mb-8"
         >
-          <span className="rule" />Offre signature · Barista
+          <span className="rule" />Prestation barista · Paris & Île-de-France
         </motion.p>
 
         <h1 className="font-display text-[13vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[12vw] md:text-[9vw]">
-          <SplitText text="Latte," as="span" className="block" delay={0.3} />
+          <SplitText text="Barista" as="span" className="block" delay={0.3} />
+          {/* Espace réel entre les deux lignes : sans lui, le texte du H1
+              se lit « Baristaévénementiel. » dans le DOM (crawlers, outils). */}
+          {" "}
           {/* Compensates the descender breathing room SplitText now
               reserves below each line — keeps the two-line gap tight. */}
           <span className="-mt-[0.22em] block">
             <SplitText
-              text="d'exception."
+              text="événementiel."
               as="span"
               className="font-accent italic text-[color:var(--color-grenat)]"
               delay={0.9}

@@ -89,12 +89,20 @@ const baristaBreadcrumbLd = {
 };
 
 export const metadata: Metadata = {
-  title: "Barista événementiel Paris — matcha & latte art",
+  // « prestation barista » : 221 impressions en position 6,7 pour 0,5 % de
+  // CTR, captées par l'article de blog alors que cette page n'a aucune
+  // impression (Search Console, 11/10/2026). Title et H1 reprennent
+  // l'expression commerciale ; l'article garde l'angle tendance.
+  title: "Prestation barista événementiel Paris — latte art",
   description:
-    "Barista événementiel haut de gamme à Paris : matcha, ube, blue et golden lattes, café de spécialité et latte art personnalisé pour vos événements.",
+    "Prestation barista pour mariages, salons et entreprises à Paris et en Île-de-France : café de spécialité, lattes signature, latte art à votre logo.",
   keywords: [
+    "prestation barista",
+    "prestation barista événementiel",
     "barista événementiel",
     "barista événementiel Paris",
+    "animation barista",
+    "prestation barista salon professionnel",
     "barista mariage Paris",
     "service café événementiel",
     "matcha latte événementiel",
@@ -103,9 +111,9 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/barista" },
   openGraph: {
-    title: "Barista événementiel — Cosmo Club Paris",
+    title: "Prestation barista événementiel — Cosmo Club Paris",
     description:
-      "Lattes d'exception, café de spécialité et latte art personnalisé pour vos événements à Paris.",
+      "Stand café de spécialité, lattes signature et latte art à votre logo pour vos mariages, salons et événements d'entreprise à Paris.",
     url: "/barista",
     type: "website",
   },

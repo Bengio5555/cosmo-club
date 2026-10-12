@@ -24,8 +24,8 @@ const ITEMS = [
   },
   {
     href: "/animation-cocktail-paris",
-    label: "Atelier mixologie",
-    desc: "Atelier cocktail à domicile ou en entreprise : EVJF, EVG, team building.",
+    label: "Animation cocktail entreprise",
+    desc: "Atelier mixologie dans vos locaux ou en séminaire : team building, soirée corporate. Formats privés aussi.",
   },
 ] as const;
 
