@@ -17,7 +17,7 @@ import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { QuickRemindButton } from "@/components/dashboard/QuickRemindButton";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
-import { emptyRevenueSplit, type RevenuePoint } from "@/lib/dashboard/revenue";
+import { emptyRevenueSplit, type EventType, type RevenuePoint } from "@/lib/dashboard/revenue";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { autoStartDueEvents } from "./events/actions";
 import type { Database } from "@/types/database";
@@ -61,7 +61,7 @@ export default async function DashboardHome() {
     // bucket of this series also drives the "CA du mois" KPI.
     supabase
       .from("invoices")
-      .select("issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id")
+      .select("id,issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id,source_invoice_id,client_id")
       .or(`event_date.gte.${sixMonthsAgo},issue_date.gte.${sixMonthsAgo}`)
       .neq("status", "brouillon")
       .neq("status", "annule"),
@@ -145,15 +145,46 @@ export default async function DashboardHome() {
     .slice(0, 6);
 
   // 6-month revenue series, month label localized, split by event type.
-  // The type lives on the quote the invoice was issued from ; invoices
-  // without a quote (or whose quote has no type) fall into « autre ».
+  // The type lives on the quote the invoice was issued from. Invoices
+  // without a quote are usually complements of an event already invoiced
+  // (small amounts), so they inherit a type in this order :
+  //   1. their quote ; for a credit note, the quote of the source invoice ;
+  //   2. the typed invoice of the same client for the same event date ;
+  //   3. the latest typed invoice of the same client in the window ;
+  //   4. « autre » (no quote, no client to lean on).
+  const trendRows = trendInvoices ?? [];
   const trendQuoteIds = Array.from(
-    new Set((trendInvoices ?? []).map((inv) => inv.quote_id).filter((x): x is string => !!x)),
+    new Set(trendRows.map((inv) => inv.quote_id).filter((x): x is string => !!x)),
   );
   const { data: trendQuotes } = trendQuoteIds.length
     ? await supabase.from("quotes").select("id,event_type").in("id", trendQuoteIds)
     : { data: [] };
   const quoteType = new Map((trendQuotes ?? []).map((q) => [q.id, q.event_type]));
+  const rowById = new Map(trendRows.map((inv) => [inv.id, inv]));
+  const directType = new Map<string, EventType>();
+  for (const inv of trendRows) {
+    let t = inv.quote_id ? quoteType.get(inv.quote_id) : null;
+    if (!t && inv.source_invoice_id) {
+      const src = rowById.get(inv.source_invoice_id);
+      if (src?.quote_id) t = quoteType.get(src.quote_id);
+    }
+    if (t) directType.set(inv.id, t);
+  }
+  const siblingType = new Map<string, EventType>();
+  const clientLatest = new Map<string, { d: string; t: EventType }>();
+  for (const inv of trendRows) {
+    const t = directType.get(inv.id);
+    if (!t || !inv.client_id) continue;
+    if (inv.event_date) siblingType.set(`${inv.client_id}|${inv.event_date}`, t);
+    const d = inv.event_date ?? inv.issue_date;
+    const cur = clientLatest.get(inv.client_id);
+    if (!cur || d > cur.d) clientLatest.set(inv.client_id, { d, t });
+  }
+  const typeOf = (inv: (typeof trendRows)[number]): EventType =>
+    directType.get(inv.id) ??
+    (inv.client_id && inv.event_date ? siblingType.get(`${inv.client_id}|${inv.event_date}`) : undefined) ??
+    (inv.client_id ? clientLatest.get(inv.client_id)?.t : undefined) ??
+    "autre";
   const monthlySeries: RevenuePoint[] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
@@ -161,11 +192,10 @@ export default async function DashboardHome() {
     const label = d.toLocaleDateString("fr-FR", { month: "short" });
     const byType = emptyRevenueSplit();
     let total = 0;
-    for (const inv of trendInvoices ?? []) {
+    for (const inv of trendRows) {
       if (!((inv.event_date ?? inv.issue_date) ?? "").startsWith(monthKey)) continue;
       const amount = Number(inv.total_ht ?? 0);
-      const type = (inv.quote_id && quoteType.get(inv.quote_id)) || "autre";
-      byType[type] += amount;
+      byType[typeOf(inv)] += amount;
       total += amount;
     }
     monthlySeries.push({ month: label, total, byType });
