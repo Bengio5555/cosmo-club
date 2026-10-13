@@ -17,6 +17,7 @@ import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { QuickRemindButton } from "@/components/dashboard/QuickRemindButton";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { emptyRevenueSplit, type RevenuePoint } from "@/lib/dashboard/revenue";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { autoStartDueEvents } from "./events/actions";
 import type { Database } from "@/types/database";
@@ -64,7 +65,7 @@ export default async function DashboardHome() {
     // bucket of this series also drives the "CA du mois" KPI.
     supabase
       .from("invoices")
-      .select("issue_date,event_date,total_ht,total_ttc,is_credit_note,status")
+      .select("issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id")
       .or(`event_date.gte.${sixMonthsAgo},issue_date.gte.${sixMonthsAgo}`)
       .neq("status", "brouillon")
       .neq("status", "annule"),
@@ -147,20 +148,32 @@ export default async function DashboardHome() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6);
 
-  // 6-month revenue series, month label localized
-  const monthlySeries: { month: string; total: number }[] = [];
+  // 6-month revenue series, month label localized, split by event type.
+  // The type lives on the quote the invoice was issued from ; invoices
+  // without a quote (or whose quote has no type) fall into « autre ».
+  const trendQuoteIds = Array.from(
+    new Set((trendInvoices ?? []).map((inv) => inv.quote_id).filter((x): x is string => !!x)),
+  );
+  const { data: trendQuotes } = trendQuoteIds.length
+    ? await supabase.from("quotes").select("id,event_type").in("id", trendQuoteIds)
+    : { data: [] };
+  const quoteType = new Map((trendQuotes ?? []).map((q) => [q.id, q.event_type]));
+  const monthlySeries: RevenuePoint[] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
     const monthKey = d.toISOString().slice(0, 7);
     const label = d.toLocaleDateString("fr-FR", { month: "short" });
-    const total = (trendInvoices ?? [])
-      .filter((inv) =>
-        ((inv.event_date ?? inv.issue_date) ?? "").startsWith(monthKey),
-      )
-      .reduce((sum, inv) => sum + Number(inv.total_ht ?? 0), 0);
-    monthlySeries.push({ month: label, total });
+    const byType = emptyRevenueSplit();
+    let total = 0;
+    for (const inv of trendInvoices ?? []) {
+      if (!((inv.event_date ?? inv.issue_date) ?? "").startsWith(monthKey)) continue;
+      const amount = Number(inv.total_ht ?? 0);
+      const type = (inv.quote_id && quoteType.get(inv.quote_id)) || "autre";
+      byType[type] += amount;
+      total += amount;
+    }
+    monthlySeries.push({ month: label, total, byType });
   }
-  const maxTrend = Math.max(1, ...monthlySeries.map((t) => t.total));
   const lastTwo = monthlySeries.slice(-2);
   const trendDelta =
     lastTwo.length === 2 && lastTwo[0].total > 0
@@ -425,7 +438,7 @@ export default async function DashboardHome() {
                 </span>
               )}
             </div>
-            <RevenueChart series={monthlySeries} max={maxTrend} />
+            <RevenueChart series={monthlySeries} />
           </div>
 
           {/* Pipeline summary — counts leads (not quotes). A single
