@@ -29,22 +29,18 @@ export default async function DashboardHome() {
   const supabase = await createClient();
 
   const today = new Date();
-  const todayISO = today.toISOString().slice(0, 10);
-  const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    .toISOString()
-    .slice(0, 10);
-  const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 1)
-    .toISOString()
-    .slice(0, 10);
-  const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 3600 * 1000)
-    .toISOString()
-    .slice(0, 10);
-  const fifteenDaysFromNow = new Date(today.getTime() + 15 * 24 * 3600 * 1000)
-    .toISOString()
-    .slice(0, 10);
-  const tenDaysFromNow = new Date(today.getTime() + 10 * 24 * 3600 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  // Dates clés en calendrier LOCAL du serveur. Une conversion en UTC
+  // (toISOString) renvoie la veille à minuit heure de Paris : un 1er du
+  // mois devenait le 30 du mois précédent et tous les buckets du
+  // graphique glissaient d'un mois en dehors d'un serveur en UTC.
+  const isoDay = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const todayISO = isoDay(today);
+  const firstOfMonth = isoDay(new Date(today.getFullYear(), today.getMonth(), 1));
+  const sixMonthsAgo = isoDay(new Date(today.getFullYear(), today.getMonth() - 5, 1));
+  const sevenDaysFromNow = isoDay(new Date(today.getTime() + 7 * 24 * 3600 * 1000));
+  const fifteenDaysFromNow = isoDay(new Date(today.getTime() + 15 * 24 * 3600 * 1000));
+  const tenDaysFromNow = isoDay(new Date(today.getTime() + 10 * 24 * 3600 * 1000));
 
   // Parallel fetch
   const [
@@ -161,7 +157,7 @@ export default async function DashboardHome() {
   const monthlySeries: RevenuePoint[] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const monthKey = d.toISOString().slice(0, 7);
+    const monthKey = isoDay(d).slice(0, 7);
     const label = d.toLocaleDateString("fr-FR", { month: "short" });
     const byType = emptyRevenueSplit();
     let total = 0;
