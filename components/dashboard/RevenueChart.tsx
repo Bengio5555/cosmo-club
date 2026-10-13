@@ -3,20 +3,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMotionValueEvent, useSpring } from "motion/react";
 import { formatEUR } from "@/lib/format";
-import { REVENUE_TYPES, REVENUE_TYPE_LABEL, type EventType, type RevenuePoint } from "@/lib/dashboard/revenue";
+import { REVENUE_TYPES, REVENUE_TYPE_LABEL, emptyRevenueSplit, type EventType, type RevenuePoint } from "@/lib/dashboard/revenue";
 import { cn } from "@/lib/utils";
 
 /**
- * CA sur 6 mois, en colonnes empilées par type d'événement.
+ * CA d'une année civile, en colonnes empilées par type d'événement.
  *
- * - Survol (ou doigt posé) sur un mois : la colonne s'allume, une ligne de
- *   repère traverse le graphique au niveau du total, le chiffre d'en-tête
- *   glisse vers la nouvelle valeur, et la répartition mariage / corporate /
- *   … s'affiche dans l'info-bulle et dans la rangée de légende en dessous.
- * - Sans survol : le mois courant (dernière colonne) est sélectionné.
+ * - Au repos : l'en-tête affiche le total de l'année et la légende sa
+ *   répartition mariage / corporate / … (le « coup d'œil » annuel).
+ * - Survol (ou doigt posé) sur un mois : la colonne s'allume, une ligne
+ *   de repère traverse le graphique au niveau du total du mois, le
+ *   chiffre d'en-tête glisse vers la valeur du mois, et l'info-bulle et
+ *   la légende passent à la répartition de ce mois.
  *
- * Palette catégorielle validée (dataviz skill) : ordre fixe par type, pas de
- * couleur par rang. Segments séparés par un liseré de 2 px couleur surface.
+ * Palette catégorielle validée (dataviz skill) : ordre fixe par type, pas
+ * de couleur par rang. Segments séparés par un liseré de 2 px surface.
  */
 
 // Validated categorical slots (light / dark), one per event type, in the
@@ -46,24 +47,36 @@ function niceCeil(v: number): number {
 const compact = (v: number) =>
   v >= 1000 ? `${(v / 1000).toLocaleString("fr-FR", { maximumFractionDigits: v % 1000 === 0 ? 0 : 1 })} k€` : `${v} €`;
 
-export function RevenueChart({ series }: { series: RevenuePoint[] }) {
+export function RevenueChart({ series, year }: { series: RevenuePoint[]; year: number }) {
   const n = series.length;
-  const last = Math.max(0, n - 1);
   const [hover, setHover] = useState<number | null>(null);
-  const active = hover ?? last;
-  const point = series[active];
+  const point = hover !== null ? series[hover] : null;
 
+  // Year aggregates : what the chart shows at rest.
+  const yearTotal = useMemo(() => series.reduce((s, p) => s + p.total, 0), [series]);
+  const yearSplit = useMemo(() => {
+    const acc = emptyRevenueSplit();
+    for (const p of series) for (const t of REVENUE_TYPES) acc[t] += p.byType[t];
+    return acc;
+  }, [series]);
   const ceil = useMemo(() => niceCeil(Math.max(1, ...series.map((p) => p.total))), [series]);
-  // Only the types that earned something over the period make the legend.
-  const presentTypes = useMemo(
-    () => REVENUE_TYPES.filter((t) => series.some((p) => p.byType[t] > 0)),
-    [series],
-  );
+  // Only the types that earned something over the year make the legend.
+  const presentTypes = useMemo(() => REVENUE_TYPES.filter((t) => yearSplit[t] > 0), [yearSplit]);
 
-  // The headline glides between months instead of jumping.
-  const spring = useSpring(point?.total ?? 0, { stiffness: 120, damping: 22 });
-  const [shown, setShown] = useState(point?.total ?? 0);
-  useEffect(() => { spring.set(point?.total ?? 0); }, [point?.total, spring]);
+  const shownTotal = point ? point.total : yearTotal;
+  const shownSplit = point ? point.byType : yearSplit;
+  const periodLabel = point
+    ? `${MONTH_LONG[point.month] ?? point.month} ${year}`
+    : n === 12
+      ? `année ${year}`
+      : n === 1
+        ? `${MONTH_LONG[series[0].month] ?? series[0].month} ${year}`
+        : `${year} · ${MONTH_LONG[series[0].month] ?? series[0].month} à ${MONTH_LONG[series[n - 1].month] ?? series[n - 1].month}`;
+
+  // The headline glides between the year and a month instead of jumping.
+  const spring = useSpring(shownTotal, { stiffness: 120, damping: 22 });
+  const [shown, setShown] = useState(shownTotal);
+  useEffect(() => { spring.set(shownTotal); }, [shownTotal, spring]);
   useMotionValueEvent(spring, "change", (v) => setShown(Math.round(v)));
 
   const plotRef = useRef<HTMLDivElement>(null);
@@ -75,25 +88,31 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
     setHover(Math.floor(ratio * n));
   }
 
-  if (n === 0 || !point) return null;
+  if (n === 0) return null;
   const pctOf = (v: number) => `${(v / ceil) * 100}%`;
-  const monthLong = MONTH_LONG[point.month] ?? point.month;
 
   return (
     <div className="mt-4 select-none">
-      {/* ── Headline : the active month and its total ── */}
+      {/* ── Headline : the year at rest, the hovered month otherwise ── */}
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            CA HT · {monthLong}
+            CA HT · {periodLabel}
           </p>
           <p className="mt-0.5 text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             {formatEUR(shown)}
           </p>
         </div>
-        <p className={cn("hidden text-right text-[11px] text-slate-400 transition-opacity sm:block dark:text-slate-500", hover !== null && "opacity-0")}>
-          Survolez un mois pour la répartition
-        </p>
+        <div className="hidden text-right sm:block">
+          {point ? (
+            <>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total {year}</p>
+              <p className="text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">{formatEUR(yearTotal)}</p>
+            </>
+          ) : (
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">Survolez un mois pour son détail</p>
+          )}
+        </div>
       </div>
 
       {/* ── Plot ── */}
@@ -121,7 +140,7 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
         <div
           ref={plotRef}
           role="img"
-          aria-label={`Chiffre d'affaires HT par mois et par type d'événement : ${series
+          aria-label={`Chiffre d'affaires HT ${year} par mois et par type d'événement : ${series
             .map((p) => `${p.month} ${formatEUR(p.total)}`)
             .join(", ")}`}
           className="relative flex h-44 touch-pan-y items-end sm:h-52"
@@ -129,21 +148,23 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
           onPointerMove={(e) => { if (e.pointerType === "mouse" || e.buttons > 0) pick(e.clientX); }}
           onPointerLeave={() => setHover(null)}
         >
-          {/* trace line at the active total */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 z-10 transition-[top] duration-300 ease-out"
-            style={{ top: `${(1 - point.total / ceil) * 100}%` }}
-          >
-            <span className="absolute inset-x-0 top-0 border-t border-dashed border-slate-500/70 dark:border-slate-400/70" />
-            <span className="absolute -left-12 top-0 -translate-y-1/2 rounded bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white dark:bg-slate-100 dark:text-slate-900">
-              {compact(Math.round(point.total))}
-            </span>
-            <span className="absolute right-0 top-0 h-1.5 w-1.5 -translate-y-1/2 translate-x-1/2 rounded-full bg-slate-700 dark:bg-slate-200" />
-          </div>
+          {/* trace line at the hovered month's total */}
+          {point && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 z-10 transition-[top] duration-300 ease-out"
+              style={{ top: `${(1 - point.total / ceil) * 100}%` }}
+            >
+              <span className="absolute inset-x-0 top-0 border-t border-dashed border-slate-500/70 dark:border-slate-400/70" />
+              <span className="absolute -left-12 top-0 -translate-y-1/2 rounded bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white dark:bg-slate-100 dark:text-slate-900">
+                {compact(Math.round(point.total))}
+              </span>
+              <span className="absolute right-0 top-0 h-1.5 w-1.5 -translate-y-1/2 translate-x-1/2 rounded-full bg-slate-700 dark:bg-slate-200" />
+            </div>
+          )}
 
           {series.map((p, i) => {
-            const isActive = i === active;
+            const isActive = i === hover;
             // stack from the baseline up, in the fixed type order
             let acc = 0;
             const segments = REVENUE_TYPES.filter((t) => p.byType[t] > 0).map((t) => {
@@ -153,7 +174,7 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
             });
             return (
               <div key={p.month} className="relative flex h-full flex-1 items-end justify-center">
-                <div className="relative h-full w-6">
+                <div className={cn("relative h-full", n > 8 ? "w-4 sm:w-5" : "w-6")}>
                   {segments.map((seg, k) => (
                     <span
                       key={seg.type}
@@ -178,7 +199,7 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
                   <div
                     className={cn(
                       "pointer-events-none absolute bottom-full z-20 mb-2 w-max min-w-[11rem] rounded-md bg-slate-900 px-3 py-2 text-left text-[11px] text-white shadow-lg dark:bg-slate-800",
-                      i === 0 ? "left-0" : i === n - 1 ? "right-0" : "left-1/2 -translate-x-1/2",
+                      i < 2 ? "left-0" : i > n - 3 ? "right-0" : "left-1/2 -translate-x-1/2",
                     )}
                   >
                     <p className="flex items-baseline justify-between gap-4">
@@ -214,8 +235,8 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
             <span
               key={p.month}
               className={cn(
-                "flex-1 text-center text-[11px] font-medium capitalize",
-                i === active ? "text-slate-900 dark:text-slate-100" : "text-slate-500 dark:text-slate-400",
+                "flex-1 text-center text-[10px] font-medium capitalize sm:text-[11px]",
+                i === hover ? "text-slate-900 dark:text-slate-100" : "text-slate-500 dark:text-slate-400",
               )}
             >
               {p.month}
@@ -224,11 +245,12 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
         </div>
       </div>
 
-      {/* ── Legend + split of the active month ── */}
+      {/* ── Legend + split : the year at rest, the hovered month otherwise ── */}
       {presentTypes.length > 0 && (
         <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
           {presentTypes.map((t) => {
-            const v = point.byType[t];
+            const v = shownSplit[t];
+            const share = shownTotal > 0 ? Math.round((v / shownTotal) * 100) : 0;
             return (
               <li key={t} className="flex items-center gap-2">
                 <span className={cn("inline-block h-2.5 w-2.5 rounded-sm", SWATCH[t])} />
@@ -236,6 +258,7 @@ export function RevenueChart({ series }: { series: RevenuePoint[] }) {
                 <span className={cn("tabular-nums", v > 0 ? "font-semibold text-slate-900 dark:text-slate-100" : "text-slate-400 dark:text-slate-600")}>
                   {v > 0 ? formatEUR(v) : "—"}
                 </span>
+                {v > 0 && <span className="text-slate-400 dark:text-slate-500">{share}%</span>}
               </li>
             );
           })}

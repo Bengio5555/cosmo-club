@@ -24,7 +24,12 @@ import type { Database } from "@/types/database";
 
 type LeadStatus = Database["public"]["Enums"]["lead_status"];
 
-export default async function DashboardHome() {
+export default async function DashboardHome({
+  searchParams,
+}: {
+  searchParams: Promise<{ annee?: string }>;
+}) {
+  const { annee } = await searchParams;
   await autoStartDueEvents();
   const supabase = await createClient();
 
@@ -37,7 +42,19 @@ export default async function DashboardHome() {
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const todayISO = isoDay(today);
   const firstOfMonth = isoDay(new Date(today.getFullYear(), today.getMonth(), 1));
-  const sixMonthsAgo = isoDay(new Date(today.getFullYear(), today.getMonth() - 5, 1));
+  // Chart window : a calendar year. The landing year is the current one ;
+  // older years are reachable through the ?annee= filter once they exist.
+  const currentYear = today.getFullYear();
+  const requestedYear = Number(annee);
+  const selectedYear =
+    Number.isInteger(requestedYear) && requestedYear >= 2020 && requestedYear <= currentYear
+      ? requestedYear
+      : currentYear;
+  const yearBounds = (y: number) => ({ start: `${y}-01-01`, end: `${y}-12-31` });
+  const invoiceYearFilter = (y: number) => {
+    const { start, end } = yearBounds(y);
+    return `and(event_date.gte.${start},event_date.lte.${end}),and(issue_date.gte.${start},issue_date.lte.${end})`;
+  };
   const sevenDaysFromNow = isoDay(new Date(today.getTime() + 7 * 24 * 3600 * 1000));
   const fifteenDaysFromNow = isoDay(new Date(today.getTime() + 15 * 24 * 3600 * 1000));
   const tenDaysFromNow = isoDay(new Date(today.getTime() + 10 * 24 * 3600 * 1000));
@@ -62,7 +79,7 @@ export default async function DashboardHome() {
     supabase
       .from("invoices")
       .select("id,issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id,source_invoice_id,client_id")
-      .or(`event_date.gte.${sixMonthsAgo},issue_date.gte.${sixMonthsAgo}`)
+      .or(invoiceYearFilter(currentYear))
       .neq("status", "brouillon")
       .neq("status", "annule"),
     supabase
@@ -144,67 +161,107 @@ export default async function DashboardHome() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6);
 
-  // 6-month revenue series, month label localized, split by event type.
+  // Revenue series of a calendar year, month by month, split by event type.
   // The type lives on the quote the invoice was issued from. Invoices
   // without a quote are usually complements of an event already invoiced
   // (small amounts), so they inherit a type in this order :
   //   1. their quote ; for a credit note, the quote of the source invoice ;
   //   2. the typed invoice of the same client for the same event date ;
-  //   3. the latest typed invoice of the same client in the window ;
+  //   3. the latest typed invoice of the same client in the year ;
   //   4. « autre » (no quote, no client to lean on).
-  const trendRows = trendInvoices ?? [];
+  type TrendRow = NonNullable<typeof trendInvoices>[number];
+  const currentYearRows: TrendRow[] = trendInvoices ?? [];
+  const selectedYearRows: TrendRow[] =
+    selectedYear === currentYear
+      ? currentYearRows
+      : ((
+          await supabase
+            .from("invoices")
+            .select("id,issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id,source_invoice_id,client_id")
+            .or(invoiceYearFilter(selectedYear))
+            .neq("status", "brouillon")
+            .neq("status", "annule")
+        ).data ?? []);
   const trendQuoteIds = Array.from(
-    new Set(trendRows.map((inv) => inv.quote_id).filter((x): x is string => !!x)),
+    new Set([...currentYearRows, ...selectedYearRows].map((inv) => inv.quote_id).filter((x): x is string => !!x)),
   );
   const { data: trendQuotes } = trendQuoteIds.length
     ? await supabase.from("quotes").select("id,event_type").in("id", trendQuoteIds)
     : { data: [] };
   const quoteType = new Map((trendQuotes ?? []).map((q) => [q.id, q.event_type]));
-  const rowById = new Map(trendRows.map((inv) => [inv.id, inv]));
-  const directType = new Map<string, EventType>();
-  for (const inv of trendRows) {
-    let t = inv.quote_id ? quoteType.get(inv.quote_id) : null;
-    if (!t && inv.source_invoice_id) {
-      const src = rowById.get(inv.source_invoice_id);
-      if (src?.quote_id) t = quoteType.get(src.quote_id);
+
+  const buildSeries = (rows: TrendRow[], year: number, lastMonth: number): RevenuePoint[] => {
+    const rowById = new Map(rows.map((inv) => [inv.id, inv]));
+    const directType = new Map<string, EventType>();
+    for (const inv of rows) {
+      let t = inv.quote_id ? quoteType.get(inv.quote_id) : null;
+      if (!t && inv.source_invoice_id) {
+        const src = rowById.get(inv.source_invoice_id);
+        if (src?.quote_id) t = quoteType.get(src.quote_id);
+      }
+      if (t) directType.set(inv.id, t);
     }
-    if (t) directType.set(inv.id, t);
-  }
-  const siblingType = new Map<string, EventType>();
-  const clientLatest = new Map<string, { d: string; t: EventType }>();
-  for (const inv of trendRows) {
-    const t = directType.get(inv.id);
-    if (!t || !inv.client_id) continue;
-    if (inv.event_date) siblingType.set(`${inv.client_id}|${inv.event_date}`, t);
-    const d = inv.event_date ?? inv.issue_date;
-    const cur = clientLatest.get(inv.client_id);
-    if (!cur || d > cur.d) clientLatest.set(inv.client_id, { d, t });
-  }
-  const typeOf = (inv: (typeof trendRows)[number]): EventType =>
-    directType.get(inv.id) ??
-    (inv.client_id && inv.event_date ? siblingType.get(`${inv.client_id}|${inv.event_date}`) : undefined) ??
-    (inv.client_id ? clientLatest.get(inv.client_id)?.t : undefined) ??
-    "autre";
-  const monthlySeries: RevenuePoint[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const monthKey = isoDay(d).slice(0, 7);
-    const label = d.toLocaleDateString("fr-FR", { month: "short" });
-    const byType = emptyRevenueSplit();
-    let total = 0;
-    for (const inv of trendRows) {
-      if (!((inv.event_date ?? inv.issue_date) ?? "").startsWith(monthKey)) continue;
-      const amount = Number(inv.total_ht ?? 0);
-      byType[typeOf(inv)] += amount;
-      total += amount;
+    const siblingType = new Map<string, EventType>();
+    const clientLatest = new Map<string, { d: string; t: EventType }>();
+    for (const inv of rows) {
+      const t = directType.get(inv.id);
+      if (!t || !inv.client_id) continue;
+      if (inv.event_date) siblingType.set(`${inv.client_id}|${inv.event_date}`, t);
+      const d = inv.event_date ?? inv.issue_date;
+      const cur = clientLatest.get(inv.client_id);
+      if (!cur || d > cur.d) clientLatest.set(inv.client_id, { d, t });
     }
-    monthlySeries.push({ month: label, total, byType });
-  }
+    const typeOf = (inv: TrendRow): EventType =>
+      directType.get(inv.id) ??
+      (inv.client_id && inv.event_date ? siblingType.get(`${inv.client_id}|${inv.event_date}`) : undefined) ??
+      (inv.client_id ? clientLatest.get(inv.client_id)?.t : undefined) ??
+      "autre";
+    const series: RevenuePoint[] = [];
+    for (let m = 0; m < lastMonth; m++) {
+      const d = new Date(year, m, 1);
+      const monthKey = isoDay(d).slice(0, 7);
+      const label = d.toLocaleDateString("fr-FR", { month: "short" });
+      const byType = emptyRevenueSplit();
+      let total = 0;
+      for (const inv of rows) {
+        if (!((inv.event_date ?? inv.issue_date) ?? "").startsWith(monthKey)) continue;
+        const amount = Number(inv.total_ht ?? 0);
+        byType[typeOf(inv)] += amount;
+        total += amount;
+      }
+      series.push({ month: label, total, byType });
+    }
+    return series;
+  };
+  // Current year up to this month : feeds the « CA du mois » card and the
+  // month-over-month trend. The chart shows the selected year (all 12
+  // months for a past year).
+  const monthlySeries = buildSeries(currentYearRows, currentYear, today.getMonth() + 1);
+  const chartSeries =
+    selectedYear === currentYear ? monthlySeries : buildSeries(selectedYearRows, selectedYear, 12);
   const lastTwo = monthlySeries.slice(-2);
   const trendDelta =
     lastTwo.length === 2 && lastTwo[0].total > 0
       ? ((lastTwo[1].total - lastTwo[0].total) / lastTwo[0].total) * 100
       : 0;
+
+  // Years with at least one invoice → the year filter (hidden with one year).
+  const { data: firstInvoice } = await supabase
+    .from("invoices")
+    .select("issue_date,event_date")
+    .neq("status", "brouillon")
+    .neq("status", "annule")
+    .order("issue_date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const firstYear = firstInvoice
+    ? Math.min(
+        Number((firstInvoice.event_date ?? firstInvoice.issue_date).slice(0, 4)) || currentYear,
+        Number(firstInvoice.issue_date.slice(0, 4)) || currentYear,
+      )
+    : currentYear;
+  const availableYears: number[] = [];
+  for (let y = currentYear; y >= firstYear; y--) availableYears.push(y);
 
   // Unpaid invoices remaining amounts
   const unpaidIds = (unpaidInvoices ?? []).map((i) => i.id);
@@ -439,7 +496,7 @@ export default async function DashboardHome() {
 
         {/* ─── Chart + Pipeline ─── */}
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          {/* CA 6 months bar chart */}
+          {/* CA de l'année, par mois et par type d'événement */}
           <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -447,10 +504,29 @@ export default async function DashboardHome() {
                   Chiffre d&apos;affaires
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  Sur les 6 derniers mois · HT · par date d&apos;événement
+                  Année {selectedYear} · HT · par date d&apos;événement
                 </p>
+                {availableYears.length > 1 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Choisir l'année">
+                    {availableYears.map((y) => (
+                      <Link
+                        key={y}
+                        href={y === currentYear ? "/dashboard" : `/dashboard?annee=${y}`}
+                        aria-current={y === selectedYear ? "page" : undefined}
+                        className={
+                          "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors " +
+                          (y === selectedYear
+                            ? "border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900"
+                            : "border-slate-200 text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500")
+                        }
+                      >
+                        {y}
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
-              {Math.abs(trendDelta) >= 0.5 && (
+              {selectedYear === currentYear && Math.abs(trendDelta) >= 0.5 && (
                 <span
                   className={
                     "inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold " +
@@ -464,7 +540,7 @@ export default async function DashboardHome() {
                 </span>
               )}
             </div>
-            <RevenueChart series={monthlySeries} />
+            <RevenueChart series={chartSeries} year={selectedYear} />
           </div>
 
           {/* Pipeline summary — counts leads (not quotes). A single
