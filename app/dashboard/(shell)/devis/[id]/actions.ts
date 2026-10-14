@@ -664,11 +664,15 @@ export async function createInvoiceFromQuote(quoteId: string) {
     };
   }
 
-  // Skip duplication if a facture already exists for this quote.
+  // Skip duplication if a facture already exists for this quote. Several
+  // invoices may be linked (main + complements) : the earliest issued is
+  // the main one, so that's where we send the operator.
   const { data: existing } = await supabase
     .from("invoices")
     .select("id")
     .eq("quote_id", quoteId)
+    .order("issue_date", { ascending: true })
+    .limit(1)
     .maybeSingle();
   if (existing) {
     return { ok: true as const, invoiceId: existing.id, created: false };

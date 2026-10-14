@@ -31,19 +31,19 @@ export default async function DevisListPage() {
     quoteIds.length
       ? supabase
           .from("invoices")
-          .select("id,quote_id,number,status")
+          .select("id,quote_id,number,status,issue_date")
           .eq("is_credit_note", false)
           .in("quote_id", quoteIds)
+          .order("issue_date", { ascending: true })
       : Promise.resolve({ data: [] }),
   ]);
-  const invoiceByQuote = new Map(
-    (invoicesList ?? [])
-      .filter((i) => i.quote_id)
-      .map((i) => [
-        i.quote_id as string,
-        { id: i.id, number: i.number, status: i.status as string },
-      ]),
-  );
+  // Several invoices can share a quote (main + complements) : the tag
+  // shows the main one, i.e. the earliest issued.
+  const invoiceByQuote = new Map<string, { id: string; number: string; status: string }>();
+  for (const i of invoicesList ?? []) {
+    if (!i.quote_id || invoiceByQuote.has(i.quote_id)) continue;
+    invoiceByQuote.set(i.quote_id, { id: i.id, number: i.number, status: i.status as string });
+  }
   const rows: QuoteRow[] = ((quotes ?? []) as Omit<QuoteRow, "invoice">[]).map(
     (q) => ({ ...q, invoice: invoiceByQuote.get(q.id) ?? null }),
   );

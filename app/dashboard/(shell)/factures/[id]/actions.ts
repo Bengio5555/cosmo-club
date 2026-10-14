@@ -113,6 +113,7 @@ export async function createBlankInvoice(clientId: string | null) {
 export async function linkInvoiceToQuote(
   invoiceId: string,
   quoteId: string | null,
+  opts: { asComplement?: boolean } = {},
 ) {
   const supabase = await createClient();
 
@@ -137,17 +138,25 @@ export async function linkInvoiceToQuote(
     if (!quote) {
       return { ok: false as const, error: "Devis introuvable." };
     }
-    // One invoice per quote: refuse if another invoice already claims it.
+    // One main invoice per quote. A second invoice (a complement : extra
+    // guests, overtime, a reissue) may still be attached, but only after
+    // the operator confirms — the editor asks and calls back with
+    // `asComplement`. The devis page's « Créer la facture » keeps refusing
+    // to generate a duplicate as long as any invoice is linked.
     const { data: taken } = await supabase
       .from("invoices")
       .select("id,number")
       .eq("quote_id", quoteId)
       .eq("is_credit_note", false)
       .neq("id", invoiceId)
+      .order("issue_date", { ascending: true })
+      .limit(1)
       .maybeSingle();
-    if (taken) {
+    if (taken && !opts.asComplement) {
       return {
         ok: false as const,
+        needsConfirm: true as const,
+        takenNumber: taken.number,
         error: `Ce devis est déjà rattaché à la facture ${taken.number}.`,
       };
     }

@@ -170,10 +170,18 @@ export function InvoiceEditor({
     const prev = quoteLinkId;
     setQuoteLinkId(next);
     startTransition(async () => {
-      const res = await linkInvoiceToQuote(invoice.id, next || null);
+      let res = await linkInvoiceToQuote(invoice.id, next || null);
+      // The quote already has its main invoice : attach as a complement
+      // (extra guests, overtime, reissue) only if the operator confirms.
+      if (!res.ok && "needsConfirm" in res && res.needsConfirm) {
+        const go = window.confirm(
+          `Ce devis a déjà la facture ${res.takenNumber}. Rattacher cette facture comme complément du même événement ?`,
+        );
+        if (go) res = await linkInvoiceToQuote(invoice.id, next || null, { asComplement: true });
+      }
       if (!res.ok) {
         setQuoteLinkId(prev);
-        setMsg({ kind: "err", text: res.error });
+        if (!("needsConfirm" in res && res.needsConfirm)) setMsg({ kind: "err", text: res.error });
         return;
       }
       setMsg({
@@ -451,8 +459,11 @@ export function InvoiceEditor({
               <p className="mb-2 text-[11px] text-slate-500 dark:text-slate-500">
                 Rattache cette facture au devis qu&apos;elle règle — utile
                 quand elle a été émise pour une autre société (holding) que
-                celle du devis. Le suivi « À facturer » de la page Devis se
-                met à jour. Enregistré immédiatement.
+                celle du devis, ou pour un complément (invités en plus,
+                heures supplémentaires) d&apos;un événement déjà facturé. Le
+                suivi « À facturer » de la page Devis et la répartition du
+                CA par type d&apos;événement se mettent à jour. Enregistré
+                immédiatement.
               </p>
               <select
                 value={quoteLinkId}
@@ -462,9 +473,9 @@ export function InvoiceEditor({
               >
                 <option value="">— Aucun devis lié —</option>
                 {quoteOptions.map((q) => (
-                  <option key={q.id} value={q.id} disabled={q.taken}>
+                  <option key={q.id} value={q.id}>
                     {q.label}
-                    {q.taken ? " (déjà facturé)" : ""}
+                    {q.taken ? " (déjà facturé · complément)" : ""}
                   </option>
                 ))}
               </select>
