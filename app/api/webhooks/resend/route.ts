@@ -39,9 +39,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "not configured" }, { status: 503 });
   }
 
-  const id = request.headers.get("svix-id");
-  const timestamp = request.headers.get("svix-timestamp");
-  const signature = request.headers.get("svix-signature");
+  // Resend signs with svix; the Standard Webhooks names are the same
+  // scheme (newer resend versions verify with the standardwebhooks package).
+  const h = request.headers;
+  const id = h.get("svix-id") ?? h.get("webhook-id");
+  const timestamp = h.get("svix-timestamp") ?? h.get("webhook-timestamp");
+  const signature = h.get("svix-signature") ?? h.get("webhook-signature");
   if (!id || !timestamp || !signature) {
     return NextResponse.json({ error: "missing signature" }, { status: 401 });
   }
