@@ -130,18 +130,6 @@ export function deliveryTimeline(e: QuoteEmail): { label: string; at: string }[]
   return steps.filter((s): s is { label: string; at: string } => !!s.at);
 }
 
-/** Texte multi-ligne pour l'attribut title (survol). */
-export function deliveryTooltip(e: QuoteEmail): string {
-  const lines = deliveryTimeline(e).map(
-    (s) => `${s.label} : ${formatDeliveryDate(s.at)}`,
-  );
-  if (e.recipient) lines.unshift(`À ${e.recipient}`);
-  const detail = e.problem_detail || e.error;
-  if (detail) lines.push(`Motif : ${detail}`);
-  lines.push(deliveryState(e).hint);
-  return lines.join("\n");
-}
-
 /** Dernier e-mail envoyé par devis (le plus récent gagne). */
 export function latestEmailByQuote(rows: QuoteEmail[]): Map<string, QuoteEmail> {
   const out = new Map<string, QuoteEmail>();
