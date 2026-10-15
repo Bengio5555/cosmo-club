@@ -43,6 +43,9 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   "/dashboard/staff": ["owner", "admin", "manager"],
   "/dashboard/providers": ["owner", "admin", "manager"],
   "/dashboard/partners": ["owner", "admin", "manager"],
+  // Shared Google Drive (contracts, job sheets, event photos). The
+  // /api/dashboard/drive routes reuse this rule via hasDriveAccess().
+  "/dashboard/documents": ["owner", "admin", "manager"],
 
   // Site content (vitrine + éditorial)
   "/dashboard/blog": ["owner", "admin", "manager"],

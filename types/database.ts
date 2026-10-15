@@ -94,6 +94,7 @@ export type Database = {
           start_time: string | null
           status: Database["public"]["Enums"]["event_status"]
           title: string
+          drive_folder_id: string | null
           todo_data: Json | null
           updated_at: string
         }
