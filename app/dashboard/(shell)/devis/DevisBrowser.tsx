@@ -13,6 +13,8 @@ import {
 import type { Database } from "@/types/database";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
+import { EmailDeliveryTag } from "@/components/dashboard/EmailDeliveryTag";
+import type { QuoteEmail } from "@/lib/quoteEmail";
 import { formatDateFR, formatEUR } from "@/lib/format";
 
 type QuoteStatus = Database["public"]["Enums"]["quote_status"];
@@ -30,6 +32,8 @@ export type QuoteRow = {
   client_id: string | null;
   /** The (non-credit-note) invoice spawned from this quote, if any. */
   invoice: { id: string; number: string; status: string } | null;
+  /** Latest quote email and its delivery tracking, if any. */
+  email: QuoteEmail | null;
 };
 
 export type ClientLite = {
@@ -447,7 +451,8 @@ function QuoteTable({
   return (
     <div className="table-as-cards">
       {/* Accepted quotes carry an invoicing-control tag under their
-          status (facturée / brouillon / à facturer). */}
+          status (facturée / brouillon / à facturer); sent ones carry the
+          delivery state of their email (envoyé / remis / non remis…). */}
       <table className="w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-transparent dark:text-slate-500">
           <tr>
@@ -523,6 +528,11 @@ function QuoteTable({
               </td>
               <td data-label="Statut" className="px-4 py-3">
                 <StatusBadge status={q.status} />
+                {q.status === "envoye" && q.email && (
+                  <div className="mt-1.5">
+                    <EmailDeliveryTag email={q.email} />
+                  </div>
+                )}
                 {q.status === "accepte" && (
                   <div className="mt-1.5">
                     <InvoiceTag invoice={q.invoice} />

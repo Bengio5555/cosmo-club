@@ -5,6 +5,7 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
+import { QUOTE_EMAIL_TAG } from "@/lib/quoteEmail";
 import { MOODBOARD_MAX } from "./moodboard-config";
 
 const STORAGE_BUCKET = "cosmoclub-images";
@@ -388,6 +389,19 @@ function parseCcEmails(input: string[] | undefined): string[] {
 }
 
 /**
+ * Trace an outgoing quote email for delivery tracking (quote_emails).
+ * Non-blocking: the email has already left (or definitively failed), so
+ * a logging error — e.g. migration not applied yet — is only logged.
+ */
+async function recordQuoteEmail(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  row: Database["public"]["Tables"]["quote_emails"]["Insert"],
+) {
+  const { error } = await supabase.from("quote_emails").insert(row);
+  if (error) console.error("[sendDevis] quote_emails insert failed:", error.message);
+}
+
+/**
  * Figer + envoyer le devis.
  *  - Transition status: brouillon → envoye (+ sent_at)
  *  - Si RESEND_API_KEY configuré et client.email présent : envoie l'email
@@ -491,7 +505,7 @@ export async function sendDevis(
       typeof opts?.message === "string" && opts.message.trim()
         ? opts.message.trim().slice(0, 2000)
         : null;
-    await resend.emails.send({
+    const { data: sent, error: sendErr } = await resend.emails.send({
       from: `${companyName} <${fromEmail}>`,
       to: [client.email],
       cc: cc.length > 0 ? cc : undefined,
@@ -507,6 +521,32 @@ export async function sendDevis(
         locale: isEn ? "en" : "fr",
         personalMessage,
       }),
+      // Lets the Resend webhook tell quote emails apart from the others
+      // (invoices, notifications) — see app/api/webhooks/resend.
+      tags: [{ name: QUOTE_EMAIL_TAG.name, value: QUOTE_EMAIL_TAG.value }],
+    });
+    // The SDK returns API errors instead of throwing: without this check
+    // a refused send (bad address, quota…) was reported as emailed.
+    if (sendErr || !sent) {
+      const reason = sendErr?.message ?? "Réponse vide de Resend";
+      console.error("[sendDevis] resend refused:", sendErr);
+      await recordQuoteEmail(supabase, {
+        quote_id: id,
+        recipient: client.email,
+        error: reason.slice(0, 500),
+        failed_at: new Date().toISOString(),
+      });
+      return {
+        ok: true as const,
+        emailed: false,
+        warning: "Email non envoyé (Resend a refusé l'envoi) — la plaquette est quand même publiée.",
+      };
+    }
+    // Delivery tracking: the webhook matches its events on this id.
+    await recordQuoteEmail(supabase, {
+      quote_id: id,
+      resend_email_id: sent.id,
+      recipient: client.email,
     });
     // Log the personalized note (only when one was actually written +
     // the email went out) so the operator can review what was said to
@@ -527,6 +567,12 @@ export async function sendDevis(
     return { ok: true as const, emailed: true, ccCount: cc.length };
   } catch (err) {
     console.error("[sendDevis] resend error:", err);
+    await recordQuoteEmail(supabase, {
+      quote_id: id,
+      recipient: client.email,
+      error: "Erreur réseau vers Resend",
+      failed_at: new Date().toISOString(),
+    });
     return {
       ok: true as const,
       emailed: false,

@@ -422,6 +422,27 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["quote_messages"]["Row"]>
         Relationships: []
       }
+      quote_emails: {
+        Row: {
+          id: string
+          quote_id: string
+          resend_email_id: string | null
+          recipient: string | null
+          error: string | null
+          created_at: string
+          sent_at: string | null
+          delivered_at: string | null
+          delayed_at: string | null
+          opened_at: string | null
+          bounced_at: string | null
+          complained_at: string | null
+          failed_at: string | null
+          problem_detail: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["quote_emails"]["Row"]> & { quote_id: string }
+        Update: Partial<Database["public"]["Tables"]["quote_emails"]["Row"]>
+        Relationships: []
+      }
       quote_menu_proposals: {
         Row: {
           id: string

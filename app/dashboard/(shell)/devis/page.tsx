@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MailWarning } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatEUR } from "@/lib/format";
+import {
+  QUOTE_EMAIL_COLUMNS,
+  deliveryState,
+  latestEmailByQuote,
+  type QuoteEmail,
+} from "@/lib/quoteEmail";
 import { DevisBrowser, type QuoteRow, type ClientLite } from "./DevisBrowser";
 
 export default async function DevisListPage() {
@@ -18,7 +24,11 @@ export default async function DevisListPage() {
     new Set((quotes ?? []).map((q) => q.client_id).filter((x): x is string => !!x)),
   );
   const quoteIds = (quotes ?? []).map((q) => q.id);
-  const [{ data: clientsList }, { data: invoicesList }] = await Promise.all([
+  const [
+    { data: clientsList },
+    { data: invoicesList },
+    { data: emailsList },
+  ] = await Promise.all([
     clientIds.length
       ? supabase
           .from("clients")
@@ -36,7 +46,16 @@ export default async function DevisListPage() {
           .in("quote_id", quoteIds)
           .order("issue_date", { ascending: true })
       : Promise.resolve({ data: [] }),
+    // Delivery tracking of the quote emails (Resend webhook). Comes back
+    // null until the quote_emails migration is applied — no tag then.
+    quoteIds.length
+      ? supabase
+          .from("quote_emails")
+          .select(QUOTE_EMAIL_COLUMNS)
+          .in("quote_id", quoteIds)
+      : Promise.resolve({ data: [] }),
   ]);
+  const emailByQuote = latestEmailByQuote((emailsList ?? []) as QuoteEmail[]);
   // Several invoices can share a quote (main + complements) : the tag
   // shows the main one, i.e. the earliest issued.
   const invoiceByQuote = new Map<string, { id: string; number: string; status: string }>();
@@ -44,8 +63,16 @@ export default async function DevisListPage() {
     if (!i.quote_id || invoiceByQuote.has(i.quote_id)) continue;
     invoiceByQuote.set(i.quote_id, { id: i.id, number: i.number, status: i.status as string });
   }
-  const rows: QuoteRow[] = ((quotes ?? []) as Omit<QuoteRow, "invoice">[]).map(
-    (q) => ({ ...q, invoice: invoiceByQuote.get(q.id) ?? null }),
+  const rows: QuoteRow[] = (
+    (quotes ?? []) as Omit<QuoteRow, "invoice" | "email">[]
+  ).map((q) => ({
+    ...q,
+    invoice: invoiceByQuote.get(q.id) ?? null,
+    email: emailByQuote.get(q.id) ?? null,
+  }));
+  // Quotes awaiting an answer whose email never reached the client.
+  const undelivered = rows.filter(
+    (q) => q.status === "envoye" && q.email && deliveryState(q.email).problem,
   );
 
   // Aggregates for the small stats row. The "Signés" pill shows both
@@ -103,6 +130,21 @@ export default async function DevisListPage() {
           </div>
         )}
 
+        {undelivered.length > 0 && (
+          <UndeliveredAlert
+            quotes={undelivered}
+            clientName={(id) => {
+              const c = (clientsList ?? []).find((x) => x.id === id);
+              return c
+                ? [c.first_name, c.last_name].filter(Boolean).join(" ") ||
+                    c.company_name ||
+                    c.email ||
+                    ""
+                : "";
+            }}
+          />
+        )}
+
         {error && (
           <div className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
             Erreur de chargement : {error.message}
@@ -142,6 +184,58 @@ function StatPill({
       </p>
       <p className={`mt-1.5 text-lg font-semibold tabular-nums ${valueCls}`}>
         {value}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Devis en attente dont l'e-mail n'est pas arrivé (rebond, spam, échec).
+ * Disparaît dès que le devis est renvoyé ou change de statut.
+ */
+function UndeliveredAlert({
+  quotes,
+  clientName,
+}: {
+  quotes: QuoteRow[];
+  clientName: (id: string | null) => string;
+}) {
+  const n = quotes.length;
+  return (
+    <div className="mt-6 rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-500/40 dark:bg-red-500/10">
+      <p className="flex items-center gap-2 text-sm font-semibold text-red-800 dark:text-red-200">
+        <MailWarning className="h-4 w-4" aria-hidden />
+        {n === 1
+          ? "1 devis n'est pas arrivé chez le client"
+          : `${n} devis ne sont pas arrivés chez le client`}
+      </p>
+      <ul className="mt-2 space-y-1 text-sm text-red-800 dark:text-red-200">
+        {quotes.map((q) => {
+          const email = q.email!;
+          const s = deliveryState(email);
+          const name = clientName(q.client_id);
+          return (
+            <li key={q.id}>
+              <Link
+                href={`/dashboard/devis/${q.id}`}
+                className="font-medium underline underline-offset-2 hover:no-underline"
+              >
+                {q.number}
+              </Link>
+              {name && <span> · {name}</span>}
+              <span>
+                {" "}
+                — {s.label}
+                {email.recipient ? ` (${email.recipient})` : ""}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-xs text-red-700 dark:text-red-300">
+        Corrige l&apos;adresse sur la fiche client, repasse le devis en
+        brouillon puis renvoie-le. En cas de signalement spam, contacte le
+        client directement.
       </p>
     </div>
   );
