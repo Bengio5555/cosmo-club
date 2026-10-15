@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft, ExternalLink, Mail, Phone } from "lucide-react";
 import { DevisEditor } from "./DevisEditor";
 import { listEventImages, listMoodboardUploads } from "./actions";
+import { QUOTE_EMAIL_COLUMNS, type QuoteEmail } from "@/lib/quoteEmail";
 
 type Params = Promise<{ id: string }>;
 
@@ -19,6 +20,7 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
     moodboardUploads,
     { data: menuProposals },
     { data: cocktailCatalog },
+    { data: deliveryEmail },
   ] = await Promise.all([
     supabase.from("quotes").select("*").eq("id", id).maybeSingle(),
     supabase
@@ -49,6 +51,15 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
       .eq("archived", false)
       .order("category", { ascending: true })
       .order("name", { ascending: true }),
+    // Latest quote email + Resend delivery tracking (null until the
+    // quote_emails migration is applied).
+    supabase
+      .from("quote_emails")
+      .select(QUOTE_EMAIL_COLUMNS)
+      .eq("quote_id", id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   if (!quote) {
@@ -79,6 +90,7 @@ export default async function DevisDetailPage({ params }: { params: Params }) {
         messageHistory={messages ?? []}
         menuProposals={menuProposals ?? []}
         cocktailCatalog={cocktailCatalog ?? []}
+        deliveryEmail={(deliveryEmail as QuoteEmail | null) ?? null}
       />
 
       {client && (
