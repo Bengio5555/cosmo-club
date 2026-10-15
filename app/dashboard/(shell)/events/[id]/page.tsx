@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -17,9 +18,11 @@ import { QuoteLinkCard, type QuoteOption } from "./QuoteLinkCard";
 import { MenuSection } from "./MenuSection";
 import { MarginSection } from "./MarginSection";
 import { ExtraCostsEditor } from "./ExtraCostsEditor";
+import { EventDocuments } from "./EventDocuments";
 import { autoStartDueEvents } from "../actions";
 import { computeEventMargin } from "@/lib/server/eventMargin";
 import { getCurrentRole } from "@/lib/auth/server";
+import { rolesForPath } from "@/lib/auth/roles";
 import { parseExtraCosts } from "@/lib/extraCosts";
 
 type Params = Promise<{ id: string }>;
@@ -50,6 +53,8 @@ export default async function EventDetailPage({
   // they need to run the event.
   const role = await getCurrentRole();
   const isStaff = role === "staff";
+  const canSeeDocuments =
+    role !== null && rolesForPath("/dashboard/documents").includes(role);
 
   // Per-event extra charges (verrerie, glaçons, suppléments). Read from
   // the select("*") row so a not-yet-migrated `extra_costs` column is
@@ -398,6 +403,23 @@ export default async function EventDetailPage({
           <ExtraCostsEditor eventId={event.id} initial={extraCosts} />
         </div>
       ))}
+
+      {canSeeDocuments && (
+        <div className="px-4 pb-6 md:px-8">
+          <Suspense
+            fallback={
+              <div className="h-24 animate-pulse rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40" />
+            }
+          >
+            <EventDocuments
+              eventId={event.id}
+              title={event.title}
+              date={event.date}
+              folderId={event.drive_folder_id}
+            />
+          </Suspense>
+        </div>
+      )}
 
       {!isStaff && (
         <div className="border-t border-slate-100 dark:border-slate-900 px-4 py-6 md:px-8">
