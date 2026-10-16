@@ -25,6 +25,8 @@ export type InvoiceRow = {
   paid: number;
   /** Sum of credit notes (avoirs) offsetting this invoice. */
   credited: number;
+  /** Counts in the revenue (lib/dashboard/revenue countsInRevenue). */
+  inRevenue: boolean;
 };
 
 /** Amount still owed: total minus payments minus credit notes, floored at 0. */
@@ -203,10 +205,16 @@ export function FacturesBrowser({
   // list (date/type filter + live search + status chip).
   const totals = useMemo(() => {
     let ht = 0;
+    let htCount = 0;
     let paid = 0;
     let remaining = 0;
     for (const r of visible) {
-      ht += Number(r.total_ht ?? 0);
+      // Same revenue rule as the dashboard : issued invoices + credit
+      // notes from their creation, minus cancelled ones.
+      if (r.inRevenue) {
+        ht += Number(r.total_ht ?? 0);
+        htCount++;
+      }
       if (!r.is_credit_note) {
         paid += r.paid;
         // "Reste à encaisser" = only issued invoices (envoyé / en
@@ -217,7 +225,7 @@ export function FacturesBrowser({
         }
       }
     }
-    return { ht, paid, remaining };
+    return { ht, htCount, paid, remaining };
   }, [visible]);
 
   const chips: Array<{ key: GroupKey | "all"; label: string; count: number }> = [
@@ -292,7 +300,7 @@ export function FacturesBrowser({
       {/* Totals bar (over the visible set) */}
       {rows.length > 0 && (
         <div className="grid grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none p-3 text-center">
-          <Stat label={`Total HT (${visible.length})`} value={formatEUR(totals.ht)} />
+          <Stat label={`CA HT (${totals.htCount})`} value={formatEUR(totals.ht)} />
           <Stat label="Encaissé" value={formatEUR(totals.paid)} tone="ok" />
           <Stat label="Reste à encaisser" value={formatEUR(totals.remaining)} tone="pending" />
         </div>

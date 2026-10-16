@@ -748,12 +748,21 @@ export async function deleteInvoice(id: string) {
   const supabase = await createClient();
   const { data: inv } = await supabase
     .from("invoices")
-    .select("id,status")
+    .select("id,status,is_credit_note")
     .eq("id", id)
     .maybeSingle();
   if (!inv) return { ok: false as const, error: "Facture introuvable" };
   if (inv.status !== "brouillon") {
     return { ok: false as const, error: "Seuls les brouillons peuvent être supprimés" };
+  }
+  // A credit note gets its final AV- number at creation : deleting it
+  // would leave a gap in the sequence (numérotation continue). It is
+  // cancelled instead, which keeps the number and drops it from revenue.
+  if (inv.is_credit_note) {
+    return {
+      ok: false as const,
+      error: "Un avoir ne peut pas être supprimé (son numéro est déjà attribué). Annule-le plutôt.",
+    };
   }
   const { error } = await supabase.from("invoices").delete().eq("id", id);
   if (error) return { ok: false as const, error: error.message };
