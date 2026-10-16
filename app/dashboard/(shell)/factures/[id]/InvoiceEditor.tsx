@@ -777,13 +777,33 @@ function TopBar({
             >
               <Send className="h-3 w-3" /> Figer & envoyer
             </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="inline-flex items-center gap-1 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5 px-3 py-2 text-xs text-red-700 dark:text-red-300 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10"
-            >
-              <Trash2 className="h-3 w-3" /> Supprimer
-            </button>
+            {invoice.is_credit_note ? (
+              // Numbered at creation : a credit note is cancelled, never
+              // deleted, so the AV- sequence keeps no gap.
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Annuler cet avoir ? Son numéro reste dans la numérotation et il ne sera plus déduit du chiffre d'affaires.",
+                    )
+                  )
+                    onCancel();
+                }}
+                disabled={pending}
+                className="inline-flex items-center gap-1 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5 px-3 py-2 text-xs text-red-700 dark:text-red-300 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10"
+              >
+                <Ban className="h-3 w-3" /> Annuler l&apos;avoir
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onDelete}
+                className="inline-flex items-center gap-1 rounded-md border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5 px-3 py-2 text-xs text-red-700 dark:text-red-300 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10"
+              >
+                <Trash2 className="h-3 w-3" /> Supprimer
+              </button>
+            )}
           </>
         )}
 
