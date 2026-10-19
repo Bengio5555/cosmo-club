@@ -40,7 +40,7 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
       email: "",
       phone: "",
       message: initialBrand ? `Canettes personnalisées pour « ${initialBrand} ».\n` : "",
-      website: "",
+      hp_f2: "",
       canBrand: initialBrand,
     },
   });
@@ -222,8 +222,11 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
         autoComplete="off"
         tabIndex={-1}
         aria-hidden
+        data-1p-ignore
+        data-lpignore="true"
+        data-form-type="other"
         className="pointer-events-none absolute left-[-9999px] top-[-9999px] h-0 w-0 opacity-0"
-        {...form.register("website")}
+        {...form.register("hp_f2")}
       />
       {/* marque venue de la page canettes (lien « Demander un devis pour X ») */}
       <input type="hidden" {...form.register("canBrand")} />

@@ -212,7 +212,7 @@ export async function POST(req: Request) {
   const data = parsed.data;
 
   // Honeypot — silent drop
-  if (data.website) {
+  if (data.hp_f2) {
     return NextResponse.json({ ok: true, dropped: true });
   }
 
