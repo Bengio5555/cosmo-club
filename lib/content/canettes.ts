@@ -36,8 +36,6 @@ export type Recette = {
   garnishShort: string;
   /** Teinte dominante dans la canette (encre du logo choisie en conséquence). */
   hue: { primary: string; soft: string };
-  /** Petite illustration botanique (PNG transparent, 512 px). */
-  illustration: string;
   inkTone: "claire" | "foncée";
 };
 
@@ -45,7 +43,6 @@ export const recettes: Recette[] = [
   {
     id: "litchi-rose",
     garnishShort: "Ruban de concombre",
-    illustration: "/brand/canettes/illus-litchi-rose.png",
     num: "01",
     name: "Litchi Rose",
     tasting: "Floral, frais, pétillant.",
@@ -57,7 +54,6 @@ export const recettes: Recette[] = [
   {
     id: "framboise-hibiscus",
     garnishShort: "Fleur d’hibiscus",
-    illustration: "/brand/canettes/illus-framboise-hibiscus.png",
     num: "02",
     name: "Framboise Hibiscus",
     tasting: "Acidulé, profond, légèrement épicé.",
@@ -69,7 +65,6 @@ export const recettes: Recette[] = [
   {
     id: "coco-peche-aloe",
     garnishShort: "Citron vert",
-    illustration: "/brand/canettes/illus-coco-peche-aloe.png",
     num: "03",
     name: "Coco Pêche Aloe Vera",
     tasting: "Doux, désaltérant, solaire.",
