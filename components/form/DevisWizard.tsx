@@ -168,10 +168,16 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
       for (let i = 0; i < order.length; i++) {
         const hasError = order[i].some((f) => errors[f]);
         if (hasError) {
-          setDirection(-1);
-          setStep((i + 1) as typeof step);
-          setStatus("error");
+          const targetStep = (i + 1) as typeof step;
           const firstField = order[i].find((f) => errors[f]);
+          if (targetStep === step) {
+            // Same step : the inline messages under the fields say it all.
+            track(EVENTS.wizardError, { kind: "validation", step: targetStep, field: firstField ?? "" });
+            return;
+          }
+          setDirection(-1);
+          setStep(targetStep);
+          setStatus("error");
           const msg = firstField
             ? errors[firstField]?.message || "Champ invalide"
             : "Formulaire invalide";
@@ -190,6 +196,16 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
   return (
     <form
       onSubmit={(e) => { syncAutofill(); return form.handleSubmit(submitValid, submitInvalid)(e); }}
+      onKeyDown={(e) => {
+        // Enter in a field (or on an autofill suggestion) must never submit
+        // the request by itself : it moves to the next step, and on the last
+        // step it does nothing — only the « Envoyer » button sends.
+        if (e.key !== "Enter") return;
+        const t = e.target as HTMLElement;
+        if (t.tagName === "TEXTAREA" || t.tagName === "BUTTON") return;
+        e.preventDefault();
+        if (step < TOTAL_STEPS) void goNext();
+      }}
       noValidate
       className="relative flex min-h-[620px] flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream-paper)] p-6 md:p-10"
     >
