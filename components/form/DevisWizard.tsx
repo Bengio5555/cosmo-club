@@ -1,9 +1,9 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "motion/react";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { track, EVENTS } from "@/lib/track";
 import { devisSchema, stepFields, type DevisInput, eventTypes, offers } from "@/lib/content/devis";
@@ -20,6 +20,9 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
   const [status, setStatus] = useState<Status>("idle");
   const [serverError, setServerError] = useState<string | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
+  // One automatic retry after re-reading the DOM when validation fails on
+  // a field the browser filled without telling React (autofill).
+  const retriedRef = useRef(false);
 
   const form = useForm<DevisInput>({
     resolver: zodResolver(devisSchema) as any,
@@ -55,10 +58,12 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
   // validating, copy what the DOM actually shows into the form state.
   const syncAutofill = () => {
     const names: (keyof DevisInput)[] = ["date", "location", "guests", "firstName", "lastName", "email", "phone", "message"];
+    const formEl = document.getElementById("firstName")?.closest("form") ?? document.querySelector("form");
+    const fd = formEl instanceof HTMLFormElement ? new FormData(formEl) : null;
     for (const name of names) {
+      const fromForm = fd?.get(name);
       const el = document.getElementById(name) as HTMLInputElement | HTMLTextAreaElement | null;
-      if (!el) continue;
-      const dom = el.value;
+      const dom = typeof fromForm === "string" && fromForm !== "" ? fromForm : (el?.value ?? "");
       const cur = form.getValues(name);
       if (dom !== "" && dom !== String(cur ?? "")) {
         form.setValue(name, (name === "guests" ? (Number(dom) || dom) : dom) as never, { shouldDirty: true });
@@ -103,8 +108,8 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
     setStep(3);
   }, [form]);
 
-  const onSubmit = form.handleSubmit(
-    async (values) => {
+  const submitValid = async (values: DevisInput) => {
+      retriedRef.current = false;
       setStatus("submitting");
       setServerError(null);
       try {
@@ -139,12 +144,21 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
         setServerError("network");
         track(EVENTS.wizardError, { kind: "network", step: 4 });
       }
-    },
-    // Invalid-submit handler: find the first step that still has errors and
-    // bring the user back to it so they can fix. Without this, validation
-    // errors on hidden earlier steps fail silently and the submit button
-    // appears dead.
-    (errors) => {
+  };
+
+  // Invalid-submit handler: find the first step that still has errors and
+  // bring the user back to it so they can fix. Without this, validation
+  // errors on hidden earlier steps fail silently and the submit button
+  // appears dead. Before complaining, re-read the DOM once and retry : a
+  // browser autofill can leave the form state behind what the user sees.
+  const submitInvalid = (errors: FieldErrors<DevisInput>) => {
+      if (!retriedRef.current) {
+        retriedRef.current = true;
+        syncAutofill();
+        void form.handleSubmit(submitValid, submitInvalid)();
+        return;
+      }
+      retriedRef.current = false;
       const order: (keyof DevisInput)[][] = [
         [...stepFields[1]] as (keyof DevisInput)[],
         [...stepFields[2]] as (keyof DevisInput)[],
@@ -166,8 +180,8 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
           return;
         }
       }
-    },
-  );
+  };
+
 
   if (status === "success") {
     return <SuccessScreen firstName={form.getValues("firstName")} />;
@@ -175,7 +189,7 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
 
   return (
     <form
-      onSubmit={(e) => { syncAutofill(); return onSubmit(e); }}
+      onSubmit={(e) => { syncAutofill(); return form.handleSubmit(submitValid, submitInvalid)(e); }}
       noValidate
       className="relative flex min-h-[620px] flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream-paper)] p-6 md:p-10"
     >
