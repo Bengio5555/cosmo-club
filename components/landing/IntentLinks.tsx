@@ -41,7 +41,7 @@ export function IntentLinks() {
         <Reveal>
           <p className="eyebrow mb-6"><span className="rule" />Pour quel événement ?</p>
           <h2 className="font-display text-[7vw] leading-[1] text-balance text-[color:var(--color-ink-text)] md:text-[3.5vw]">
-            Cinq formats, une <span className="font-accent italic text-[color:var(--color-grenat)]">même exigence</span>.
+            Cinq formats, une <span className="font-accent text-[color:var(--color-grenat)]">même exigence</span>.
           </h2>
         </Reveal>
 

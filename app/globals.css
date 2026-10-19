@@ -40,9 +40,9 @@
   --color-foreground: var(--color-bone);
 
   /* ─── Fonts ────────────────────────────────────── */
-  --font-display: var(--font-fraunces);
+  --font-display: var(--font-bricolage);
   --font-body: var(--font-inter-tight);
-  --font-accent: var(--font-cormorant);
+  --font-accent: var(--font-bricolage);
   --font-sans: var(--font-inter-tight);
 
   /* ─── Radii / spacing extensions ───────────────── */
@@ -89,14 +89,16 @@ html.dark body {
 
 /* ─── Typography base ─────────────────────────────── */
 .font-display {
-  font-family: var(--font-display), "Times New Roman", serif;
-  font-feature-settings: "liga" 1, "dlig" 1, "ss01" 1;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .font-accent {
-  font-family: var(--font-accent), "Georgia", serif;
-  font-style: italic;
+  font-family: var(--font-accent), system-ui, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: -0.02em;
 }
 
 .eyebrow {
@@ -381,7 +383,7 @@ html.dark body {
 }
 .article-prose > * + * { margin-top: 1.25em; }
 .article-prose h2 {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-display), system-ui, sans-serif;
   font-size: 2rem;
   line-height: 1.15;
   letter-spacing: -0.01em;
@@ -390,7 +392,7 @@ html.dark body {
   color: var(--color-ink-text);
 }
 .article-prose h3 {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-display), system-ui, sans-serif;
   font-size: 1.4rem;
   line-height: 1.25;
   margin-top: 1.8em;
@@ -430,7 +432,7 @@ html.dark body {
 .article-prose blockquote {
   border-left: 2px solid var(--color-grenat);
   padding-left: 1.25em;
-  font-family: var(--font-accent), serif;
+  font-family: var(--font-accent), system-ui, sans-serif;
   font-style: italic;
   color: var(--color-espresso);
 }
@@ -447,7 +449,7 @@ html.dark body {
   vertical-align: top;
 }
 .article-prose th {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 600;
   color: var(--color-grenat);
   border-bottom-color: var(--color-grenat);
@@ -474,4 +476,16 @@ html.dark body {
   box-shadow:
     0 18px 50px -22px rgba(20, 12, 8, 0.45),
     0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+/* Autofill (Safari / Chrome) peint les champs en bleu-blanc : on garde le
+   fond transparent du formulaire et l'encre du site. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-ink-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-cream-paper) inset;
+  box-shadow: 0 0 0 1000px var(--color-cream-paper) inset;
+  transition: background-color 600000s ease-in-out 0s;
 }

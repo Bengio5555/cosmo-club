@@ -395,3 +395,32 @@
   color: var(--brief-grenat);
   border-bottom: none;
 }
+
+/* ─── Matériel QR ─── */
+.briefing-scan-intro {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--brief-muted);
+}
+.briefing-scan-btn {
+  display: block;
+  margin: 0 0 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--brief-grenat);
+  color: #fff;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+.briefing-scan-btn:hover {
+  background: var(--brief-ink);
+}
+.briefing-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  color: var(--brief-grenat);
+  white-space: nowrap;
+}

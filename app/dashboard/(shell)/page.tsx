@@ -17,7 +17,12 @@ import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { QuickRemindButton } from "@/components/dashboard/QuickRemindButton";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
-import { emptyRevenueSplit, type EventType, type RevenuePoint } from "@/lib/dashboard/revenue";
+import {
+  countsInRevenue,
+  emptyRevenueSplit,
+  type EventType,
+  type RevenuePoint,
+} from "@/lib/dashboard/revenue";
 import { formatDateFR, formatEUR } from "@/lib/format";
 import { autoStartDueEvents } from "./events/actions";
 import type { Database } from "@/types/database";
@@ -75,12 +80,13 @@ export default async function DashboardHome({
     // attributed to the EVENT month (event_date), falling back to
     // issue_date when an invoice has no event. Fetch anything whose
     // event OR issue date is within the window; the current-month
-    // bucket of this series also drives the "CA du mois" KPI.
+    // bucket of this series also drives the "CA du mois" KPI. Drafts
+    // are kept here : a draft credit note already counts (see
+    // countsInRevenue), draft invoices are dropped in revenueRows.
     supabase
       .from("invoices")
       .select("id,issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id,source_invoice_id,client_id")
       .or(invoiceYearFilter(currentYear))
-      .neq("status", "brouillon")
       .neq("status", "annule"),
     supabase
       .from("invoices")
@@ -170,18 +176,39 @@ export default async function DashboardHome({
   //   3. the latest typed invoice of the same client in the year ;
   //   4. « autre » (no quote, no client to lean on).
   type TrendRow = NonNullable<typeof trendInvoices>[number];
-  const currentYearRows: TrendRow[] = trendInvoices ?? [];
+  // Keep only what makes revenue (countsInRevenue). A credit note needs
+  // its source invoice's status ; cancelled sources aren't in the rows
+  // (filtered out by the query), so they're looked up.
+  const revenueRows = async (rows: TrendRow[]): Promise<TrendRow[]> => {
+    const statusById = new Map<string, string>(rows.map((r) => [r.id, r.status]));
+    const missing = Array.from(
+      new Set(
+        rows
+          .map((r) => (r.is_credit_note ? r.source_invoice_id : null))
+          .filter((x): x is string => !!x && !statusById.has(x)),
+      ),
+    );
+    if (missing.length) {
+      const { data } = await supabase.from("invoices").select("id,status").in("id", missing);
+      for (const r of data ?? []) statusById.set(r.id, r.status);
+    }
+    return rows.filter((r) =>
+      countsInRevenue(r, r.source_invoice_id ? statusById.get(r.source_invoice_id) : null),
+    );
+  };
+  const currentYearRows: TrendRow[] = await revenueRows(trendInvoices ?? []);
   const selectedYearRows: TrendRow[] =
     selectedYear === currentYear
       ? currentYearRows
-      : ((
-          await supabase
-            .from("invoices")
-            .select("id,issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id,source_invoice_id,client_id")
-            .or(invoiceYearFilter(selectedYear))
-            .neq("status", "brouillon")
-            .neq("status", "annule")
-        ).data ?? []);
+      : await revenueRows(
+          (
+            await supabase
+              .from("invoices")
+              .select("id,issue_date,event_date,total_ht,total_ttc,is_credit_note,status,quote_id,source_invoice_id,client_id")
+              .or(invoiceYearFilter(selectedYear))
+              .neq("status", "annule")
+          ).data ?? [],
+        );
   const trendQuoteIds = Array.from(
     new Set([...currentYearRows, ...selectedYearRows].map((inv) => inv.quote_id).filter((x): x is string => !!x)),
   );

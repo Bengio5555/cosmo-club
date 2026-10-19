@@ -7,6 +7,7 @@ import { formatDateFR } from "@/lib/format";
 import { LeadDetailForm } from "./LeadDetailForm";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { hostOf } from "@/lib/attribution";
+import { OFFER_LABEL } from "@/lib/content/devis";
 import { ArrowLeft, Mail, Phone, Building2, Calendar, Users } from "lucide-react";
 
 // The /contact form lets visitors type the date in free French
@@ -25,6 +26,24 @@ function rawDate(payload: unknown): string | null {
 function rawLocation(payload: unknown): string | null {
   if (payload && typeof payload === "object" && "location" in payload) {
     const v = (payload as Record<string, unknown>).location;
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return null;
+}
+
+// Offre choisie à l'étape 2 du formulaire (bar, barista, canettes…).
+function rawOffer(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "offer" in payload) {
+    const v = (payload as Record<string, unknown>).offer;
+    if (typeof v === "string" && v in OFFER_LABEL) return OFFER_LABEL[v as keyof typeof OFFER_LABEL];
+  }
+  return null;
+}
+
+// Marque posée sur la canette (page canettes) avant de demander le devis.
+function rawCanBrand(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "canBrand" in payload) {
+    const v = (payload as Record<string, unknown>).canBrand;
     if (typeof v === "string" && v.trim()) return v.trim();
   }
   return null;
@@ -90,6 +109,15 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
                 <EventTypeLabel value={lead.event_type} />
               </dd>
 
+              {rawOffer(lead.raw_payload) && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Offre</dt>
+                  <dd className="text-right text-slate-700 dark:text-slate-200">
+                    {rawOffer(lead.raw_payload)}
+                  </dd>
+                </>
+              )}
+
               <dt className="text-xs text-slate-500 dark:text-slate-500">Date événement</dt>
               <dd className="text-right text-slate-700 dark:text-slate-200">
                 {lead.event_date
@@ -106,6 +134,15 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               <dd className="text-right text-slate-700 dark:text-slate-200">
                 {lead.guests_count ?? "—"}
               </dd>
+
+              {rawCanBrand(lead.raw_payload) && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Marque sur la canette</dt>
+                  <dd className="text-right text-slate-700 dark:text-slate-200">
+                    {rawCanBrand(lead.raw_payload)}
+                  </dd>
+                </>
+              )}
 
               {lead.budget_estimate != null && (
                 <>

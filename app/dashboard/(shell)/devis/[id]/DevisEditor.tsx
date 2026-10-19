@@ -33,6 +33,13 @@ import { CatalogPicker, type PickedItem } from "./CatalogPicker";
 import { MoodboardPicker, type AvailableImage } from "./MoodboardPicker";
 import { Receipt, CalendarPlus, Wine, ListChecks } from "lucide-react";
 import { createEventFromQuote } from "../../events/actions";
+import { EmailDeliveryTag } from "@/components/dashboard/EmailDeliveryTag";
+import {
+  deliveryState,
+  deliveryTimeline,
+  formatDeliveryDate,
+  type QuoteEmail,
+} from "@/lib/quoteEmail";
 
 type Quote = Tables<"quotes">;
 type QuoteItem = Tables<"quote_items">;
@@ -102,6 +109,7 @@ export function DevisEditor({
   messageHistory = [],
   menuProposals = [],
   cocktailCatalog = [],
+  deliveryEmail = null,
 }: {
   quote: Quote;
   items: QuoteItem[];
@@ -111,6 +119,8 @@ export function DevisEditor({
   messageHistory?: MessageLog[];
   menuProposals?: MenuProposal[];
   cocktailCatalog?: CatalogCocktail[];
+  /** Latest quote email + its Resend delivery tracking, if any. */
+  deliveryEmail?: QuoteEmail | null;
 }) {
   const router = useRouter();
   const readOnly = quote.status !== "brouillon";
@@ -529,6 +539,7 @@ export function DevisEditor({
     <div className="min-w-0 max-w-full px-4 py-6 md:px-8 md:py-8">
       <TopBar
         quote={quote}
+        deliveryEmail={deliveryEmail}
         dirty={isDirty}
         pending={pending}
         onSave={save}
@@ -542,6 +553,10 @@ export function DevisEditor({
         onCreateInvoice={createInvoice}
         onCreateEvent={createEvent}
       />
+
+      {deliveryEmail && quote.status !== "brouillon" && (
+        <DeliveryNotice email={deliveryEmail} status={quote.status} />
+      )}
 
       {msg && (
         <div
@@ -1334,6 +1349,7 @@ function MessagePopup({
 
 function TopBar({
   quote,
+  deliveryEmail,
   dirty,
   pending,
   onSave,
@@ -1348,6 +1364,7 @@ function TopBar({
   onProposeMenu,
 }: {
   quote: Quote;
+  deliveryEmail: QuoteEmail | null;
   dirty: boolean;
   pending: boolean;
   onSave: () => void;
@@ -1371,6 +1388,9 @@ function TopBar({
         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-500">
           <StatusPill status={quote.status} />
           {quote.sent_at && <span>Envoyé le {new Date(quote.sent_at).toLocaleDateString("fr-FR")}</span>}
+          {quote.status === "envoye" && deliveryEmail && (
+            <EmailDeliveryTag email={deliveryEmail} />
+          )}
           {quote.accepted_at && <span>Accepté le {new Date(quote.accepted_at).toLocaleDateString("fr-FR")}</span>}
           {quote.refused_at && <span>Refusé le {new Date(quote.refused_at).toLocaleDateString("fr-FR")}</span>}
         </div>
@@ -1505,6 +1525,56 @@ function TopBar({
         </button>
       </div>
     </div>
+  );
+}
+
+/* ─── Quote email delivery (Resend webhook) ───────────────────────── */
+
+/**
+ * Suivi de l'e-mail du devis : une ligne discrète (destinataire + étapes
+ * datées), ou un encadré rouge quand un devis en attente n'est pas
+ * arrivé chez le client.
+ */
+function DeliveryNotice({
+  email,
+  status,
+}: {
+  email: QuoteEmail;
+  status: QuoteStatus;
+}) {
+  const s = deliveryState(email);
+  const steps = deliveryTimeline(email);
+  const detail = email.problem_detail || email.error;
+  const stepsText = steps
+    .map((st) => `${st.label} le ${formatDeliveryDate(st.at)}`)
+    .join(" · ");
+
+  if (s.problem && status === "envoye") {
+    return (
+      <div className="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200">
+        <p className="font-semibold">
+          {email.complained_at
+            ? "Le client a signalé l'e-mail du devis comme spam."
+            : email.bounced_at
+              ? "L'e-mail du devis n'est pas arrivé chez le client."
+              : "L'e-mail du devis n'est pas parti."}
+        </p>
+        <p className="mt-0.5">
+          {email.recipient && <>Adresse : {email.recipient}. </>}
+          {detail && <>Motif : {detail}. </>}
+          {email.complained_at
+            ? "Contacte le client directement plutôt que de renvoyer l'e-mail."
+            : "Vérifie l'adresse sur la fiche client, repasse le devis en brouillon puis renvoie-le."}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
+      E-mail{email.recipient ? ` à ${email.recipient}` : ""} : {stepsText}
+      {email.opened_at && " (ouverture indicative)"}
+    </p>
   );
 }
 

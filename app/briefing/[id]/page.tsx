@@ -62,7 +62,7 @@ export default async function PublicBriefingPage({
   // Auto-fill: pull cocktails + ingredients + client. Avoid PostgREST
   // nested joins (typed client doesn't infer them) — use plain .in()
   // queries with in-memory join.
-  const [{ data: cocktailLinks }, { data: client }, reserved] = await Promise.all([
+  const [{ data: cocktailLinks }, { data: client }, reserved, { data: equipmentLinks }] = await Promise.all([
     supabase
       .from("event_cocktails")
       .select("cocktail_id,qty_planned")
@@ -77,7 +77,20 @@ export default async function PublicBriefingPage({
     // Reserved stock is read live so the "stocks à prendre" list is
     // always the one on the event, never a stale copy.
     loadReservedStock(supabase, id),
+    supabase.from("event_equipment").select("equipment_id").eq("event_id", id),
   ]);
+
+  // Matériel à charger (QR) : liste + lien vers le module de scan.
+  const equipmentIds = (equipmentLinks ?? []).map((l) => l.equipment_id);
+  const { data: equipment } = equipmentIds.length
+    ? await supabase
+        .from("equipment")
+        .select("id,code,name,category,contents")
+        .in("id", equipmentIds)
+        .order("category")
+        .order("code")
+    : { data: [] };
+  const scanUrl = `/scan/${id}?t=${providedToken}`;
 
   const cocktailIds = (cocktailLinks ?? [])
     .map((c) => c.cocktail_id)
@@ -240,6 +253,40 @@ export default async function PublicBriefingPage({
             {data.stocks_notes.trim() && (
               <pre className="briefing-pre">{data.stocks_notes}</pre>
             )}
+          </section>
+        )}
+
+        {/* ─── Matériel (QR) ─── */}
+        {(equipment ?? []).length > 0 && (
+          <section className="briefing-section">
+            <h2 className="briefing-h2">Matériel à charger ({(equipment ?? []).length})</h2>
+            <p className="briefing-scan-intro">
+              Chaque élément porte un QR code. Scanne-le au stock avant de le
+              charger, puis sur place avant de le remettre dans le camion :
+              rien ne doit rester derrière.
+            </p>
+            <a href={scanUrl} className="briefing-scan-btn no-print">
+              Scanner le matériel →
+            </a>
+            <table className="briefing-stock">
+              <thead>
+                <tr>
+                  <th style={{ width: "22%" }}>Code</th>
+                  <th>Élément</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(equipment ?? []).map((e) => (
+                  <tr key={e.id}>
+                    <td className="briefing-code">{e.code}</td>
+                    <td>
+                      {e.name}
+                      {e.contents ? <span className="briefing-muted"> — {e.contents}</span> : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
         )}
 

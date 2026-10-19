@@ -81,7 +81,7 @@ function toDbDate(v: string | null | undefined): string | null {
 // Persist the lead into the `leads` table. Non-blocking: failures are logged
 // and swallowed so the user still gets a successful response if the email
 // went through.
-async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
+async function persistLead(data: ReturnType<typeof devisSchema.parse>, opts: { suspect?: boolean } = {}) {
   const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
   const hasKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!hasUrl || !hasKey) {
@@ -158,6 +158,14 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
           ? Number(data.guests) || null
           : null,
       message: data.message || null,
+      // Champ piège rempli : on garde la demande mais on la signale, plutôt
+      // que de la perdre — un autofill de navigateur peut aussi le remplir.
+      internal_notes: opts.suspect
+        ? "⚠️ Champ piège anti-robots rempli à l'envoi : robot probable, ou remplissage automatique du navigateur. À vérifier avant de répondre."
+        : null,
+      // Marque posée sur la canette (page canettes) : sert de société
+      // par défaut, le reste du payload est conservé dans raw_payload.
+      company: typeof data.canBrand === "string" && data.canBrand.trim() ? data.canBrand.trim() : null,
       raw_payload: data as unknown as Database["public"]["Tables"]["leads"]["Insert"]["raw_payload"],
     };
     const payload = { ...basePayload, ...attribution };
@@ -208,10 +216,9 @@ export async function POST(req: Request) {
 
   const data = parsed.data;
 
-  // Honeypot — silent drop
-  if (data.website) {
-    return NextResponse.json({ ok: true, dropped: true });
-  }
+  // Honeypot : la demande est conservée mais signalée dans le dashboard, et
+  // l'e-mail de notification n'est pas envoyé (pas de spam dans la boîte).
+  const suspect = !!data.hp_f2;
 
   const subject = `Nouveau devis · ${labelFor(data.eventType)} · ${data.firstName} ${data.lastName}`;
 
@@ -236,7 +243,10 @@ export async function POST(req: Request) {
   const htmlBody = renderHtml(data);
 
   // Persist to DB alongside the email — failures in one don't affect the other.
-  await persistLead(data);
+  await persistLead(data, { suspect });
+  if (suspect) {
+    return NextResponse.json({ ok: true, flagged: true });
+  }
 
   if (!resend) {
     // Dev fallback: log to server console so the flow is testable without a key
@@ -290,7 +300,8 @@ function offerLabel(o: string) {
   const map: Record<string, string> = {
     bar: "Bar à cocktails",
     barista: "Barista",
-    both: "Les deux",
+    canettes: "Mocktail in a can",
+    both: "Bar + barista",
     undecided: "À conseiller",
   };
   return map[o] ?? o;

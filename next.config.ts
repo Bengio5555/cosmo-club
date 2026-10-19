@@ -3,6 +3,14 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   /**
+   * Dev only: lets a phone on the same Wi-Fi open the dev server through
+   * the Mac's LAN address (Next 16 blocks cross-origin dev assets by
+   * default, which left pages un-hydrated on the phone). The whole
+   * 192.168.0.x range is listed so a new DHCP lease keeps working.
+   * Ignored in production builds.
+   */
+  allowedDevOrigins: ["192.168.0.*", "192.168.1.*", "*.local"],
+  /**
    * Security headers (audit item, open since June). No CSP yet — the
    * site runs inline JSON-LD, GTM and Sentry, so a blind CSP would
    * break things; to be introduced separately in report-only mode.
@@ -44,6 +52,10 @@ const nextConfig: NextConfig = {
     // and revalidate constantly. Our event/brand photos are immutable
     // (re-uploads get new filenames), so pin a 30-day CDN TTL.
     minimumCacheTTL: 2592000,
+    // Next 16 only serves the qualities listed here. 75 stays the
+    // default; 90 is reserved for full-screen hero photos, where WebP at
+    // 75 visibly smears fine detail (ice, condensation) on large screens.
+    qualities: [75, 90],
     // Default permissive entry for static `/brand/...` and `/_next/...`
     // paths (Next.js 16 drops the default once we declare any entry).
     localPatterns: [

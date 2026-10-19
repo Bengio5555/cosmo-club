@@ -32,7 +32,7 @@ export default function CgvPage() {
         <p className="font-accent text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-or)]">
           Conditions générales de vente
         </p>
-        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-5xl">
+        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-4xl">
           Cadre contractuel des prestations Cosmo Club
         </h1>
         <p className="mt-4 text-sm text-[color:var(--color-espresso)]/70">
@@ -47,34 +47,34 @@ export default function CgvPage() {
       />
 
       <style>{`
-        /* The markdown doc-title now renders as the first h2 (see
-           lib/cgv.ts — demoted from h1 to fix the duplicate-H1 issue);
-           it repeats the page header, so hide it visually. */
-        .cgv-prose > h2:first-child { display: none; }
-        .cgv-prose h2 {
-          font-family: var(--font-display);
-          font-size: 1.4rem;
-          line-height: 1.2;
-          margin: 2.4rem 0 0.8rem;
-          color: var(--color-ink-text);
-        }
-        .cgv-prose p {
-          color: var(--color-espresso);
-          line-height: 1.65;
-          font-size: 0.97rem;
-          margin: 0 0 1rem;
-        }
-        .cgv-prose ul {
-          margin: 0 0 1.2rem 0;
-          padding-left: 1.1rem;
-          list-style: disc;
-          color: var(--color-espresso);
-          font-size: 0.97rem;
-          line-height: 1.65;
-        }
-        .cgv-prose li { margin: 0.25rem 0; }
-        .cgv-prose strong { color: var(--color-ink-text); font-weight: 600; }
-      `}</style>
+ /* The markdown doc-title now renders as the first h2 (see
+ lib/cgv.ts — demoted from h1 to fix the duplicate-H1 issue);
+ it repeats the page header, so hide it visually. */
+ .cgv-prose > h2:first-child { display: none; }
+ .cgv-prose h2 {
+ font-family: var(--font-display);
+ font-size: 1.4rem;
+ line-height: 1.2;
+ margin: 2.4rem 0 0.8rem;
+ color: var(--color-ink-text);
+ }
+ .cgv-prose p {
+ color: var(--color-espresso);
+ line-height: 1.65;
+ font-size: 0.97rem;
+ margin: 0 0 1rem;
+ }
+ .cgv-prose ul {
+ margin: 0 0 1.2rem 0;
+ padding-left: 1.1rem;
+ list-style: disc;
+ color: var(--color-espresso);
+ font-size: 0.97rem;
+ line-height: 1.65;
+ }
+ .cgv-prose li { margin: 0.25rem 0; }
+ .cgv-prose strong { color: var(--color-ink-text); font-weight: 600; }
+`}</style>
     </article>
   );
 }

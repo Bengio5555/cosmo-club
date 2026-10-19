@@ -180,6 +180,21 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["homepage_gallery_selection"]["Row"]>
         Relationships: []
       }
+      can_sticker_tries: {
+        Row: {
+          brand: string
+          created_at: string
+          id: string
+          ink: string
+          page: string | null
+          recipe: string
+          session_id: string
+          subtitle: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["can_sticker_tries"]["Row"]> & { brand: string; recipe: string; ink: string; session_id: string }
+        Update: Partial<Database["public"]["Tables"]["can_sticker_tries"]["Row"]>
+        Relationships: []
+      }
       client_logos: {
         Row: {
           archived: boolean
@@ -422,6 +437,27 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["quote_messages"]["Row"]>
         Relationships: []
       }
+      quote_emails: {
+        Row: {
+          id: string
+          quote_id: string
+          resend_email_id: string | null
+          recipient: string | null
+          error: string | null
+          created_at: string
+          sent_at: string | null
+          delivered_at: string | null
+          delayed_at: string | null
+          opened_at: string | null
+          bounced_at: string | null
+          complained_at: string | null
+          failed_at: string | null
+          problem_detail: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["quote_emails"]["Row"]> & { quote_id: string }
+        Update: Partial<Database["public"]["Tables"]["quote_emails"]["Row"]>
+        Relationships: []
+      }
       quote_menu_proposals: {
         Row: {
           id: string
@@ -580,6 +616,55 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["event_stock"]["Row"]>
         Relationships: []
       }
+      equipment: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          category: Database["public"]["Enums"]["equipment_category"]
+          contents: string | null
+          qr_token: string
+          archived: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["equipment"]["Row"]> & { code: string; name: string }
+        Update: Partial<Database["public"]["Tables"]["equipment"]["Row"]>
+        Relationships: []
+      }
+      event_equipment: {
+        Row: {
+          event_id: string
+          equipment_id: string
+          depart_at: string | null
+          depart_by: string | null
+          retour_at: string | null
+          retour_by: string | null
+          created_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["event_equipment"]["Row"]> & { event_id: string; equipment_id: string }
+        Update: Partial<Database["public"]["Tables"]["event_equipment"]["Row"]>
+        Relationships: []
+      }
+      equipment_scans: {
+        Row: {
+          id: string
+          event_id: string
+          equipment_id: string | null
+          phase: Database["public"]["Enums"]["equipment_phase"]
+          result: Database["public"]["Enums"]["equipment_scan_result"]
+          scanned_by: string | null
+          raw: string | null
+          created_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["equipment_scans"]["Row"]> & {
+          event_id: string
+          phase: Database["public"]["Enums"]["equipment_phase"]
+          result: Database["public"]["Enums"]["equipment_scan_result"]
+        }
+        Update: Partial<Database["public"]["Tables"]["equipment_scans"]["Row"]>
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: {
@@ -590,6 +675,9 @@ export type Database = {
     Enums: {
       article_status: "draft" | "scheduled" | "published"
       event_status: "a_venir" | "en_cours" | "termine" | "annule"
+      equipment_category: "bar" | "caisse" | "tech" | "verrerie" | "autre"
+      equipment_phase: "depart" | "retour"
+      equipment_scan_result: "ok" | "deja" | "autre_evenement" | "inconnu"
       event_type: "mariage" | "corporate" | "prive" | "defile" | "lancement" | "autre"
       invoice_status: "brouillon" | "envoye" | "paye" | "en_retard" | "annule"
       lead_status: "nouveau" | "contacte" | "devis_envoye" | "gagne" | "perdu"

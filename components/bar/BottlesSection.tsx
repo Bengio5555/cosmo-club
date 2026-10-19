@@ -23,9 +23,9 @@ export function BottlesSection({ bottleSrcs }: { bottleSrcs: string[] }) {
       <div className="relative mx-auto max-w-[1400px] px-6 md:px-10">
         <Reveal className="mb-16 max-w-3xl md:mb-24">
           <p className="eyebrow mb-6"><span className="rule" />Cocktail « in a bottle »</p>
-          <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
+          <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
             La bouteille<br />
-            <span className="font-accent italic text-[color:var(--color-grenat)]">
+            <span className="font-accent text-[color:var(--color-grenat)]">
               qui devient souvenir.
             </span>
           </h2>

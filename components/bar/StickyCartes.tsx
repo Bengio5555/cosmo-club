@@ -125,7 +125,7 @@ function CarteCard({
             </p>
           </div>
           <span
-            className="font-display text-5xl md:text-6xl"
+            className="font-display text-5xl md:text-5xl"
             style={{ color: mix(palette.text, 0.3) }}
           >
             0{index + 1}
@@ -138,7 +138,7 @@ function CarteCard({
               {carte.name}
             </h3>
             <p
-              className="mt-4 font-accent text-2xl italic md:text-3xl"
+              className="mt-4 font-accent text-2xl md:text-3xl"
               style={{ color: mix(palette.text, 0.85) }}
             >
               « {carte.tagline} »

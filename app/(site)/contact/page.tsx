@@ -82,7 +82,9 @@ const faqJsonLd = {
   ],
 };
 
-export default function Page() {
+export default async function Page({ searchParams }: { searchParams: Promise<{ marque?: string }> }) {
+  const { marque } = await searchParams;
+  const initialBrand = (marque ?? "").trim().slice(0, 60);
   return (
     <>
       <script
@@ -98,7 +100,7 @@ export default function Page() {
 
       <section className="relative bg-[color:var(--color-ink-soft)] pb-24 pt-6 md:pb-32">
         <div className="mx-auto grid max-w-[1400px] gap-10 px-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:gap-16 md:px-10">
-          <DevisWizard />
+          <DevisWizard initialBrand={initialBrand} />
           <aside className="space-y-10 text-[color:var(--color-espresso)] md:pl-6">
             <div>
               <p className="eyebrow"><span className="rule" />Coordonnées</p>
@@ -189,6 +191,7 @@ export default function Page() {
                 {[
                   "Bar à cocktails signature",
                   "Stands barista & latte art",
+                  "Mocktail in a can · canettes personnalisées",
                   "Cocktails en bouteille",
                   "Juice bar & mocktails",
                   "Création sur-mesure",

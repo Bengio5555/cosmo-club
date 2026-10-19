@@ -1,15 +1,17 @@
-import { Fraunces, Inter_Tight, Cormorant_Garamond } from "next/font/google";
+import { Bricolage_Grotesque, Inter_Tight } from "next/font/google";
 
-// Trimmed font set — only weights actually used in the codebase (grep
-// of `font-*` utility classes). Cuts ~3 woff2 files off the critical
-// path: 300 had a single occurrence on Fraunces, 300/700 on Inter Tight
-// were unused, and Cormorant is only used as an italic accent.
-export const fraunces = Fraunces({
+/**
+ * Typographie du site.
+ *  - Bricolage Grotesque : titres et accents (grotesque à caractère, dans
+ *    l'esprit du logo). Plus aucun mot en italique : l'accent se fait par
+ *    la couleur sur le même caractère.
+ *  - Inter Tight : texte courant, interface, dashboard.
+ */
+export const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-fraunces",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  variable: "--font-bricolage",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const interTight = Inter_Tight({
@@ -19,16 +21,4 @@ export const interTight = Inter_Tight({
   weight: ["400", "500", "600"],
 });
 
-export const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-cormorant",
-  weight: ["400"],
-  style: ["italic"],
-});
-
-export const fontClassName = [
-  fraunces.variable,
-  interTight.variable,
-  cormorant.variable,
-].join(" ");
+export const fontClassName = [bricolage.variable, interTight.variable].join(" ");

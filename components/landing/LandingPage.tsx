@@ -197,7 +197,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
           <Reveal>
             <p className="eyebrow mb-6"><span className="rule" />Pourquoi Cosmo Club</p>
             <h2 className="font-display text-[8vw] leading-[1] text-[color:var(--color-ink-text)] md:text-[4vw]">
-              Quatre raisons de nous confier <span className="font-accent italic text-[color:var(--color-grenat)]">votre soirée</span>.
+              Quatre raisons de nous confier <span className="font-accent text-[color:var(--color-grenat)]">votre soirée</span>.
             </h2>
           </Reveal>
           <div className="mt-16 grid gap-10 md:grid-cols-2">
@@ -242,7 +242,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
               <span className="rule bg-[color:var(--color-bone)]/40" />Le déroulé
             </p>
             <h2 className="font-display text-[8vw] leading-[1] md:text-[4vw]">
-              Comment ça se passe <span className="font-accent italic text-[color:var(--color-or)]">avec nous</span>.
+              Comment ça se passe <span className="font-accent text-[color:var(--color-or)]">avec nous</span>.
             </h2>
           </Reveal>
           <ol className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -253,7 +253,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
                     Google validates these — broken fragments degrade
                     the rich result eligibility. */}
                 <li id={`step-${i + 1}`} className="border-t border-[color:var(--color-bone)]/20 pt-5">
-                  <p className="font-accent text-sm italic text-[color:var(--color-or)]">
+                  <p className="font-accent text-sm text-[color:var(--color-or)]">
                     N°{String(i + 1).padStart(2, "0")}
                   </p>
                   <h3 className="mt-2 font-display text-xl">{step.label}</h3>
@@ -273,7 +273,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
           <Reveal>
             <p className="eyebrow mb-6"><span className="rule" />Questions fréquentes</p>
             <h2 className="font-display text-[7vw] leading-[1] text-[color:var(--color-ink-text)] md:text-[3.5vw]">
-              Tout ce que vous vous <span className="font-accent italic text-[color:var(--color-grenat)]">demandez</span>.
+              Tout ce que vous vous <span className="font-accent text-[color:var(--color-grenat)]">demandez</span>.
             </h2>
           </Reveal>
           <div className="mt-12 divide-y divide-[color:var(--color-espresso)]/15 border-y border-[color:var(--color-espresso)]/15">
@@ -307,7 +307,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
             <Reveal>
               <p className="eyebrow mb-6"><span className="rule" />À voir aussi</p>
               <h2 className="font-display text-[6vw] leading-[1] text-[color:var(--color-ink-text)] md:text-[3vw]">
-                D&apos;autres <span className="font-accent italic text-[color:var(--color-grenat)]">prestations</span>.
+                D&apos;autres <span className="font-accent text-[color:var(--color-grenat)]">prestations</span>.
               </h2>
             </Reveal>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -347,7 +347,7 @@ export function LandingPage({ config }: { config: LandingConfig }) {
           <Reveal>
             <p className="eyebrow mb-8 justify-center"><span className="rule" />Prenons rendez-vous</p>
             <h2 className="font-display text-[11vw] leading-[0.95] text-balance text-[color:var(--color-ink-text)] sm:text-[13vw] md:text-[8vw]">
-              Parlons de <span className="font-accent italic text-[color:var(--color-grenat)]">votre</span> événement.
+              Parlons de <span className="font-accent text-[color:var(--color-grenat)]">votre</span> événement.
             </h2>
             <p className="mx-auto mt-8 max-w-xl text-lg text-[color:var(--color-espresso)]/75 md:text-xl">
               Racontez-nous le moment que vous préparez. Nous composons une
@@ -390,7 +390,7 @@ function renderWithAccent(text: string, accent: string) {
   return (
     <>
       {before}
-      <span className="font-accent italic text-[color:var(--color-or)]">{match}</span>
+      <span className="font-accent text-[color:var(--color-or)]">{match}</span>
       {after}
     </>
   );

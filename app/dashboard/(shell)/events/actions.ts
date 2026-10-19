@@ -1070,3 +1070,89 @@ export async function replaceStockFromMenu(eventId: string) {
   revalidatePath(`/dashboard/events/${eventId}`);
   return { ok: true as const, linesWritten: reservations.length };
 }
+
+// ─── Matériel (QR) ───────────────────────────────────────────────────────
+
+/** Coche / décoche un élément de matériel sur l'événement. Décocher un
+ *  élément déjà scanné est refusé : on corrige d'abord le scan. */
+export async function setEventEquipment(
+  eventId: string,
+  equipmentId: string,
+  selected: boolean,
+) {
+  const supabase = await createClient();
+  if (selected) {
+    const { error } = await supabase
+      .from("event_equipment")
+      .upsert({ event_id: eventId, equipment_id: equipmentId }, {
+        onConflict: "event_id,equipment_id",
+        ignoreDuplicates: true,
+      });
+    if (error) return { ok: false as const, error: error.message };
+  } else {
+    const { data: row } = await supabase
+      .from("event_equipment")
+      .select("depart_at,retour_at")
+      .eq("event_id", eventId)
+      .eq("equipment_id", equipmentId)
+      .maybeSingle();
+    if (row?.depart_at || row?.retour_at) {
+      return {
+        ok: false as const,
+        error: "Cet élément a déjà été scanné : efface d'abord le scan.",
+      };
+    }
+    const { error } = await supabase
+      .from("event_equipment")
+      .delete()
+      .eq("event_id", eventId)
+      .eq("equipment_id", equipmentId);
+    if (error) return { ok: false as const, error: error.message };
+  }
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
+/** Efface un scan (erreur de manipulation) ; l'historique brut reste dans
+ *  equipment_scans. */
+export async function clearEquipmentScan(
+  eventId: string,
+  equipmentId: string,
+  phase: "depart" | "retour",
+) {
+  const supabase = await createClient();
+  const patch =
+    phase === "depart"
+      ? { depart_at: null, depart_by: null }
+      : { retour_at: null, retour_by: null };
+  const { error } = await supabase
+    .from("event_equipment")
+    .update(patch)
+    .eq("event_id", eventId)
+    .eq("equipment_id", equipmentId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}
+
+/** Marque un élément à la main (le manutentionnaire n'a pas pu scanner). */
+export async function markEquipmentManually(
+  eventId: string,
+  equipmentId: string,
+  phase: "depart" | "retour",
+) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const patch =
+    phase === "depart"
+      ? { depart_at: now, depart_by: "Marqué à la main" }
+      : { retour_at: now, retour_by: "Marqué à la main" };
+  const { error } = await supabase
+    .from("event_equipment")
+    .update(patch)
+    .eq("event_id", eventId)
+    .eq("equipment_id", equipmentId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/dashboard/events/${eventId}`);
+  return { ok: true as const };
+}

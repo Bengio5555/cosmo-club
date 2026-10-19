@@ -32,6 +32,7 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
 
   // Operations
   "/dashboard/leads": ["owner", "admin", "manager"],
+  "/dashboard/essais-canette": ["owner", "admin", "manager"],
   "/dashboard/devis": ["owner", "admin", "manager", "compta"],
   "/dashboard/factures": ["owner", "admin", "compta"],
   "/dashboard/clients": ["owner", "admin", "manager", "compta"],
@@ -40,6 +41,7 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   "/dashboard/cocktails": ["owner", "admin", "manager"],
   "/dashboard/catalog": ["owner", "admin", "manager"],
   "/dashboard/stock": ["owner", "admin", "manager"],
+  "/dashboard/materiel": ["owner", "admin", "manager"],
   "/dashboard/staff": ["owner", "admin", "manager"],
   "/dashboard/providers": ["owner", "admin", "manager"],
   "/dashboard/partners": ["owner", "admin", "manager"],

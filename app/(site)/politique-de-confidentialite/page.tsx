@@ -30,7 +30,7 @@ export default function PolitiqueConfidentialitePage() {
         <p className="font-accent text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-or)]">
           Données personnelles
         </p>
-        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-5xl">
+        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-4xl">
           Politique de confidentialité
         </h1>
         <p className="mt-4 text-sm text-[color:var(--color-espresso)]/70">
@@ -80,6 +80,15 @@ export default function PolitiqueConfidentialitePage() {
               prestation est confirmée)&nbsp;: coordonnées de facturation,
               documents contractuels. Base légale&nbsp;: exécution du contrat
               et obligations légales comptables.
+            </li>
+            <li>
+              <strong>Aperçu de personnalisation</strong> (page canettes
+              personnalisées)&nbsp;: le texte que vous saisissez pour
+              l&apos;afficher sur la canette, la recette et l&apos;encre
+              choisies, rattachés à un identifiant de session anonyme. Aucune
+              adresse IP ni donnée de contact n&apos;est enregistrée.
+              Finalité&nbsp;: comprendre l&apos;usage de la page et améliorer
+              l&apos;offre. Base légale&nbsp;: intérêt légitime.
             </li>
             <li>
               <strong>Mesure d&apos;audience</strong>&nbsp;: statistiques de
@@ -137,6 +146,7 @@ export default function PolitiqueConfidentialitePage() {
               (obligation légale comptable).
             </li>
             <li>Données de mesure d&apos;audience&nbsp;: 14&nbsp;mois maximum.</li>
+            <li>Saisies de l&apos;aperçu de personnalisation&nbsp;: 12&nbsp;mois.</li>
           </ul>
         </section>
 

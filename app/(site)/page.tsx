@@ -37,6 +37,7 @@ export default async function HomePage() {
   // static fallback while a client hook fetches the config.
   const [
     heroSrc,
+    heroCanettesSrc,
     clientLogos,
     galleryTiles,
     persoEntries,
@@ -44,6 +45,7 @@ export default async function HomePage() {
     bentoBaristaSrc,
   ] = await Promise.all([
     getImagePath("home", "hero", heroHomeImg.src),
+    getImagePath("home", "hero-canettes", "/brand/canettes/cosmo-cans-landscape-v2.jpg"),
     getPublicClientLogos(),
     getHomeGalleryTiles(),
     Promise.all(
@@ -162,7 +164,9 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <LiquidHero heroSrc={heroSrc} />
+      <LiquidHero
+        slides={{ home: heroSrc, canettes: heroCanettesSrc }}
+      />
       <CocktailMarquee />
       <BaristaMarquee />
       <UniversBento paths={bentoPaths} />

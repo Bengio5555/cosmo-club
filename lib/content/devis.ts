@@ -20,6 +20,11 @@ export const offers = [
     desc: "Matcha, Ube, Blue, Golden Latte — chauds ou glacés.",
   },
   {
+    id: "canettes",
+    label: "Mocktail in a can",
+    desc: "Canettes personnalisées sans alcool, dès 200 — livrées, installées ou servies.",
+  },
+  {
     id: "both",
     label: "Les deux",
     desc: "Bar du soir + stand barista du matin ou dessert.",
@@ -35,7 +40,7 @@ export const devisSchema = z.object({
   eventType: z.enum(["mariage", "corporate", "prive", "defile", "autre"], {
     message: "Choisissez un type d'événement.",
   }),
-  offer: z.enum(["bar", "barista", "both", "undecided"], {
+  offer: z.enum(["bar", "barista", "canettes", "both", "undecided"], {
     message: "Choisissez une offre.",
   }),
   date: z
@@ -65,7 +70,15 @@ export const devisSchema = z.object({
     .max(1500, "Maximum 1500 caractères.")
     .optional()
     .or(z.literal("")),
-  website: z.string().max(0).optional().or(z.literal("")),
+  // Champ piège anti-robots. Nom volontairement sans signification : un
+  // champ nommé « website » se faisait remplir par l'autofill d'Arc /
+  // Chrome, la validation échouait sur un champ invisible et le navigateur
+  // faisait défiler la page vers lui. Côté navigateur on ne le valide pas ;
+  // le serveur ignore silencieusement la demande s'il est rempli.
+  hp_f2: z.string().optional().or(z.literal("")),
+  // Marque posée sur la canette (page canettes), transmise par le lien
+  // « Demander un devis pour X ». Informative : jamais bloquante.
+  canBrand: z.string().max(60).optional().or(z.literal("")),
   // Where the visitor came from (captured client-side by AttributionCapture).
   // Optional and lenient: a missing or odd value must never block a devis.
   attribution: z
@@ -91,4 +104,13 @@ export const stepFields = {
   2: ["offer"] as const,
   3: ["date", "location", "guests"] as const,
   4: ["firstName", "lastName", "email", "phone", "message"] as const,
+};
+
+/** Libellés des offres, partagés par le dashboard et les e-mails. */
+export const OFFER_LABEL: Record<DevisInput["offer"], string> = {
+  bar: "Bar à cocktails",
+  barista: "Barista",
+  canettes: "Mocktail in a can",
+  both: "Bar + barista",
+  undecided: "À conseiller",
 };

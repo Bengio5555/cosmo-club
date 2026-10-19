@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { countsInRevenue } from "@/lib/dashboard/revenue";
 import { NewInvoiceButton } from "./NewInvoiceButton";
 import { ExportPdfButton } from "./ExportPdfButton";
 import { FacturesBrowser, type InvoiceRow } from "./FacturesBrowser";
@@ -102,6 +103,26 @@ export default async function InvoicesListPage({
     );
   }
 
+  // Revenue rule needs each credit note's source invoice status. Sources
+  // outside the current view (date/type filter, row limit) are looked up.
+  const statusById = new Map<string, string>(
+    (invoices ?? []).map((i) => [i.id, i.status]),
+  );
+  const missingSources = Array.from(
+    new Set(
+      (invoices ?? [])
+        .map((i) => (i.is_credit_note ? i.source_invoice_id : null))
+        .filter((x): x is string => !!x && !statusById.has(x)),
+    ),
+  );
+  if (missingSources.length) {
+    const { data: sources } = await supabase
+      .from("invoices")
+      .select("id,status")
+      .in("id", missingSources);
+    for (const src of sources ?? []) statusById.set(src.id, src.status);
+  }
+
   // Prepare row view-models (resolve client name + payments) so the
   // client-side browser can search/filter and total without re-querying.
   const rows: InvoiceRow[] = (invoices ?? []).map((inv) => {
@@ -124,6 +145,10 @@ export default async function InvoicesListPage({
       who,
       paid: paidByInvoice.get(inv.id) ?? 0,
       credited: creditedByInvoice.get(inv.id) ?? 0,
+      inRevenue: countsInRevenue(
+        inv,
+        inv.source_invoice_id ? statusById.get(inv.source_invoice_id) : null,
+      ),
     };
   });
   const hasServerFilter = !!(from || to || (kind && kind !== "all"));

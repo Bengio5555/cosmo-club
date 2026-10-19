@@ -1,9 +1,9 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "motion/react";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { track, EVENTS } from "@/lib/track";
 import { devisSchema, stepFields, type DevisInput, eventTypes, offers } from "@/lib/content/devis";
@@ -15,18 +15,23 @@ type Status = "idle" | "submitting" | "success" | "error";
 
 const TOTAL_STEPS = 4;
 
-export function DevisWizard() {
+export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {}) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [status, setStatus] = useState<Status>("idle");
   const [serverError, setServerError] = useState<string | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
+  // One automatic retry after re-reading the DOM when validation fails on
+  // a field the browser filled without telling React (autofill).
+  const retriedRef = useRef(false);
 
   const form = useForm<DevisInput>({
     resolver: zodResolver(devisSchema) as any,
     mode: "onTouched",
     defaultValues: {
       eventType: undefined as unknown as DevisInput["eventType"],
-      offer: undefined as unknown as DevisInput["offer"],
+      // Arrivée depuis la page canettes (« Demander un devis pour X ») :
+      // l'offre canettes est présélectionnée.
+      offer: (initialBrand ? "canettes" : undefined) as unknown as DevisInput["offer"],
       date: "",
       location: "",
       guests: undefined,
@@ -34,8 +39,9 @@ export function DevisWizard() {
       lastName: "",
       email: "",
       phone: "",
-      message: "",
-      website: "",
+      message: initialBrand ? `Canettes personnalisées pour « ${initialBrand} ».\n` : "",
+      hp_f2: "",
+      canBrand: initialBrand,
     },
   });
 
@@ -46,7 +52,27 @@ export function DevisWizard() {
     track(EVENTS.wizardStep, { step });
   }, [step]);
 
+  // Safari and Chrome autofill can fill an input without firing React's
+  // onChange, so react-hook-form still holds "" while the field visibly
+  // reads "Benjamin" — and validation then fails on a filled field. Before
+  // validating, copy what the DOM actually shows into the form state.
+  const syncAutofill = () => {
+    const names: (keyof DevisInput)[] = ["date", "location", "guests", "firstName", "lastName", "email", "phone", "message"];
+    const formEl = document.getElementById("firstName")?.closest("form") ?? document.querySelector("form");
+    const fd = formEl instanceof HTMLFormElement ? new FormData(formEl) : null;
+    for (const name of names) {
+      const fromForm = fd?.get(name);
+      const el = document.getElementById(name) as HTMLInputElement | HTMLTextAreaElement | null;
+      const dom = typeof fromForm === "string" && fromForm !== "" ? fromForm : (el?.value ?? "");
+      const cur = form.getValues(name);
+      if (dom !== "" && dom !== String(cur ?? "")) {
+        form.setValue(name, (name === "guests" ? (Number(dom) || dom) : dom) as never, { shouldDirty: true });
+      }
+    }
+  };
+
   const goNext = async () => {
+    syncAutofill();
     const fields = stepFields[step];
     const valid = await form.trigger([...fields] as (keyof DevisInput)[], { shouldFocus: true });
     if (!valid) {
@@ -82,8 +108,8 @@ export function DevisWizard() {
     setStep(3);
   }, [form]);
 
-  const onSubmit = form.handleSubmit(
-    async (values) => {
+  const submitValid = async (values: DevisInput) => {
+      retriedRef.current = false;
       setStatus("submitting");
       setServerError(null);
       try {
@@ -118,12 +144,21 @@ export function DevisWizard() {
         setServerError("network");
         track(EVENTS.wizardError, { kind: "network", step: 4 });
       }
-    },
-    // Invalid-submit handler: find the first step that still has errors and
-    // bring the user back to it so they can fix. Without this, validation
-    // errors on hidden earlier steps fail silently and the submit button
-    // appears dead.
-    (errors) => {
+  };
+
+  // Invalid-submit handler: find the first step that still has errors and
+  // bring the user back to it so they can fix. Without this, validation
+  // errors on hidden earlier steps fail silently and the submit button
+  // appears dead. Before complaining, re-read the DOM once and retry : a
+  // browser autofill can leave the form state behind what the user sees.
+  const submitInvalid = (errors: FieldErrors<DevisInput>) => {
+      if (!retriedRef.current) {
+        retriedRef.current = true;
+        try { syncAutofill(); } catch (err) { console.error("[devis] sync", err); }
+        void form.handleSubmit(submitValid, submitInvalid)();
+        return;
+      }
+      retriedRef.current = false;
       const order: (keyof DevisInput)[][] = [
         [...stepFields[1]] as (keyof DevisInput)[],
         [...stepFields[2]] as (keyof DevisInput)[],
@@ -133,10 +168,16 @@ export function DevisWizard() {
       for (let i = 0; i < order.length; i++) {
         const hasError = order[i].some((f) => errors[f]);
         if (hasError) {
-          setDirection(-1);
-          setStep((i + 1) as typeof step);
-          setStatus("error");
+          const targetStep = (i + 1) as typeof step;
           const firstField = order[i].find((f) => errors[f]);
+          if (targetStep === step) {
+            // Same step : the inline messages under the fields say it all.
+            track(EVENTS.wizardError, { kind: "validation", step: targetStep, field: firstField ?? "" });
+            return;
+          }
+          setDirection(-1);
+          setStep(targetStep);
+          setStatus("error");
           const msg = firstField
             ? errors[firstField]?.message || "Champ invalide"
             : "Formulaire invalide";
@@ -145,8 +186,8 @@ export function DevisWizard() {
           return;
         }
       }
-    },
-  );
+  };
+
 
   if (status === "success") {
     return <SuccessScreen firstName={form.getValues("firstName")} />;
@@ -154,7 +195,24 @@ export function DevisWizard() {
 
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={(e) => {
+        // preventDefault first, whatever happens next : a thrown error in
+        // the sync must never fall back to a native GET submission (page
+        // reload at the top, nothing sent).
+        e.preventDefault();
+        try { syncAutofill(); } catch (err) { console.error("[devis] sync", err); }
+        return form.handleSubmit(submitValid, submitInvalid)(e);
+      }}
+      onKeyDown={(e) => {
+        // Enter in a field (or on an autofill suggestion) must never submit
+        // the request by itself : it moves to the next step, and on the last
+        // step it does nothing — only the « Envoyer » button sends.
+        if (e.key !== "Enter") return;
+        const t = e.target as HTMLElement;
+        if (t.tagName === "TEXTAREA" || t.tagName === "BUTTON") return;
+        e.preventDefault();
+        if (step < TOTAL_STEPS) void goNext();
+      }}
       noValidate
       className="relative flex min-h-[620px] flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream-paper)] p-6 md:p-10"
     >
@@ -164,9 +222,14 @@ export function DevisWizard() {
         autoComplete="off"
         tabIndex={-1}
         aria-hidden
+        data-1p-ignore
+        data-lpignore="true"
+        data-form-type="other"
         className="pointer-events-none absolute left-[-9999px] top-[-9999px] h-0 w-0 opacity-0"
-        {...form.register("website")}
+        {...form.register("hp_f2")}
       />
+      {/* marque venue de la page canettes (lien « Demander un devis pour X ») */}
+      <input type="hidden" {...form.register("canBrand")} />
 
       <Progress step={step} />
 
@@ -216,7 +279,7 @@ export function DevisWizard() {
             type="submit"
             disabled={status === "submitting"}
             className={cn(
-              "group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-ink-text)] transition-colors duration-500",
+              "group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--color-bone)] transition-colors duration-500",
               status === "submitting"
                 ? "cursor-wait bg-[color:var(--color-ash)]"
                 : "bg-[color:var(--color-grenat)] hover:bg-[color:var(--color-grenat-glow)]",
@@ -327,7 +390,7 @@ function StepOffer({ form, onSelect }: { form: Form; onSelect: (id: string) => v
       <header className="mb-8">
         <p className="eyebrow mb-4"><span className="rule" />Étape 02</p>
         <h3 className="font-display text-3xl text-[color:var(--color-ink-text)] md:text-4xl">
-          Cocktails, barista, ou les deux ?
+          Cocktails, barista ou canettes ?
         </h3>
         <p className="mt-3 text-sm text-[color:var(--color-espresso)]/70">
           On ajustera les détails ensemble. Aucun choix n'est définitif.
@@ -624,9 +687,9 @@ function SuccessScreen({ firstName }: { firstName: string }) {
         }}
       />
       <p className="relative eyebrow mb-6"><span className="rule" />Demande reçue</p>
-      <h3 className="relative font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-6xl">
+      <h3 className="relative font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-5xl">
         Merci{firstName ? `, ${firstName}` : ""}.<br />
-        <span className="font-accent italic text-[color:var(--color-grenat)]">
+        <span className="font-accent text-[color:var(--color-grenat)]">
           On revient vers vous sous&nbsp;48&nbsp;h.
         </span>
       </h3>
