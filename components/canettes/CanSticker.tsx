@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { track } from "@/lib/track";
 import { recordCanTry } from "@/app/(site)/canettes-personnalisees/actions";
 import { personnalisation, recettes, type Recette } from "@/lib/content/canettes";
@@ -230,7 +229,6 @@ export function CanSticker({ clips }: { clips: Record<Recette["id"], CanClip> })
               <div className="mt-3 flex flex-wrap gap-3">
                 {recettes.map((r) => (
                   <button key={r.id} type="button" onClick={() => setRecipe(r.id)} aria-pressed={recipe === r.id} className={chipClass(recipe === r.id)}>
-                    <Image src={r.illustration} alt="" width={28} height={28} className="h-7 w-7 object-contain" />
                     {r.name}
                   </button>
                 ))}
