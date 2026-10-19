@@ -17,7 +17,7 @@ export function IdentitySection() {
         <div className="grid gap-14 md:grid-cols-[1fr_1.6fr] md:gap-20">
           <Reveal>
             <p className="eyebrow"><span className="rule" />Votre identité, partout</p>
-            <h2 className="mt-6 font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
+            <h2 className="mt-6 font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-5xl">
               Votre marque<br />
               <span className="font-accent text-[color:var(--color-grenat)]">
                 flotte à la surface.
@@ -35,7 +35,7 @@ export function IdentitySection() {
                 delay={i * 140}
                 className="group relative flex flex-col gap-3 py-8 md:flex-row md:items-baseline md:gap-8 md:py-10"
               >
-                <span className="font-display text-4xl text-[color:var(--color-or)]/80 transition-colors duration-500 group-hover:text-[color:var(--color-or)] md:text-5xl md:min-w-[4ch]">
+                <span className="font-display text-4xl text-[color:var(--color-or)]/80 transition-colors duration-500 group-hover:text-[color:var(--color-or)] md:text-4xl md:min-w-[4ch]">
                   0{i + 1}
                 </span>
                 <div className="flex-1">

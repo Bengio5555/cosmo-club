@@ -28,7 +28,7 @@ export function ConceptManifesto() {
         </div>
 
         <Reveal className="space-y-8">
-          <p className="font-display text-3xl leading-tight text-[color:var(--color-ink-text)] md:text-5xl">
+          <p className="font-display text-3xl leading-tight text-[color:var(--color-ink-text)] md:text-4xl">
             Là où les cocktails deviennent des œuvres liquides et&nbsp;les soirées sont toujours uniques.
           </p>
           <div className="h-px w-full bg-gradient-to-r from-transparent via-[color:var(--color-or-deep)]/70 to-transparent" />
@@ -42,7 +42,7 @@ export function ConceptManifesto() {
               { k: "∞", v: "Créations sur-mesure" },
             ].map((s) => (
               <div key={s.k} className="border-t border-[color:var(--color-ash-warm)] pt-4">
-                <p className="font-display text-4xl text-[color:var(--color-grenat)] md:text-5xl">{s.k}</p>
+                <p className="font-display text-4xl text-[color:var(--color-grenat)] md:text-4xl">{s.k}</p>
                 <p className="mt-2 text-sm uppercase tracking-[0.22em] text-[color:var(--color-espresso)]/60">
                   {s.v}
                 </p>

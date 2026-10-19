@@ -57,7 +57,7 @@ export function BaristaHero({ heroSrc }: { heroSrc: string }) {
           <span className="rule" />Prestation barista · Paris & Île-de-France
         </motion.p>
 
-        <h1 className="font-display text-[13vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[12vw] md:text-[9vw]">
+        <h1 className="font-display text-[12vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[11vw] md:text-[7.5vw]">
           <SplitText text="Barista" as="span" className="block" delay={0.3} />
           {/* Espace réel entre les deux lignes : sans lui, le texte du H1
               se lit « Baristaévénementiel. » dans le DOM (crawlers, outils). */}

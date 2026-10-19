@@ -62,7 +62,7 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
           <span className="rule" />Offre signature · Bar à cocktails
         </motion.p>
 
-        <h1 className="font-display text-[13vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[12vw] md:text-[9vw]">
+        <h1 className="font-display text-[12vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[11vw] md:text-[7.5vw]">
           <SplitText text="Mixologie" as="span" className="block" delay={0.3} />
           {/* Negative top margin compensates for the descender breathing
               room that SplitText adds below each line — keeps the visual

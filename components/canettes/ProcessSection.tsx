@@ -7,7 +7,7 @@ export function ProcessSection() {
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <Reveal className="mb-14 max-w-2xl md:mb-20">
           <p className="eyebrow mb-6"><span className="rule" />Comment ça marche</p>
-          <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
+          <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
             Du brief<br />
             <span className="font-accent text-[color:var(--color-grenat)]">
               à la canette scellée.

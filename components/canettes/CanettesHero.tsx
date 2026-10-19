@@ -54,7 +54,7 @@ export function CanettesHero({ heroSrc }: { heroSrc: string }) {
           <span className="rule hidden sm:inline-block" />Nouveau · Canettes personnalisées
         </motion.p>
 
-        <h1 className="font-display text-[13vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[12vw] md:text-[9vw]">
+        <h1 className="font-display text-[12vw] leading-[0.92] text-balance text-[color:var(--color-ink-text)] sm:text-[11vw] md:text-[7.5vw]">
           <SplitText text="Mocktail" as="span" className="block" delay={0.3} />
           <span className="-mt-[0.38em] block">
             <SplitText

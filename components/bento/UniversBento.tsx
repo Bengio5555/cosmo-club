@@ -23,12 +23,12 @@ export function UniversBento({
     >
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <Reveal className="mb-14 flex flex-col md:mb-20 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <p className="mb-6 text-[11px] uppercase tracking-[0.32em] font-medium text-[color:var(--color-grenat)]">
               <span className="mr-3 inline-block h-px w-12 align-middle bg-[color:var(--color-grenat)] opacity-70" />
               Trois univers, une signature
             </p>
-            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
+            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
               Le verre, <span className="font-accent text-[color:var(--color-grenat)]">ou la tasse.</span>
               <br />
               L'un comme l'autre, <br className="hidden md:block" />

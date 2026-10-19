@@ -627,7 +627,7 @@ function SuccessScreen({ firstName }: { firstName: string }) {
         }}
       />
       <p className="relative eyebrow mb-6"><span className="rule" />Demande reçue</p>
-      <h3 className="relative font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-6xl">
+      <h3 className="relative font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-5xl">
         Merci{firstName ? `, ${firstName}` : ""}.<br />
         <span className="font-accent text-[color:var(--color-grenat)]">
           On revient vers vous sous&nbsp;48&nbsp;h.

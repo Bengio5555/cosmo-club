@@ -25,7 +25,7 @@ export function PageHeader({ eyebrow, title, italicWord, description }: Props) {
               <span className="rule" />{eyebrow}
             </p>
           )}
-          <h1 className="font-display text-4xl leading-[0.95] text-balance text-[color:var(--color-ink-text)] [hyphens:auto] sm:text-5xl md:text-6xl lg:text-[8vw]">
+          <h1 className="font-display text-4xl leading-[0.95] text-balance text-[color:var(--color-ink-text)] [hyphens:auto] sm:text-5xl md:text-5xl lg:text-[8vw]">
             {title}
             {italicWord && (
               <>

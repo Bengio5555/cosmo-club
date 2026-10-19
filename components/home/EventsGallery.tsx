@@ -112,7 +112,7 @@ export function EventsGallery({
               <span className="mr-3 inline-block h-px w-12 align-middle bg-[color:var(--color-grenat)] opacity-70" />
               Galerie
             </p>
-            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
+            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
               Des nuits <br />
               <span className="font-accent text-[color:var(--color-grenat)]">
                 inoubliables.

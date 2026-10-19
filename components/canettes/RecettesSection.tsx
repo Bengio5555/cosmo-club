@@ -18,7 +18,7 @@ export function RecettesSection({ imageSrc }: { imageSrc: string }) {
         <Reveal className="mb-8 flex flex-col gap-4 md:mb-12 md:flex-row md:items-end md:justify-between md:gap-10">
           <div>
             <p className="eyebrow mb-4"><span className="rule" />Les recettes</p>
-            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
+            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-5xl">
               Nos recettes,{" "}
               <span className="font-accent text-[color:var(--color-grenat)]">Mocktails.</span>
             </h2>

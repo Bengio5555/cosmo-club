@@ -185,7 +185,7 @@ export default async function ArticlePage({ params }: Props) {
                 Le Mag
               </Link>
             </p>
-            <h1 className="font-display text-3xl leading-[1.1] text-balance text-[color:var(--color-ink-text)] sm:text-4xl md:text-5xl">
+            <h1 className="font-display text-3xl leading-[1.1] text-balance text-[color:var(--color-ink-text)] sm:text-4xl md:text-4xl">
               {article.title}
             </h1>
             <div className="mt-8 flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.32em] text-[color:var(--color-grenat)]">

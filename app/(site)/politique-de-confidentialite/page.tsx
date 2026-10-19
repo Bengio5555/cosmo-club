@@ -30,7 +30,7 @@ export default function PolitiqueConfidentialitePage() {
         <p className="font-accent text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-or)]">
           Données personnelles
         </p>
-        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-5xl">
+        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-4xl">
           Politique de confidentialité
         </h1>
         <p className="mt-4 text-sm text-[color:var(--color-espresso)]/70">

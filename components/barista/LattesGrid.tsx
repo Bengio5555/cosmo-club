@@ -28,7 +28,7 @@ export function LattesGrid({
         <Reveal className="mb-16 flex flex-col md:mb-24 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="eyebrow mb-6"><span className="rule" />Les signatures</p>
-            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
+            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
               Quatre couleurs,<br />
               <span className="font-accent text-[color:var(--color-grenat)]">
                 quatre rituels.
@@ -99,7 +99,7 @@ function LatteCard({
         </span>
       </div>
 
-      <h3 className="relative mt-3 font-display text-5xl leading-none text-[color:var(--color-ink-text)] md:text-6xl">
+      <h3 className="relative mt-3 font-display text-5xl leading-none text-[color:var(--color-ink-text)] md:text-5xl">
         {latte.name}
       </h3>
 

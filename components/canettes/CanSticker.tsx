@@ -125,7 +125,7 @@ export function CanSticker({ clips }: { clips: Record<Recette["id"], CanClip> })
         <div className="flex flex-col md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:grid-rows-[auto_auto] md:items-center md:gap-x-16">
           <div className="order-1 mb-8 max-w-2xl md:order-none md:col-start-1 md:row-start-1 md:mb-10">
             <p className="eyebrow mb-5"><span className="rule" />Personnalisation</p>
-            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
+            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-5xl">
               Votre marque,<br />
               <span className="font-accent text-[color:var(--color-grenat)]">dans la main de chaque invité.</span>
             </h2>

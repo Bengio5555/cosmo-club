@@ -16,7 +16,7 @@ export function AlcoholFreeSection() {
       <div className="relative mx-auto max-w-[1400px] px-6 md:px-10">
         <Reveal className="mb-16 md:mb-24">
           <p className="eyebrow mb-6"><span className="rule" />Sans alcool, sans compromis</p>
-          <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
+          <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
             Juice bar<br />
             <span className="font-accent text-[color:var(--color-grenat)]">
               &nbsp;&amp; mocktails.
@@ -36,7 +36,7 @@ export function AlcoholFreeSection() {
                 Pressé minute
               </span>
             </div>
-            <h3 className="mt-4 font-display text-4xl text-[color:var(--color-ink-text)] md:text-5xl">
+            <h3 className="mt-4 font-display text-4xl text-[color:var(--color-ink-text)] md:text-4xl">
               Le vivant, en verre.
             </h3>
             <ul className="mt-8 space-y-4 text-[15px] leading-relaxed text-[color:var(--color-espresso)]/85">
@@ -60,7 +60,7 @@ export function AlcoholFreeSection() {
                 Zero proof
               </span>
             </div>
-            <h3 className="mt-4 font-display text-4xl text-[color:var(--color-ink-text)] md:text-5xl">
+            <h3 className="mt-4 font-display text-4xl text-[color:var(--color-ink-text)] md:text-4xl">
               La sélection.
             </h3>
             <ul className="mt-8 grid gap-2 text-[15px] text-[color:var(--color-espresso)]/85 md:grid-cols-2">

@@ -85,7 +85,7 @@ function _Section(tuiles: (Tuile & { backgroundImage: string })[]) {
               <span className="mr-3 inline-block h-px w-12 align-middle bg-[color:var(--color-grenat)] opacity-70" />
               Votre signature, partout
             </p>
-            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] [hyphens:auto] sm:text-5xl md:text-7xl">
+            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] [hyphens:auto] sm:text-5xl md:text-6xl">
               La personnalisation,{" "}
               <span className="font-accent text-[color:var(--color-grenat)]">
                 portée à l'extrême.

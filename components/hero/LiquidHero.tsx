@@ -286,7 +286,7 @@ function OfferSlide({
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35, duration: 1.1, ease: EASE }}
-        className="font-display text-balance text-[12vw] leading-[0.95] text-[color:var(--color-ink-text)] sm:text-[10vw] md:text-[6.5vw]"
+        className="font-display text-balance text-[12vw] leading-[0.95] text-[color:var(--color-ink-text)] sm:text-[10vw] md:text-[5.5vw]"
       >
         {title}
         <br />

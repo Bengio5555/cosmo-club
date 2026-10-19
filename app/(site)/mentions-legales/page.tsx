@@ -30,7 +30,7 @@ export default function MentionsLegalesPage() {
         <p className="font-accent text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-or)]">
           Informations légales
         </p>
-        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-5xl">
+        <h1 className="mt-3 font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-4xl">
           Mentions légales
         </h1>
       </header>

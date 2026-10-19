@@ -125,7 +125,7 @@ function CarteCard({
             </p>
           </div>
           <span
-            className="font-display text-5xl md:text-6xl"
+            className="font-display text-5xl md:text-5xl"
             style={{ color: mix(palette.text, 0.3) }}
           >
             0{index + 1}

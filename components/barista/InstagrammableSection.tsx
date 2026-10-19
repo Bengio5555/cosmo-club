@@ -15,7 +15,7 @@ export function InstagrammableSection() {
       <div className="relative mx-auto max-w-[1400px] px-6 text-center md:px-10">
         <Reveal>
           <p className="eyebrow mb-8 justify-center"><span className="rule" />L'effet</p>
-          <h2 className="font-display text-balance text-5xl leading-[0.9] text-[color:var(--color-ink-text)] sm:text-6xl md:text-[9vw]">
+          <h2 className="font-display text-balance text-5xl leading-[0.9] text-[color:var(--color-ink-text)] sm:text-6xl md:text-[7.5vw]">
             Un bar <span className="font-accent text-[color:var(--color-grenat)]">unique</span>.
           </h2>
 
@@ -26,7 +26,7 @@ export function InstagrammableSection() {
               { k: "1", v: "Bar qui change votre soirée" },
             ].map((c) => (
               <div key={c.k} className="text-center">
-                <p className="font-display text-5xl text-[color:var(--color-or)] md:text-6xl">
+                <p className="font-display text-5xl text-[color:var(--color-or)] md:text-5xl">
                   {c.k}
                 </p>
                 <p className="mt-2 text-[11px] uppercase tracking-[0.32em] text-[color:var(--color-espresso)]/60">

@@ -8,7 +8,7 @@ export function StandsSection() {
         <Reveal className="mb-16 flex flex-col md:mb-24 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="eyebrow mb-6"><span className="rule" />Les stands</p>
-            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
+            <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
               Du plus épuré<br />
               <span className="font-accent text-[color:var(--color-grenat)]">
                 au plus premium.
@@ -99,7 +99,7 @@ export function StandsSection() {
                 </span>
               </div>
 
-              <h3 className="mt-3 font-display text-4xl text-[color:var(--color-ink-text)] md:text-5xl">
+              <h3 className="mt-3 font-display text-4xl text-[color:var(--color-ink-text)] md:text-4xl">
                 {s.tier}
               </h3>
 
