@@ -49,7 +49,25 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
     track(EVENTS.wizardStep, { step });
   }, [step]);
 
+  // Safari and Chrome autofill can fill an input without firing React's
+  // onChange, so react-hook-form still holds "" while the field visibly
+  // reads "Benjamin" — and validation then fails on a filled field. Before
+  // validating, copy what the DOM actually shows into the form state.
+  const syncAutofill = () => {
+    const names: (keyof DevisInput)[] = ["date", "location", "guests", "firstName", "lastName", "email", "phone", "message"];
+    for (const name of names) {
+      const el = document.getElementById(name) as HTMLInputElement | HTMLTextAreaElement | null;
+      if (!el) continue;
+      const dom = el.value;
+      const cur = form.getValues(name);
+      if (dom !== "" && dom !== String(cur ?? "")) {
+        form.setValue(name, (name === "guests" ? (Number(dom) || dom) : dom) as never, { shouldDirty: true });
+      }
+    }
+  };
+
   const goNext = async () => {
+    syncAutofill();
     const fields = stepFields[step];
     const valid = await form.trigger([...fields] as (keyof DevisInput)[], { shouldFocus: true });
     if (!valid) {
@@ -157,7 +175,7 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
 
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={(e) => { syncAutofill(); return onSubmit(e); }}
       noValidate
       className="relative flex min-h-[620px] flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream-paper)] p-6 md:p-10"
     >
@@ -221,7 +239,7 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
             type="submit"
             disabled={status === "submitting"}
             className={cn(
-              "group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-[color:var(--color-ink-text)] transition-colors duration-500",
+              "group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--color-bone)] transition-colors duration-500",
               status === "submitting"
                 ? "cursor-wait bg-[color:var(--color-ash)]"
                 : "bg-[color:var(--color-grenat)] hover:bg-[color:var(--color-grenat-glow)]",

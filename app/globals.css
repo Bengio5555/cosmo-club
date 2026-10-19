@@ -477,3 +477,15 @@ html.dark body {
     0 18px 50px -22px rgba(20, 12, 8, 0.45),
     0 1px 0 rgba(255, 255, 255, 0.4) inset;
 }
+
+/* Autofill (Safari / Chrome) peint les champs en bleu-blanc : on garde le
+   fond transparent du formulaire et l'encre du site. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-ink-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-cream-paper) inset;
+  box-shadow: 0 0 0 1000px var(--color-cream-paper) inset;
+  transition: background-color 600000s ease-in-out 0s;
+}
