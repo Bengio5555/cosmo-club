@@ -154,7 +154,7 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
   const submitInvalid = (errors: FieldErrors<DevisInput>) => {
       if (!retriedRef.current) {
         retriedRef.current = true;
-        syncAutofill();
+        try { syncAutofill(); } catch (err) { console.error("[devis] sync", err); }
         void form.handleSubmit(submitValid, submitInvalid)();
         return;
       }
@@ -195,7 +195,14 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
 
   return (
     <form
-      onSubmit={(e) => { syncAutofill(); return form.handleSubmit(submitValid, submitInvalid)(e); }}
+      onSubmit={(e) => {
+        // preventDefault first, whatever happens next : a thrown error in
+        // the sync must never fall back to a native GET submission (page
+        // reload at the top, nothing sent).
+        e.preventDefault();
+        try { syncAutofill(); } catch (err) { console.error("[devis] sync", err); }
+        return form.handleSubmit(submitValid, submitInvalid)(e);
+      }}
       onKeyDown={(e) => {
         // Enter in a field (or on an autofill suggestion) must never submit
         // the request by itself : it moves to the next step, and on the last
