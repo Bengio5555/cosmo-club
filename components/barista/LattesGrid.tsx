@@ -30,7 +30,7 @@ export function LattesGrid({
             <p className="eyebrow mb-6"><span className="rule" />Les signatures</p>
             <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
               Quatre couleurs,<br />
-              <span className="font-accent italic text-[color:var(--color-grenat)]">
+              <span className="font-accent text-[color:var(--color-grenat)]">
                 quatre rituels.
               </span>
             </h2>
@@ -104,7 +104,7 @@ function LatteCard({
       </h3>
 
       <p
-        className="relative mt-3 font-accent text-lg italic md:text-xl"
+        className="relative mt-3 font-accent text-lg md:text-xl"
         style={{ color: latte.hue.primary }}
       >
         « {latte.tasting} »

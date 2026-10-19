@@ -21,7 +21,7 @@ export function ConceptManifesto() {
             <span className="mr-3 inline-block h-px w-12 align-middle bg-[color:var(--color-grenat)] opacity-70" />
             Le concept
           </p>
-          <p className="mt-6 font-accent text-3xl italic leading-snug text-[color:var(--color-grenat)] md:text-4xl">
+          <p className="mt-6 font-accent text-3xl leading-snug text-[color:var(--color-grenat)] md:text-4xl">
             De&nbsp;Cosmopolitain. <br />
             Bienvenue au Cosmo Club.
           </p>

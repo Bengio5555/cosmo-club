@@ -15,7 +15,7 @@ export function Footer() {
               {site.description}
             </p>
             <div className="hairline" />
-            <p className="font-accent text-xl italic text-[color:var(--color-grenat)]">
+            <p className="font-accent text-xl text-[color:var(--color-grenat)]">
               « {site.baseline} »
             </p>
           </div>
@@ -62,6 +62,11 @@ export function Footer() {
               <li>
                 <Link href="/animation-cocktail-paris" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
                   Atelier mixologie
+                </Link>
+              </li>
+              <li>
+                <Link href="/canettes-personnalisees" className="text-[color:var(--color-espresso)]/80 transition-colors hover:text-[color:var(--color-grenat)]">
+                  Canettes personnalisées
                 </Link>
               </li>
               <li>

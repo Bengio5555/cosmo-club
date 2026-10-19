@@ -18,7 +18,7 @@ export function CtaDevis() {
         <Reveal>
           <p className="eyebrow mb-8 justify-center"><span className="rule" />Prenons rendez-vous</p>
           <h2 className="font-display text-[11vw] leading-[0.95] text-balance text-[color:var(--color-ink-text)] sm:text-[13vw] md:text-[8vw]">
-            Parlons de <span className="font-accent italic text-[color:var(--color-grenat)]">votre</span> événement.
+            Parlons de <span className="font-accent text-[color:var(--color-grenat)]">votre</span> événement.
           </h2>
           <p className="mx-auto mt-8 max-w-xl text-lg text-[color:var(--color-espresso)]/75 md:text-xl">
             Racontez-nous votre moment — mariage, dîner, défilé, soirée intime. Nous composons une offre sur-mesure, à la hauteur.

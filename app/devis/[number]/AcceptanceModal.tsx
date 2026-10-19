@@ -331,199 +331,199 @@ export function AcceptanceModal({
       </div>
 
       <style>{`
-        .acceptance-modal-backdrop {
-          position: fixed;
-          inset: 0;
-          z-index: 60;
-          background: rgba(10, 10, 10, 0.78);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 16px;
-          backdrop-filter: blur(6px);
-        }
-        .acceptance-modal {
-          background: #fffaf2;
-          color: #2a1f14;
-          border-radius: 14px;
-          width: 100%;
-          max-width: 540px;
-          max-height: 92vh;
-          display: flex;
-          flex-direction: column;
-          box-shadow: 0 30px 80px rgba(0,0,0,0.45);
-          font-family: var(--font-body, system-ui, -apple-system, sans-serif);
-        }
-        .acceptance-modal-head {
-          padding: 22px 24px 14px;
-          border-bottom: 1px solid rgba(42,31,20,0.1);
-        }
-        .acceptance-modal-eyebrow {
-          font-size: 10px;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: #8b1a1a;
-          margin: 0;
-        }
-        .acceptance-modal-title {
-          font-family: var(--font-display, Georgia, serif);
-          font-size: 24px;
-          margin: 4px 0 8px;
-          letter-spacing: -0.01em;
-        }
-        .acceptance-modal-sub {
-          font-size: 13px;
-          line-height: 1.5;
-          color: #3a2a1e;
-          margin: 0;
-        }
-        .acceptance-modal-body {
-          padding: 18px 24px;
-          overflow-y: auto;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-        .acceptance-modal-check {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          font-size: 13px;
-          line-height: 1.5;
-          cursor: pointer;
-        }
-        .acceptance-modal-check input {
-          margin-top: 3px;
-          accent-color: #8b1a1a;
-          width: 16px;
-          height: 16px;
-          flex-shrink: 0;
-        }
-        .acceptance-modal-link {
-          color: #8b1a1a;
-          text-decoration: underline;
-          text-underline-offset: 2px;
-        }
-        .acceptance-modal-cgv-note {
-          font-size: 12px;
-          line-height: 1.5;
-          color: #3a2a1e;
-          margin: -8px 0 0;
-          padding: 10px 12px;
-          background: rgba(139, 26, 26, 0.06);
-          border-left: 2px solid #8b1a1a;
-          border-radius: 0 6px 6px 0;
-        }
-        .acceptance-modal-field {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-        .acceptance-modal-field > span {
-          font-size: 11px;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: #726d63;
-          font-weight: 600;
-        }
-        .acceptance-modal-field input[type="text"] {
-          padding: 10px 12px;
-          border: 1px solid rgba(42,31,20,0.18);
-          border-radius: 8px;
-          background: #fff;
-          color: #2a1f14;
-          font-size: 14px;
-          font-family: inherit;
-        }
-        .acceptance-modal-field input[type="text"]:focus {
-          outline: none;
-          border-color: #8b1a1a;
-        }
-        .acceptance-modal-padwrap {
-          position: relative;
-          border: 1px dashed rgba(42,31,20,0.28);
-          border-radius: 8px;
-          background: #fff;
-          height: 180px;
-          overflow: hidden;
-        }
-        .acceptance-modal-padwrap canvas {
-          display: block;
-          width: 100%;
-          height: 100%;
-        }
-        .acceptance-modal-padhint {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: rgba(114,109,99,0.7);
-          font-size: 12px;
-          pointer-events: none;
-          letter-spacing: 0.06em;
-        }
-        .acceptance-modal-padclear {
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          background: #fff;
-          border: 1px solid rgba(42,31,20,0.16);
-          border-radius: 6px;
-          padding: 3px 8px;
-          font-size: 11px;
-          color: #3a2a1e;
-          cursor: pointer;
-        }
-        .acceptance-modal-padclear:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-        .acceptance-modal-err {
-          background: rgba(139,26,26,0.08);
-          border-left: 3px solid #8b1a1a;
-          padding: 10px 12px;
-          font-size: 13px;
-          color: #5a1010;
-          border-radius: 4px;
-          margin: 0;
-        }
-        .acceptance-modal-foot {
-          display: flex;
-          justify-content: flex-end;
-          gap: 8px;
-          padding: 14px 24px 18px;
-          border-top: 1px solid rgba(42,31,20,0.1);
-        }
-        .acceptance-modal-cancel,
-        .acceptance-modal-submit {
-          padding: 10px 16px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          font-family: inherit;
-          border: 1px solid transparent;
-          transition: background-color 0.15s ease;
-        }
-        .acceptance-modal-cancel {
-          background: #fff;
-          border-color: rgba(42,31,20,0.2);
-          color: #3a2a1e;
-        }
-        .acceptance-modal-cancel:hover { background: #f4ecd6; }
-        .acceptance-modal-submit {
-          background: #8b1a1a;
-          color: #fffaf2;
-        }
-        .acceptance-modal-submit:hover { background: #b5322b; }
-        .acceptance-modal-submit:disabled,
-        .acceptance-modal-cancel:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-      `}</style>
+ .acceptance-modal-backdrop {
+ position: fixed;
+ inset: 0;
+ z-index: 60;
+ background: rgba(10, 10, 10, 0.78);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ padding: 16px;
+ backdrop-filter: blur(6px);
+ }
+ .acceptance-modal {
+ background: #fffaf2;
+ color: #2a1f14;
+ border-radius: 14px;
+ width: 100%;
+ max-width: 540px;
+ max-height: 92vh;
+ display: flex;
+ flex-direction: column;
+ box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+ font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+ }
+ .acceptance-modal-head {
+ padding: 22px 24px 14px;
+ border-bottom: 1px solid rgba(42,31,20,0.1);
+ }
+ .acceptance-modal-eyebrow {
+ font-size: 10px;
+ letter-spacing: 0.28em;
+ text-transform: uppercase;
+ color: #8b1a1a;
+ margin: 0;
+ }
+ .acceptance-modal-title {
+ font-family: var(--font-display, Georgia, serif);
+ font-size: 24px;
+ margin: 4px 0 8px;
+ letter-spacing: -0.01em;
+ }
+ .acceptance-modal-sub {
+ font-size: 13px;
+ line-height: 1.5;
+ color: #3a2a1e;
+ margin: 0;
+ }
+ .acceptance-modal-body {
+ padding: 18px 24px;
+ overflow-y: auto;
+ flex: 1;
+ display: flex;
+ flex-direction: column;
+ gap: 16px;
+ }
+ .acceptance-modal-check {
+ display: flex;
+ align-items: flex-start;
+ gap: 10px;
+ font-size: 13px;
+ line-height: 1.5;
+ cursor: pointer;
+ }
+ .acceptance-modal-check input {
+ margin-top: 3px;
+ accent-color: #8b1a1a;
+ width: 16px;
+ height: 16px;
+ flex-shrink: 0;
+ }
+ .acceptance-modal-link {
+ color: #8b1a1a;
+ text-decoration: underline;
+ text-underline-offset: 2px;
+ }
+ .acceptance-modal-cgv-note {
+ font-size: 12px;
+ line-height: 1.5;
+ color: #3a2a1e;
+ margin: -8px 0 0;
+ padding: 10px 12px;
+ background: rgba(139, 26, 26, 0.06);
+ border-left: 2px solid #8b1a1a;
+ border-radius: 0 6px 6px 0;
+ }
+ .acceptance-modal-field {
+ display: flex;
+ flex-direction: column;
+ gap: 6px;
+ }
+ .acceptance-modal-field > span {
+ font-size: 11px;
+ letter-spacing: 0.16em;
+ text-transform: uppercase;
+ color: #726d63;
+ font-weight: 600;
+ }
+ .acceptance-modal-field input[type="text"] {
+ padding: 10px 12px;
+ border: 1px solid rgba(42,31,20,0.18);
+ border-radius: 8px;
+ background: #fff;
+ color: #2a1f14;
+ font-size: 14px;
+ font-family: inherit;
+ }
+ .acceptance-modal-field input[type="text"]:focus {
+ outline: none;
+ border-color: #8b1a1a;
+ }
+ .acceptance-modal-padwrap {
+ position: relative;
+ border: 1px dashed rgba(42,31,20,0.28);
+ border-radius: 8px;
+ background: #fff;
+ height: 180px;
+ overflow: hidden;
+ }
+ .acceptance-modal-padwrap canvas {
+ display: block;
+ width: 100%;
+ height: 100%;
+ }
+ .acceptance-modal-padhint {
+ position: absolute;
+ inset: 0;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ color: rgba(114,109,99,0.7);
+ font-size: 12px;
+ pointer-events: none;
+ letter-spacing: 0.06em;
+ }
+ .acceptance-modal-padclear {
+ position: absolute;
+ top: 8px;
+ right: 8px;
+ background: #fff;
+ border: 1px solid rgba(42,31,20,0.16);
+ border-radius: 6px;
+ padding: 3px 8px;
+ font-size: 11px;
+ color: #3a2a1e;
+ cursor: pointer;
+ }
+ .acceptance-modal-padclear:disabled {
+ opacity: 0.4;
+ cursor: not-allowed;
+ }
+ .acceptance-modal-err {
+ background: rgba(139,26,26,0.08);
+ border-left: 3px solid #8b1a1a;
+ padding: 10px 12px;
+ font-size: 13px;
+ color: #5a1010;
+ border-radius: 4px;
+ margin: 0;
+ }
+ .acceptance-modal-foot {
+ display: flex;
+ justify-content: flex-end;
+ gap: 8px;
+ padding: 14px 24px 18px;
+ border-top: 1px solid rgba(42,31,20,0.1);
+ }
+ .acceptance-modal-cancel,
+ .acceptance-modal-submit {
+ padding: 10px 16px;
+ border-radius: 8px;
+ font-size: 13px;
+ font-weight: 600;
+ cursor: pointer;
+ font-family: inherit;
+ border: 1px solid transparent;
+ transition: background-color 0.15s ease;
+ }
+ .acceptance-modal-cancel {
+ background: #fff;
+ border-color: rgba(42,31,20,0.2);
+ color: #3a2a1e;
+ }
+ .acceptance-modal-cancel:hover { background: #f4ecd6; }
+ .acceptance-modal-submit {
+ background: #8b1a1a;
+ color: #fffaf2;
+ }
+ .acceptance-modal-submit:hover { background: #b5322b; }
+ .acceptance-modal-submit:disabled,
+ .acceptance-modal-cancel:disabled {
+ opacity: 0.6;
+ cursor: not-allowed;
+ }
+`}</style>
     </div>
   );
 }

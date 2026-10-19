@@ -39,7 +39,7 @@ export function Header() {
         <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6 md:px-10">
           <Logo />
 
-          <nav className="hidden md:flex items-center gap-8" aria-label="Menu principal">
+          <nav className="hidden xl:flex items-center gap-8" aria-label="Menu principal">
             {nav.map((item) => (
               <Link
                 key={item.href}
@@ -52,7 +52,7 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden xl:block">
             <Link
               href="/contact"
               onClick={() => track("devis_cta_click", { location: "header_desktop" })}
@@ -67,7 +67,7 @@ export function Header() {
           <button
             type="button"
             aria-label="Ouvrir le menu"
-            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-ash)]"
+            className="xl:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-ash)]"
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -78,7 +78,7 @@ export function Header() {
       {/* Mobile menu */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-[color:var(--color-cream-paper)]/98 backdrop-blur-xl transition-all duration-700 ease-[var(--ease-silk)] md:hidden",
+          "fixed inset-0 z-40 bg-[color:var(--color-cream-paper)]/98 backdrop-blur-xl transition-all duration-700 ease-[var(--ease-silk)] xl:hidden",
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
         )}
       >

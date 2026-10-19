@@ -15,7 +15,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 
 const TOTAL_STEPS = 4;
 
-export function DevisWizard() {
+export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {}) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [status, setStatus] = useState<Status>("idle");
   const [serverError, setServerError] = useState<string | null>(null);
@@ -34,8 +34,9 @@ export function DevisWizard() {
       lastName: "",
       email: "",
       phone: "",
-      message: "",
+      message: initialBrand ? `Canettes personnalisées pour « ${initialBrand} ».\n` : "",
       website: "",
+      canBrand: initialBrand,
     },
   });
 
@@ -167,6 +168,8 @@ export function DevisWizard() {
         className="pointer-events-none absolute left-[-9999px] top-[-9999px] h-0 w-0 opacity-0"
         {...form.register("website")}
       />
+      {/* marque venue de la page canettes (lien « Demander un devis pour X ») */}
+      <input type="hidden" {...form.register("canBrand")} />
 
       <Progress step={step} />
 
@@ -626,7 +629,7 @@ function SuccessScreen({ firstName }: { firstName: string }) {
       <p className="relative eyebrow mb-6"><span className="rule" />Demande reçue</p>
       <h3 className="relative font-display text-4xl leading-[1.05] text-[color:var(--color-ink-text)] md:text-6xl">
         Merci{firstName ? `, ${firstName}` : ""}.<br />
-        <span className="font-accent italic text-[color:var(--color-grenat)]">
+        <span className="font-accent text-[color:var(--color-grenat)]">
           On revient vers vous sous&nbsp;48&nbsp;h.
         </span>
       </h3>

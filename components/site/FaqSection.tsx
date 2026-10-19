@@ -33,7 +33,7 @@ export function FaqSection({ items }: { items: FaqItem[] }) {
           </p>
           <h2 className="font-display text-[7vw] leading-[1] text-[color:var(--color-ink-text)] md:text-[3.5vw]">
             Tout ce que vous vous{" "}
-            <span className="font-accent italic text-[color:var(--color-grenat)]">
+            <span className="font-accent text-[color:var(--color-grenat)]">
               demandez
             </span>
             .

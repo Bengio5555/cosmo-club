@@ -30,6 +30,15 @@ function rawLocation(payload: unknown): string | null {
   return null;
 }
 
+// Marque posée sur la canette (page canettes) avant de demander le devis.
+function rawCanBrand(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "canBrand" in payload) {
+    const v = (payload as Record<string, unknown>).canBrand;
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return null;
+}
+
 type Params = Promise<{ id: string }>;
 
 export default async function LeadDetailPage({ params }: { params: Params }) {
@@ -106,6 +115,15 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               <dd className="text-right text-slate-700 dark:text-slate-200">
                 {lead.guests_count ?? "—"}
               </dd>
+
+              {rawCanBrand(lead.raw_payload) && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Marque sur la canette</dt>
+                  <dd className="text-right text-slate-700 dark:text-slate-200">
+                    {rawCanBrand(lead.raw_payload)}
+                  </dd>
+                </>
+              )}
 
               {lead.budget_estimate != null && (
                 <>

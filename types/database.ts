@@ -180,6 +180,21 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["homepage_gallery_selection"]["Row"]>
         Relationships: []
       }
+      can_sticker_tries: {
+        Row: {
+          brand: string
+          created_at: string
+          id: string
+          ink: string
+          page: string | null
+          recipe: string
+          session_id: string
+          subtitle: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["can_sticker_tries"]["Row"]> & { brand: string; recipe: string; ink: string; session_id: string }
+        Update: Partial<Database["public"]["Tables"]["can_sticker_tries"]["Row"]>
+        Relationships: []
+      }
       client_logos: {
         Row: {
           archived: boolean

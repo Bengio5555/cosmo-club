@@ -16,7 +16,7 @@ export function MixologieIntro() {
         <div className="grid gap-12 md:grid-cols-[1fr_1.6fr]">
           <div>
             <p className="eyebrow"><span className="rule" />Notre approche</p>
-            <p className="mt-6 font-accent text-3xl italic leading-snug text-[color:var(--color-grenat)] md:text-4xl">
+            <p className="mt-6 font-accent text-3xl leading-snug text-[color:var(--color-grenat)] md:text-4xl">
               Le cocktail, <br />
               comme une pièce <br />
               de haute couture.

@@ -82,6 +82,15 @@ export default function PolitiqueConfidentialitePage() {
               et obligations légales comptables.
             </li>
             <li>
+              <strong>Aperçu de personnalisation</strong> (page canettes
+              personnalisées)&nbsp;: le texte que vous saisissez pour
+              l&apos;afficher sur la canette, la recette et l&apos;encre
+              choisies, rattachés à un identifiant de session anonyme. Aucune
+              adresse IP ni donnée de contact n&apos;est enregistrée.
+              Finalité&nbsp;: comprendre l&apos;usage de la page et améliorer
+              l&apos;offre. Base légale&nbsp;: intérêt légitime.
+            </li>
+            <li>
               <strong>Mesure d&apos;audience</strong>&nbsp;: statistiques de
               navigation anonymisées via Google Analytics&nbsp;4 et Vercel
               Analytics. Base légale&nbsp;: intérêt légitime / consentement
@@ -137,6 +146,7 @@ export default function PolitiqueConfidentialitePage() {
               (obligation légale comptable).
             </li>
             <li>Données de mesure d&apos;audience&nbsp;: 14&nbsp;mois maximum.</li>
+            <li>Saisies de l&apos;aperçu de personnalisation&nbsp;: 12&nbsp;mois.</li>
           </ul>
         </section>
 

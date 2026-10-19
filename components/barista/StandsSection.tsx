@@ -10,7 +10,7 @@ export function StandsSection() {
             <p className="eyebrow mb-6"><span className="rule" />Les stands</p>
             <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
               Du plus épuré<br />
-              <span className="font-accent italic text-[color:var(--color-grenat)]">
+              <span className="font-accent text-[color:var(--color-grenat)]">
                 au plus premium.
               </span>
             </h2>

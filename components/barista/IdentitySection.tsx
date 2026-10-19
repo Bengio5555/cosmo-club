@@ -19,7 +19,7 @@ export function IdentitySection() {
             <p className="eyebrow"><span className="rule" />Votre identité, partout</p>
             <h2 className="mt-6 font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-6xl">
               Votre marque<br />
-              <span className="font-accent italic text-[color:var(--color-grenat)]">
+              <span className="font-accent text-[color:var(--color-grenat)]">
                 flotte à la surface.
               </span>
             </h2>

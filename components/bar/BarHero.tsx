@@ -72,7 +72,7 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
             <SplitText
               text="événementielle."
               as="span"
-              className="font-accent italic text-[color:var(--color-grenat)]"
+              className="font-accent text-[color:var(--color-grenat)]"
               delay={0.9}
             />
           </span>
@@ -82,26 +82,14 @@ export function BarHero({ heroSrc }: { heroSrc: string }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.7, duration: 1, ease: [0.19, 1, 0.22, 1] }}
-          className="mt-10 max-w-2xl"
+          className="mt-8 max-w-xl"
         >
-          {/* Liquid-glass card: keep it genuinely transparent (white
-              wash at /15) so the rooftop photo reads through the card
-              and the "glass" effect actually feels like glass. We rely
-              on a heavy backdrop-blur + small saturate boost for the
-              refracted look; readability of the lede is preserved by
-              a subtle dark ink-tone gradient layered behind the text
-              rather than by opacifying the whole pane. */}
-          <div className="relative overflow-hidden rounded-xl px-6 py-5 shadow-[0_24px_60px_-24px_rgba(20,12,8,0.55),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.06)] ring-1 ring-white/30 backdrop-blur-2xl backdrop-saturate-150 md:px-7 md:py-6">
-            {/* specular top sheen */}
-            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
-            {/* warm gold tint in the bottom-right (catches the brand) */}
-            <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-[color:var(--color-or)]/[0.06]" />
-            {/* grenat hairline */}
-            <span aria-hidden className="absolute left-0 top-0 h-full w-[2px] bg-[color:var(--color-grenat)]/85" />
-            <p className="relative text-lg leading-relaxed text-[color:var(--color-ink-text)] md:text-xl">
-              Quatre cartes, un seul principe : chaque verre doit valoir le coup d'œil, et mériter qu'on en reparle le lendemain. Classiques exécutés sans compromis, relectures signatures, toppings premium, créations écrites pour vous.
-            </p>
-          </div>
+          {/* Une ligne en italique, lisible sur la photo grâce à l’ombre crème,
+              même traitement que le slider de l’accueil. Pas de paragraphe
+              dans le hero : la page le dit juste en dessous. */}
+          <p className="font-display text-xl leading-snug tracking-wide text-[color:var(--color-grenat)] [text-shadow:0_0_1px_rgba(243,235,217,1),0_0_6px_rgba(243,235,217,0.95),0_2px_24px_rgba(243,235,217,0.9)] md:text-2xl">
+            Chaque verre doit valoir le coup d’œil.
+          </p>
         </motion.div>
 
         <motion.div

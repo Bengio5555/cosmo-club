@@ -6,6 +6,18 @@
         "path": "/brand/ai/hero-home.png",
         "orientation": "landscape",
         "section": "Hero"
+      },
+      "hero-canettes": {
+        "title": "Hero Home · Canettes",
+        "path": "/brand/canettes/cosmo-cans-landscape-v2.jpg",
+        "orientation": "landscape",
+        "section": "Hero"
+      },
+      "hero-barista": {
+        "title": "Hero Home · Barista",
+        "path": "/brand/ai/hero-barista.png",
+        "orientation": "landscape",
+        "section": "Hero"
       }
     },
     "bar-a-cocktails": {
@@ -166,6 +178,20 @@
         "path": "/brand/ai/latte-golden.png",
         "orientation": "square",
         "section": "Lattes"
+      }
+    },
+    "canettes": {
+      "hero": {
+        "title": "Hero Canettes",
+        "path": "/brand/canettes/cosmo-cans-landscape-v2.jpg",
+        "orientation": "landscape",
+        "section": "Hero"
+      },
+      "recettes": {
+        "title": "Les trois recettes",
+        "path": "/brand/canettes/cosmo-cans-trio.jpg",
+        "orientation": "portrait",
+        "section": "Recettes"
       }
     }
   }

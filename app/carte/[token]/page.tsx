@@ -69,7 +69,7 @@ export default async function CartePage({ params }: { params: Params }) {
       <div className="mx-auto max-w-2xl">
         <p className="eyebrow mb-4"><span className="rule" />{company}</p>
         <h1 className="font-display text-4xl leading-[1.05] md:text-5xl">
-          Votre carte <span className="font-accent italic text-[color:var(--color-grenat)]">{prop.gamme}</span>
+          Votre carte <span className="font-accent text-[color:var(--color-grenat)]">{prop.gamme}</span>
         </h1>
         <p className="mt-4 text-sm text-[color:var(--color-espresso)]">
           {client?.first_name ? `Bonjour ${client.first_name}, ` : ""}

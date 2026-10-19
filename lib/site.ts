@@ -37,6 +37,7 @@ export const editorialAuthor = {
 export const nav = [
   { href: "/bar-a-cocktails", label: "Bar à cocktails" },
   { href: "/barista", label: "Barista" },
+  { href: "/canettes-personnalisees", label: "Canettes" },
   { href: "/evenements", label: "Événements" },
   { href: "/concept", label: "Concept" },
   { href: "/blog", label: "Le Mag" },

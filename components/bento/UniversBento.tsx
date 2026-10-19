@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
+import { LogoCanVisual } from "@/components/canettes/LogoCanVisual";
 
 // SSR-resolved image URLs are passed in via the `paths` prop. We used
 // to read them through useImageConfig (a client hook), which painted
@@ -25,10 +26,10 @@ export function UniversBento({
           <div className="max-w-2xl">
             <p className="mb-6 text-[11px] uppercase tracking-[0.32em] font-medium text-[color:var(--color-grenat)]">
               <span className="mr-3 inline-block h-px w-12 align-middle bg-[color:var(--color-grenat)] opacity-70" />
-              Deux univers, une signature
+              Trois univers, une signature
             </p>
             <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
-              Le verre, <span className="font-accent italic text-[color:var(--color-grenat)]">ou la tasse.</span>
+              Le verre, <span className="font-accent text-[color:var(--color-grenat)]">ou la tasse.</span>
               <br />
               L'un comme l'autre, <br className="hidden md:block" />
               pensés comme une œuvre.
@@ -68,15 +69,17 @@ export function UniversBento({
             visual={<LatteVisual src={paths.barista} />}
           />
 
-          {/* Personnalisation teaser */}
+          {/* Mocktail in a can — nouvelle offre */}
           <BentoCard
-            href="#personnalisation"
+            href="/canettes-personnalisees"
             className="md:row-span-1 md:min-h-[310px]"
             index="03"
-            kicker="Sur-mesure"
-            title="Votre identité partout"
-            description="Glaçons, pochoirs, toppings, mélangeurs, gobelets — tout peut porter votre signature."
-            visual={<MonogramVisual />}
+            kicker="Nouveau"
+            title="Mocktail in a can"
+            titleClassName="max-w-[9ch] text-4xl md:text-[2.6rem]"
+            overlay="linear-gradient(to right, rgba(237,227,201,0.55) 0%, rgba(237,227,201,0.25) 45%, transparent 65%)"
+            description={<span className="block max-w-[19ch]">Des recettes sans alcool, votre logo. Dès 200 canettes.</span>}
+            visual={<LogoCanVisual fill />}
           />
         </div>
       </div>
@@ -92,6 +95,8 @@ function BentoCard({
   title,
   description,
   visual,
+  titleClassName = "text-4xl md:text-6xl",
+  overlay = "linear-gradient(to top, rgba(237,227,201,0.92) 0%, rgba(237,227,201,0.5) 40%, transparent 80%)",
 }: {
   href: string;
   className?: string;
@@ -100,6 +105,10 @@ function BentoCard({
   title: string;
   description: React.ReactNode;
   visual: React.ReactNode;
+  /** Override for long titles that must not wrap on three lines in a 1/3 card. */
+  titleClassName?: string;
+  /** Cream wash over the visual; lighter when the photo itself is the message. */
+  overlay?: string;
 }) {
   return (
     <Link
@@ -112,10 +121,7 @@ function BentoCard({
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(237,227,201,0.92) 0%, rgba(237,227,201,0.5) 40%, transparent 80%)",
-        }}
+        style={{ background: overlay }}
       />
 
       <div className="flex items-start justify-between gap-6">
@@ -126,7 +132,7 @@ function BentoCard({
       </div>
 
       <div className="mt-auto">
-        <h3 className="font-display text-4xl leading-[0.95] text-[color:var(--color-ink-text)] md:text-6xl">
+        <h3 className={`font-display text-balance leading-[0.95] text-[color:var(--color-ink-text)] ${titleClassName}`}>
           {title}
         </h3>
         <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[color:var(--color-espresso)]/75">
@@ -162,7 +168,7 @@ function CocktailVisual({ src, priority }: { src: string; priority?: boolean }) 
   );
 }
 
-function LatteVisual({ src }: { src: string }) {
+function LatteVisual({ src, position = "object-center" }: { src: string; position?: string }) {
   return (
     <div className="relative h-full w-full overflow-hidden">
       <Image
@@ -171,27 +177,8 @@ function LatteVisual({ src }: { src: string }) {
         alt=""
         fill
         sizes="(min-width: 768px) 33vw, 100vw"
-        className="object-cover object-center transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.05]"
+        className={`object-cover ${position} transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-[1.05]`}
       />
-    </div>
-  );
-}
-
-function MonogramVisual() {
-  return (
-    <div className="relative h-full w-full overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 70% 50%, rgba(201,169,97,0.35), transparent 55%), linear-gradient(150deg, var(--color-cream-pearl), var(--color-cream-warm))",
-        }}
-      />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="font-display text-[8rem] font-light leading-none tracking-[-0.04em] text-[color:var(--color-or-deep)]/25">
-          CC
-        </span>
-      </div>
     </div>
   );
 }

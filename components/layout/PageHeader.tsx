@@ -30,7 +30,7 @@ export function PageHeader({ eyebrow, title, italicWord, description }: Props) {
             {italicWord && (
               <>
                 {" "}
-                <span className="font-accent italic text-[color:var(--color-grenat)]">
+                <span className="font-accent text-[color:var(--color-grenat)]">
                   {italicWord}
                 </span>
               </>

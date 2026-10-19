@@ -18,6 +18,7 @@ import {
   Network,
   MessageSquareText,
   FolderOpen,
+  Tag,
 } from "lucide-react";
 
 export type NavItem = {
@@ -43,6 +44,7 @@ export const DASHBOARD_NAV: NavSection[] = [
     items: [
       { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
       { href: "/dashboard/leads", label: "Demandes", icon: Inbox },
+      { href: "/dashboard/essais-canette", label: "Essais canette", icon: Tag },
       { href: "/dashboard/devis", label: "Devis", icon: FileText },
       { href: "/dashboard/factures", label: "Factures", icon: Receipt },
       { href: "/dashboard/events", label: "Événements", icon: CalendarDays },

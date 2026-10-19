@@ -25,7 +25,7 @@ export function BottlesSection({ bottleSrcs }: { bottleSrcs: string[] }) {
           <p className="eyebrow mb-6"><span className="rule" />Cocktail « in a bottle »</p>
           <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] sm:text-5xl md:text-7xl">
             La bouteille<br />
-            <span className="font-accent italic text-[color:var(--color-grenat)]">
+            <span className="font-accent text-[color:var(--color-grenat)]">
               qui devient souvenir.
             </span>
           </h2>

@@ -158,6 +158,9 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>) {
           ? Number(data.guests) || null
           : null,
       message: data.message || null,
+      // Marque posée sur la canette (page canettes) : sert de société
+      // par défaut, le reste du payload est conservé dans raw_payload.
+      company: typeof data.canBrand === "string" && data.canBrand.trim() ? data.canBrand.trim() : null,
       raw_payload: data as unknown as Database["public"]["Tables"]["leads"]["Insert"]["raw_payload"],
     };
     const payload = { ...basePayload, ...attribution };

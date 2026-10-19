@@ -87,7 +87,7 @@ function _Section(tuiles: (Tuile & { backgroundImage: string })[]) {
             </p>
             <h2 className="font-display text-balance text-4xl leading-[0.95] text-[color:var(--color-ink-text)] [hyphens:auto] sm:text-5xl md:text-7xl">
               La personnalisation,{" "}
-              <span className="font-accent italic text-[color:var(--color-grenat)]">
+              <span className="font-accent text-[color:var(--color-grenat)]">
                 portée à l'extrême.
               </span>
             </h2>

@@ -66,6 +66,9 @@ export const devisSchema = z.object({
     .optional()
     .or(z.literal("")),
   website: z.string().max(0).optional().or(z.literal("")),
+  // Marque posée sur la canette (page canettes), transmise par le lien
+  // « Demander un devis pour X ». Informative : jamais bloquante.
+  canBrand: z.string().max(60).optional().or(z.literal("")),
   // Where the visitor came from (captured client-side by AttributionCapture).
   // Optional and lenient: a missing or odd value must never block a devis.
   attribution: z
