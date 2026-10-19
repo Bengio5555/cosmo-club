@@ -14,6 +14,7 @@ import { EventEditor } from "./EventEditor";
 import { EventTodo } from "./EventTodo";
 import { StaffSection } from "./StaffSection";
 import { StockSection } from "./StockSection";
+import { EquipmentSection } from "./EquipmentSection";
 import { QuoteLinkCard, type QuoteOption } from "./QuoteLinkCard";
 import { MenuSection } from "./MenuSection";
 import { MarginSection } from "./MarginSection";
@@ -76,6 +77,8 @@ export default async function EventDetailPage({
     { data: reservations },
     { data: menuRaw },
     { data: cocktailOptions },
+    { data: equipmentOptions },
+    { data: equipmentAssignments },
   ] = await Promise.all([
     event.client_id
       ? supabase.from("clients").select("*").eq("id", event.client_id).maybeSingle()
@@ -118,6 +121,15 @@ export default async function EventDetailPage({
       .eq("archived", false)
       .order("category", { nullsFirst: false })
       .order("name"),
+    supabase
+      .from("equipment")
+      .select("id,code,name,category,contents,archived")
+      .order("category")
+      .order("code"),
+    supabase
+      .from("event_equipment")
+      .select("*")
+      .eq("event_id", id),
   ]);
 
   // Resolve cocktail names for the menu rows + ingredients for the
@@ -388,6 +400,17 @@ export default async function EventDetailPage({
             menuDiverges={menuDiverges}
           />
         )}
+      </div>
+
+      <div className="px-4 pb-6 md:px-8">
+        <EquipmentSection
+          eventId={event.id}
+          eventStatus={event.status}
+          options={equipmentOptions ?? []}
+          assignments={equipmentAssignments ?? []}
+          scanUrl={event.briefing_token ? `/scan/${event.id}?t=${event.briefing_token}` : null}
+          readOnly={isStaff}
+        />
       </div>
 
       {/* Always await the margin promise (avoids a floating promise),
