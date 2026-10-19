@@ -31,7 +31,7 @@ export async function recordCanTry(input: {
       .from("can_sticker_tries")
       .upsert(
         { brand, subtitle: subtitle || null, recipe: input.recipe, ink: input.ink, session_id: sessionId, page: "/canettes-personnalisees" },
-        { onConflict: "session_id,lower(brand)", ignoreDuplicates: true },
+        { onConflict: "session_id,brand", ignoreDuplicates: true },
       );
     if (error) console.error("[recordCanTry]", error.message);
   } catch (e) {

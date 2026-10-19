@@ -20,7 +20,7 @@ create table if not exists public.can_sticker_tries (
 -- Une ligne par marque et par session : retaper la même marque ne crée
 -- pas de doublon, changer de recette ou d'encre non plus.
 create unique index if not exists can_sticker_tries_session_brand_idx
-  on public.can_sticker_tries (session_id, lower(brand));
+  on public.can_sticker_tries (session_id, brand);
 create index if not exists can_sticker_tries_created_idx
   on public.can_sticker_tries (created_at desc);
 
