@@ -56,13 +56,13 @@ export const recettes: Recette[] = [
   },
   {
     id: "framboise-hibiscus",
-    garnishShort: "Orange séchée",
+    garnishShort: "Fleur d’hibiscus",
     illustration: "/brand/canettes/illus-framboise-hibiscus.png",
     num: "02",
     name: "Framboise Hibiscus",
     tasting: "Acidulé, profond, légèrement épicé.",
     base: "Purée de framboise, sirop d'hibiscus, citron jaune, ginger beer.",
-    garnish: "Tranche d'orange séchée ou fleur d'hibiscus.",
+    garnish: "Fleur d'hibiscus.",
     hue: { primary: "#8f2a4a", soft: "#d9a2b4" },
     inkTone: "claire",
   },
@@ -222,7 +222,7 @@ export type FaqEntry = { q: string; a: string };
 export const faq: FaqEntry[] = [
   {
     q: "Qu'est-ce qu'un « Mocktail in a can » ?",
-    a: "Une canette transparente de 25 cl à couvercle aluminium, remplie d'une recette sans alcool créée par Cosmo Club, avec une garniture visible (ruban de concombre, tranche d'orange séchée, fleur d'hibiscus) et votre logo posé en étiquette transparente. Chaque canette est remplie et scellée le jour même de la livraison ou de l'événement.",
+    a: "Une canette transparente de 25 cl à couvercle aluminium, remplie d'une recette sans alcool créée par Cosmo Club, avec une garniture visible (ruban de concombre, fleur d'hibiscus, citron vert) et votre logo posé en étiquette transparente. Chaque canette est remplie et scellée le jour même de la livraison ou de l'événement.",
   },
   {
     q: "Combien coûte une canette personnalisée ?",

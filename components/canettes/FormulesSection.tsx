@@ -26,7 +26,7 @@ export function FormulesSection() {
             <Reveal
               key={f.id}
               delay={i * 140}
-              className="group relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream)] p-6 transition-colors duration-700 hover:border-[color:var(--color-or)]/50 md:p-8"
+              className="group relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-ash)]/60 bg-[color:var(--color-cream)] p-6 transition-colors duration-700 hover:border-[color:var(--color-or)]/50 md:row-span-8 md:grid md:grid-rows-subgrid md:gap-y-0 md:p-8"
             >
               <div
                 aria-hidden
@@ -41,6 +41,10 @@ export function FormulesSection() {
                 }}
               />
 
+              {/* Eight subgrid rows shared by the three cards (eyebrow, title,
+                  tagline, description, price, includes, audiences, CTA): every
+                  line and every separator sits at the same height whatever
+                  the text length. */}
               <div className="flex items-baseline justify-between">
                 <p className="eyebrow whitespace-nowrap">{f.num} · Dès {f.minCans} canettes</p>
                 {f.highlight && (
