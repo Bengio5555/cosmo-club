@@ -293,7 +293,8 @@ function offerLabel(o: string) {
   const map: Record<string, string> = {
     bar: "Bar à cocktails",
     barista: "Barista",
-    both: "Les deux",
+    canettes: "Mocktail in a can",
+    both: "Bar + barista",
     undecided: "À conseiller",
   };
   return map[o] ?? o;

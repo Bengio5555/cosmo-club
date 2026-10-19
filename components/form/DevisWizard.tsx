@@ -26,7 +26,9 @@ export function DevisWizard({ initialBrand = "" }: { initialBrand?: string } = {
     mode: "onTouched",
     defaultValues: {
       eventType: undefined as unknown as DevisInput["eventType"],
-      offer: undefined as unknown as DevisInput["offer"],
+      // Arrivée depuis la page canettes (« Demander un devis pour X ») :
+      // l'offre canettes est présélectionnée.
+      offer: (initialBrand ? "canettes" : undefined) as unknown as DevisInput["offer"],
       date: "",
       location: "",
       guests: undefined,
@@ -330,7 +332,7 @@ function StepOffer({ form, onSelect }: { form: Form; onSelect: (id: string) => v
       <header className="mb-8">
         <p className="eyebrow mb-4"><span className="rule" />Étape 02</p>
         <h3 className="font-display text-3xl text-[color:var(--color-ink-text)] md:text-4xl">
-          Cocktails, barista, ou les deux ?
+          Cocktails, barista ou canettes ?
         </h3>
         <p className="mt-3 text-sm text-[color:var(--color-espresso)]/70">
           On ajustera les détails ensemble. Aucun choix n'est définitif.

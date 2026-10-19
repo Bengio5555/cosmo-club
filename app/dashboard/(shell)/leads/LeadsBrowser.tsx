@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import type { Database } from "@/types/database";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
+import { OFFER_LABEL } from "@/lib/content/devis";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { channelLabel } from "@/lib/attribution";
 import { formatDateFR } from "@/lib/format";
@@ -299,6 +300,9 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                   </td>
                   <td data-label="Événement" className="px-3 py-3 md:px-4">
                     <EventTypeLabel value={l.event_type} />
+                    {rawOfferText(l.raw_payload) && (
+                      <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-500">{rawOfferText(l.raw_payload)}</p>
+                    )}
                   </td>
                   <td data-label="Date" className="px-3 py-3 text-xs text-slate-600 dark:text-slate-300 md:px-4">
                     {l.event_date ? (
@@ -359,6 +363,14 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
       )}
     </div>
   );
+}
+
+function rawOfferText(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "offer" in payload) {
+    const v = (payload as Record<string, unknown>).offer;
+    if (typeof v === "string" && v in OFFER_LABEL) return OFFER_LABEL[v as keyof typeof OFFER_LABEL];
+  }
+  return null;
 }
 
 function rawDateText(payload: unknown): string | null {

@@ -7,6 +7,7 @@ import { formatDateFR } from "@/lib/format";
 import { LeadDetailForm } from "./LeadDetailForm";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { hostOf } from "@/lib/attribution";
+import { OFFER_LABEL } from "@/lib/content/devis";
 import { ArrowLeft, Mail, Phone, Building2, Calendar, Users } from "lucide-react";
 
 // The /contact form lets visitors type the date in free French
@@ -26,6 +27,15 @@ function rawLocation(payload: unknown): string | null {
   if (payload && typeof payload === "object" && "location" in payload) {
     const v = (payload as Record<string, unknown>).location;
     if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return null;
+}
+
+// Offre choisie à l'étape 2 du formulaire (bar, barista, canettes…).
+function rawOffer(payload: unknown): string | null {
+  if (payload && typeof payload === "object" && "offer" in payload) {
+    const v = (payload as Record<string, unknown>).offer;
+    if (typeof v === "string" && v in OFFER_LABEL) return OFFER_LABEL[v as keyof typeof OFFER_LABEL];
   }
   return null;
 }
@@ -98,6 +108,15 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
               <dd className="text-right">
                 <EventTypeLabel value={lead.event_type} />
               </dd>
+
+              {rawOffer(lead.raw_payload) && (
+                <>
+                  <dt className="text-xs text-slate-500 dark:text-slate-500">Offre</dt>
+                  <dd className="text-right text-slate-700 dark:text-slate-200">
+                    {rawOffer(lead.raw_payload)}
+                  </dd>
+                </>
+              )}
 
               <dt className="text-xs text-slate-500 dark:text-slate-500">Date événement</dt>
               <dd className="text-right text-slate-700 dark:text-slate-200">

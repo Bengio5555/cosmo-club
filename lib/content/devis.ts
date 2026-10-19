@@ -20,6 +20,11 @@ export const offers = [
     desc: "Matcha, Ube, Blue, Golden Latte — chauds ou glacés.",
   },
   {
+    id: "canettes",
+    label: "Mocktail in a can",
+    desc: "Canettes personnalisées sans alcool, dès 200 — livrées, installées ou servies.",
+  },
+  {
     id: "both",
     label: "Les deux",
     desc: "Bar du soir + stand barista du matin ou dessert.",
@@ -35,7 +40,7 @@ export const devisSchema = z.object({
   eventType: z.enum(["mariage", "corporate", "prive", "defile", "autre"], {
     message: "Choisissez un type d'événement.",
   }),
-  offer: z.enum(["bar", "barista", "both", "undecided"], {
+  offer: z.enum(["bar", "barista", "canettes", "both", "undecided"], {
     message: "Choisissez une offre.",
   }),
   date: z
@@ -94,4 +99,13 @@ export const stepFields = {
   2: ["offer"] as const,
   3: ["date", "location", "guests"] as const,
   4: ["firstName", "lastName", "email", "phone", "message"] as const,
+};
+
+/** Libellés des offres, partagés par le dashboard et les e-mails. */
+export const OFFER_LABEL: Record<DevisInput["offer"], string> = {
+  bar: "Bar à cocktails",
+  barista: "Barista",
+  canettes: "Mocktail in a can",
+  both: "Bar + barista",
+  undecided: "À conseiller",
 };

@@ -191,6 +191,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ m
                 {[
                   "Bar à cocktails signature",
                   "Stands barista & latte art",
+                  "Mocktail in a can · canettes personnalisées",
                   "Cocktails en bouteille",
                   "Juice bar & mocktails",
                   "Création sur-mesure",
