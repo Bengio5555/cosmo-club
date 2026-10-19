@@ -266,7 +266,7 @@ export function ScanClient({
             <input
               ref={nameInputRef}
               defaultValue={name}
-              placeholder="Karim"
+              placeholder="Votre prénom"
               autoComplete="given-name"
               className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-lg text-white placeholder:text-white/40 focus:border-white/60 focus:outline-none"
             />
