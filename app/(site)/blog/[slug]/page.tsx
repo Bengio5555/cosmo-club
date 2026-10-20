@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { site, editorialAuthor } from "@/lib/site";
 import { getAllArticles, getArticle } from "@/lib/blog";
+import { ogDefaults } from "@/lib/seo-og";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: article.keywords,
     alternates: { canonical: `/blog/${slug}` },
     openGraph: {
+      ...ogDefaults(),
       title: article.title,
       description: article.description,
       url: `/blog/${slug}`,

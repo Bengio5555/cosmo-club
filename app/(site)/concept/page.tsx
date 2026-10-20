@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ConceptManifesto } from "@/components/home/ConceptManifesto";
 import { CtaDevis } from "@/components/home/CtaDevis";
+import { ogDefaults } from "@/lib/seo-og";
 
 export const metadata: Metadata = {
   title: "Le concept — mixologie événementielle à Paris",
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
     "L'histoire et l'équipe de Cosmo Club Paris : un laboratoire de mixologie et de barista événementiel pour mariages, corporate et soirées privées.",
   alternates: { canonical: "/concept" },
   openGraph: {
+    ...ogDefaults(),
     title: "Le concept — Cosmo Club Paris",
     description: "Un laboratoire de mixologie et de barista événementiel, signature parisienne.",
     url: "/concept",

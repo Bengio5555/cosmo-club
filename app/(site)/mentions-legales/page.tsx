@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { ogDefaults } from "@/lib/seo-og";
 
 export const metadata: Metadata = {
   title: "Mentions légales — Cosmo Club Paris",
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/mentions-legales" },
   robots: { index: true, follow: true },
   openGraph: {
+    ...ogDefaults(),
     title: "Mentions légales — Cosmo Club Paris",
     description:
       "Mentions légales du site cosmoclub.fr : éditeur, hébergeur, propriété intellectuelle et contact.",

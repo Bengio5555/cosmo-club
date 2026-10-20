@@ -5,6 +5,7 @@ import { ClientsMarquee } from "@/components/marquee/ClientsMarquee";
 import { CtaDevis } from "@/components/home/CtaDevis";
 import { getAllEventTiles } from "@/lib/server/homeGallery";
 import { getPublicClientLogos } from "@/lib/server/clientLogos";
+import { ogDefaults } from "@/lib/seo-og";
 
 export const metadata: Metadata = {
   title: "Événements & références — mariages, corporate",
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/evenements" },
   openGraph: {
+    ...ogDefaults(),
     title: "Événements & références — Cosmo Club Paris",
     description: "Mariages, corporate, soirées privées : nos réalisations événementielles signature.",
     url: "/evenements",

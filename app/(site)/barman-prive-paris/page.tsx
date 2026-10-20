@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
 import { getImagePath } from "@/lib/server/imagesConfig";
+import { ogDefaults } from "@/lib/seo-og";
 
 const SLUG = "/barman-prive-paris";
 const FALLBACK_HERO = "/brand/ai/hero-bar-cocktails.png";
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: SLUG },
   openGraph: {
+    ...ogDefaults(),
     title: "Barman privé Paris — Cosmo Club",
     description:
       "Mixologue professionnel pour vos soirées privées à domicile : carte signature, équipement, service de A à Z.",

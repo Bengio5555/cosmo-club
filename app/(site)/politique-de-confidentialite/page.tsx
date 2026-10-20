@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ogDefaults } from "@/lib/seo-og";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité — Cosmo Club Paris",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/politique-de-confidentialite" },
   robots: { index: true, follow: true },
   openGraph: {
+    ...ogDefaults(),
     title: "Politique de confidentialité — Cosmo Club Paris",
     description:
       "Comment Cosmo Club Paris collecte, utilise et protège vos données personnelles. Vos droits RGPD.",
