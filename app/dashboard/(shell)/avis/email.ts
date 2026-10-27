@@ -24,35 +24,65 @@ export function formatEventDateLong(date: string): string {
 }
 
 export function buildReviewEmail({ firstName, eventDate, reviewUrl }: ReviewEmailInput) {
-  const name = (firstName ?? "").trim();
-  const greeting = name ? `Bonjour ${name},` : "Bonjour,";
   const dateLong = formatEventDateLong(eventDate);
   const eventPhrase = dateLong ? `votre événement du ${dateLong}` : "votre événement";
 
   // Pas « soirée » : séminaires, ateliers et déjeuners ont lieu de jour.
-  const subject = "Merci pour ce bel événement";
-  const thanks = `Merci encore de nous avoir accueillis pour ${eventPhrase}. On espère que vos invités en gardent un aussi bon souvenir que nous.`;
-  const ask = "Si vous avez un instant, quelques mots sur Google nous feraient très plaisir.";
+  return render({
+    subject: "Merci pour ce bel événement",
+    firstName,
+    paragraphs: [
+      `Merci encore de nous avoir accueillis pour ${eventPhrase}. On espère que vos invités en gardent un aussi bon souvenir que nous.`,
+      "Si vous avez un instant, quelques mots sur Google nous feraient très plaisir.",
+    ],
+    reviewUrl,
+  });
+}
+
+/** Relance unique, 7 jours après la demande : plus courte, même lien. */
+export function buildReviewReminderEmail({ firstName, reviewUrl }: Omit<ReviewEmailInput, "eventDate">) {
+  return render({
+    subject: "Petit rappel de la Cosmo Team",
+    firstName,
+    paragraphs: [
+      "Petit rappel, au cas où notre dernier message se serait perdu : si vous avez deux minutes, quelques mots sur Google nous aideraient beaucoup.",
+    ],
+    reviewUrl,
+  });
+}
+
+function render({
+  subject,
+  firstName,
+  paragraphs,
+  reviewUrl,
+}: {
+  subject: string;
+  firstName: string | null;
+  paragraphs: string[];
+  reviewUrl: string;
+}) {
+  const name = (firstName ?? "").trim();
+  const greeting = name ? `Bonjour ${name},` : "Bonjour,";
 
   const text = [
     greeting,
     "",
-    thanks,
-    "",
-    ask,
-    "",
+    ...paragraphs.flatMap((p) => [p, ""]),
     `Laisser un avis : ${reviewUrl}`,
     "",
     "À très vite,",
     "La Cosmo Team",
   ].join("\n");
 
+  const body = paragraphs
+    .map((p, i) => `<p style="font-size:15px;line-height:1.6;margin:0 0 ${i === paragraphs.length - 1 ? 20 : 12}px;">${escapeHtml(p)}</p>`)
+    .join("\n        ");
   const html = `
       <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;color:#111827;">
         <p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8b1a1a;font-weight:700;margin:0 0 16px;">Cosmo Club Paris</p>
         <p style="font-size:15px;line-height:1.6;margin:0 0 12px;">${escapeHtml(greeting)}</p>
-        <p style="font-size:15px;line-height:1.6;margin:0 0 12px;">${escapeHtml(thanks)}</p>
-        <p style="font-size:15px;line-height:1.6;margin:0 0 20px;">${escapeHtml(ask)}</p>
+        ${body}
         <p style="margin:0 0 24px;">
           <a href="${escapeHtml(reviewUrl)}" style="display:inline-block;background:#8b1a1a;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 20px;border-radius:8px;">Laisser un avis</a>
         </p>
