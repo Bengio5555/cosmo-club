@@ -211,3 +211,21 @@ test("llms.txt : les fiches d'annuaire apparaissent dans Identité", () => {
   });
   assert.match(out, /- Instagram : @cosmoclubparis\n- Mariages\.net : https:\/\/www\.mariages\.net\/animation-mariage\/cosmo-club--e423149/);
 });
+
+// --- Champ piège du formulaire de devis ------------------------------------
+test("champ piège : remplissage automatique ≠ robot", async () => {
+  const { honeypotVerdict } = await import("../lib/devisHoneypot.ts");
+  const base = { firstName: "Benjamin", lastName: "Amouyal", email: "benjamin.amouyal@gmail.com", phone: "07 75 74 49 77", location: "Château de Courances" };
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "" }), "clean");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "Benjamin Amouyal" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "amouyal" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "+33775744977" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "benjamin.amouyal@gmail.com" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "26 rue Bosquet" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "75007" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "Paris" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "Cosmo Club" }), "autofill");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "https://cheap-pills.example" }), "bot");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "Buy followers now at our store, best prices guaranteed today!!" }), "bot");
+  assert.equal(honeypotVerdict({ ...base, hp_f2: "x7Kq9!mZ" }), "bot");
+});
