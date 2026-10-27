@@ -34,29 +34,42 @@ export function hostOf(u: string): string | null {
   }
 }
 
-/** Domaines des sources (résultats de recherche, citations, adresses écrites dans le texte) et texte de la réponse. */
-export function collect(content: unknown[]): { domains: string[]; text: string } {
+export type CitedSource = { url: string; title: string };
+
+/** Domaines des sources (résultats de recherche, citations, adresses écrites dans le texte), pages sources et texte de la réponse. */
+export function collect(content: unknown[]): { domains: string[]; sources: CitedSource[]; text: string } {
   const domains = new Set<string>();
+  const sources = new Map<string, CitedSource>();
+  const addSource = (url: string | undefined, title: string | undefined) => {
+    if (!url || sources.has(url) || !/^https?:\/\//.test(url)) return;
+    sources.set(url, { url: url.slice(0, 500), title: (title ?? "").replace(/\s+/g, " ").trim().slice(0, 200) });
+  };
   let text = "";
   for (const b of content) {
     const x = b as {
       type?: string;
       text?: string;
       content?: unknown;
-      citations?: { url?: string }[] | null;
+      citations?: { url?: string; title?: string }[] | null;
     };
     if (!x || typeof x !== "object") continue;
     if (x.type === "web_search_tool_result" && Array.isArray(x.content)) {
-      for (const r of x.content as { type?: string; url?: string }[]) {
+      for (const r of x.content as { type?: string; url?: string; title?: string }[]) {
         const h = r?.type === "web_search_result" && r.url ? hostOf(r.url) : null;
-        if (h) domains.add(h);
+        if (h) {
+          domains.add(h);
+          addSource(r.url, r.title);
+        }
       }
     }
     if (x.type === "text" && typeof x.text === "string") {
       text += x.text + "\n";
       for (const c of x.citations ?? []) {
         const h = c?.url ? hostOf(c.url) : null;
-        if (h) domains.add(h);
+        if (h) {
+          domains.add(h);
+          addSource(c.url, c.title);
+        }
       }
     }
   }
@@ -66,7 +79,7 @@ export function collect(content: unknown[]): { domains: string[]; text: string }
     if (!/\.(fr|com|net|org|io|paris|co|eu|events?|media|be|ch)$/.test(h)) continue;
     domains.add(h);
   }
-  return { domains: [...domains], text };
+  return { domains: [...domains], sources: [...sources.values()], text };
 }
 
 /** Notre site est cité (dans les sources) ou la marque est nommée dans la réponse. */
@@ -79,15 +92,26 @@ export function isCited(domains: string[], text: string, ownDomain: string, bran
   });
 }
 
+const isOwn = (d: string, ownDomain: string) => d === ownDomain || d.endsWith("." + ownDomain);
+
 export function competitorsOf(domains: string[], ownDomain: string): string[] {
-  return domains
-    .filter((d) => d !== ownDomain && !d.endsWith("." + ownDomain) && !isGenericDomain(d))
+  return domains.filter((d) => !isOwn(d, ownDomain) && !isGenericDomain(d)).slice(0, 12);
+}
+
+/** Pages citées à notre place (ni notre site, ni un réseau social), pour savoir à quel article écrire. */
+export function competitorSourcesOf(sources: CitedSource[], ownDomain: string): CitedSource[] {
+  return sources
+    .filter((s) => {
+      const h = hostOf(s.url);
+      return !!h && !isOwn(h, ownDomain) && !isGenericDomain(h);
+    })
     .slice(0, 12);
 }
 
 export type AskResult = {
   cited: boolean;
   citedDomains: string[];
+  citedSources: CitedSource[];
   excerpt: string;
   costUsd: number;
   error: string | null;
@@ -127,7 +151,7 @@ export async function askOne(
         (u.server_tool_use?.web_search_requests ?? 0) * PRICE_SEARCH;
       content.push(...resp.content);
       if (resp.stop_reason === "refusal") {
-        return { cited: false, citedDomains: [], excerpt: "", costUsd: cost, error: "Réponse refusée par le modèle" };
+        return { cited: false, citedDomains: [], citedSources: [], excerpt: "", costUsd: cost, error: "Réponse refusée par le modèle" };
       }
       if (resp.stop_reason !== "pause_turn") break;
       messages.push({ role: "assistant", content: resp.content });
@@ -136,15 +160,17 @@ export async function askOne(
     return {
       cited: false,
       citedDomains: [],
+      citedSources: [],
       excerpt: "",
       costUsd: cost,
       error: (e as Error).message.slice(0, 160),
     };
   }
-  const { domains, text } = collect(content);
+  const { domains, sources, text } = collect(content);
   return {
     cited: isCited(domains, text, opts.ownDomain, opts.brandTerms),
     citedDomains: competitorsOf(domains, opts.ownDomain),
+    citedSources: competitorSourcesOf(sources, opts.ownDomain),
     excerpt: text.replace(/\s+/g, " ").trim().slice(0, 400),
     costUsd: cost,
     error: null,

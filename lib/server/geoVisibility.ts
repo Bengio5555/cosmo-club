@@ -82,6 +82,7 @@ export async function runGeoVisibility(opts: { limit?: number } = {}): Promise<G
         category: r.category,
         cited: r.cited,
         cited_domains: r.citedDomains,
+        cited_sources: r.citedSources,
         answer_excerpt: r.excerpt || null,
         error: r.error,
       })),

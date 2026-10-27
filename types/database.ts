@@ -690,6 +690,7 @@ export type Database = {
           category: string
           cited: boolean
           cited_domains: string[]
+          cited_sources: Json
           answer_excerpt: string | null
           error: string | null
         }
@@ -700,6 +701,27 @@ export type Database = {
           cited: boolean
         }
         Update: Partial<Database["public"]["Tables"]["geo_results"]["Row"]>
+        Relationships: []
+      }
+      geo_actions: {
+        Row: {
+          key: string
+          kind: string
+          title: string
+          status: "done" | "snoozed"
+          snoozed_until: string | null
+          done_at: string | null
+          baseline: Json | null
+          updated_by: string | null
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["geo_actions"]["Row"]> & {
+          key: string
+          kind: string
+          title: string
+          status: "done" | "snoozed"
+        }
+        Update: Partial<Database["public"]["Tables"]["geo_actions"]["Row"]>
         Relationships: []
       }
       ai_bot_hits: {

@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentRole } from "@/lib/auth/server";
 import { formatDateFR } from "@/lib/format";
 import { GEO_CATEGORIES, type GeoCategory } from "@/lib/geo/questions";
+import { loadGeoActionData } from "@/lib/server/geoActions";
+import { outcomeOf, pickActions } from "@/lib/geo/actions";
 import { RerunButton } from "./RerunButton";
+import { TodoBlock, type DoneItem, type TodoItem } from "./TodoBlock";
 
 // Le bouton « Relancer maintenant » exécute le passage complet dans
 // l'action serveur : on reprend la durée max du cron.
@@ -80,6 +83,39 @@ export default async function VisibilitePage() {
   const pathCounts = countBy(hits ?? [], (h) => h.path).slice(0, 10);
 
   const missingMigration = runsError?.message.includes("geo_runs");
+
+  // « À faire cette semaine » : règles fixes sur les passages et les avis en attente.
+  const todo = missingMigration ? null : await loadGeoActionData(supabase);
+  const todoItems: TodoItem[] = todo
+    ? pickActions(todo.candidates, todo.decisions, new Date().toISOString().slice(0, 10)).map((a) => ({
+        key: a.key,
+        title: a.title,
+        detail: a.detail,
+        href: a.href,
+        hrefLabel: a.hrefLabel,
+        hasArticle: !!a.article,
+      }))
+    : [];
+  const doneItems: DoneItem[] = (todo?.decisions ?? [])
+    .filter((d) => d.status === "done" && d.done_at)
+    .sort((a, b) => String(b.done_at).localeCompare(String(a.done_at)))
+    .slice(0, 10)
+    .map((d) => {
+      const o = outcomeOf(d, todo!.runs, todo!.results, new Date());
+      return {
+        key: d.key,
+        title: d.title,
+        doneOn: formatDateFR(d.done_at),
+        ...(o?.state === "measured"
+          ? {
+              result: `cité ${o.before.cited} fois sur ${o.before.total} avant, ${o.after.cited} sur ${o.after.total} après${o.better ? "" : " : pas encore d'effet"}`,
+              tone: o.better ? ("good" as const) : ("neutral" as const),
+            }
+          : o?.state === "waiting"
+            ? { result: `effet mesuré à partir du ${formatDateFR(o.readyOn)}`, tone: "waiting" as const }
+            : { result: "pas de mesure pour ce type d'action", tone: "neutral" as const }),
+      };
+    });
   const chronological = [...(runs ?? [])].reverse();
   const maxPct = Math.max(0.01, ...chronological.map((r) => (r.questions ? r.cited / r.questions : 0)));
 
@@ -105,6 +141,8 @@ export default async function VisibilitePage() {
             : runsError.message}
         </div>
       )}
+
+      {todo && <TodoBlock items={todoItems} done={doneItems} />}
 
       <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/60 dark:shadow-none">
         <SectionTitle icon={Radar} title="Recommandé par les assistants IA" />

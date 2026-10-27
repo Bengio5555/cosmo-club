@@ -6,7 +6,8 @@ import assert from "node:assert/strict";
 
 import { normalizeGoogleReviewUrl } from "../lib/reviewUrl.ts";
 import { buildLlmsTxt } from "../lib/content/llms.ts";
-import { collect, isCited, competitorsOf } from "../lib/geo/aiMentions.ts";
+import { collect, isCited, competitorsOf, competitorSourcesOf } from "../lib/geo/aiMentions.ts";
+import { candidateActions, pickActions, isArticleUrl, isDirectory, outcomeOf, baselineFor } from "../lib/geo/actions.ts";
 import { aiBotName } from "../lib/geo/aiBots.ts";
 import { buildReviewEmail, formatEventDateLong } from "../app/dashboard/(shell)/avis/email.ts";
 
@@ -81,6 +82,11 @@ test("citations IA : domaines des sources, des citations et du texte", () => {
   assert.ok(isCited(["www.cosmoclub.fr".replace("www.", "")], "", "cosmoclub.fr", []));
   assert.ok(!isCited([], "le cosmos club de jazz", "cosmoclub.fr", ["Cosmo Club"]));
   assert.deepEqual(competitorsOf(domains, "cosmoclub.fr").sort(), ["barvolant.fr", "mariages.net", "zankyou.fr"]);
+  const { sources } = collect(content);
+  assert.deepEqual(
+    competitorSourcesOf(sources, "cosmoclub.fr").map((x) => x.url).sort(),
+    ["https://www.mariages.net/bar", "https://zankyou.fr/p/bars"],
+  );
 });
 
 test("robots IA : détection par user-agent", () => {
@@ -99,4 +105,77 @@ test("attribution : les liens ChatGPT (utm_source=chatgpt.com) comptent comme as
   assert.equal(deriveChannel({ referrer: "https://chatgpt.com/" }), "ai_assistant");
   assert.equal(deriveChannel({ utm_source: "google", utm_medium: "cpc" }), "google_ads");
   assert.equal(deriveChannel({ utm_source: "partenaire-x" }), "referral");
+});
+
+// --- « À faire cette semaine » ---------------------------------------------
+const run = (id, ran_at) => ({ id, ran_at, questions: 4, cited: 0 });
+const res = (run_id, question, category, cited, domains = [], sources = []) => ({
+  run_id, question, category, cited, cited_domains: domains, cited_sources: sources, error: null,
+});
+
+test("à faire : annuaire, article, catégorie à 0, avis en attente, trois au plus", () => {
+  const runs = [run("r2", "2026-10-26T06:00:00Z"), run("r1", "2026-10-19T06:00:00Z")];
+  const art = { url: "https://blog-mariage.fr/blog/top-10-bars-a-cocktails-mariage-paris", title: "Top 10 des bars à cocktails" };
+  const results = [];
+  for (const r of ["r1", "r2"]) {
+    results.push(res(r, "Q prix 1", "prix", false, ["mariages.net", "blog-mariage.fr"], [art]));
+    results.push(res(r, "Q prix 2", "prix", false, ["mariages.net", "blog-mariage.fr"], [art]));
+    results.push(res(r, "Q mariage", "mariage", true, ["blog-mariage.fr"], [art]));
+  }
+  const all = candidateActions({ runs, results, pendingReviews: { count: 2, latestEventId: "e1" } });
+  const keys = all.map((a) => a.key);
+  assert.deepEqual(keys.slice(0, 4), ["reviews:e1", "content:prix", "site:mariages.net", "site:blog-mariage.fr"]);
+  assert.equal(all.find((a) => a.key === "site:blog-mariage.fr").kind, "article");
+  assert.deepEqual(all.find((a) => a.key === "site:blog-mariage.fr").article, art);
+  assert.equal(all.find((a) => a.key === "site:mariages.net").kind, "directory");
+  assert.ok(!keys.includes("content:mariage"), "une catégorie citée ne déclenche rien");
+  assert.match(all.find((a) => a.key === "site:blog-mariage.fr").detail, /4 réponses/, "les réponses où l'on est cité ne comptent pas");
+
+  const today = "2026-10-27";
+  assert.equal(pickActions(all, [], today).length, 3);
+  const decisions = [
+    { key: "reviews:e1", status: "done", done_at: "2026-10-27T10:00:00Z", snoozed_until: null, baseline: null, title: "", kind: "reviews" },
+    { key: "content:prix", status: "snoozed", snoozed_until: "2026-11-10", done_at: null, baseline: null, title: "", kind: "content" },
+  ];
+  assert.deepEqual(pickActions(all, decisions, today).map((a) => a.key), ["site:mariages.net", "site:blog-mariage.fr"]);
+  assert.ok(pickActions(all, decisions, "2026-11-10").some((a) => a.key === "content:prix"), "plus tard revient à échéance");
+});
+
+test("à faire : seuil de 3 réponses sans nous, et poids plafonné", () => {
+  const runs = [run("r1", "2026-10-26T06:00:00Z")];
+  const results = [res("r1", "Q1", "prix", false, ["rare.fr"]), res("r1", "Q2", "prix", true, ["rare.fr"])];
+  assert.ok(!candidateActions({ runs, results, pendingReviews: { count: 0, latestEventId: null } }).some((a) => a.key === "site:rare.fr"));
+  const many = Array.from({ length: 40 }, (_, i) => res("r1", `Q${i}`, "mariage", false, ["mariages.net"]));
+  const acts = candidateActions({ runs, results: many, pendingReviews: { count: 1, latestEventId: "e9" } });
+  assert.equal(acts[0].key, "reviews:e9", "un site très cité ne passe pas devant les avis en attente");
+});
+
+test("à faire : reconnaître annuaires et articles", () => {
+  assert.ok(isDirectory("www.mariages.net".replace("www.", "")));
+  assert.ok(isDirectory("fr.zankyou.fr".replace("fr.", "")));
+  assert.ok(isArticleUrl("https://site.fr/blog/bar-mariage"));
+  assert.ok(isArticleUrl("https://site.fr/les-10-meilleurs-bars-a-cocktails-paris"));
+  assert.ok(!isArticleUrl("https://concurrent.fr/"));
+  assert.ok(!isArticleUrl("https://concurrent.fr/mariage"));
+});
+
+test("à faire : mesure à J+28 sur les questions de l'action", () => {
+  const before = [run("b1", "2026-09-01T06:00:00Z")];
+  const after = [run("a2", "2026-10-20T06:00:00Z"), run("a1", "2026-10-13T06:00:00Z")];
+  const results = [
+    res("b1", "Q prix", "prix", false), res("b1", "Q prix 2", "prix", false),
+    res("a1", "Q prix", "prix", true), res("a1", "Q prix 2", "prix", false),
+    res("a2", "Q prix", "prix", true), res("a2", "Q prix 2", "prix", false),
+    res("a2", "Autre", "mariage", false),
+  ];
+  const action = { questions: ["Q prix", "Q prix 2"] };
+  const baseline = baselineFor(action, before, results);
+  assert.deepEqual(baseline, { questions: ["Q prix", "Q prix 2"], cited: 0, total: 2 });
+  const d = { key: "content:prix", status: "done", done_at: "2026-09-02T10:00:00Z", baseline, snoozed_until: null, title: "", kind: "content" };
+  const runs = [...after, ...before];
+  const o = outcomeOf(d, runs, results, new Date("2026-10-27T00:00:00Z"));
+  assert.equal(o.state, "measured");
+  assert.deepEqual(o.after, { cited: 2, total: 4 });
+  assert.equal(o.better, true);
+  assert.equal(outcomeOf(d, runs, results, new Date("2026-09-20T00:00:00Z")).state, "waiting");
 });
