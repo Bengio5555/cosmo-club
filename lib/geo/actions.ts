@@ -123,6 +123,8 @@ export function candidateActions(input: {
   runs: RunLite[];
   results: ResultLite[];
   pendingReviews: { count: number; latestEventId: string | null };
+  /** Demandes envoyées il y a plus de 7 jours, sans relance ni avis reçu. */
+  remindableReviews?: { count: number; latestEventId: string | null };
   /** Annuaires où Cosmo Club a déjà une fiche : on propose de l'étoffer, pas de s'inscrire. */
   presence?: { domain: string; url: string }[];
 }): GeoAction[] {
@@ -130,18 +132,28 @@ export function candidateActions(input: {
   const recentIds = new Set(input.runs.slice(0, 4).map((r) => r.id));
   const recent = input.results.filter((r) => recentIds.has(r.run_id) && !r.error);
 
-  if (input.pendingReviews.count > 0 && input.pendingReviews.latestEventId) {
-    const n = input.pendingReviews.count;
+  // Demandes et relances d'avis : une seule ligne, pour laisser la place au reste.
+  const ask = input.pendingReviews.latestEventId ? input.pendingReviews.count : 0;
+  const remind = input.remindableReviews?.latestEventId ? input.remindableReviews.count : 0;
+  if (ask + remind > 0) {
+    const demandes = ask > 1 ? `les ${ask} demandes` : "la demande";
+    const relances = remind > 1 ? `les ${remind} relances` : "la relance";
     out.push({
-      key: `reviews:${input.pendingReviews.latestEventId}`,
+      key: ask
+        ? `reviews:${input.pendingReviews.latestEventId}`
+        : `reviews:relance-${input.remindableReviews!.latestEventId}`,
       kind: "reviews",
-      title: `Envoie ${n > 1 ? `les ${n} demandes` : "la demande"} d'avis en attente`,
+      title: ask && remind
+        ? `Envoie ${demandes} et ${relances} d'avis en attente`
+        : ask
+          ? `Envoie ${demandes} d'avis en attente`
+          : `Envoie ${relances} d'avis : clients sans avis 7 jours après la demande`,
       detail: "Les avis Google pèsent dans les recommandations de Google et des assistants IA. Un clic par événement.",
-      href: "/dashboard/avis",
+      href: ask ? "/dashboard/avis" : "/dashboard/avis?vue=relancer",
       hrefLabel: "Ouvrir Avis clients",
       article: null,
       questions: [],
-      score: 50 + Math.min(n, 5) * 2,
+      score: 50 + Math.min(ask + remind, 5) * 2,
     });
   }
 

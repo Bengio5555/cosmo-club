@@ -98,6 +98,12 @@ export type Database = {
           todo_data: Json | null
           review_requested_at: string | null
           review_requested_by: string | null
+          review_reminded_at: string | null
+          review_reminded_by: string | null
+          review_received_at: string | null
+          review_received_by: string | null
+          review_clicked_at: string | null
+          review_token: string
           updated_at: string
         }
         Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & { title: string; date: string }

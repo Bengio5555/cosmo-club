@@ -5,6 +5,7 @@ import { profiles, site } from "@/lib/site";
 import { reviewsAggregate } from "@/lib/testimonials";
 import { PRESS } from "@/lib/content/llms";
 import { GEO_MODEL } from "@/lib/geo/aiMentions";
+import { reviewStage } from "@/lib/reviewFollowup";
 import {
   candidateActions,
   type Decision,
@@ -32,8 +33,10 @@ export type GeoActionData = {
  * recalculent les candidats plutôt que de croire ce qu'envoie le navigateur.
  */
 export async function loadGeoActionData(supabase: Supabase): Promise<GeoActionData> {
-  const today = new Date().toISOString().slice(0, 10);
-  const since = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10);
+  const now = Date.now();
+  const today = new Date(now).toISOString().slice(0, 10);
+  const since = new Date(now - 60 * 86400000).toISOString().slice(0, 10);
+  const yearAgo = new Date(now - 365 * 86400000).toISOString().slice(0, 10);
 
   const [{ data: runs }, { data: decisions }, { data: events }] = await Promise.all([
     supabase
@@ -44,11 +47,10 @@ export async function loadGeoActionData(supabase: Supabase): Promise<GeoActionDa
     supabase.from("geo_actions").select("key,status,snoozed_until,done_at,baseline,title,kind"),
     supabase
       .from("events")
-      .select("id,date,client_id")
+      .select("id,date,client_id,review_requested_at,review_reminded_at,review_received_at")
       .lt("date", today)
-      .gte("date", since)
+      .gte("date", yearAgo)
       .neq("status", "annule")
-      .is("review_requested_at", null)
       .order("date", { ascending: false }),
   ]);
 
@@ -66,7 +68,22 @@ export async function loadGeoActionData(supabase: Supabase): Promise<GeoActionDa
     ? await supabase.from("clients").select("id,email").in("id", clientIds)
     : { data: [] };
   const withEmail = new Set((clients ?? []).filter((c) => (c.email ?? "").includes("@")).map((c) => c.id));
-  const pending = (events ?? []).filter((e) => e.client_id && withEmail.has(e.client_id));
+  const { data: history } = clientIds.length
+    ? await supabase
+        .from("events")
+        .select("id,client_id,review_requested_at,review_reminded_at,review_received_at")
+        .in("client_id", clientIds)
+        .or("review_requested_at.not.is.null,review_received_at.not.is.null")
+    : { data: [] };
+  const staged = (events ?? [])
+    .filter((e) => e.client_id && withEmail.has(e.client_id))
+    .map((e) => ({
+      e,
+      stage: reviewStage(e, (history ?? []).filter((h) => h.client_id === e.client_id), now).stage,
+    }));
+  // Demandes : événements des 60 derniers jours ; relances : 12 derniers mois.
+  const pending = staged.filter((x) => x.stage === "to_request" && x.e.date >= since).map((x) => x.e);
+  const remindable = staged.filter((x) => x.stage === "to_remind").map((x) => x.e);
 
   const data = {
     runs: runs ?? [],
@@ -79,6 +96,7 @@ export async function loadGeoActionData(supabase: Supabase): Promise<GeoActionDa
       runs: data.runs,
       results: data.results,
       pendingReviews: { count: pending.length, latestEventId: pending[0]?.id ?? null },
+      remindableReviews: { count: remindable.length, latestEventId: remindable[0]?.id ?? null },
       presence: profiles.map((p) => ({ domain: new URL(p.url).hostname.replace(/^www\./, ""), url: p.url })),
     }),
   };
