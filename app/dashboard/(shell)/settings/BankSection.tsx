@@ -65,10 +65,11 @@ export function BankSection({
             </p>
           )}
         </div>
-        <p className="text-[11px] text-slate-500">
-          Protégé : changement par le propriétaire avec un code reçu par e-mail, alerte envoyée à chaque modification.
-          {updatedAt && <> Dernière modification le {formatDateFR(updatedAt, { withTime: true })}.</>}
-        </p>
+        {updatedAt && (
+          <p className="text-[11px] text-slate-500">
+            Dernière modification le {formatDateFR(updatedAt, { withTime: true })}.
+          </p>
+        )}
         {isOwner && history.length > 0 && (
           <details className="border-t border-slate-100 pt-3 dark:border-slate-900">
             <summary className="cursor-pointer text-xs font-medium text-slate-600 dark:text-slate-400">
