@@ -7,7 +7,7 @@
  *
  * Le devis reste obligatoire : aucune commande en ligne, aucun
  * simulateur. La version avec alcool n'est pas une formule standard,
- * elle se traite uniquement sur demande (mentionnée en FAQ).
+ * elle se traite uniquement sur devis (listée en option et en FAQ).
  */
 
 export const TVA_RATE = 0.2;
@@ -164,6 +164,11 @@ export const options = [
     name: "Livraison",
     desc: "Paris 60 € · petite couronne 90 € · reste de l'Île-de-France 120 à 150 €. Offerte dès 500 canettes.",
     price: "offerte dès 500",
+  },
+  {
+    name: "Version cocktail, avec alcool",
+    desc: "Les recettes déclinées en cocktails alcoolisés, étudiées au cas par cas selon votre événement.",
+    price: "sur devis",
   },
 ];
 
