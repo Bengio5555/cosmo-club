@@ -34,7 +34,7 @@ export async function rerunGeoCheck() {
 }
 
 const TODO_ROLES = ["owner", "admin", "manager"];
-const KEY_RE = /^(reviews|site|content):[a-z0-9.\-_]{1,120}$/i;
+const KEY_RE = /^(reviews|site|profile|content):[a-z0-9.\-_]{1,120}$/i;
 
 /**
  * « Fait » ou « Plus tard » sur une action du bloc À faire. La clé est

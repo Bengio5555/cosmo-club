@@ -18,6 +18,16 @@ export const site = {
   },
 } as const;
 
+// Fiches de Cosmo Club sur des annuaires tiers. Servent au `sameAs` de
+// l'Organization (Google et les assistants relient ces fiches à la même
+// entité), à /llms.txt, et au suivi Visibilité IA : une réponse qui cite
+// l'une de ces fiches compte comme une citation de Cosmo Club.
+export const profiles = [
+  { label: "Mariages.net", url: "https://www.mariages.net/animation-mariage/cosmo-club--e423149" },
+] as const;
+
+export const organizationSameAs: string[] = [site.instagram, ...profiles.map((p) => p.url)];
+
 // Single source of truth for editorial author. Used by:
 // - the BlogPosting `author` JSON-LD on every article page (Person, not Organization)
 // - a separate standalone Person JSON-LD block emitted next to BlogPosting

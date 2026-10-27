@@ -29,7 +29,7 @@ test("e-mail d'avis : prénom, date longue, HTML échappé", () => {
     eventDate: "2026-10-18",
     reviewUrl: "https://g.page/r/abc/review?a=1&b=2",
   });
-  assert.equal(subject, "Merci pour votre soirée");
+  assert.equal(subject, "Merci pour ce bel événement");
   assert.match(text, /Bonjour <b>Léa<\/b>,/);
   assert.match(text, /accueillis pour votre événement du 18 octobre\./);
   assert.match(text, /quelques mots sur Google nous feraient très plaisir/);
@@ -180,4 +180,34 @@ test("à faire : mesure à J+28 sur les questions de l'action", () => {
   assert.deepEqual(o.after, { cited: 2, total: 4 });
   assert.equal(o.better, true);
   assert.equal(outcomeOf(d, runs, results, new Date("2026-09-20T00:00:00Z")).state, "waiting");
+});
+
+// --- Fiches d'annuaire (mariages.net) --------------------------------------
+test("fiche mariages.net : compte comme une citation, et l'action devient « étoffer »", async () => {
+  const { isOwnProfile } = await import("../lib/geo/aiMentions.ts");
+  const fiche = "https://www.mariages.net/animation-mariage/cosmo-club--e423149";
+  assert.ok(isOwnProfile("https://mariages.net/animation-mariage/cosmo-club--e423149?utm=x", [fiche]));
+  assert.ok(!isOwnProfile("https://www.mariages.net/animation-mariage/autre--e1", [fiche]));
+  const sources = [{ url: fiche, title: "Cosmo Club" }];
+  assert.ok(isCited(["mariages.net"], "Je conseille ce bar.", "cosmoclub.fr", ["Cosmo Club"], sources, [fiche]));
+  assert.ok(!isCited(["mariages.net"], "Je conseille ce bar.", "cosmoclub.fr", ["Cosmo Club"], [{ url: "https://www.mariages.net/x", title: "" }], [fiche]));
+  assert.deepEqual(competitorSourcesOf([...sources, { url: "https://www.mariages.net/x", title: "" }], "cosmoclub.fr", [fiche]).map((s) => s.url), ["https://www.mariages.net/x"]);
+
+  const runs = [run("r1", "2026-10-26T06:00:00Z")];
+  const results = [1, 2, 3].map((i) => res("r1", `Q${i}`, "mariage", false, ["mariages.net"]));
+  const acts = candidateActions({ runs, results, pendingReviews: { count: 0, latestEventId: null }, presence: [{ domain: "mariages.net", url: fiche }] });
+  const a = acts.find((x) => x.key === "profile:mariages.net");
+  assert.ok(a, "action « étoffer la fiche »");
+  assert.equal(a.href, fiche);
+  assert.ok(!acts.some((x) => x.key === "site:mariages.net"), "plus de « Inscris Cosmo Club »");
+});
+
+test("llms.txt : les fiches d'annuaire apparaissent dans Identité", () => {
+  const out = buildLlmsTxt({
+    siteUrl: "https://www.cosmoclub.fr",
+    articles: [],
+    reviews: { ratingValue: 5, reviewCount: 15, source: "Google" },
+    profiles: [{ label: "Mariages.net", url: "https://www.mariages.net/animation-mariage/cosmo-club--e423149" }],
+  });
+  assert.match(out, /- Instagram : @cosmoclubparis\n- Mariages\.net : https:\/\/www\.mariages\.net\/animation-mariage\/cosmo-club--e423149/);
 });

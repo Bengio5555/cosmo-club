@@ -1,6 +1,6 @@
 import { getAllArticles } from "@/lib/blog";
 import { buildLlmsTxt } from "@/lib/content/llms";
-import { site } from "@/lib/site";
+import { profiles, site } from "@/lib/site";
 import { reviewsAggregate } from "@/lib/testimonials";
 
 // Régénéré au plus toutes les heures : un article publié apparaît dans
@@ -9,7 +9,7 @@ export const revalidate = 3600;
 
 export async function GET() {
   const articles = await getAllArticles();
-  const body = buildLlmsTxt({ siteUrl: site.url, articles, reviews: reviewsAggregate });
+  const body = buildLlmsTxt({ siteUrl: site.url, articles, reviews: reviewsAggregate, profiles });
   return new Response(body, {
     headers: { "Content-Type": "text/plain; charset=utf-8" },
   });
