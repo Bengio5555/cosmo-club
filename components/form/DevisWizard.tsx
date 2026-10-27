@@ -694,7 +694,7 @@ function SuccessScreen({ firstName }: { firstName: string }) {
         </span>
       </h3>
       <p className="relative mt-6 max-w-md text-[color:var(--color-espresso)]/75">
-        Pendant ce temps, suivez l'envers du décor sur Instagram — nos derniers cocktails et stands y sont postés chaque semaine.
+        Notre Book vient de partir dans votre boîte mail. Pendant ce temps, suivez l'envers du décor sur Instagram — nos derniers cocktails et stands y sont postés chaque semaine.
       </p>
       <div className="relative mt-8 flex flex-col items-center gap-3 sm:flex-row">
         <a

@@ -15,6 +15,13 @@ const FROM_EMAIL = process.env.DEVIS_FROM_EMAIL ?? "devis@cosmoclub.fr";
 
 const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;
 
+// Plaquette jointe à l'accusé de réception. Source : scripts/plaquette/
+// (régénérer avec `bash scripts/plaquette/build.sh`). Resend télécharge le
+// fichier depuis l'URL publique du site, donc le PDF doit être déployé.
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? site.url).replace(/\/$/, "");
+const BROCHURE_URL = `${SITE_URL}/book/cosmo-club-book.pdf`;
+const BROCHURE_FILENAME = "Cosmo Club Paris - Book 2026.pdf";
+
 // Resolve the notification recipient: the value configured by the owner
 // in /dashboard/settings wins, then the DEVIS_TO_EMAIL env var (build-time),
 // then site.email as a last resort. Reads via the admin client so it works
@@ -256,19 +263,59 @@ export async function POST(req: Request) {
 
   const toEmail = await resolveLeadNotificationEmail();
 
-  try {
-    await resend.emails.send({
+  // Les deux envois partent ensemble ; seul celui de l'admin conditionne
+  // la réponse, l'accusé de réception au client est best-effort.
+  const [adminResult] = await Promise.allSettled([
+    resend.emails.send({
       from: `Cosmo Club Devis <${FROM_EMAIL}>`,
       to: [toEmail],
       replyTo: data.email,
       subject,
       text: textBody,
       html: htmlBody,
-    });
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("resend_error", err);
+    }),
+    sendBrochure(resend, data, toEmail),
+  ]);
+
+  if (adminResult.status === "rejected") {
+    console.error("resend_error", adminResult.reason);
     return NextResponse.json({ ok: false, error: "send_failed" }, { status: 502 });
+  }
+  return NextResponse.json({ ok: true });
+}
+
+// Accusé de réception envoyé au prospect dès sa demande, avec la plaquette
+// en pièce jointe. Les réponses du client arrivent chez l'admin (replyTo).
+// Si Resend refuse la pièce jointe (PDF introuvable, par exemple avant le
+// déploiement), on renvoie le même mail sans PJ : le lien suffit.
+async function sendBrochure(
+  client: Resend,
+  d: ReturnType<typeof devisSchema.parse>,
+  replyTo: string,
+) {
+  const base = {
+    from: `Cosmo Club Paris <${FROM_EMAIL}>`,
+    to: [d.email],
+    replyTo,
+    subject: "Votre demande Cosmo Club · notre Book",
+    text: renderBrochureText(d),
+    html: renderBrochureHtml(d),
+  };
+  try {
+    const res = await client.emails.send({
+      ...base,
+      attachments: [{ filename: BROCHURE_FILENAME, path: BROCHURE_URL }],
+    });
+    if (!res.error) return;
+    console.error("[sendBrochure] with attachment:", res.error);
+  } catch (err) {
+    console.error("[sendBrochure] with attachment threw:", err);
+  }
+  try {
+    const res = await client.emails.send(base);
+    if (res.error) console.error("[sendBrochure] without attachment:", res.error);
+  } catch (err) {
+    console.error("[sendBrochure] without attachment threw:", err);
   }
 }
 
@@ -314,6 +361,106 @@ function escape(s: string) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+// Le mail part vers l'adresse saisie dans un formulaire public : le prénom
+// est le seul texte libre recopié, on le borne pour qu'un robot ne puisse pas
+// s'en servir pour relayer un message ou un lien depuis notre domaine.
+function brochureName(d: ReturnType<typeof devisSchema.parse>): string | null {
+  const name = d.firstName.replace(/\s+/g, " ").trim().slice(0, 40);
+  if (!name || /https?:|www\.|@|\.[a-z]{2,}\b/i.test(name)) return null;
+  return name;
+}
+
+function brochureRecap(d: ReturnType<typeof devisSchema.parse>): [string, string][] {
+  const rows: [string, string][] = [
+    ["Événement", labelFor(d.eventType)],
+    ["Offre", offerLabel(d.offer)],
+    ["Date", d.date],
+    ["Lieu", d.location],
+  ];
+  if (d.guests != null) rows.push(["Invités", String(d.guests)]);
+  return rows;
+}
+
+function renderBrochureText(d: ReturnType<typeof devisSchema.parse>) {
+  return [
+    brochureName(d) ? `Bonjour ${brochureName(d)},` : "Bonjour,",
+    ``,
+    `Merci pour votre demande, elle est bien arrivée ! Nous revenons vers vous sous 48 h pour en parler.`,
+    ``,
+    `En attendant, vous trouverez notre Book en pièce jointe : nos bars, nos cartes, nos personnalisations…`,
+    `Il est aussi disponible ici : ${BROCHURE_URL}`,
+    ``,
+    `Votre demande :`,
+    ...brochureRecap(d).map(([k, v]) => `${k} : ${v}`),
+    ``,
+    `Une précision à ajouter ? Répondez simplement à cet e-mail.`,
+    ``,
+    `À très vite,`,
+    `La Cosmo Team`,
+    `${site.phoneDisplay} · ${site.url.replace(/^https?:\/\/(www\.)?/, "")} · ${site.instagramHandle}`,
+  ].join("\n");
+}
+
+function renderBrochureHtml(d: ReturnType<typeof devisSchema.parse>) {
+  const rows = brochureRecap(d)
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:5px 0; color:#726d63; width:110px;">${escape(k)}</td><td style="padding:5px 0;">${escape(v)}</td></tr>`,
+    )
+    .join("");
+  return `
+<!doctype html>
+<html lang="fr">
+  <body style="font-family: Inter, system-ui, sans-serif; background:#f5efe0; margin:0; padding:32px; color:#2a1f14;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden;">
+      <tr>
+        <td style="padding:32px 32px 8px;">
+          <p style="font-size:10px; letter-spacing:0.28em; text-transform:uppercase; color:#8b1a1a; margin:0 0 12px;">Cosmo Club Paris</p>
+          <h1 style="font-family:Georgia,serif; font-size:28px; line-height:1.2; margin:0 0 18px; color:#2a1f14;">${brochureName(d) ? `Merci, ${escape(brochureName(d)!)}&nbsp;!` : "Merci&nbsp;!"}</h1>
+          <p style="margin:0 0 12px; line-height:1.6;">Votre demande est bien arrivée. Nous revenons vers vous sous 48&nbsp;h pour en parler.</p>
+          <p style="margin:0 0 12px; line-height:1.6;">En attendant, vous trouverez notre Book en pièce jointe&nbsp;: nos bars, nos cartes, nos personnalisations…</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 32px 8px;">
+          <a href="${BROCHURE_URL}" style="display:inline-block; padding:14px 28px; background:#8b1a1a; color:#f5efe0; text-decoration:none; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase;">
+            Voir le Book
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:20px 32px 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5efe0; border-left:3px solid #8b1a1a; border-radius:6px;">
+            <tr>
+              <td style="padding:14px 18px;">
+                <p style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#8b1a1a; margin:0 0 8px;">Votre demande</p>
+                <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px; line-height:1.5; color:#2a1f14;">${rows}</table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 32px 28px; line-height:1.6;">
+          <p style="margin:0 0 16px;">Une précision à ajouter&nbsp;? Répondez simplement à cet e-mail.</p>
+          <p style="margin:0;">À très vite,<br/><strong>La Cosmo Team</strong></p>
+          <p style="margin:6px 0 0; font-size:13px; color:#3a2a1e;">
+            <a href="tel:${site.phone.replace(/\s/g, "")}" style="color:#8b1a1a; text-decoration:none;">${escape(site.phoneDisplay)}</a>
+            · <a href="${site.url}" style="color:#8b1a1a; text-decoration:none;">cosmoclub.fr</a>
+            · <a href="${site.instagram}" style="color:#8b1a1a; text-decoration:none;">${escape(site.instagramHandle)}</a>
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:20px 32px; background:#f5efe0; font-size:11px; color:#3a2a1e; opacity:0.7;">
+          Cet e-mail vous a été envoyé suite à votre demande sur cosmoclub.fr.
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`.trim();
 }
 
 function renderHtml(d: ReturnType<typeof devisSchema.parse>) {
