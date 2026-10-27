@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { devisSchema } from "@/lib/content/devis";
+import { honeypotVerdict } from "@/lib/devisHoneypot";
 import { site } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { channelLabel, deriveChannel, hostOf } from "@/lib/attribution";
@@ -165,10 +166,10 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>, opts: { s
           ? Number(data.guests) || null
           : null,
       message: data.message || null,
-      // Champ piège rempli : on garde la demande mais on la signale, plutôt
-      // que de la perdre — un autofill de navigateur peut aussi le remplir.
+      // Champ piège rempli avec un contenu inhabituel (voir lib/devisHoneypot) :
+      // la demande est gardée, notifiée, mais signalée.
       internal_notes: opts.suspect
-        ? "⚠️ Champ piège anti-robots rempli à l'envoi : robot probable, ou remplissage automatique du navigateur. À vérifier avant de répondre."
+        ? "⚠️ Champ piège anti-robots rempli avec un contenu inhabituel : robot probable. Tu as reçu la notification, mais le Book n'a pas été envoyé. À vérifier avant de répondre."
         : null,
       // Marque posée sur la canette (page canettes) : sert de société
       // par défaut, le reste du payload est conservé dans raw_payload.
@@ -223,11 +224,13 @@ export async function POST(req: Request) {
 
   const data = parsed.data;
 
-  // Honeypot : la demande est conservée mais signalée dans le dashboard, et
-  // l'e-mail de notification n'est pas envoyé (pas de spam dans la boîte).
-  const suspect = !!data.hp_f2;
+  // Champ piège : un remplissage automatique du navigateur n'est pas un robot.
+  // Une demande suspecte est gardée et notifiée (une vraie demande ne doit
+  // jamais être perdue), mais le prospect ne reçoit pas le Book : le
+  // formulaire ne doit pas servir de relais d'e-mails.
+  const suspect = honeypotVerdict(data) === "bot";
 
-  const subject = `Nouveau devis · ${labelFor(data.eventType)} · ${data.firstName} ${data.lastName}`;
+  const subject = `${suspect ? "⚠️ Robot probable · " : ""}Nouveau devis · ${labelFor(data.eventType)} · ${data.firstName} ${data.lastName}`;
 
   const textBody = [
     `Nouveau devis Cosmo Club`,
@@ -251,9 +254,6 @@ export async function POST(req: Request) {
 
   // Persist to DB alongside the email — failures in one don't affect the other.
   await persistLead(data, { suspect });
-  if (suspect) {
-    return NextResponse.json({ ok: true, flagged: true });
-  }
 
   if (!resend) {
     // Dev fallback: log to server console so the flow is testable without a key
@@ -274,14 +274,14 @@ export async function POST(req: Request) {
       text: textBody,
       html: htmlBody,
     }),
-    sendBrochure(resend, data, toEmail),
+    suspect ? Promise.resolve() : sendBrochure(resend, data, toEmail),
   ]);
 
   if (adminResult.status === "rejected") {
     console.error("resend_error", adminResult.reason);
     return NextResponse.json({ ok: false, error: "send_failed" }, { status: 502 });
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json(suspect ? { ok: true, flagged: true } : { ok: true });
 }
 
 // Accusé de réception envoyé au prospect dès sa demande, avec la plaquette
