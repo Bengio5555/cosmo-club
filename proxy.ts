@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/types/database";
 import {
@@ -6,6 +6,7 @@ import {
   defaultRouteForRole,
   type UserRole,
 } from "@/lib/auth/roles";
+import { aiBotName } from "@/lib/geo/aiBots";
 
 /**
  * Next.js 16 proxy (formerly middleware).
@@ -15,7 +16,15 @@ import {
  * - Protects /dashboard/**: if no session, redirect to /dashboard/login.
  *   The login + auth callback routes are allowed through.
  */
-export async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
+  // Public pages only reach the proxy for AI crawlers (see the second
+  // matcher entry): log the hit off the response path and let it through.
+  if (!request.nextUrl.pathname.startsWith("/dashboard")) {
+    const bot = aiBotName(request.headers.get("user-agent"));
+    if (bot) event.waitUntil(logAiBotHit(bot, request.nextUrl.pathname));
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -94,10 +103,50 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
+/**
+ * Best-effort insert into ai_bot_hits through PostgREST with the service
+ * key (the table has no insert policy). No IP, no full user-agent: bot
+ * name + path only. Failures are swallowed — logging must never break a
+ * crawl.
+ */
+async function logAiBotHit(bot: string, pathname: string): Promise<void> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/rest/v1/ai_bot_hits`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ bot, path: pathname.slice(0, 200) }),
+    });
+  } catch {
+    // ignore
+  }
+}
+
 export const config = {
   matcher: [
     // Run on all /dashboard/** and the auth callback. Skip static assets and
     // the public site so performance isn't impacted.
     "/dashboard/:path*",
+    // Public pages: only when the user-agent is an AI crawler, so regular
+    // visitors never pay for a proxy invocation. Must stay a literal (the
+    // matcher is analysed at build time) — keep in sync with AI_BOTS (lib/geo/aiBots.ts).
+    {
+      source: "/((?!api|_next/static|_next/image|dashboard|favicon.ico|.*\\.(?:png|jpg|jpeg|webp|avif|svg|ico|css|js|woff2?)$).*)",
+      has: [
+        {
+          type: "header",
+          key: "user-agent",
+          value:
+            ".*(OAI-SearchBot|ChatGPT-User|GPTBot|Claude-User|Claude-SearchBot|ClaudeBot|Perplexity-User|PerplexityBot|CCBot|Bytespider|meta-externalagent|MistralAI-User).*",
+        },
+      ],
+    },
   ],
 };

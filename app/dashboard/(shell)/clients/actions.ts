@@ -63,6 +63,9 @@ export async function saveNewClient(
   // Provenance of the mirrored demande (phone, recommendation…). Kept out
   // of ClientInput on purpose: it belongs to the lead, not the client row.
   const channel = isChannel(opts.channel) ? opts.channel : null;
+  if (!channel) {
+    return { ok: false as const, error: "Indique comment ce contact est arrivé." };
+  }
 
   if (!v.first_name && !v.last_name && !v.company_name && !v.email) {
     return {

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { randomBytes } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeGoogleReviewUrl } from "@/lib/reviewUrl";
 
 /**
  * Generate (or rotate) the iCalendar subscription token. The token is
@@ -40,4 +41,31 @@ export async function clearCalendarToken() {
 
   revalidatePath("/dashboard/settings");
   return { ok: true as const };
+}
+
+/**
+ * Lien « laisser un avis » Google, utilisé par /dashboard/avis. Vide =
+ * désactivé. Seuls les liens Google en https passent (voir lib/reviewUrl).
+ */
+export async function saveGoogleReviewUrl(raw: string) {
+  const trimmed = raw.trim();
+  const url = trimmed ? normalizeGoogleReviewUrl(trimmed) : null;
+  if (trimmed && !url) {
+    return {
+      ok: false as const,
+      error: "Lien refusé : colle le lien « Demander des avis » de ta fiche Google (https://g.page/… ou https://search.google.com/…).",
+    };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("settings")
+    .update({ google_review_url: url })
+    .eq("id", 1)
+    .select("id");
+  if (error) return { ok: false as const, error: error.message };
+  if (!data || data.length === 0) return { ok: false as const, error: "Accès refusé." };
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/avis");
+  return { ok: true as const, url };
 }

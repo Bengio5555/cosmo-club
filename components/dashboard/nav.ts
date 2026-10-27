@@ -20,6 +20,8 @@ import {
   FolderOpen,
   Tag,
   QrCode,
+  Star,
+  Radar,
 } from "lucide-react";
 
 export type NavItem = {
@@ -49,6 +51,7 @@ export const DASHBOARD_NAV: NavSection[] = [
       { href: "/dashboard/devis", label: "Devis", icon: FileText },
       { href: "/dashboard/factures", label: "Factures", icon: Receipt },
       { href: "/dashboard/events", label: "Événements", icon: CalendarDays },
+      { href: "/dashboard/avis", label: "Avis clients", icon: Star },
     ],
   },
   {
@@ -70,6 +73,7 @@ export const DASHBOARD_NAV: NavSection[] = [
     items: [
       { href: "/dashboard/blog", label: "Le Mag", icon: Newspaper },
       { href: "/dashboard/reddit", label: "Reddit veille", icon: MessageSquareText },
+      { href: "/dashboard/visibilite", label: "Visibilité IA", icon: Radar },
       { href: "/dashboard/images", label: "Images site", icon: ImageIcon },
       { href: "/dashboard/home-gallery", label: "Galerie home", icon: ImageIcon },
       { href: "/dashboard/logos", label: "Logos clients", icon: Building2 },

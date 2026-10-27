@@ -96,6 +96,8 @@ export type Database = {
           title: string
           drive_folder_id: string | null
           todo_data: Json | null
+          review_requested_at: string | null
+          review_requested_by: string | null
           updated_at: string
         }
         Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & { title: string; date: string }
@@ -534,6 +536,7 @@ export type Database = {
           credit_note_number_prefix: string
           default_tva_rate: number
           email: string | null
+          google_review_url: string | null
           iban: string | null
           id: number
           invoice_due_days: number
@@ -663,6 +666,51 @@ export type Database = {
           result: Database["public"]["Enums"]["equipment_scan_result"]
         }
         Update: Partial<Database["public"]["Tables"]["equipment_scans"]["Row"]>
+        Relationships: []
+      }
+      geo_runs: {
+        Row: {
+          id: string
+          ran_at: string
+          model: string
+          questions: number
+          cited: number
+          cost_usd: number
+          error: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["geo_runs"]["Row"]> & { model: string; questions: number; cited: number }
+        Update: Partial<Database["public"]["Tables"]["geo_runs"]["Row"]>
+        Relationships: []
+      }
+      geo_results: {
+        Row: {
+          id: string
+          run_id: string
+          question: string
+          category: string
+          cited: boolean
+          cited_domains: string[]
+          answer_excerpt: string | null
+          error: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["geo_results"]["Row"]> & {
+          run_id: string
+          question: string
+          category: string
+          cited: boolean
+        }
+        Update: Partial<Database["public"]["Tables"]["geo_results"]["Row"]>
+        Relationships: []
+      }
+      ai_bot_hits: {
+        Row: {
+          id: number
+          bot: string
+          path: string
+          hit_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["ai_bot_hits"]["Row"]> & { bot: string; path: string }
+        Update: Partial<Database["public"]["Tables"]["ai_bot_hits"]["Row"]>
         Relationships: []
       }
     }

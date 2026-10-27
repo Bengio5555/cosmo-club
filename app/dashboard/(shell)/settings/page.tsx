@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "./SettingsForm";
 import { CalendarSection } from "./CalendarSection";
+import { ReviewLinkSection } from "./ReviewLinkSection";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -19,6 +20,7 @@ export default async function SettingsPage() {
         <SettingsForm initial={data ?? null} />
         <div className="space-y-5">
           <CalendarSection initialToken={data?.calendar_token ?? null} />
+          <ReviewLinkSection initialUrl={data?.google_review_url ?? null} />
         </div>
       </div>
     </div>

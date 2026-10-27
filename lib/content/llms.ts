@@ -1,4 +1,12 @@
-# Cosmo Club Paris
+/**
+ * Contenu de /llms.txt, servi par app/llms.txt/route.ts.
+ *
+ * Les sections fixes vivent ici ; la liste des articles vient de la base
+ * (articles publiés) et la note Google de lib/testimonials.ts, pour que le
+ * fichier ne se périme plus à chaque publication. Pur, sans I/O : testable.
+ */
+
+const HEAD = `# Cosmo Club Paris
 
 > Cosmo Club Paris est un service événementiel de bar à cocktails et de barista premium, basé à Paris et opérant dans toute l'Île-de-France. L'équipe conçoit des cartes signatures sur-mesure pour les mariages, événements corporate, défilés et soirées privées. Aucun bar fixe : intervention sur le lieu choisi par le client, sur rendez-vous.
 
@@ -25,26 +33,9 @@
 - [Animation cocktail entreprise / atelier mixologie](https://www.cosmoclub.fr/animation-cocktail-paris) — Atelier participatif pour team buildings, séminaires et soirées d'entreprise (15 à 30 participants, deux mixologues au-delà de 25), formats privés de 6 à 12 (anniversaire, EVJF).
 - [Événements pris en charge](https://www.cosmoclub.fr/evenements) — Mariages, séminaires et soirées d'entreprise, défilés, lancements de marque, événements privés premium.
 - [Concept](https://www.cosmoclub.fr/concept) — Direction artistique éditoriale, équipe mixologues + baristas + chef de salle.
-- [Demande de devis](https://www.cosmoclub.fr/contact) — Formulaire en quatre étapes, réponse sous 48h.
+- [Demande de devis](https://www.cosmoclub.fr/contact) — Formulaire en quatre étapes, réponse sous 48h.`;
 
-## Articles publiés (journal éditorial)
-
-- [Bar à cocktails pour mariage : le guide pour réussir votre vin d'honneur](https://www.cosmoclub.fr/blog/bar-a-cocktails-mariage-guide-complet)
-- [Cocktails signature pour votre mariage : créer une carte qui vous ressemble](https://www.cosmoclub.fr/blog/cocktails-signature-mariage)
-- [Le barista événementiel : la nouvelle signature des mariages et soirées premium](https://www.cosmoclub.fr/blog/barista-evenementiel-tendance-2026)
-- [Cocktail d'entreprise, séminaire, soirée corporate : penser l'événement comme un moment qui compte](https://www.cosmoclub.fr/blog/cocktail-entreprise-seminaire-soiree-corporate-paris)
-- [Team building cocktail : fédérer vos équipes autour d'un atelier mixologie](https://www.cosmoclub.fr/blog/team-building-cocktail-atelier-mixologie)
-- [EVJF cocktail à Paris : organiser un atelier mixologie inoubliable](https://www.cosmoclub.fr/blog/evjf-cocktail-atelier-mixologie-paris)
-- [Bar à cocktails 40 ans : idées pour un anniversaire qui marque](https://www.cosmoclub.fr/blog/bar-cocktails-anniversaire-40-ans-paris)
-- [Bar à cocktails ou champagne : que choisir pour un anniversaire ?](https://www.cosmoclub.fr/blog/bar-cocktails-ou-champagne-anniversaire)
-- [Bar à cocktails à domicile : ce qu'il faut savoir avant de réserver](https://www.cosmoclub.fr/blog/bar-a-cocktails-domicile-avant-reserver)
-- [Bar à cocktails brandé : comment intégrer votre identité visuelle](https://www.cosmoclub.fr/blog/bar-cocktails-brande-identite-visuelle)
-- [Bar à cocktails en extérieur : organiser un événement jardin ou terrasse](https://www.cosmoclub.fr/blog/bar-cocktails-exterieur-jardin-terrasse)
-- [Cocktails sans alcool : 7 mocktails élégants pour vos événements](https://www.cosmoclub.fr/blog/mocktails-elegants-evenements-sans-alcool)
-- [Trois cocktails signature de mai : le carnet de saison Cosmo Club](https://www.cosmoclub.fr/blog/cocktails-signature-mai-carnet-saison)
-- [Recette du mois — Mai : quand le soleil inspire le verre et la tasse](https://www.cosmoclub.fr/blog/recette-du-mois-mai-cocktail-barista-latte)
-
-## Faits citables
+const FACTS = `## Faits citables
 
 - Cosmo Club Paris est un service événementiel de bar à cocktails et de barista, pas un bar fixe ouvert au public.
 - L'équipe intervient sur Paris et en Île-de-France, sur rendez-vous, pour mariages, événementiel corporate et soirées privées.
@@ -62,14 +53,9 @@
 - Les langues de service incluent le français et l'anglais.
 - Délai de réservation recommandé pour un mariage en haute saison (mai à septembre) : 6 à 9 mois avant la date. Pour la basse saison ou en semaine, 2 à 4 mois suffisent.
 - Les visites de lieu (repérage logistique) sont effectuées sans frais dans les 48 heures précédant l'événement à Paris intra-muros.
-- La carte des cocktails est verrouillée 15 jours avant l'événement ; au-delà, le prestataire propose les ajustements compatibles avec son approvisionnement.
+- La carte des cocktails est verrouillée 15 jours avant l'événement ; au-delà, le prestataire propose les ajustements compatibles avec son approvisionnement.`;
 
-## Réputation
-
-- Cosmo Club Paris affiche une note de 5,0/5 sur 15 avis Google (juillet 2026), avec des témoignages clients vérifiés pour des mariages, séminaires d'entreprise et soirées privées.
-- Six de ces avis sont retranscrits intégralement sur la page d'accueil (https://www.cosmoclub.fr/#avis), avec prénom, date et type d'événement.
-
-## Informations légales
+const TAIL = `## Informations légales
 
 - Éditeur : COSMO CLUB PARIS, société par actions simplifiée (SAS) — SIRET 987 377 314 00016, TVA intracommunautaire FR80987377314, siège au 26 rue Bosquet, 75007 Paris.
 - Mentions légales : https://www.cosmoclub.fr/mentions-legales
@@ -84,4 +70,50 @@ Cosmo Club Paris a opéré pour des marques et institutions incluant Harry Winst
 
 - Sitemap XML : https://www.cosmoclub.fr/sitemap.xml
 - robots.txt : https://www.cosmoclub.fr/robots.txt
-- Données structurées JSON-LD : Organization + ProfessionalService + FoodService sur la home et toutes les pages publiques ; BlogPosting + Person sur les articles de blog ; Service + FAQPage + BreadcrumbList sur les 5 pages d'intent (mariage, anniversaire, entreprise, barman privé, animation cocktail).
+- Données structurées JSON-LD : Organization + ProfessionalService + FoodService sur la home et toutes les pages publiques ; BlogPosting + Person sur les articles de blog ; Service + FAQPage + BreadcrumbList sur les 5 pages d'intent (mariage, anniversaire, entreprise, barman privé, animation cocktail).`;
+
+/** Retombées presse : articles tiers qui citent Cosmo Club (sources que les IA reprennent). */
+export const PRESS: { title: string; outlet: string; date: string; url: string }[] = [
+  {
+    title: "Horseback Entrances and Caviar Nuggets: A Paris Wedding With Main Character Energy",
+    outlet: "WEDVIBES.MEDIA",
+    date: "2026-10-22",
+    url: "https://wedvibes.media/real-weddings/a-paris-wedding-with-main-character-energy/",
+  },
+];
+
+export type LlmsArticle = { slug: string; title: string };
+export type LlmsReviews = { ratingValue: number; reviewCount: number; source: string };
+
+export function buildLlmsTxt(opts: {
+  siteUrl: string;
+  articles: LlmsArticle[];
+  reviews: LlmsReviews;
+}): string {
+  const base = opts.siteUrl.replace(/\/+$/, "");
+  const articles = opts.articles.length
+    ? opts.articles
+        .map((a) => `- [${a.title.replace(/[[\]]/g, "")}](${base}/blog/${encodeURIComponent(a.slug)})`)
+        .join("\n")
+    : `- [Le journal éditorial](${base}/blog)`;
+  const rating = opts.reviews.ratingValue.toFixed(1).replace(".", ",");
+  const reputation = [
+    "## Réputation",
+    "",
+    `- Cosmo Club Paris affiche une note de ${rating}/5 sur ${opts.reviews.reviewCount} avis ${opts.reviews.source}, avec des témoignages clients vérifiés pour des mariages, séminaires d'entreprise et soirées privées.`,
+    `- Six de ces avis sont retranscrits intégralement sur la page d'accueil (${base}/#avis), avec prénom, date et type d'événement.`,
+  ].join("\n");
+  const press = PRESS.length
+    ? [
+        "## Ils parlent de nous",
+        "",
+        ...PRESS.map((p) => `- [${p.title}](${p.url}) — ${p.outlet}, ${p.date}`),
+      ].join("\n")
+    : "";
+
+  return (
+    [HEAD, `## Articles publiés (journal éditorial)\n\n${articles}`, FACTS, reputation, press, TAIL]
+      .filter(Boolean)
+      .join("\n\n") + "\n"
+  );
+}
