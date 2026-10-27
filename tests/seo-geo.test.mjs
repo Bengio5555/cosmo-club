@@ -29,7 +29,7 @@ test("e-mail d'avis : prénom, date longue, HTML échappé", () => {
     eventDate: "2026-10-18",
     reviewUrl: "https://g.page/r/abc/review?a=1&b=2",
   });
-  assert.equal(subject, "Merci pour ce beau moment");
+  assert.equal(subject, "Merci pour ce bel événement");
   assert.match(text, /Bonjour <b>Léa<\/b>,/);
   assert.match(text, /accueillis pour votre événement du 18 octobre\./);
   assert.match(text, /quelques mots sur Google nous feraient très plaisir/);
