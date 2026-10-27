@@ -1,0 +1,702 @@
+<!doctype html>
+<!--
+  Book Cosmo Club (la « plaquette ») — source de public/book/cosmo-club-book.pdf
+  (le PDF joint à l'accusé de réception envoyé par /api/devis).
+
+  Modifier ce fichier puis régénérer le PDF : bash scripts/plaquette/build.sh
+  Format A4 paysage, une <section class="page"> par page.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cosmo Club Paris — Book 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter+Tight:wght@400;500;600&family=Jost:wght@400&display=block" rel="stylesheet">
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  :root {
+    --paper: #f6f0e1;
+    --bone: #f4ecd6;
+    --cream: #ede3c9;
+    --ink: #2a1f14;
+    --espresso: #3a2a1e;
+    --grenat: #8b1a1a;
+    --or: #c9a961;
+    --smoke: #726d63;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--paper); }
+  body {
+    font-family: "Inter Tight", system-ui, sans-serif;
+    color: var(--ink);
+    font-size: 10.5pt;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .page {
+    position: relative;
+    width: 297mm;
+    height: 210mm;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    background: var(--paper);
+    padding: 16mm 18mm 16mm 34mm;
+  }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+
+  /* Libellé vertical à gauche, repris de l'ancienne plaquette */
+  .rail {
+    position: absolute;
+    left: 11mm;
+    bottom: 16mm;
+    transform-origin: left bottom;
+    transform: rotate(-90deg) translate(0, 100%);
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    font-size: 30pt;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--grenat);
+    white-space: nowrap;
+  }
+  .folio {
+    position: absolute;
+    right: 18mm;
+    bottom: 9mm;
+    display: flex;
+    align-items: center;
+    gap: 6mm;
+    font-size: 7.5pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--smoke);
+  }
+  .folio img { height: 7mm; }
+
+  h1, h2, h3 { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; }
+  h2 { font-size: 40pt; text-transform: uppercase; margin-bottom: 4mm; }
+  h3 { font-size: 12pt; letter-spacing: 0; line-height: 1.2; margin-bottom: 1.2mm; }
+  .kicker {
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--grenat);
+    margin-bottom: 3mm;
+  }
+  .lead { font-size: 12.5pt; line-height: 1.45; font-weight: 500; margin-bottom: 6mm; max-width: 120mm; }
+  .tagline { font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 13pt; color: var(--grenat); margin-bottom: 6mm; }
+  p + p { margin-top: 2.5mm; }
+  .item { margin-bottom: 4.5mm; }
+  .item p { color: var(--espresso); }
+  .note { font-size: 8.5pt; color: var(--smoke); margin-top: 5mm; }
+  .ask { font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 12pt; color: var(--grenat); margin-top: 6mm; }
+  .badge {
+    display: inline-block;
+    background: var(--grenat);
+    color: var(--bone);
+    font-size: 7pt;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 1.4mm 3mm;
+    border-radius: 99px;
+    margin-bottom: 4mm;
+  }
+
+  .photo { background: var(--cream) center / cover no-repeat; border-radius: 2mm; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; height: 100%; }
+  .stack { display: flex; flex-direction: column; justify-content: center; }
+
+  /* ---------- Couverture ---------- */
+  .cover { padding: 0; display: grid; grid-template-columns: 1.1fr 0.9fr; background: var(--bone); }
+  .cover .left { padding: 22mm 20mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover .logo { width: 105mm; }
+  .cover h1 { font-size: 24pt; text-transform: none; letter-spacing: -0.01em; line-height: 1.1; max-width: 110mm; }
+  .cover .meta { white-space: nowrap; font-size: 7.5pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--grenat); }
+  .cover .right { background-image: url(assets/bar-miroir-hd.jpg); background-size: cover; background-position: 60% center; }
+
+  /* ---------- Qui sommes-nous ---------- */
+  .about .grid-2 { grid-template-columns: 1.15fr 0.85fr; }
+  .about .def { margin-top: 8mm; padding-top: 6mm; border-top: 0.3mm solid var(--grenat); }
+  .about .def h3 { font-size: 20pt; }
+  .about .def em { font-style: normal; color: var(--smoke); font-size: 9pt; }
+  .about .def p.quote { font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 12.5pt; line-height: 1.35; margin-top: 3mm; }
+  .about .pour { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 8mm; }
+  .about .pour span { border: 0.3mm solid var(--ink); border-radius: 99px; padding: 1.2mm 3.5mm; font-size: 8pt; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ---------- Sommaire ---------- */
+  .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; margin-top: 10mm; }
+  .menu-grid .num { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 34pt; color: var(--grenat); line-height: 1; }
+  .menu-grid h3 { font-size: 15pt; text-transform: uppercase; margin: 3mm 0 4mm; padding-bottom: 3mm; border-bottom: 0.3mm solid var(--ink); }
+  .menu-grid li { list-style: none; font-size: 10.5pt; padding: 1.1mm 0; display: flex; justify-content: space-between; gap: 3mm; }
+  .menu-grid li b { font-weight: 500; }
+  .menu-grid li i { font-style: normal; color: var(--smoke); font-size: 8.5pt; }
+  .new { color: var(--grenat); font-weight: 600; font-size: 7pt; letter-spacing: 0.15em; text-transform: uppercase; }
+
+  /* ---------- Pages offre (photo + texte) ---------- */
+  .offer { display: grid; grid-template-columns: 105mm 1fr; gap: 14mm; height: 100%; }
+  .offer.wide { grid-template-columns: 125mm 1fr; }
+  .offer .photos { display: grid; gap: 4mm; height: 100%; }
+  .offer .text { display: flex; flex-direction: column; justify-content: center; padding-right: 4mm; }
+
+  /* Bar à shots / champagne : deux demi-pages */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; height: 100%; }
+  .duo .half { display: grid; grid-template-rows: 78mm 1fr; gap: 6mm; }
+  .duo h2 { font-size: 30pt; }
+
+  /* Canettes */
+  .formules { display: flex; gap: 2mm; margin-top: 1mm; }
+  .formules span { border: 0.3mm solid var(--grenat); color: var(--grenat); border-radius: 99px; padding: 1mm 3.2mm; font-size: 8pt; font-weight: 600; }
+
+  /* Canettes : la canette « Votre logo » (reprise de LogoCanVisual sur le
+     site) et les trois recettes détourées, posées directement sur la page. */
+  .can-page { display: grid; grid-template-rows: auto 1fr; gap: 7mm; height: 100%; }
+  .can-head { display: grid; grid-template-columns: 1fr 1.15fr; gap: 12mm; align-items: end; }
+  .can-head h2 { margin-bottom: 2mm; }
+  .can-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4mm;
+    align-items: end;
+    padding: 4mm 0 0;
+  }
+  .can-row figure { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .can-row .recipe { position: relative; height: 78mm; aspect-ratio: 290 / 420; container-type: inline-size; }
+  .can-row .recipe img { width: 100%; height: 100%; filter: drop-shadow(0 5mm 6mm rgba(42,31,20,0.22)); }
+  /* Logo Cosmo Club en blanc sur les recettes, calqué sur l'étiquette des
+     vraies canettes (photos du site) : géométrique fin, très espacé. */
+  .can-row .brand {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    white-space: nowrap;
+    color: #fff;
+    font-family: "Jost", "Inter Tight", sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.26em;
+    font-size: 7.6cqw;
+    line-height: 1;
+    padding-left: 0.26em;
+  }
+  .can-row .brand small { font-size: 4.2cqw; letter-spacing: 0.3em; margin-top: 3.6cqw; }
+  /* La canette vide du site est un format haut (695 × 1600) : on la ramène au
+     format des canettes recettes en n'affichant que son haut et son bas, le
+     corps étant un cylindre uniforme la jointure ne se voit pas. */
+  .can-row .can {
+    position: relative;
+    height: 79mm;
+    aspect-ratio: 695 / 1140;
+    container-type: inline-size;
+    filter: drop-shadow(0 5mm 6mm rgba(42,31,20,0.22));
+  }
+  .can-row .can .half { height: 50%; background: url(assets/can-empty.png) no-repeat; background-size: 100% auto; }
+  .can-row .can .top { background-position: center top; }
+  .can-row .can .bottom { background-position: center bottom; }
+  .can-row .mark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #1a120c;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: 10.5cqw;
+    line-height: 1.15;
+    padding-left: 0.3em;
+  }
+  .can-row .mark small { font-weight: 400; font-size: 5.3cqw; letter-spacing: 0.34em; opacity: 0.8; margin-top: 5cqw; }
+  .can-row figcaption { margin-top: 4mm; }
+  .can-row figcaption b { display: block; font-family: "Bricolage Grotesque", sans-serif; font-size: 11pt; }
+  .can-row figcaption span { font-size: 8.5pt; color: var(--espresso); }
+
+  /* Personnalisations */
+  .perso { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6mm 7mm; margin-top: 4mm; }
+  .perso .photo { height: 50mm; margin-bottom: 2.5mm; }
+  .perso b { display: block; font-family: "Bricolage Grotesque", sans-serif; font-size: 10.5pt; }
+  .perso span { font-size: 8.5pt; color: var(--smoke); }
+
+  /* Décoration */
+  .deco { display: grid; grid-template-columns: 1fr 1fr 1fr 1.1fr; grid-template-rows: 1fr 1fr; gap: 4mm; height: 100%; }
+  .deco .text { grid-column: 4; grid-row: 1 / span 2; display: flex; flex-direction: column; justify-content: center; padding-left: 4mm; }
+  .deco h2 { font-size: 28pt; }
+
+  /* Clients */
+  /* Logos clients : recadrés de l'ancienne plaquette (.crop, fond blanc fondu
+     dans la page) ou logos officiels récents (.vec, passés en noir). */
+  .logo-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: 24mm; column-gap: 6mm; row-gap: 1mm; margin-top: 6mm; }
+  .logo-grid div { display: flex; align-items: center; justify-content: center; }
+  .logo-grid img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .logo-grid img.crop { height: 100%; mix-blend-mode: multiply; filter: grayscale(1) brightness(1.12) contrast(1.3); clip-path: inset(3px); }
+  .logo-grid img.vec { max-width: 78%; max-height: 40%; filter: brightness(0); }
+  .logo-grid img[src$="colam.svg"] { max-height: 62%; }
+
+  /* Process */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7mm; margin-top: 12mm; }
+  .steps > div { border-top: 0.6mm solid var(--grenat); padding-top: 5mm; }
+  .steps .n { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 40pt; line-height: 1; color: var(--grenat); margin-bottom: 4mm; }
+  .steps h3 { font-size: 14pt; margin-bottom: 2.5mm; }
+  .steps p { font-size: 9.5pt; color: var(--espresso); }
+
+  /* Contact */
+  .contact .grid-2 { grid-template-columns: 95mm 1fr; gap: 18mm; }
+  .contact h2 { font-size: 46pt; }
+  .contact .lines { font-size: 13pt; line-height: 1.7; margin-top: 6mm; }
+  .contact .lines b { font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; }
+  .contact .cta {
+    display: inline-block;
+    margin-top: 10mm;
+    background: var(--grenat);
+    color: var(--bone);
+    font-weight: 600;
+    font-size: 9pt;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4mm 8mm;
+    border-radius: 99px;
+  }
+  .contact .small { margin-top: 5mm; font-size: 8.5pt; color: var(--smoke); }
+
+  /* Lecture à l'écran : pages A4 posées sur un fond, réduites à la largeur
+     de la fenêtre (--fit, calculé plus bas). N'affecte pas le PDF. */
+  @media screen {
+    html, body { background: #cfc6b4; }
+    body { padding: 24px 0; }
+    .page {
+      zoom: var(--fit, 1);
+      margin: 0 auto 24px;
+      box-shadow: 0 6px 30px rgba(42, 31, 20, 0.25);
+    }
+  }
+</style>
+<script>
+  // Ajuste la taille des pages à la fenêtre (écran uniquement, voir @media screen).
+  function fitPages() {
+    var pagePx = 297 * 96 / 25.4;
+    var fit = Math.min(1, (window.innerWidth - 32) / pagePx);
+    document.documentElement.style.setProperty("--fit", fit.toFixed(3));
+  }
+  fitPages();
+  window.addEventListener("resize", fitPages);
+</script>
+</head>
+<body>
+
+<!-- 1 · Couverture -->
+<section class="page cover">
+  <div class="left">
+    <div class="meta">Paris · Book 2026</div>
+    <div>
+      <img class="logo" src="assets/logo.png" alt="Cosmo Club Paris">
+      <h1 style="margin-top:12mm">Bar à cocktails &amp; barista événementiel.</h1>
+    </div>
+    <div class="meta">Mariages · Corporate · Lancements · Soirées privées</div>
+  </div>
+  <div class="right"></div>
+</section>
+
+<!-- 2 · Qui sommes-nous -->
+<section class="page about">
+  <div class="rail">Qui sommes-nous</div>
+  <div class="grid-2">
+    <div class="stack">
+      <div class="kicker">La Team Cosmo</div>
+      <p class="lead">Passionnés d’événementiel et de mixologie, nous proposons un service de cocktails haut de gamme et, pour ceux qui le souhaitent, une direction artistique complète.</p>
+      <p>Soirée d’entreprise, mariage, lancement de produit ou fête privée&nbsp;: notre équipe offre à vos invités un bar (très) original et des cocktails (ultra) personnalisés, pour que chacun de vos événements devienne un souvenir mémorable.</p>
+      <div class="def">
+        <h3>COSMO, n.m.</h3>
+        <em>De « Cosmopolitan »</em>
+        <p class="quote">Là où les cocktails deviennent des œuvres liquides et où les soirées sont toujours uniques. Ici, on mélange l’inattendu et les classiques, et chaque verre raconte sa propre histoire.</p>
+      </div>
+      <div class="pour"><span>Mariages</span><span>Corporate &amp; séminaires</span><span>Lancements &amp; défilés</span><span>Soirées privées</span></div>
+    </div>
+    <div class="photo" style="background-image:url(assets/about-bottle.jpg); background-position: 70% center"></div>
+  </div>
+  <div class="folio">Cosmo Club Paris <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 3 · Sommaire -->
+<section class="page">
+  <div class="rail">Nos univers</div>
+  <div class="kicker">Tout ce qu’on peut faire pour vous</div>
+  <h2>Nos univers</h2>
+  <div class="menu-grid">
+    <div>
+      <div class="num">01</div>
+      <h3>Mixologie</h3>
+      <ul>
+        <li><b>Bar à cocktails</b><i>p.4</i></li>
+        <li><b>Bar à shots</b><i>p.5</i></li>
+        <li><b>Bar à champagne</b><i>p.5</i></li>
+        <li><b>Mocktail in a can <span class="new">Nouveau</span></b><i>p.7</i></li>
+        <li><b>Cocktail in a bottle</b><i>p.8</i></li>
+        <li><b>Alcohol free</b><i>p.9</i></li>
+      </ul>
+    </div>
+    <div>
+      <div class="num">02</div>
+      <h3>Café</h3>
+      <ul>
+        <li><b>Barista</b><i>p.6</i></li>
+        <li><b>Latte in a can <span class="new">Nouveau</span></b><i>p.6</i></li>
+      </ul>
+    </div>
+    <div>
+      <div class="num">03</div>
+      <h3>Expériences</h3>
+      <ul>
+        <li><b>Cocktail class</b><i>p.10</i></li>
+        <li><b>Barista class</b><i>p.10</i></li>
+        <li><b>Bar participatif</b><i>p.10</i></li>
+      </ul>
+    </div>
+    <div>
+      <div class="num">04</div>
+      <h3>L’atelier</h3>
+      <ul>
+        <li><b>Nos bars</b><i>p.11</i></li>
+        <li><b>Personnalisations</b><i>p.12</i></li>
+        <li><b>Décoration &amp; décors</b><i>p.13</i></li>
+      </ul>
+    </div>
+  </div>
+  <div class="folio">Cosmo Club Paris <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 4 · Bar à cocktails -->
+<section class="page">
+  <div class="rail">Mixologie</div>
+  <div class="offer">
+    <div class="photos" style="grid-template-rows: 1.3fr 1fr;">
+      <div class="photo" style="background-image:url(assets/deco-bougie.jpg)"></div>
+      <div class="photo" style="background-image:url(assets/deco-citron.jpg)"></div>
+    </div>
+    <div class="text">
+      <div class="kicker">01 · Mixologie</div>
+      <h2>Bar à cocktails</h2>
+      <p class="tagline">Quelle est votre envie&nbsp;?</p>
+      <div class="item"><h3>La carte « Classique »</h3><p>Les indispensables&nbsp;: gin tonic, vodka Red Bull, rhum coca…</p></div>
+      <div class="item"><h3>La carte « Cosmo »</h3><p>Nos coups de cœur revisités&nbsp;: Pornstar Martini, Spicy Margarita, Amaretto Sour, Espresso Martini, Basil Smash… et notre signature, le Cosmo Pop.</p></div>
+      <div class="item"><h3>La carte « Création »</h3><p>Nos mixologues imaginent des créations uniques à l’image de votre événement&nbsp;: un logo, une couleur, une envie particulière.</p></div>
+      <p class="ask">Une autre envie&nbsp;? Dites-nous tout&nbsp;!</p>
+      <p class="note">Gamme d’alcools casher disponible.</p>
+    </div>
+  </div>
+  <div class="folio">04 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 5 · Bar à shots + Bar à champagne -->
+<section class="page">
+  <div class="rail">Mixologie</div>
+  <div class="duo">
+    <div class="half">
+      <div class="photo" style="background-image:url(assets/shots-row.jpg)"></div>
+      <div>
+        <div class="kicker">01 · Mixologie</div>
+        <h2>Bar à shots</h2>
+        <p class="tagline">« Soup of the day&nbsp;? Tequila&nbsp;! »</p>
+        <p>Un bar à shots à thème pour faire monter l’ambiance&nbsp;: bar à tequila, mur de shots, recettes à vos couleurs…</p>
+        <p class="ask">Une autre envie&nbsp;? Dites-nous tout&nbsp;!</p>
+      </div>
+    </div>
+    <div class="half">
+      <div class="photo" style="background-image:url(assets/champagne-bar.jpg)"></div>
+      <div>
+        <div class="kicker">01 · Mixologie</div>
+        <h2>Bar à champagne</h2>
+        <p class="tagline">Save water, drink champagne&nbsp;!</p>
+        <p>Un bar dédié au service des bulles&nbsp;: bar en bois ou bar miroir, verrerie premium et cascade de verres (en option), mise en fleurs et bougies.</p>
+        <p class="note">Champagne au choix.</p>
+      </div>
+    </div>
+  </div>
+  <div class="folio">05 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 6 · Barista -->
+<section class="page">
+  <div class="rail">Café</div>
+  <div class="offer wide">
+    <div class="photos" style="grid-template-columns: 1.25fr 1fr; grid-template-rows: 1fr 1fr;">
+      <div class="photo" style="grid-row: 1 / span 2; background-image:url(assets/barista-stand.jpg)"></div>
+      <div class="photo" style="background-image:url(assets/latte.jpg)"></div>
+      <div class="photo" style="background-image:url(assets/barista-stand-2.jpg)"></div>
+    </div>
+    <div class="text">
+      <div class="kicker">02 · Café</div>
+      <h2>Barista</h2>
+      <p class="tagline">La meilleure façon de commencer votre journée ou votre événement.</p>
+      <div class="item"><h3>La carte</h3><p>Cafés de spécialité et lattes incontournables&nbsp;: Matcha, Ube, Blue, Golden… En chaud ou en glacé, pour toutes les saisons.</p></div>
+      <div class="item"><h3>Les stands</h3><p>Plusieurs modèles, du plus épuré au plus premium, pour s’intégrer à votre univers.</p></div>
+      <div class="item"><h3>La personnalisation</h3><p>Votre logo, un message ou un motif sur les gobelets, directement sur la mousse ou sur nos stands entièrement personnalisables. Des détails soignés qui rendent votre bar unique… et résolument instagrammable.</p></div>
+      <div class="item"><h3>Latte in a can <span class="new" style="margin-left:2mm">Nouveau</span></h3><p>Nos lattes glacés en canette transparente, à votre logo, comme nos mocktails.</p></div>
+    </div>
+  </div>
+  <div class="folio">06 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 7 · Mocktail in a can -->
+<section class="page">
+  <div class="rail">Mixologie</div>
+  <div class="can-page">
+    <div class="can-head">
+      <div>
+        <div class="kicker">01 · Mixologie</div>
+        <span class="badge">Nouveau</span>
+        <h2>Mocktail<br>in a can</h2>
+        <p class="tagline" style="margin-bottom:0">Des canettes de mocktails à votre marque.</p>
+      </div>
+      <div>
+        <p>Votre logo imprimé sur la canette, trois recettes sans alcool et la carte assortie. Idéal pour un lancement, un salon ou un cadeau d’invités.</p>
+        <h3 style="margin-top:4mm">Trois formules, dès 200 canettes</h3>
+        <div class="formules"><span>Livrée</span><span>Installée</span><span>Servie, bar et barman compris</span></div>
+        <p class="ask" style="margin-top:4mm">Envie d’une version cocktail, avec alcool&nbsp;? Sur&nbsp;devis.</p>
+        <p class="note" style="margin-top:1.5mm">Recette créée sur mesure en option.</p>
+      </div>
+    </div>
+    <div class="can-row">
+      <figure class="logo-can">
+        <div class="can">
+          <div class="half top"></div><div class="half bottom"></div>
+          <div class="mark"><span>Votre</span><span>Logo</span><small>Paris</small></div>
+        </div>
+        <figcaption><b>Votre canette</b><span>Votre logo, en étiquette transparente.</span></figcaption>
+      </figure>
+      <figure>
+        <div class="recipe">
+          <img src="assets/can-litchi-rose.png" alt="Canette Litchi Rose">
+          <div class="brand">Cosmo Club<small>Paris</small></div>
+        </div>
+        <figcaption><b>Litchi Rose</b><span>Floral, frais, pétillant.</span></figcaption>
+      </figure>
+      <figure>
+        <div class="recipe">
+          <img src="assets/can-framboise-hibiscus.png" alt="Canette Framboise Hibiscus">
+          <div class="brand">Cosmo Club<small>Paris</small></div>
+        </div>
+        <figcaption><b>Framboise Hibiscus</b><span>Acidulé, profond, légèrement épicé.</span></figcaption>
+      </figure>
+      <figure>
+        <div class="recipe">
+          <img src="assets/can-coco-peche-aloe.png" alt="Canette Coco Pêche Aloe Vera">
+          <div class="brand">Cosmo Club<small>Paris</small></div>
+        </div>
+        <figcaption><b>Coco Pêche Aloe Vera</b><span>Doux, désaltérant, solaire.</span></figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="folio">07 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 8 · Cocktail in a bottle -->
+<section class="page">
+  <div class="rail">Mixologie</div>
+  <div class="offer wide">
+    <div class="photos" style="grid-template-columns: 1fr 1fr;">
+      <div class="photo" style="background-image:url(assets/bottle-menu.jpg)"></div>
+      <div class="photo" style="background-image:url(assets/bottles.jpg)"></div>
+    </div>
+    <div class="text">
+      <div class="kicker">01 · Mixologie</div>
+      <h2>Cocktail<br>« in a bottle »</h2>
+      <p class="tagline">Des bouteilles de cocktails à votre image.</p>
+      <div class="item"><h3>Les bouteilles</h3><p>Format au choix&nbsp;: 20&nbsp;cl, 50&nbsp;cl, 1&nbsp;L ou 5&nbsp;L.</p></div>
+      <div class="item"><h3>La personnalisation</h3><p>Des étiquettes au gré de vos envies&nbsp;: message, logo, couleur, dessin…</p></div>
+    </div>
+  </div>
+  <div class="folio">08 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 9 · Alcohol free -->
+<section class="page">
+  <div class="rail">Mixologie</div>
+  <div class="offer">
+    <div class="photos">
+      <div class="photo" style="background-image:url(assets/mocktail.jpg)"></div>
+    </div>
+    <div class="text">
+      <div class="kicker">01 · Mixologie</div>
+      <h2>Alcohol free</h2>
+      <p class="tagline">Des options sans alcool pour tous vos événements, même pour les plus petits.</p>
+      <div class="item"><h3>La carte « Mocktails »</h3><p>Des créations sans alcool qui reprennent fidèlement les saveurs des cocktails classiques. Même goût, zéro alcool.</p></div>
+      <div class="item"><h3>La carte « Juice Bar »</h3><p>Des mélanges de jus frais et colorés, pour une touche vitaminée.</p></div>
+      <div class="item"><h3>La carte « Bambino »</h3><p>Des cocktails comme les grands… mais 100&nbsp;% sans alcool, pensés pour les plus jeunes.</p></div>
+    </div>
+  </div>
+  <div class="folio">09 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 10 · Cocktail class & bar participatif -->
+<section class="page">
+  <div class="rail">Expériences</div>
+  <div class="offer">
+    <div class="photos">
+      <div class="photo" style="background-image:url(assets/cocktail-class.jpg)"></div>
+    </div>
+    <div class="text">
+      <div class="kicker">03 · Expériences</div>
+      <h2 style="font-size:32pt">Cocktail class</h2>
+      <p class="tagline" style="margin-bottom:3mm">Une expérience immersive et conviviale.</p>
+      <p>Pour renforcer l’esprit d’équipe lors d’un séminaire ou animer une soirée privée, notre mixologue vous guide dans l’art du cocktail&nbsp;: quelques techniques de base, la recette de votre cocktail préféré, et vous repartez avec des astuces et une fiche recette pour la maison.</p>
+      <p><b>Aussi disponible en Barista class.</b></p>
+      <h2 style="font-size:32pt; margin-top:9mm">Bar participatif</h2>
+      <p class="tagline" style="margin-bottom:3mm">Une expérience ludique et fédératrice.</p>
+      <p>Vos invités passent derrière le bar aux côtés de nos mixologues pour shaker, doser, créer… Le temps d’un événement, chacun devient barman.</p>
+    </div>
+  </div>
+  <div class="folio">10 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 11 · Nos bars -->
+<section class="page">
+  <div class="rail">L’atelier</div>
+  <div class="offer wide" style="grid-template-columns: 1fr 88mm;">
+    <div class="photos" style="grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;">
+      <div class="photo" style="grid-column: 1 / span 2; background-image:url(assets/bar-azulejos-hd.jpg)"></div>
+      <div class="photo" style="background-image:url(assets/bar-detail.jpg)"></div>
+      <div class="photo" style="background-image:url(assets/deco-salute.jpg)"></div>
+    </div>
+    <div class="text">
+      <div class="kicker">04 · L’atelier</div>
+      <h2>Nos bars</h2>
+      <p class="tagline">Modulables de 1,2&nbsp;m à 5&nbsp;m.</p>
+      <p>Bar en bois, bar miroir, bar à carreaux… Tous se personnalisent&nbsp;: logo, motif, texte.</p>
+      <div class="item" style="margin-top:6mm"><h3>Le Bar Cosmo</h3><p>Devanture personnalisable (logo, texte, couleur) et lumière sur mesure.</p></div>
+    </div>
+  </div>
+  <div class="folio">11 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 12 · Personnalisations -->
+<section class="page">
+  <div class="rail">L’atelier</div>
+  <div class="kicker">04 · L’atelier</div>
+  <h2 style="font-size:32pt">Personnalisations</h2>
+  <div class="perso">
+    <div><div class="photo" style="background-image:url(assets/perso-glacon.jpg)"></div><b>Glaçon</b><span>Avec votre logo, des fleurs, des fruits</span></div>
+    <div><div class="photo" style="background-image:url(assets/perso-pastille.jpg)"></div><b>Pastille comestible</b><span>Avec votre logo, un motif</span></div>
+    <div><div class="photo" style="background-image:url(assets/perso-topping.jpg)"></div><b>Topping fruit</b><span>Avec votre logo, des lettres</span></div>
+    <div><div class="photo" style="background-image:url(assets/perso-message.jpg)"></div><b>Message</b><span>Avec votre logo, un mot, une citation</span></div>
+    <div><div class="photo" style="background-image:url(assets/perso-pochoir.jpg)"></div><b>Pochoir</b><span>Avec vos initiales</span></div>
+    <div><div class="photo" style="background-image:url(assets/perso-melangeur.jpg)"></div><b>Mélangeur</b><span>Avec votre logo, un mot</span></div>
+    <div><div class="photo" style="background-image:url(assets/perso-dessous.jpg)"></div><b>Dessous de verre</b><span>Avec votre logo, un mot, un motif</span></div>
+    <div><div class="photo" style="background-image:url(assets/perso-mousse.jpg)"></div><b>Impression sur mousse</b><span>Avec votre logo, un mot, un motif</span></div>
+  </div>
+  <div class="folio">12 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 13 · Décoration & décors -->
+<section class="page">
+  <div class="rail">L’atelier</div>
+  <div class="deco">
+    <div class="photo" style="grid-row: 1 / span 2; background-image:url(assets/deco-fleurs.jpg)"></div>
+    <div class="photo" style="background-image:url(assets/deco-menu.jpg)"></div>
+    <div class="photo" style="background-image:url(assets/decor-cloche.jpg)"></div>
+    <div class="photo" style="background-image:url(assets/mur-shots.jpg)"></div>
+    <div class="photo" style="background-image:url(assets/decor-charrette.jpg)"></div>
+    <div class="text">
+      <div class="kicker">04 · L’atelier</div>
+      <h2>Décoration &amp; décors</h2>
+      <p>Graphisme des cartes cocktails, arrière-bar décoré, compositions florales, néon sur mesure&nbsp;: nous créons des bars décoratifs qui font du service des cocktails une animation à part entière.</p>
+      <p>Mur de shots, mur de champagne, charrette décorative… Notre atelier conçoit des bars uniques, imaginés pour sublimer vos événements.</p>
+    </div>
+  </div>
+  <div class="folio">13 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 14 · Nos clients -->
+<section class="page clients">
+  <div class="rail">Nos clients</div>
+  <div class="kicker">Ils nous ont fait confiance</div>
+  <h2 style="font-size:28pt">… et on espère que vous aussi, très bientôt.</h2>
+  <div class="logo-grid">
+    <div><img class="crop" src="assets/clients/bodyhit.jpg" alt="Bodyhit"></div>
+    <div><img class="vec" src="assets/clients/stella-forest.png" alt="Stella Forest"></div>
+    <div><img class="crop" src="assets/clients/kwerk.jpg" alt="kwerk"></div>
+    <div><img class="crop" src="assets/clients/wba.jpg" alt="WBA"></div>
+    <div><img class="crop" src="assets/clients/sephora.jpg" alt="Sephora"></div>
+    <div><img class="vec" src="assets/clients/entourage.png" alt="Entourage Paris"></div>
+    <div><img class="crop" src="assets/clients/ray-ban.jpg" alt="Ray-Ban"></div>
+    <div><img class="crop" src="assets/clients/azzaro.jpg" alt="Azzaro"></div>
+    <div><img class="vec" src="assets/clients/unlockt.svg" alt="unlockt.me"></div>
+    <div><img class="crop" src="assets/clients/from-future.jpg" alt="From Future"></div>
+    <div><img class="crop" src="assets/clients/pokawa.jpg" alt="Pokawa"></div>
+    <div><img class="vec" src="assets/clients/noholita.png" alt="Noholita"></div>
+    <div><img class="crop" src="assets/clients/harry-winston.jpg" alt="Harry Winston"></div>
+    <div><img class="crop" src="assets/clients/pourtales.jpg" alt="Hôtel Pourtalès"></div>
+    <div><img class="vec" src="assets/clients/bumble.svg" alt="Bumble"></div>
+    <div><img class="crop" src="assets/clients/clinique.jpg" alt="Clinique des Champs-Élysées"></div>
+    <div><img class="crop" src="assets/clients/tommy-hilfiger.jpg" alt="Tommy Hilfiger"></div>
+    <div><img class="vec" src="assets/clients/oliver-peoples.svg" alt="Oliver Peoples"></div>
+    <div><img class="crop" src="assets/clients/slice.jpg" alt="Slice Pizza Club"></div>
+    <div><img class="crop" src="assets/clients/maison123.jpg" alt="Maison 123"></div>
+    <div><img class="crop" src="assets/clients/natixis.jpg" alt="Natixis Investment Managers"></div>
+    <div><img class="vec" src="assets/clients/colam.svg" alt="colam entreprendre"></div>
+    <div><img class="crop" src="assets/clients/kyc.jpg" alt="KYC Consulting"></div>
+    <div><img class="crop" src="assets/clients/voodoo.jpg" alt="Voodoo"></div>
+    <div><img class="crop" src="assets/clients/bcg.jpg" alt="BCG"></div>
+    <div><img class="crop" src="assets/clients/henry-jacques.jpg" alt="Henry Jacques"></div>
+    <div><img class="crop" src="assets/clients/rothschild.jpg" alt="Rothschild &amp; Co"></div>
+    <div><img class="crop" src="assets/clients/hg.jpg" alt="Hg"></div>
+    <div><img class="vec" src="assets/clients/orbius.png" alt="Orbius"></div>
+    <div><img class="crop" src="assets/clients/fomo.jpg" alt="FOMO Production"></div>
+  </div>
+  <div class="folio">14 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 15 · Comment ça marche -->
+<section class="page">
+  <div class="rail">Comment ça marche</div>
+  <div class="kicker">De la demande au jour J</div>
+  <h2>Comment ça marche</h2>
+  <div class="steps">
+    <div><div class="n">1</div><h3>Votre demande</h3><p>Le formulaire sur cosmoclub.fr, un e-mail ou un appel&nbsp;: dites-nous la date, le lieu, le nombre d’invités et vos envies.</p></div>
+    <div><div class="n">2</div><h3>On en parle</h3><p>On revient vers vous sous 48&nbsp;h pour affiner le projet&nbsp;: ambiance, cartes, bar, personnalisations.</p></div>
+    <div><div class="n">3</div><h3>Votre proposition</h3><p>Vous recevez un devis détaillé et une carte des cocktails sur mesure, que vous validez en ligne.</p></div>
+    <div><div class="n">4</div><h3>Le jour J</h3><p>On installe, on sert, on range. Vous n’avez plus qu’à profiter de votre événement.</p></div>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:4mm; height:66mm; margin-top:12mm">
+    <div class="photo" style="background-image:url(assets/perso-pastille.jpg)"></div>
+    <div class="photo" style="background-image:url(assets/shots-tags.jpg)"></div>
+    <div class="photo" style="background-image:url(assets/deco-salute.jpg)"></div>
+  </div>
+  <div class="folio">15 <img src="assets/logo.png" alt=""></div>
+</section>
+
+<!-- 16 · Contact -->
+<section class="page contact">
+  <div class="rail">Contact</div>
+  <div class="grid-2">
+    <div class="photo" style="background-image:url(assets/contact-napkin.jpg)"></div>
+    <div class="stack">
+      <div class="kicker">Parlons de votre événement</div>
+      <h2>Cosmo Team</h2>
+      <div class="lines">
+        <b>Paris 7</b> · sur rendez-vous<br>
+        <a href="tel:+33775744977">07 75 74 49 77</a><br>
+        <a href="mailto:contact@cosmoclub.fr">contact@cosmoclub.fr</a><br>
+        <a href="https://www.cosmoclub.fr">cosmoclub.fr</a> · <a href="https://www.instagram.com/cosmoclubparis">@cosmoclubparis</a>
+      </div>
+      <a class="cta" href="https://www.cosmoclub.fr/contact" style="align-self:flex-start">Demander un devis</a>
+      <p class="small">Réponse sous 48&nbsp;h · Paris &amp; Île-de-France.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
