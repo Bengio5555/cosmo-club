@@ -33,6 +33,43 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["articles"]["Row"]>
         Relationships: []
       }
+      bank_change_log: {
+        Row: {
+          id: number
+          changed_at: string
+          changed_by: string | null
+          via_dashboard: boolean
+          old_iban_masked: string | null
+          new_iban_masked: string | null
+          old_bic: string | null
+          new_bic: string | null
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      bank_change_requests: {
+        Row: {
+          id: string
+          requested_by: string
+          new_iban: string
+          new_bic: string | null
+          code_hash: string
+          attempts: number
+          expires_at: string
+          used_at: string | null
+          created_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["bank_change_requests"]["Row"]> & {
+          id: string
+          requested_by: string
+          new_iban: string
+          code_hash: string
+          expires_at: string
+        }
+        Update: Partial<Database["public"]["Tables"]["bank_change_requests"]["Row"]>
+        Relationships: []
+      }
       catalog_items: {
         Row: {
           id: string
@@ -533,6 +570,8 @@ export type Database = {
         Row: {
           address_line1: string | null
           address_line2: string | null
+          bank_updated_at: string | null
+          bank_updated_by: string | null
           bic: string | null
           calendar_token: string | null
           city: string | null

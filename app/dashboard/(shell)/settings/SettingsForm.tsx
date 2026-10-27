@@ -7,6 +7,8 @@ import type { Tables } from "@/types/database";
 
 type Settings = Tables<"settings">;
 
+const BANK_FIELDS = ["iban", "bic", "bank_updated_at", "bank_updated_by"] as const;
+
 export function SettingsForm({ initial }: { initial: Settings | null }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -22,9 +24,13 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
     startTransition(async () => {
       setMsg(null);
       const supabase = createClient();
+      // IBAN et BIC se changent dans la section Banque (code par e-mail) :
+      // la base refuse toute autre écriture de ces champs.
+      const payload: Partial<Settings> = { ...f, id: 1 };
+      for (const k of BANK_FIELDS) delete payload[k];
       const { error } = await supabase
         .from("settings")
-        .upsert({ ...f, id: 1 })
+        .upsert(payload)
         .eq("id", 1);
       if (error) {
         setMsg({ kind: "err", text: error.message });
@@ -113,17 +119,6 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
         <p className="text-[11px] text-slate-500 dark:text-slate-500">
           À chaque nouveau devis envoyé depuis le formulaire public, une notification arrive sur cette boîte. Si vide, on retombe sur l&apos;email de contact public.
         </p>
-      </Section>
-
-      <Section title="Banque (affichage facture)">
-        <Row>
-          <Field label="IBAN">
-            <Input value={f.iban ?? ""} onChange={(v) => upd("iban", v)} />
-          </Field>
-          <Field label="BIC">
-            <Input value={f.bic ?? ""} onChange={(v) => upd("bic", v)} />
-          </Field>
-        </Row>
       </Section>
 
       <Section title="Facturation">
