@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { site } from "@/lib/site";
+import { profiles, site } from "@/lib/site";
 import { askOne, GEO_MODEL, hostOf } from "@/lib/geo/aiMentions";
 import { GEO_QUESTIONS, type GeoQuestion } from "@/lib/geo/questions";
 
@@ -43,7 +43,7 @@ export async function runGeoVisibility(opts: { limit?: number } = {}): Promise<G
         return;
       }
       const q = questions[next++];
-      const r = await askOne(client, q.question, { ownDomain, brandTerms });
+      const r = await askOne(client, q.question, { ownDomain, brandTerms, profileUrls: profiles.map((p) => p.url) });
       spent += r.costUsd;
       results.push({ ...r, ...q });
     }

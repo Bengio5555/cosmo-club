@@ -82,9 +82,29 @@ export function collect(content: unknown[]): { domains: string[]; sources: Cited
   return { domains: [...domains], sources: [...sources.values()], text };
 }
 
-/** Notre site est cité (dans les sources) ou la marque est nommée dans la réponse. */
-export function isCited(domains: string[], text: string, ownDomain: string, brandTerms: string[]): boolean {
+const normUrl = (u: string) => u.toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/[?#].*$/, "").replace(/\/+$/, "");
+
+/** Page d'une de nos fiches d'annuaire (mariages.net…) : compte comme notre site. */
+export function isOwnProfile(url: string, profileUrls: readonly string[]): boolean {
+  const u = normUrl(url);
+  return profileUrls.some((p) => {
+    const n = normUrl(p);
+    return u === n || u.startsWith(n + "/");
+  });
+}
+
+/** Notre site ou une de nos fiches est cité (dans les sources), ou la marque est nommée dans la réponse. */
+export function isCited(
+  domains: string[],
+  text: string,
+  ownDomain: string,
+  brandTerms: string[],
+  sources: CitedSource[] = [],
+  profileUrls: readonly string[] = [],
+): boolean {
   if (domains.some((d) => d === ownDomain || d.endsWith("." + ownDomain))) return true;
+  if (sources.some((s) => isOwnProfile(s.url, profileUrls))) return true;
+  if (profileUrls.some((p) => text.toLowerCase().includes(normUrl(p)))) return true;
   const flat = text.toLowerCase().replace(/\s+/g, " ");
   return brandTerms.some((b) => {
     const parts = b.toLowerCase().split(/\s+/).filter(Boolean).map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
@@ -98,12 +118,12 @@ export function competitorsOf(domains: string[], ownDomain: string): string[] {
   return domains.filter((d) => !isOwn(d, ownDomain) && !isGenericDomain(d)).slice(0, 12);
 }
 
-/** Pages citées à notre place (ni notre site, ni un réseau social), pour savoir à quel article écrire. */
-export function competitorSourcesOf(sources: CitedSource[], ownDomain: string): CitedSource[] {
+/** Pages citées à notre place (ni notre site, ni nos fiches, ni un réseau social), pour savoir à quel article écrire. */
+export function competitorSourcesOf(sources: CitedSource[], ownDomain: string, profileUrls: readonly string[] = []): CitedSource[] {
   return sources
     .filter((s) => {
       const h = hostOf(s.url);
-      return !!h && !isOwn(h, ownDomain) && !isGenericDomain(h);
+      return !!h && !isOwn(h, ownDomain) && !isGenericDomain(h) && !isOwnProfile(s.url, profileUrls);
     })
     .slice(0, 12);
 }
@@ -128,7 +148,7 @@ const SYSTEM =
 export async function askOne(
   client: Anthropic,
   question: string,
-  opts: { ownDomain: string; brandTerms: string[] },
+  opts: { ownDomain: string; brandTerms: string[]; profileUrls?: readonly string[] },
 ): Promise<AskResult> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: question }];
   const content: unknown[] = [];
@@ -167,10 +187,18 @@ export async function askOne(
     };
   }
   const { domains, sources, text } = collect(content);
+  const profileUrls = opts.profileUrls ?? [];
+  // Un annuaire n'apparaît « à notre place » que s'il est cité par une autre page que notre fiche.
+  const viaOtherPages = new Set(
+    sources.filter((s) => !isOwnProfile(s.url, profileUrls)).map((s) => hostOf(s.url)),
+  );
+  const onlyOurProfile = new Set(
+    sources.filter((s) => isOwnProfile(s.url, profileUrls)).map((s) => hostOf(s.url)).filter((h) => h && !viaOtherPages.has(h)),
+  );
   return {
-    cited: isCited(domains, text, opts.ownDomain, opts.brandTerms),
-    citedDomains: competitorsOf(domains, opts.ownDomain),
-    citedSources: competitorSourcesOf(sources, opts.ownDomain),
+    cited: isCited(domains, text, opts.ownDomain, opts.brandTerms, sources, profileUrls),
+    citedDomains: competitorsOf(domains.filter((d) => !onlyOurProfile.has(d)), opts.ownDomain),
+    citedSources: competitorSourcesOf(sources, opts.ownDomain, profileUrls),
     excerpt: text.replace(/\s+/g, " ").trim().slice(0, 400),
     costUsd: cost,
     error: null,

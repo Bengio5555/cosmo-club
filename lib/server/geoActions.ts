@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { createClient } from "@/lib/supabase/server";
-import { site } from "@/lib/site";
+import { profiles, site } from "@/lib/site";
 import { reviewsAggregate } from "@/lib/testimonials";
 import { PRESS } from "@/lib/content/llms";
 import { GEO_MODEL } from "@/lib/geo/aiMentions";
@@ -79,6 +79,7 @@ export async function loadGeoActionData(supabase: Supabase): Promise<GeoActionDa
       runs: data.runs,
       results: data.results,
       pendingReviews: { count: pending.length, latestEventId: pending[0]?.id ?? null },
+      presence: profiles.map((p) => ({ domain: new URL(p.url).hostname.replace(/^www\./, ""), url: p.url })),
     }),
   };
 }

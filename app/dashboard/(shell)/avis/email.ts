@@ -29,7 +29,8 @@ export function buildReviewEmail({ firstName, eventDate, reviewUrl }: ReviewEmai
   const dateLong = formatEventDateLong(eventDate);
   const eventPhrase = dateLong ? `votre événement du ${dateLong}` : "votre événement";
 
-  const subject = "Merci pour votre soirée";
+  // Pas « soirée » : séminaires, ateliers et déjeuners ont lieu de jour.
+  const subject = "Merci pour ce beau moment";
   const thanks = `Merci encore de nous avoir accueillis pour ${eventPhrase}. On espère que vos invités en gardent un aussi bon souvenir que nous.`;
   const ask = "Si vous avez un instant, quelques mots sur Google nous feraient très plaisir.";
 

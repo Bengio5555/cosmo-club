@@ -31,7 +31,7 @@ export type Decision = {
   kind: string;
 };
 
-export type ActionKind = "reviews" | "directory" | "article" | "competitor" | "content";
+export type ActionKind = "reviews" | "directory" | "profile" | "article" | "competitor" | "content";
 export type GeoAction = {
   key: string;
   kind: ActionKind;
@@ -123,6 +123,8 @@ export function candidateActions(input: {
   runs: RunLite[];
   results: ResultLite[];
   pendingReviews: { count: number; latestEventId: string | null };
+  /** Annuaires où Cosmo Club a déjà une fiche : on propose de l'étoffer, pas de s'inscrire. */
+  presence?: { domain: string; url: string }[];
 }): GeoAction[] {
   const out: GeoAction[] = [];
   const recentIds = new Set(input.runs.slice(0, 4).map((r) => r.id));
@@ -166,7 +168,20 @@ export function candidateActions(input: {
     const top = [...e.urls.entries()].sort((a, b) => b[1].n - a[1].n)[0];
     const questions = [...e.questions];
     const seen = `Cité dans ${pct(e.count)} ces dernières semaines, sans Cosmo Club.`;
-    if (isDirectory(domain)) {
+    const profile = input.presence?.find((p) => p.domain === domain);
+    if (profile) {
+      out.push({
+        key: `profile:${domain}`,
+        kind: "profile",
+        title: `Étoffe la fiche Cosmo Club sur ${domain}`,
+        detail: `${seen} La fiche existe, mais d'autres prestataires ressortent : des avis de clients, des photos récentes et un prix clair l'aident à être reprise.`,
+        href: profile.url,
+        hrefLabel: "Ouvrir la fiche",
+        article: null,
+        questions,
+        score: 42 + weight(e.count),
+      });
+    } else if (isDirectory(domain)) {
       out.push({
         key: `site:${domain}`,
         kind: "directory",

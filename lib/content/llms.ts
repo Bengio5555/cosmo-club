@@ -89,6 +89,8 @@ export function buildLlmsTxt(opts: {
   siteUrl: string;
   articles: LlmsArticle[];
   reviews: LlmsReviews;
+  /** Fiches sur des annuaires tiers, listées dans « Identité ». */
+  profiles?: readonly { label: string; url: string }[];
 }): string {
   const base = opts.siteUrl.replace(/\/+$/, "");
   const articles = opts.articles.length
@@ -111,8 +113,13 @@ export function buildLlmsTxt(opts: {
       ].join("\n")
     : "";
 
+  const head = HEAD.replace(
+    "- Instagram : @cosmoclubparis",
+    ["- Instagram : @cosmoclubparis", ...(opts.profiles ?? []).map((p) => `- ${p.label} : ${p.url}`)].join("\n"),
+  );
+
   return (
-    [HEAD, `## Articles publiés (journal éditorial)\n\n${articles}`, FACTS, reputation, press, TAIL]
+    [head, `## Articles publiés (journal éditorial)\n\n${articles}`, FACTS, reputation, press, TAIL]
       .filter(Boolean)
       .join("\n\n") + "\n"
   );
