@@ -26,8 +26,12 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
 const EVENT_COLS =
   "id,date,status,client_id,review_requested_at,review_requested_by,review_reminded_at,review_received_at,review_token";
 
-/** Vérifications communes : rôle, session, événement passé, client avec e-mail. */
-async function loadEvent(eventId: string) {
+/**
+ * Vérifications communes : rôle, session, événement passé, client rattaché.
+ * `needClient = false` pour « Avis reçu », qui n'envoie rien : un avis
+ * spontané peut être noté même sans client rattaché.
+ */
+async function loadEvent(eventId: string, needClient = true) {
   const role = await getCurrentRole();
   if (!role || !(ALLOWED as readonly string[]).includes(role)) {
     return { error: "Accès refusé." } as const;
@@ -53,7 +57,7 @@ async function loadEvent(eventId: string) {
   const today = new Date().toISOString().slice(0, 10);
   if (ev.status === "annule") return { error: "Événement annulé." } as const;
   if (ev.date >= today) return { error: "L'événement n'a pas encore eu lieu." } as const;
-  if (!ev.client_id) return { error: "Aucun client rattaché à cet événement." } as const;
+  if (needClient && !ev.client_id) return { error: "Aucun client rattaché à cet événement." } as const;
 
   return { supabase, user, ev, clientId: ev.client_id } as const;
 }
@@ -109,6 +113,7 @@ export async function sendReviewRequest(eventId: string, force = false): Promise
   const ctx = await loadEvent(eventId);
   if (ctx.error) return { ok: false, error: ctx.error };
   const { supabase, user, ev, clientId } = ctx;
+  if (!clientId) return { ok: false, error: "Aucun client rattaché à cet événement." };
   if (ev.review_received_at) return { ok: false, error: "L'avis est déjà marqué comme reçu." };
 
   if (!force) {
@@ -176,6 +181,7 @@ export async function sendReviewReminder(eventId: string): Promise<Result> {
   const ctx = await loadEvent(eventId);
   if (ctx.error) return { ok: false, error: ctx.error };
   const { supabase, user, ev, clientId } = ctx;
+  if (!clientId) return { ok: false, error: "Aucun client rattaché à cet événement." };
   if (!ev.review_requested_at) return { ok: false, error: "Aucune demande n'a encore été envoyée." };
   if (ev.review_received_at) return { ok: false, error: "L'avis est déjà marqué comme reçu." };
   if (ev.review_reminded_at) return { ok: false, error: "La relance est déjà partie." };
@@ -224,7 +230,7 @@ export async function markReviewReceived(
   eventId: string,
   received: boolean,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const ctx = await loadEvent(eventId);
+  const ctx = await loadEvent(eventId, false);
   if (ctx.error) return { ok: false, error: ctx.error };
   const { supabase, user } = ctx;
 

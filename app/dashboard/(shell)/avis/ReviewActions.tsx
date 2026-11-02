@@ -62,8 +62,13 @@ export function ReviewActions({
   switch (stage.stage) {
     case "to_request":
     case "client_done":
+      // « Avis reçu » aussi avant toute demande : un client peut laisser un
+      // avis spontanément, il sort alors de la liste à demander.
       buttons = disabledReason ? (
-        <p className="text-xs text-slate-500 dark:text-slate-400">{disabledReason}</p>
+        <>
+          <p className="self-center text-xs text-slate-500 dark:text-slate-400">{disabledReason}</p>
+          {received}
+        </>
       ) : stage.stage === "to_request" ? (
         <button
           type="button"
@@ -95,6 +100,14 @@ export function ReviewActions({
           {pending ? "Envoi…" : "Envoyer quand même"}
         </button>
       );
+      if (!disabledReason) {
+        buttons = (
+          <>
+            {buttons}
+            {received}
+          </>
+        );
+      }
       break;
     case "to_remind":
       buttons = (
