@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
 import { getImagePath } from "@/lib/server/imagesConfig";
+import { ogDefaults } from "@/lib/seo-og";
 
 const SLUG = "/bar-a-cocktails/entreprise";
 const FALLBACK_HERO = "/brand/ai/hero-bar.png";
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: SLUG },
   openGraph: {
+    ...ogDefaults(),
     title: "Bar à cocktails entreprise — Cosmo Club Paris",
     description:
       "Mixologie événementielle B2B : lancements de marque, soirées corporate, séminaires, cocktails de fin d'année.",

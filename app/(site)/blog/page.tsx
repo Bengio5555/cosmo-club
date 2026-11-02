@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { getAllArticles } from "@/lib/blog";
 import { site } from "@/lib/site";
+import { ogDefaults } from "@/lib/seo-og";
 
 // Breadcrumb parity with the service pages (they all emit one; the blog
 // section was the last without).
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
     "Guides et inspirations pour vos événements à Paris : mariage, soirée corporate, cocktails signature, barista et tendances mixologie 2026. Cosmo Club Paris.",
   alternates: { canonical: "/blog" },
   openGraph: {
+    ...ogDefaults(),
     title: "Blog — Cosmo Club Paris",
     description: "Guides mariage, événementiel et mixologie premium.",
     url: "/blog",

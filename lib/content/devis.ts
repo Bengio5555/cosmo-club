@@ -74,7 +74,7 @@ export const devisSchema = z.object({
   // champ nommé « website » se faisait remplir par l'autofill d'Arc /
   // Chrome, la validation échouait sur un champ invisible et le navigateur
   // faisait défiler la page vers lui. Côté navigateur on ne le valide pas ;
-  // le serveur ignore silencieusement la demande s'il est rempli.
+  // le serveur distingue autofill et robot (lib/devisHoneypot.ts).
   hp_f2: z.string().optional().or(z.literal("")),
   // Marque posée sur la canette (page canettes), transmise par le lien
   // « Demander un devis pour X ». Informative : jamais bloquante.

@@ -24,7 +24,7 @@ export function RecettesSection({ imageSrc }: { imageSrc: string }) {
             </h2>
           </div>
           <p className="max-w-md text-[15px] text-[color:var(--color-espresso)]/70 md:text-right">
-            Créées par nos mixologues pour tenir en canette : purées de fruits, sirops d’auteur, bulle fine. Lattes glacés sur demande.
+            Créées par nos mixologues pour tenir en canette :<br />purées de fruits, sirops, bulle fine. Lattes glacés sur demande.
           </p>
         </Reveal>
 
@@ -44,20 +44,13 @@ export function RecettesSection({ imageSrc }: { imageSrc: string }) {
               <Reveal
                 key={r.id}
                 delay={i * 120}
-                className="group flex items-center gap-4 py-5 first:pt-0 last:pb-0 md:gap-6 md:py-6"
+                className="group py-5 first:pt-0 last:pb-0 md:py-6"
               >
-                <Image
-                  src={r.illustration}
-                  alt=""
-                  width={112}
-                  height={112}
-                  className="h-16 w-16 shrink-0 object-contain md:h-24 md:w-24"
-                />
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-4 md:items-baseline">
                     <h3 className="font-display text-2xl text-[color:var(--color-ink-text)] md:text-3xl">
                       {r.name}
-                      <span className="mt-0.5 block font-accent text-base text-[color:var(--color-grenat)] md:ml-3 md:mt-0 md:inline md:text-lg">{r.tasting}</span>
+                      <span className="mt-1 block font-accent text-base text-[color:var(--color-grenat)] md:text-lg">{r.tasting}</span>
                     </h3>
                     <span className="font-display text-sm tabular-nums text-[color:var(--color-or)]">{r.num}</span>
                   </div>

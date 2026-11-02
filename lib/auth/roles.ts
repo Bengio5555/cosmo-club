@@ -38,6 +38,8 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   "/dashboard/clients": ["owner", "admin", "manager", "compta"],
   // Events: the ONLY page staff can reach.
   "/dashboard/events": ["owner", "admin", "manager", "staff"],
+  // Demandes d'avis Google après un événement.
+  "/dashboard/avis": ["owner", "admin", "manager"],
   "/dashboard/cocktails": ["owner", "admin", "manager"],
   "/dashboard/catalog": ["owner", "admin", "manager"],
   "/dashboard/stock": ["owner", "admin", "manager"],
@@ -52,6 +54,8 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   // Site content (vitrine + éditorial)
   "/dashboard/blog": ["owner", "admin", "manager"],
   "/dashboard/reddit": ["owner", "admin", "manager"],
+  // Citations dans les assistants IA, leads IA, passages des robots IA.
+  "/dashboard/visibilite": ["owner", "admin", "manager"],
   "/dashboard/images": ["owner", "admin"],
   "/dashboard/home-gallery": ["owner", "admin"],
   "/dashboard/logos": ["owner", "admin"],

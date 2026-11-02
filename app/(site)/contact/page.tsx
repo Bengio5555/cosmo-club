@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { DevisWizard } from "@/components/form/DevisWizard";
 import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
 import { site } from "@/lib/site";
+import { ogDefaults } from "@/lib/seo-og";
 
 export const metadata: Metadata = {
   title: "Devis & contact — bar à cocktails événementiel",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
     "Demandez votre devis sur-mesure en 4 questions, réponse sous 48 h. Bar à cocktails et barista événementiel à Paris et en Île-de-France.",
   alternates: { canonical: "/contact" },
   openGraph: {
+    ...ogDefaults(),
     title: "Devis & contact — Cosmo Club Paris",
     description: "Devis sur-mesure en 4 questions, réponse sous 48h.",
     url: "/contact",

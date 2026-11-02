@@ -100,6 +100,9 @@ const PAID_MEDIUMS = /^(cpc|ppc|paid|paid_social|paidsocial|paid-social|ads|disp
 const AI_HOSTS =
   /(^|\.)(chatgpt\.com|openai\.com|perplexity\.ai|claude\.ai|gemini\.google\.com|copilot\.microsoft\.com|you\.com|mistral\.ai|chat\.mistral\.ai)$/;
 
+const AI_SOURCES =
+  /^(chatgpt(\.com)?|openai|perplexity(\.ai)?|claude(\.ai)?|gemini|copilot|mistral|you\.com)$/;
+
 export function deriveChannel(a: Attribution | null | undefined): Channel {
   if (!a) return "direct";
   const src = norm(a.utm_source);
@@ -115,6 +118,10 @@ export function deriveChannel(a: Attribution | null | undefined): Channel {
   if (!src && click.startsWith("msclkid")) return "google_ads";
 
   if (src) {
+    // ChatGPT (and some other assistants) tag outbound links with
+    // utm_source=chatgpt.com — checked first, before the generic rules
+    // below would file it as "Autre site".
+    if (AI_SOURCES.test(src)) return "ai_assistant";
     if (/google/.test(src)) return paid ? "google_ads" : "google_organic";
     if (/instagram|^ig$/.test(src)) return paid ? "instagram_paid" : "instagram";
     if (/facebook|^fb$|meta/.test(src)) return paid ? "facebook_paid" : "facebook";

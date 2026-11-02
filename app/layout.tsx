@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { fontClassName } from "@/lib/fonts";
-import { site } from "@/lib/site";
+import { site, organizationSameAs } from "@/lib/site";
 import "./globals.css";
 
 // GA4 measurement ID. Lit l'env d'abord pour rester configurable
@@ -75,7 +75,7 @@ const organizationJsonLd = {
     { "@type": "City", name: "Paris" },
     { "@type": "AdministrativeArea", name: "Île-de-France" },
   ],
-  sameAs: [site.instagram],
+  sameAs: organizationSameAs,
   contactPoint: {
     "@type": "ContactPoint",
     telephone: site.phone.replace(/\s/g, ""),

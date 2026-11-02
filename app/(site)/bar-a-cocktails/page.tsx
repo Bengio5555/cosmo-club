@@ -16,6 +16,7 @@ import {
   buildFaqLd,
   type FaqItem,
 } from "@/components/site/FaqSection";
+import { ogDefaults } from "@/lib/seo-og";
 
 // FAQ — facts sourced from published site content only (cartes, bar
 // formats, mocktails, in-a-bottle, IDF coverage, card lock policy).
@@ -132,6 +133,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/bar-a-cocktails" },
   openGraph: {
+    ...ogDefaults(),
     title: "Bar à cocktails événementiel — Cosmo Club Paris",
     description:
       "Bar à cocktails mobile premium pour vos événements à Paris et en Île-de-France.",

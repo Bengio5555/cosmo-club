@@ -9,6 +9,7 @@ import { FaqSection, buildFaqLd } from "@/components/site/FaqSection";
 import { getImagePath } from "@/lib/server/imagesConfig";
 import { faq, formules, paliers } from "@/lib/content/canettes";
 import { site } from "@/lib/site";
+import { ogDefaults } from "@/lib/seo-og";
 
 const SLUG = "/canettes-personnalisees";
 const URL = `${site.url}${SLUG}`;
@@ -36,9 +37,10 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: SLUG },
   openGraph: {
+    ...ogDefaults({ url: "/og/canettes.jpg", alt: "Canettes transparentes Cosmo Club Paris sur glace, logo blanc, mocktail concombre" }),
     title: "Mocktail in a can — Cosmo Club Paris",
     description:
-      "La canette transparente à votre logo : recettes sans alcool, garniture visible, scellée le jour même. dès 200 canettes.",
+      "La canette transparente à votre logo : recettes sans alcool, garniture visible, scellée le jour même. Dès 200 canettes.",
     url: SLUG,
     type: "website",
   },

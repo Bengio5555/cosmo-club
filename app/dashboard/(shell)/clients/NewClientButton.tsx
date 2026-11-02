@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, X } from "lucide-react";
-import { CHANNELS } from "@/lib/attribution";
+import { CHANNELS, OFFLINE_CHANNELS } from "@/lib/attribution";
 import { saveNewClient, type ClientInput } from "./actions";
 
 export function NewClientButton() {
@@ -143,13 +143,27 @@ export function NewClientButton() {
               </div>
 
               <Field label="Comment ce contact est-il arrivé ?">
-                <select name="channel" defaultValue="" className={inputCls}>
-                  <option value="">Je ne sais pas</option>
-                  {CHANNELS.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
-                  ))}
+                {/* Obligatoire : sans canal, la demande créée en miroir sort
+                    des statistiques de provenance (« non renseigné »). Les
+                    canaux hors ligne d'abord, c'est le cas d'une saisie manuelle. */}
+                <select name="channel" defaultValue="" required className={inputCls}>
+                  <option value="" disabled>
+                    Choisir…
+                  </option>
+                  <optgroup label="Hors ligne">
+                    {OFFLINE_CHANNELS.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="En ligne">
+                    {CHANNELS.filter((c) => c.group !== "offline").map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               </Field>
 

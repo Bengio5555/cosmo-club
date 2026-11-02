@@ -228,13 +228,24 @@ export default async function DashboardHome({
       }
       if (t) directType.set(inv.id, t);
     }
+    // Month an invoice belongs to: its event date, else — for a credit
+    // note — the month of the invoice it cancels (so an avoir never lands
+    // in a different month than its invoice), else its issue date.
+    const bucketDate = (inv: TrendRow): string => {
+      if (inv.event_date) return inv.event_date;
+      if (inv.is_credit_note && inv.source_invoice_id) {
+        const src = rowById.get(inv.source_invoice_id);
+        if (src) return src.event_date ?? src.issue_date;
+      }
+      return inv.issue_date;
+    };
     const siblingType = new Map<string, EventType>();
     const clientLatest = new Map<string, { d: string; t: EventType }>();
     for (const inv of rows) {
       const t = directType.get(inv.id);
       if (!t || !inv.client_id) continue;
       if (inv.event_date) siblingType.set(`${inv.client_id}|${inv.event_date}`, t);
-      const d = inv.event_date ?? inv.issue_date;
+      const d = bucketDate(inv);
       const cur = clientLatest.get(inv.client_id);
       if (!cur || d > cur.d) clientLatest.set(inv.client_id, { d, t });
     }
@@ -251,7 +262,7 @@ export default async function DashboardHome({
       const byType = emptyRevenueSplit();
       let total = 0;
       for (const inv of rows) {
-        if (!((inv.event_date ?? inv.issue_date) ?? "").startsWith(monthKey)) continue;
+        if (!bucketDate(inv).startsWith(monthKey)) continue;
         const amount = Number(inv.total_ht ?? 0);
         byType[typeOf(inv)] += amount;
         total += amount;

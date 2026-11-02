@@ -8,7 +8,7 @@ import { EventsGallery } from "@/components/home/EventsGallery";
 import { ClientsMarquee } from "@/components/marquee/ClientsMarquee";
 import { Testimonials } from "@/components/home/Testimonials";
 import { CtaDevis } from "@/components/home/CtaDevis";
-import { site } from "@/lib/site";
+import { site, organizationSameAs } from "@/lib/site";
 import { testimonials, reviewsAggregate } from "@/lib/testimonials";
 import heroHomeImg from "@/public/brand/ai/hero-home.png";
 import { getImagePath } from "@/lib/server/imagesConfig";
@@ -147,7 +147,7 @@ export default async function HomePage() {
       reviewBody: t.body,
       ...(t.date ? { datePublished: t.date } : {}),
     })),
-    sameAs: [site.instagram],
+    sameAs: organizationSameAs,
     contactPoint: {
       "@type": "ContactPoint",
       telephone: site.phone.replace(/\s/g, ""),

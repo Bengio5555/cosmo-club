@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
 import { getImagePath } from "@/lib/server/imagesConfig";
+import { ogDefaults } from "@/lib/seo-og";
 
 const SLUG = "/bar-a-cocktails/anniversaire";
 const FALLBACK_HERO = "/brand/ai/bento-bar-cocktails.png";
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: SLUG },
   openGraph: {
+    ...ogDefaults(),
     title: "Bar à cocktails anniversaire — Cosmo Club Paris",
     description:
       "Mixologie événementielle pour un anniversaire qui marque. Bars modulables, cartes signature, mocktails et personnalisation.",

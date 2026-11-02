@@ -7,7 +7,7 @@
  *
  * Le devis reste obligatoire : aucune commande en ligne, aucun
  * simulateur. La version avec alcool n'est pas une formule standard,
- * elle se traite uniquement sur demande (mentionnée en FAQ).
+ * elle se traite uniquement sur devis (listée en option et en FAQ).
  */
 
 export const TVA_RATE = 0.2;
@@ -36,8 +36,6 @@ export type Recette = {
   garnishShort: string;
   /** Teinte dominante dans la canette (encre du logo choisie en conséquence). */
   hue: { primary: string; soft: string };
-  /** Petite illustration botanique (PNG transparent, 512 px). */
-  illustration: string;
   inkTone: "claire" | "foncée";
 };
 
@@ -45,7 +43,6 @@ export const recettes: Recette[] = [
   {
     id: "litchi-rose",
     garnishShort: "Ruban de concombre",
-    illustration: "/brand/canettes/illus-litchi-rose.png",
     num: "01",
     name: "Litchi Rose",
     tasting: "Floral, frais, pétillant.",
@@ -56,20 +53,18 @@ export const recettes: Recette[] = [
   },
   {
     id: "framboise-hibiscus",
-    garnishShort: "Orange séchée",
-    illustration: "/brand/canettes/illus-framboise-hibiscus.png",
+    garnishShort: "Fleur d’hibiscus",
     num: "02",
     name: "Framboise Hibiscus",
     tasting: "Acidulé, profond, légèrement épicé.",
     base: "Purée de framboise, sirop d'hibiscus, citron jaune, ginger beer.",
-    garnish: "Tranche d'orange séchée ou fleur d'hibiscus.",
+    garnish: "Fleur d'hibiscus.",
     hue: { primary: "#8f2a4a", soft: "#d9a2b4" },
     inkTone: "claire",
   },
   {
     id: "coco-peche-aloe",
     garnishShort: "Citron vert",
-    illustration: "/brand/canettes/illus-coco-peche-aloe.png",
     num: "03",
     name: "Coco Pêche Aloe Vera",
     tasting: "Doux, désaltérant, solaire.",
@@ -170,6 +165,11 @@ export const options = [
     desc: "Paris 60 € · petite couronne 90 € · reste de l'Île-de-France 120 à 150 €. Offerte dès 500 canettes.",
     price: "offerte dès 500",
   },
+  {
+    name: "Version cocktail, avec alcool",
+    desc: "Les recettes déclinées en cocktails alcoolisés, étudiées au cas par cas selon votre événement.",
+    price: "sur devis",
+  },
 ];
 
 export const personnalisation = [
@@ -222,7 +222,7 @@ export type FaqEntry = { q: string; a: string };
 export const faq: FaqEntry[] = [
   {
     q: "Qu'est-ce qu'un « Mocktail in a can » ?",
-    a: "Une canette transparente de 25 cl à couvercle aluminium, remplie d'une recette sans alcool créée par Cosmo Club, avec une garniture visible (ruban de concombre, tranche d'orange séchée, fleur d'hibiscus) et votre logo posé en étiquette transparente. Chaque canette est remplie et scellée le jour même de la livraison ou de l'événement.",
+    a: "Une canette transparente de 25 cl à couvercle aluminium, remplie d'une recette sans alcool créée par Cosmo Club, avec une garniture visible (ruban de concombre, fleur d'hibiscus, citron vert) et votre logo posé en étiquette transparente. Chaque canette est remplie et scellée le jour même de la livraison ou de l'événement.",
   },
   {
     q: "Combien coûte une canette personnalisée ?",

@@ -33,6 +33,43 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["articles"]["Row"]>
         Relationships: []
       }
+      bank_change_log: {
+        Row: {
+          id: number
+          changed_at: string
+          changed_by: string | null
+          via_dashboard: boolean
+          old_iban_masked: string | null
+          new_iban_masked: string | null
+          old_bic: string | null
+          new_bic: string | null
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      bank_change_requests: {
+        Row: {
+          id: string
+          requested_by: string
+          new_iban: string
+          new_bic: string | null
+          code_hash: string
+          attempts: number
+          expires_at: string
+          used_at: string | null
+          created_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["bank_change_requests"]["Row"]> & {
+          id: string
+          requested_by: string
+          new_iban: string
+          code_hash: string
+          expires_at: string
+        }
+        Update: Partial<Database["public"]["Tables"]["bank_change_requests"]["Row"]>
+        Relationships: []
+      }
       catalog_items: {
         Row: {
           id: string
@@ -96,6 +133,14 @@ export type Database = {
           title: string
           drive_folder_id: string | null
           todo_data: Json | null
+          review_requested_at: string | null
+          review_requested_by: string | null
+          review_reminded_at: string | null
+          review_reminded_by: string | null
+          review_received_at: string | null
+          review_received_by: string | null
+          review_clicked_at: string | null
+          review_token: string
           updated_at: string
         }
         Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & { title: string; date: string }
@@ -525,6 +570,8 @@ export type Database = {
         Row: {
           address_line1: string | null
           address_line2: string | null
+          bank_updated_at: string | null
+          bank_updated_by: string | null
           bic: string | null
           calendar_token: string | null
           city: string | null
@@ -534,6 +581,7 @@ export type Database = {
           credit_note_number_prefix: string
           default_tva_rate: number
           email: string | null
+          google_review_url: string | null
           iban: string | null
           id: number
           invoice_due_days: number
@@ -663,6 +711,73 @@ export type Database = {
           result: Database["public"]["Enums"]["equipment_scan_result"]
         }
         Update: Partial<Database["public"]["Tables"]["equipment_scans"]["Row"]>
+        Relationships: []
+      }
+      geo_runs: {
+        Row: {
+          id: string
+          ran_at: string
+          model: string
+          questions: number
+          cited: number
+          cost_usd: number
+          error: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["geo_runs"]["Row"]> & { model: string; questions: number; cited: number }
+        Update: Partial<Database["public"]["Tables"]["geo_runs"]["Row"]>
+        Relationships: []
+      }
+      geo_results: {
+        Row: {
+          id: string
+          run_id: string
+          question: string
+          category: string
+          cited: boolean
+          cited_domains: string[]
+          cited_sources: Json
+          answer_excerpt: string | null
+          error: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["geo_results"]["Row"]> & {
+          run_id: string
+          question: string
+          category: string
+          cited: boolean
+        }
+        Update: Partial<Database["public"]["Tables"]["geo_results"]["Row"]>
+        Relationships: []
+      }
+      geo_actions: {
+        Row: {
+          key: string
+          kind: string
+          title: string
+          status: "done" | "snoozed"
+          snoozed_until: string | null
+          done_at: string | null
+          baseline: Json | null
+          updated_by: string | null
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["geo_actions"]["Row"]> & {
+          key: string
+          kind: string
+          title: string
+          status: "done" | "snoozed"
+        }
+        Update: Partial<Database["public"]["Tables"]["geo_actions"]["Row"]>
+        Relationships: []
+      }
+      ai_bot_hits: {
+        Row: {
+          id: number
+          bot: string
+          path: string
+          hit_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["ai_bot_hits"]["Row"]> & { bot: string; path: string }
+        Update: Partial<Database["public"]["Tables"]["ai_bot_hits"]["Row"]>
         Relationships: []
       }
     }

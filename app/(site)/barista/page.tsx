@@ -17,6 +17,7 @@ import {
   buildFaqLd,
   type FaqItem,
 } from "@/components/site/FaqSection";
+import { ogDefaults } from "@/lib/seo-og";
 
 // FAQ — answers stick strictly to facts already published on the site
 // (llms.txt, stands section, service pages). No invented figures.
@@ -111,6 +112,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/barista" },
   openGraph: {
+    ...ogDefaults(),
     title: "Prestation barista événementiel — Cosmo Club Paris",
     description:
       "Stand café de spécialité, lattes signature et latte art à votre logo pour vos mariages, salons et événements d'entreprise à Paris.",

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CGV_TEXT, cgvVersion, renderCgvHtml } from "@/lib/cgv";
+import { ogDefaults } from "@/lib/seo-og";
 
 export const metadata: Metadata = {
   title: "Conditions générales de vente — Cosmo Club",
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
   // Own OG block — without it the page inherits the homepage's
   // openGraph from the root layout and shares as the wrong page.
   openGraph: {
+    ...ogDefaults(),
     title: "Conditions générales de vente — Cosmo Club Paris",
     description:
       "Conditions générales de vente des prestations Cosmo Club Paris.",

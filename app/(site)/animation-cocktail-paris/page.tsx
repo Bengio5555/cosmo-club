@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LandingPage, type LandingConfig } from "@/components/landing/LandingPage";
 import { getImagePath } from "@/lib/server/imagesConfig";
+import { ogDefaults } from "@/lib/seo-og";
 
 const SLUG = "/animation-cocktail-paris";
 const FALLBACK_HERO = "/brand/ai/bento-bar-cocktails.png";
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: SLUG },
   openGraph: {
+    ...ogDefaults(),
     title: "Animation cocktail entreprise Paris — Cosmo Club",
     description:
       "Atelier mixologie et animation cocktail pour vos équipes : team building, séminaire, soirée corporate, dans vos locaux ou en lieu partenaire.",
