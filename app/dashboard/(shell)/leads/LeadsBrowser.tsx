@@ -2,19 +2,20 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Mail, MailCheck, MailX, Search } from "lucide-react";
 import type { Database } from "@/types/database";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { EventTypeLabel } from "@/components/dashboard/EventTypeLabel";
 import { OFFER_LABEL } from "@/lib/content/devis";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { channelLabel } from "@/lib/attribution";
+import { ackState, type LeadAck } from "@/lib/leadAck";
 import { formatDateFR } from "@/lib/format";
 
 type LeadStatus = Database["public"]["Enums"]["lead_status"];
 type EventType = Database["public"]["Enums"]["event_type"];
 
-type Lead = {
+export type Lead = LeadAck & {
   id: string;
   status: LeadStatus;
   contact_name: string | null;
@@ -287,8 +288,9 @@ export function LeadsBrowser({ leads }: { leads: Lead[] }) {
                             </span>
                           )}
                         </p>
-                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                          {l.contact_email}
+                        <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                          <span className="truncate">{l.contact_email}</span>
+                          <AckIcon lead={l} />
                         </p>
                         {l.company && (
                           <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-500">
@@ -379,4 +381,29 @@ function rawDateText(payload: unknown): string | null {
     if (typeof v === "string" && v.trim()) return v.trim();
   }
   return null;
+}
+
+/**
+ * Picto de l'accusé de réception envoyé au prospect après le formulaire :
+ * enveloppe cochée verte (remis), enveloppe grise (parti, remise pas encore
+ * confirmée), enveloppe barrée rouge (non remis). Rien quand aucun accusé
+ * n'est connu (demande saisie à la main ou antérieure au suivi).
+ */
+function AckIcon({ lead }: { lead: LeadAck }) {
+  const state = ackState(lead);
+  if (!state) return null;
+  const when = state.at ? ` le ${formatDateFR(state.at, { withTime: true })}` : "";
+  const title = `${state.label}${when}${state.detail ? `. ${state.detail}` : ""}`;
+  const Icon = state.kind === "remis" ? MailCheck : state.kind === "probleme" ? MailX : Mail;
+  const cls =
+    state.kind === "remis"
+      ? "text-emerald-600 dark:text-emerald-400"
+      : state.kind === "probleme"
+        ? "text-red-600 dark:text-red-400"
+        : "text-slate-400 dark:text-slate-500";
+  return (
+    <span title={title} aria-label={title} role="img" className={`inline-flex shrink-0 ${cls}`}>
+      <Icon className="h-3.5 w-3.5" aria-hidden />
+    </span>
+  );
 }

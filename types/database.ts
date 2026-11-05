@@ -299,6 +299,13 @@ export type Database = {
           utm_content: string | null
           referrer: string | null
           landing_page: string | null
+          // Accusé de réception (docs/migrations/2026-11-05_lead_ack_email.sql)
+          ack_email_id: string | null
+          ack_sent_at: string | null
+          ack_delivered_at: string | null
+          ack_opened_at: string | null
+          ack_problem_at: string | null
+          ack_problem: string | null
         }
         Insert: Partial<Database["public"]["Tables"]["leads"]["Row"]>
         Update: Partial<Database["public"]["Tables"]["leads"]["Row"]>

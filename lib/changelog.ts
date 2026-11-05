@@ -44,6 +44,14 @@ export const CHANGELOG: ChangeEntry[] = [
   {
     date: "2026-11-05",
     kind: "nouveau",
+    area: "Demandes",
+    title: "Picto d'accusé de réception sur chaque demande",
+    detail:
+      "Une enveloppe à côté de l'e-mail du prospect indique si le mail envoyé après le formulaire est arrivé : cochée verte (remis), grise (parti), barrée rouge (non remis, adresse à vérifier).",
+  },
+  {
+    date: "2026-11-05",
+    kind: "nouveau",
     area: "Devis",
     title: "E-mail d'alerte quand un client refuse un devis",
     detail:

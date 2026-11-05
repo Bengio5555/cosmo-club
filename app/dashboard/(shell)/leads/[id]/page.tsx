@@ -8,7 +8,8 @@ import { LeadDetailForm } from "./LeadDetailForm";
 import { ChannelBadge } from "@/components/dashboard/ChannelBadge";
 import { hostOf } from "@/lib/attribution";
 import { OFFER_LABEL } from "@/lib/content/devis";
-import { ArrowLeft, Mail, Phone, Building2, Calendar, Users } from "lucide-react";
+import { ArrowLeft, Mail, MailCheck, MailX, Phone, Building2, Calendar, Users } from "lucide-react";
+import { ackState } from "@/lib/leadAck";
 
 // The /contact form lets visitors type the date in free French
 // ("14 juin 2026", "printemps 2026", "fin septembre"). Most of the time
@@ -89,6 +90,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
             <span className="text-[11px] text-slate-500 dark:text-slate-500">
               Reçu {formatDateFR(lead.created_at, { withTime: true })}
             </span>
+            <AckLine lead={lead} />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
             {lead.contact_name || <span className="text-slate-500 dark:text-slate-500">Sans nom</span>}
@@ -322,5 +324,26 @@ function Row({
       <span className="w-24 text-xs text-slate-500 dark:text-slate-500">{label}</span>
       <span className="flex-1">{children}</span>
     </div>
+  );
+}
+
+/** Accusé de réception envoyé au prospect : état et date, à côté de « Reçu ». */
+function AckLine({ lead }: { lead: Parameters<typeof ackState>[0] }) {
+  const state = ackState(lead);
+  if (!state) return null;
+  const Icon = state.kind === "remis" ? MailCheck : state.kind === "probleme" ? MailX : Mail;
+  const cls =
+    state.kind === "remis"
+      ? "text-emerald-700 dark:text-emerald-400"
+      : state.kind === "probleme"
+        ? "text-red-700 dark:text-red-400"
+        : "text-slate-500 dark:text-slate-500";
+  return (
+    <span className={`inline-flex items-center gap-1 text-[11px] ${cls}`} title={state.detail ?? undefined}>
+      <Icon className="h-3.5 w-3.5" aria-hidden />
+      {state.label}
+      {state.at ? ` le ${formatDateFR(state.at, { withTime: true })}` : ""}
+      {state.kind === "probleme" && state.detail ? ` : ${state.detail}` : ""}
+    </span>
   );
 }

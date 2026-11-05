@@ -6,6 +6,7 @@ import { honeypotVerdict } from "@/lib/devisHoneypot";
 import { site } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { channelLabel, deriveChannel, hostOf } from "@/lib/attribution";
+import { LEAD_ACK_TAG } from "@/lib/leadAck";
 import type { Database } from "@/types/database";
 
 export const runtime = "nodejs";
@@ -89,7 +90,10 @@ function toDbDate(v: string | null | undefined): string | null {
 // Persist the lead into the `leads` table. Non-blocking: failures are logged
 // and swallowed so the user still gets a successful response if the email
 // went through.
-async function persistLead(data: ReturnType<typeof devisSchema.parse>, opts: { suspect?: boolean } = {}) {
+async function persistLead(
+  data: ReturnType<typeof devisSchema.parse>,
+  opts: { suspect?: boolean } = {},
+): Promise<string | null> {
   const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
   const hasKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!hasUrl || !hasKey) {
@@ -99,7 +103,7 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>, opts: { s
       "serviceRoleKey=",
       hasKey,
     );
-    return;
+    return null;
   }
   try {
     const supabase = createAdminClient();
@@ -194,15 +198,17 @@ async function persistLead(data: ReturnType<typeof devisSchema.parse>, opts: { s
     }
     if (error) {
       console.error("[persistLead] insert error:", error.message, error.details, error.hint);
-      return;
+      return null;
     }
     console.log("[persistLead] ok id=", inserted?.id, "client_id=", clientId);
     // Invalidate the dashboard so the sidebar "Demandes" pastille (which
     // lives in the cached shell layout) and the KPI both pick up the new
     // demande on the owner's next navigation — otherwise the badge lags.
     revalidatePath("/dashboard", "layout");
+    return inserted?.id ?? null;
   } catch (err) {
     console.error("[persistLead] thrown:", err);
+    return null;
   }
 }
 
@@ -253,7 +259,7 @@ export async function POST(req: Request) {
   const htmlBody = renderHtml(data);
 
   // Persist to DB alongside the email — failures in one don't affect the other.
-  await persistLead(data, { suspect });
+  const leadId = await persistLead(data, { suspect });
 
   if (!resend) {
     // Dev fallback: log to server console so the flow is testable without a key
@@ -265,7 +271,7 @@ export async function POST(req: Request) {
 
   // Les deux envois partent ensemble ; seul celui de l'admin conditionne
   // la réponse, l'accusé de réception au client est best-effort.
-  const [adminResult] = await Promise.allSettled([
+  const [adminResult, ackResult] = await Promise.allSettled([
     resend.emails.send({
       from: `Cosmo Club Devis <${FROM_EMAIL}>`,
       to: [toEmail],
@@ -274,8 +280,19 @@ export async function POST(req: Request) {
       text: textBody,
       html: htmlBody,
     }),
-    suspect ? Promise.resolve() : sendBrochure(resend, data, toEmail),
+    suspect ? Promise.resolve(null) : sendBrochure(resend, data, toEmail),
   ]);
+
+  // Note l'accusé de réception sur la demande : le picto de la liste des
+  // demandes en dépend, puis le webhook Resend confirme la remise.
+  if (leadId && !suspect) {
+    await recordAck(
+      leadId,
+      ackResult.status === "fulfilled" && ackResult.value
+        ? ackResult.value
+        : { id: null, error: "L'accusé de réception n'a pas pu partir." },
+    );
+  }
 
   if (adminResult.status === "rejected") {
     console.error("resend_error", adminResult.reason);
@@ -292,7 +309,7 @@ async function sendBrochure(
   client: Resend,
   d: ReturnType<typeof devisSchema.parse>,
   replyTo: string,
-) {
+): Promise<AckResult> {
   const base = {
     from: `Cosmo Club Paris <${FROM_EMAIL}>`,
     to: [d.email],
@@ -300,22 +317,45 @@ async function sendBrochure(
     subject: "Votre demande Cosmo Club · notre Book",
     text: renderBrochureText(d),
     html: renderBrochureHtml(d),
+    tags: [{ ...LEAD_ACK_TAG }],
   };
   try {
     const res = await client.emails.send({
       ...base,
       attachments: [{ filename: BROCHURE_FILENAME, path: BROCHURE_URL }],
     });
-    if (!res.error) return;
+    if (!res.error) return { id: res.data?.id ?? null, error: null };
     console.error("[sendBrochure] with attachment:", res.error);
   } catch (err) {
     console.error("[sendBrochure] with attachment threw:", err);
   }
   try {
     const res = await client.emails.send(base);
-    if (res.error) console.error("[sendBrochure] without attachment:", res.error);
+    if (!res.error) return { id: res.data?.id ?? null, error: null };
+    console.error("[sendBrochure] without attachment:", res.error);
+    return { id: null, error: res.error.message || "Refusé par le service d'envoi." };
   } catch (err) {
     console.error("[sendBrochure] without attachment threw:", err);
+    return { id: null, error: "L'accusé de réception n'a pas pu partir." };
+  }
+}
+
+type AckResult = { id: string | null; error: string | null };
+
+// Écrit le résultat de l'accusé sur la demande. Best-effort : une erreur
+// ici (colonnes pas encore migrées, par exemple) ne doit jamais faire
+// échouer la demande, déjà enregistrée et notifiée.
+async function recordAck(leadId: string, ack: AckResult) {
+  try {
+    const now = new Date().toISOString();
+    const patch = ack.error
+      ? { ack_problem_at: now, ack_problem: ack.error.slice(0, 500) }
+      : { ack_email_id: ack.id, ack_sent_at: now };
+    const { error } = await createAdminClient().from("leads").update(patch).eq("id", leadId);
+    if (error) console.error("[recordAck] update error:", error.message);
+    else revalidatePath("/dashboard/leads");
+  } catch (err) {
+    console.error("[recordAck] thrown:", err);
   }
 }
 

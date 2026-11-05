@@ -3,6 +3,8 @@ import { revalidatePath } from "next/cache";
 import { Resend, type WebhookEventPayload } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { QUOTE_EMAIL_TAG } from "@/lib/quoteEmail";
+import { LEAD_ACK_TAG } from "@/lib/leadAck";
+import type { Database } from "@/types/database";
 import { notifyQuoteEmailProblem } from "@/lib/server/notifyQuoteEmailProblem";
 
 export const runtime = "nodejs";
@@ -90,11 +92,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "lookup failed" }, { status: 500 });
   }
   if (!row) {
-    // Not a quote email (invoice, notification…) → acknowledge and drop.
-    // A fresh quote email whose row isn't written yet → ask for a retry.
-    const isQuote = hasQuoteTag(data.tags);
+    // Accusé de réception d'une demande (e-mail au prospect après le
+    // formulaire) : suivi sur la demande elle-même.
+    const lead = await applyLeadAck(admin, emailId, update, at);
+    if (lead === "error") {
+      return NextResponse.json({ error: "lookup failed" }, { status: 500 });
+    }
+    if (lead === "handled") return NextResponse.json({ ok: true });
+
+    // Not a tracked email (invoice, notification…) → acknowledge and drop.
+    // A fresh quote / accusé email whose row isn't written yet → ask for
+    // a retry.
+    const tracked = hasTag(data.tags, QUOTE_EMAIL_TAG) || hasTag(data.tags, LEAD_ACK_TAG);
     const fresh = Date.now() - new Date(at).getTime() < RETRY_WINDOW_MS;
-    if (isQuote && fresh) {
+    if (tracked && fresh) {
       return NextResponse.json({ retry: true }, { status: 409 });
     }
     return NextResponse.json({ ignored: "unknown email" });
@@ -171,9 +182,76 @@ function columnFor(event: WebhookEventPayload): {
   }
 }
 
+type ColumnUpdate = NonNullable<ReturnType<typeof columnFor>>;
+
+/**
+ * Reporte un événement Resend sur la demande dont c'est l'accusé de
+ * réception. Chaque colonne n'est posée qu'une fois (`.is(null)`).
+ * "none" : cet e-mail n'est l'accusé d'aucune demande.
+ */
+async function applyLeadAck(
+  admin: ReturnType<typeof createAdminClient>,
+  emailId: string,
+  update: ColumnUpdate,
+  at: string,
+): Promise<"handled" | "none" | "error"> {
+  const { data: lead, error } = await admin
+    .from("leads")
+    .select("id")
+    .eq("ack_email_id", emailId)
+    .maybeSingle();
+  if (error) {
+    // Colonnes pas encore migrées : ce n'est pas un accusé suivi.
+    if (/column|schema cache/i.test(error.message)) return "none";
+    console.error("[resend-webhook] lead lookup failed:", error.message);
+    return "error";
+  }
+  if (!lead) return "none";
+
+  const problemLabel: Record<NonNullable<ColumnUpdate["problem"]>, string> = {
+    bounced: "Adresse refusée par la messagerie du prospect",
+    complained: "Signalé comme indésirable par le prospect",
+    failed: "Échec d'envoi",
+  };
+  let column: "ack_sent_at" | "ack_delivered_at" | "ack_opened_at" | "ack_problem_at" | null = null;
+  let patch: Database["public"]["Tables"]["leads"]["Update"] = {};
+  if (update.problem) {
+    column = "ack_problem_at";
+    const detail = update.detail ? ` (${update.detail})` : "";
+    patch = { ack_problem_at: at, ack_problem: `${problemLabel[update.problem]}${detail}`.slice(0, 500) };
+  } else if (update.column === "sent_at") {
+    column = "ack_sent_at";
+    patch = { ack_sent_at: at };
+  } else if (update.column === "delivered_at") {
+    column = "ack_delivered_at";
+    patch = { ack_delivered_at: at };
+  } else if (update.column === "opened_at") {
+    column = "ack_opened_at";
+    patch = { ack_opened_at: at };
+  }
+  // Retard de remise : rien à noter, la suite (remis ou rebond) suffit.
+  if (!column) return "handled";
+
+  const { data: changed, error: upErr } = await admin
+    .from("leads")
+    .update(patch)
+    .eq("id", lead.id)
+    .is(column, null)
+    .select("id");
+  if (upErr) {
+    console.error("[resend-webhook] lead update failed:", upErr.message);
+    return "error";
+  }
+  if (changed && changed.length > 0) {
+    revalidatePath("/dashboard/leads");
+    revalidatePath(`/dashboard/leads/${lead.id}`);
+  }
+  return "handled";
+}
+
 /** Resend sends tags as an object; older payloads used [{name,value}]. */
-function hasQuoteTag(tags: unknown): boolean {
-  const { name, value } = QUOTE_EMAIL_TAG;
+function hasTag(tags: unknown, tag: { name: string; value: string }): boolean {
+  const { name, value } = tag;
   if (Array.isArray(tags)) {
     return tags.some(
       (t) => t && typeof t === "object" && t.name === name && t.value === value,

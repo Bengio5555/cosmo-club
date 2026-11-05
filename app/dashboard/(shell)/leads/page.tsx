@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { LeadsBrowser } from "./LeadsBrowser";
+import { LeadsBrowser, type Lead } from "./LeadsBrowser";
+import { LEAD_ACK_COLUMNS } from "@/lib/leadAck";
 
 /**
  * Charge tous les leads en une seule requête au mount de la page.
@@ -10,13 +11,16 @@ import { LeadsBrowser } from "./LeadsBrowser";
  */
 export default async function LeadsPage() {
   const supabase = await createClient();
-  const { data: leads, error } = await supabase
-    .from("leads")
-    .select(
-      "id,status,contact_name,contact_email,company,event_type,event_date,guests_count,message,raw_payload,created_at,channel,utm_campaign",
-    )
-    .order("created_at", { ascending: false })
-    .limit(500);
+  const BASE_COLS =
+    "id,status,contact_name,contact_email,company,event_type,event_date,guests_count,message,raw_payload,created_at,channel,utm_campaign";
+  const load = (cols: string) =>
+    supabase.from("leads").select(cols).order("created_at", { ascending: false }).limit(500);
+  let { data: leads, error } = await load(`${BASE_COLS},${LEAD_ACK_COLUMNS}`);
+  // Colonnes de l'accusé pas encore migrées : la liste reste lisible,
+  // sans le picto.
+  if (error && /column|schema cache/i.test(error.message)) {
+    ({ data: leads, error } = await load(BASE_COLS));
+  }
 
   return (
     <div className="px-6 py-6 md:px-10 md:py-8">
@@ -45,7 +49,7 @@ export default async function LeadsPage() {
           </div>
         )}
 
-        <LeadsBrowser leads={leads ?? []} />
+        <LeadsBrowser leads={(leads ?? []) as unknown as Lead[]} />
       </div>
     </div>
   );
