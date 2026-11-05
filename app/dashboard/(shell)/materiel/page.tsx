@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Printer } from "lucide-react";
+import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { qrSvgForToken, svgToDataUri } from "@/lib/equipment/qr";
 import { EquipmentManager, type EquipmentRow } from "./EquipmentManager";
@@ -52,8 +52,8 @@ export default async function MaterielPage() {
           href="/dashboard/materiel/etiquettes"
           className="inline-flex shrink-0 items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
         >
-          <Printer className="h-4 w-4" />
-          Imprimer les étiquettes
+          <Download className="h-4 w-4" />
+          Télécharger les étiquettes
         </Link>
       </header>
 

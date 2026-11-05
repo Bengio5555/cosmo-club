@@ -168,7 +168,7 @@ export function EquipmentManager({ rows, activeCount }: { rows: EquipmentRow[]; 
             >
               <Link
                 href={`/dashboard/materiel/etiquettes?ids=${row.id}`}
-                title="Imprimer cette étiquette"
+                title="Télécharger cette étiquette"
                 className="h-20 w-20 shrink-0 rounded-md bg-white p-1 ring-1 ring-slate-200 dark:ring-slate-700"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}

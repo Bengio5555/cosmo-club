@@ -15,3 +15,14 @@ export async function qrSvgForToken(token: string): Promise<string> {
 export function svgToDataUri(svg: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
+
+/**
+ * Matrice du QR, pour le dessiner soi-même (export PNG des étiquettes) :
+ * `size` modules de côté, `bits` = une chaîne de 0/1 ligne par ligne.
+ */
+export function qrMatrixForToken(token: string): { size: number; bits: string } {
+  const { modules } = QRCode.create(qrUrlForToken(token), { errorCorrectionLevel: "M" });
+  let bits = "";
+  for (let i = 0; i < modules.data.length; i++) bits += modules.data[i] ? "1" : "0";
+  return { size: modules.size, bits };
+}

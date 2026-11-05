@@ -43,6 +43,14 @@ export const CHANGELOG: ChangeEntry[] = [
   // ── Novembre 2026 ────────────────────────────────────────────
   {
     date: "2026-11-05",
+    kind: "amelioration",
+    area: "Stock & matériel",
+    title: "Étiquettes QR téléchargeables une par une, à la taille choisie",
+    detail:
+      "Sur la page des étiquettes, choisis la largeur imprimée (3, 5, 7, 10 cm ou une valeur libre) et télécharge l'image de chaque étiquette. Le bouton Imprimer est retiré.",
+  },
+  {
+    date: "2026-11-05",
     kind: "nouveau",
     area: "Demandes",
     title: "Picto d'accusé de réception sur chaque demande",
