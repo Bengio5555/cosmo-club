@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { cgvVersion } from "@/lib/cgv";
 import { SignedQuotePdf, type SignedQuoteData } from "@/lib/pdf/SignedQuotePdf";
 import { getCompanyLogoDataUrl } from "@/lib/pdf/logo";
+import { cleanRefusalComment, isRefusalReason, refusalReasonLabel } from "@/lib/quoteRefusal";
 
 // Public acceptance / refusal flow. No auth is checked — the plaquette
 // URL itself is the access token. We only allow the transition from
@@ -127,11 +128,20 @@ export async function acceptDevis(input: AcceptDevisInput) {
   return { ok: true as const };
 }
 
-export async function refuseDevis(id: string, accessToken?: string | null) {
+/**
+ * Refus par le client, depuis la plaquette publique. Le motif et le mot
+ * libre sont facultatifs. Cosmo Club reçoit un e-mail « Devis refusé » :
+ * sans lui, un refus ne se voyait qu'en ouvrant la liste des devis.
+ */
+export async function refuseDevis(
+  id: string,
+  accessToken?: string | null,
+  feedback?: { reason?: string | null; comment?: string | null },
+) {
   const supabase = createAdminClient();
   const { data: q } = await supabase
     .from("quotes")
-    .select("id,status,number,lead_id,access_token")
+    .select("id,status,number,subject,total_ttc,client_id,lead_id,access_token")
     .eq("id", id)
     .maybeSingle();
   if (!q) return { ok: false as const, error: "Devis introuvable" };
@@ -142,11 +152,33 @@ export async function refuseDevis(id: string, accessToken?: string | null) {
   if (q.status !== "envoye") {
     return { ok: false as const, error: "Devis déjà décidé." };
   }
-  const { error } = await supabase
+
+  const reason = isRefusalReason(feedback?.reason) ? feedback.reason : null;
+  const comment = cleanRefusalComment(feedback?.comment);
+  const now = new Date().toISOString();
+
+  // `.eq("status", "envoye")` : un double clic ou deux onglets ne
+  // déclenchent qu'un seul refus, donc qu'un seul e-mail.
+  let { data: updated, error } = await supabase
     .from("quotes")
-    .update({ status: "refuse", refused_at: new Date().toISOString() })
-    .eq("id", id);
+    .update({ status: "refuse", refused_at: now, refusal_reason: reason, refusal_comment: comment })
+    .eq("id", id)
+    .eq("status", "envoye")
+    .select("id");
+  if (error?.message.includes("refusal_")) {
+    // Migration 2026-11-05 pas encore appliquée : le refus passe quand
+    // même, le motif part seulement dans l'e-mail.
+    ({ data: updated, error } = await supabase
+      .from("quotes")
+      .update({ status: "refuse", refused_at: now })
+      .eq("id", id)
+      .eq("status", "envoye")
+      .select("id"));
+  }
   if (error) return { ok: false as const, error: error.message };
+  if (!updated || updated.length === 0) {
+    return { ok: false as const, error: "Devis déjà décidé." };
+  }
 
   // Mirror on the lead: refused devis = lead lost.
   if (q.lead_id) {
@@ -155,11 +187,100 @@ export async function refuseDevis(id: string, accessToken?: string | null) {
     revalidatePath(`/dashboard/leads/${q.lead_id}`);
   }
 
+  // Attendu avant de répondre, comme pour la signature : Vercel coupe
+  // la fonction dès que l'action répond. Un échec d'envoi n'annule pas
+  // le refus, déjà enregistré.
+  try {
+    await sendRefusalEmail({
+      quoteId: q.id,
+      quoteNumber: q.number,
+      quoteSubject: q.subject ?? null,
+      quoteTotalTtc: Number(q.total_ttc ?? 0),
+      clientId: q.client_id,
+      refusedAt: now,
+      reason,
+      comment,
+    });
+  } catch (err) {
+    console.error("[refuseDevis] email step failed:", err);
+  }
+
   revalidatePath(`/devis/${q.number}`);
   revalidatePath(`/dashboard/devis/${id}`);
   revalidatePath("/dashboard/devis");
   revalidatePath("/dashboard");
   return { ok: true as const };
+}
+
+/* ─── Refusal email (Cosmo only) ───────────────────────────────── */
+
+async function sendRefusalEmail(o: {
+  quoteId: string;
+  quoteNumber: string;
+  quoteSubject: string | null;
+  quoteTotalTtc: number;
+  clientId: string | null;
+  refusedAt: string;
+  reason: string | null;
+  comment: string | null;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[refuseDevis] RESEND_API_KEY missing — email skipped.");
+    return;
+  }
+  const fromEmail =
+    process.env.RESEND_FROM_EMAIL ||
+    process.env.DEVIS_FROM_EMAIL ||
+    "onboarding@resend.dev";
+
+  const supabase = createAdminClient();
+  const [{ data: client }, { data: settings }] = await Promise.all([
+    o.clientId
+      ? supabase
+          .from("clients")
+          .select("email,first_name,last_name,company_name,phone")
+          .eq("id", o.clientId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.from("settings").select("company_name,email").eq("id", 1).maybeSingle(),
+  ]);
+
+  const ownerEmail = settings?.email || process.env.DEVIS_TO_EMAIL || "contact@cosmoclub.fr";
+  const companyName = settings?.company_name || "Cosmo Club Paris";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.cosmoclub.fr";
+  const clientName =
+    client?.company_name ||
+    [client?.first_name, client?.last_name].filter(Boolean).join(" ") ||
+    "Client";
+
+  const res = await new Resend(apiKey).emails.send({
+    from: `${companyName} <${fromEmail}>`,
+    to: [ownerEmail],
+    replyTo: client?.email ?? undefined,
+    subject: `Devis ${o.quoteNumber} refusé — ${clientName}`,
+    html: buildRefusalHtml({
+      quoteNumber: o.quoteNumber,
+      quoteSubject: o.quoteSubject,
+      quoteTotalTtc: o.quoteTotalTtc,
+      clientName,
+      clientEmail: client?.email ?? null,
+      clientPhone: client?.phone ?? null,
+      refusedAt: new Date(o.refusedAt).toLocaleString("fr-FR", {
+        dateStyle: "long",
+        timeStyle: "short",
+        timeZone: "Europe/Paris",
+      }),
+      reasonLabel: refusalReasonLabel(o.reason),
+      comment: o.comment,
+      dashboardLink: `${origin}/dashboard/devis/${o.quoteId}`,
+    }),
+  });
+  if ((res as { error?: unknown }).error) {
+    console.error("[refuseDevis] owner email error from Resend:", (res as { error: unknown }).error);
+  } else {
+    console.log("[refuseDevis] owner email sent to", ownerEmail);
+  }
 }
 
 /* ─── Acceptance email ─────────────────────────────────────────── */
@@ -498,6 +619,51 @@ function buildClientHtml(o: {
       Conditions générales de vente disponibles à tout moment sur notre site,
       onglet « CGV ». Conformément à l&apos;article 1366 du Code civil, votre
       signature électronique a la même force probante qu&apos;une signature manuscrite.
+    </p>
+  </div>
+</body></html>`.trim();
+}
+
+function buildRefusalHtml(o: {
+  quoteNumber: string;
+  quoteSubject: string | null;
+  quoteTotalTtc: number;
+  clientName: string;
+  clientEmail: string | null;
+  clientPhone: string | null;
+  refusedAt: string;
+  reasonLabel: string | null;
+  comment: string | null;
+  dashboardLink: string;
+}) {
+  const row = (label: string, value: string) =>
+    `<tr><td style="padding:6px 0; color:#726d63; width:130px; vertical-align:top;">${label}</td><td>${value}</td></tr>`;
+  return `
+<!doctype html><html><body style="font-family: ui-sans-serif,system-ui,sans-serif; background:#0a0a0a; color:#e9e2d0; padding:24px;">
+  <div style="max-width:640px; margin:0 auto; background:#141311; border:1px solid #3a3733; border-radius:14px; padding:28px;">
+    <p style="font-size:11px; letter-spacing:0.28em; text-transform:uppercase; color:#c9a961; margin:0 0 8px;">Devis refusé</p>
+    <h1 style="font-family:Georgia,serif; font-size:26px; margin:0 0 16px; color:#f5f1e8;">${escape(o.quoteNumber)}</h1>
+
+    <p style="font-size:14px; line-height:1.6;">
+      <strong>${escape(o.clientName)}</strong> vient de refuser le devis
+      ${o.quoteSubject ? `<em>${escape(o.quoteSubject)}</em>` : ""} de
+      <strong>${formatEUR(o.quoteTotalTtc)}</strong> TTC.
+    </p>
+
+    <table style="width:100%; border-collapse:collapse; font-size:13px; line-height:1.6; margin-top:16px;">
+      ${row("Motif", o.reasonLabel ? `<strong>${escape(o.reasonLabel)}</strong>` : "Non précisé")}
+      ${o.comment ? row("Message", escape(o.comment).replace(/\n/g, "<br>")) : ""}
+      ${o.clientEmail ? row("Email", `<a href="mailto:${escape(o.clientEmail)}" style="color:#c9a961;">${escape(o.clientEmail)}</a>`) : ""}
+      ${o.clientPhone ? row("Téléphone", escape(o.clientPhone)) : ""}
+      ${row("Total TTC", formatEUR(o.quoteTotalTtc))}
+      ${row("Refusé le", escape(o.refusedAt))}
+    </table>
+
+    <p style="font-size:13px; line-height:1.6; margin-top:18px;">
+      La demande liée est passée en « perdu ». Pour proposer une nouvelle version,
+      rouvre le devis en brouillon&nbsp;:
+      <a href="${o.dashboardLink}" style="color:#c9a961;">ouvrir le devis</a>.
+      Répondre à cet e-mail écrit directement au client.
     </p>
   </div>
 </body></html>`.trim();

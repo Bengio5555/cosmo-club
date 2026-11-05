@@ -546,6 +546,8 @@ export type Database = {
           moodboard_images: Json
           number: string
           pdf_url: string | null
+          refusal_comment: string | null
+          refusal_reason: string | null
           refused_at: string | null
           schedule: Json | null
           sent_at: string | null

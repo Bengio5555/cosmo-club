@@ -40,6 +40,7 @@ import {
   formatDeliveryDate,
   type QuoteEmail,
 } from "@/lib/quoteEmail";
+import { refusalReasonLabel } from "@/lib/quoteRefusal";
 
 type Quote = Tables<"quotes">;
 type QuoteItem = Tables<"quote_items">;
@@ -1394,6 +1395,16 @@ function TopBar({
           {quote.accepted_at && <span>Accepté le {new Date(quote.accepted_at).toLocaleDateString("fr-FR")}</span>}
           {quote.refused_at && <span>Refusé le {new Date(quote.refused_at).toLocaleDateString("fr-FR")}</span>}
         </div>
+        {quote.status === "refuse" && (quote.refusal_reason || quote.refusal_comment) && (
+          <p className="mt-2 max-w-xl rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-900 dark:text-rose-100">
+            <span className="font-medium">
+              Motif du client : {refusalReasonLabel(quote.refusal_reason) ?? "non précisé"}
+            </span>
+            {quote.refusal_comment && (
+              <span className="mt-1 block whitespace-pre-line opacity-90">« {quote.refusal_comment} »</span>
+            )}
+          </p>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
