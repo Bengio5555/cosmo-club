@@ -183,6 +183,59 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["invoices"]["Row"]>
         Relationships: []
       }
+      bank_accounts: {
+        Row: {
+          id: string
+          name: string | null
+          iban_last4: string | null
+          currency: string
+          balance: number | null
+          authorized_balance: number | null
+          is_main: boolean
+          status: string | null
+          synced_at: string | null
+          last_error: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["bank_accounts"]["Row"]> & { id: string }
+        Update: Partial<Database["public"]["Tables"]["bank_accounts"]["Row"]>
+        Relationships: []
+      }
+      bank_transactions: {
+        Row: {
+          id: string
+          qonto_id: string
+          bank_account_id: string
+          side: "credit" | "debit"
+          amount: number
+          currency: string
+          operation_type: string | null
+          label: string | null
+          reference: string | null
+          note: string | null
+          status: string
+          emitted_at: string | null
+          settled_at: string | null
+          has_attachment: boolean
+          invoice_payment_id: string | null
+          match_status: "a_traiter" | "rapproche" | "ignore"
+          match_mode: "auto" | "manuel" | null
+          matched_at: string | null
+          matched_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["bank_transactions"]["Row"]> & {
+          qonto_id: string
+          bank_account_id: string
+          side: "credit" | "debit"
+          amount: number
+          status: string
+        }
+        Update: Partial<Database["public"]["Tables"]["bank_transactions"]["Row"]>
+        Relationships: []
+      }
       invoice_payments: {
         Row: {
           id: string

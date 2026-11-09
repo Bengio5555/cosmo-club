@@ -40,6 +40,14 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
 };
 
 export const CHANGELOG: ChangeEntry[] = [
+  {
+    date: "2026-11-09",
+    kind: "nouveau",
+    area: "Factures",
+    title: "Onglet Banque : compte Qonto et rapprochement des virements",
+    detail:
+      "Solde et mouvements du compte Qonto en lecture seule. Les virements reçus sont rapprochés des factures : automatiquement quand le numéro de facture et le montant concordent, sinon en un clic à partir de suggestions (montant, nom du client, date). L'encaissement se crée sur la facture et la solde si tout est réglé. Réservé aux rôles propriétaire, admin et compta.",
+  },
   // ── Novembre 2026 ────────────────────────────────────────────
   {
     date: "2026-11-05",

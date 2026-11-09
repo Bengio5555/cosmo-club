@@ -24,7 +24,9 @@ import {
   type RevenuePoint,
 } from "@/lib/dashboard/revenue";
 import { formatDateFR, formatEUR } from "@/lib/format";
+import { after } from "next/server";
 import { autoStartDueEvents } from "./events/actions";
+import { syncBank } from "@/lib/bank/sync";
 import type { Database } from "@/types/database";
 
 type LeadStatus = Database["public"]["Enums"]["lead_status"];
@@ -36,6 +38,16 @@ export default async function DashboardHome({
 }) {
   const { annee } = await searchParams;
   await autoStartDueEvents();
+  // Banque : synchro Qonto en arrière-plan (après la réponse) si la
+  // dernière date de plus de 15 min, pour que le rapprochement
+  // automatique tourne même sans ouvrir l'onglet Banque. Jamais bloquant.
+  after(async () => {
+    try {
+      await syncBank();
+    } catch {
+      /* la page Banque affichera l'erreur */
+    }
+  });
   const supabase = await createClient();
 
   const today = new Date();

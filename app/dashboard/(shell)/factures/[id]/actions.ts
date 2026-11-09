@@ -737,10 +737,17 @@ export async function addPayment(
 
 export async function removePayment(paymentId: string, invoiceId: string) {
   const supabase = await createClient();
+  // Si cet encaissement venait d'un virement Qonto, le mouvement bancaire
+  // redevient « à traiter » (la FK passe à null toute seule à la suppression).
+  await supabase
+    .from("bank_transactions")
+    .update({ match_status: "a_traiter", match_mode: null, matched_at: null, matched_by: null })
+    .eq("invoice_payment_id", paymentId);
   const { error } = await supabase.from("invoice_payments").delete().eq("id", paymentId);
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(`/dashboard/factures/${invoiceId}`);
   revalidatePath("/dashboard/factures");
+  revalidatePath("/dashboard/banque");
   return { ok: true as const };
 }
 

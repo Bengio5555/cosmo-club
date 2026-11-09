@@ -22,6 +22,7 @@ import {
   QrCode,
   Star,
   Radar,
+  Landmark,
 } from "lucide-react";
 
 export type NavItem = {
@@ -50,6 +51,7 @@ export const DASHBOARD_NAV: NavSection[] = [
       { href: "/dashboard/essais-canette", label: "Essais canette", icon: Tag },
       { href: "/dashboard/devis", label: "Devis", icon: FileText },
       { href: "/dashboard/factures", label: "Factures", icon: Receipt },
+      { href: "/dashboard/banque", label: "Banque", icon: Landmark },
       { href: "/dashboard/events", label: "Événements", icon: CalendarDays },
       { href: "/dashboard/avis", label: "Avis clients", icon: Star },
     ],
