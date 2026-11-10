@@ -171,32 +171,47 @@ export async function loadOpenInvoices(admin: Admin): Promise<OpenInvoice[]> {
 
   const ids = invoices.map((i) => i.id);
   const clientIds = Array.from(new Set(invoices.map((i) => i.client_id).filter((x): x is string => !!x)));
-  const [{ data: payments }, { data: clients }] = await Promise.all([
+  const [{ data: payments }, { data: creditNotes }, { data: clients }] = await Promise.all([
     admin.from("invoice_payments").select("invoice_id,amount").in("invoice_id", ids),
+    // Les avoirs (même en brouillon, sauf annulés) réduisent le reste dû :
+    // même règle que le tableau de bord et la page Factures.
+    admin
+      .from("invoices")
+      .select("source_invoice_id,total_ttc,status")
+      .eq("is_credit_note", true)
+      .in("source_invoice_id", ids),
     clientIds.length
       ? admin.from("clients").select("id,first_name,last_name,company_name").in("id", clientIds)
       : Promise.resolve({ data: [] as { id: string; first_name: string | null; last_name: string | null; company_name: string | null }[] }),
   ]);
   const paidBy = new Map<string, number>();
   for (const p of payments ?? []) paidBy.set(p.invoice_id, (paidBy.get(p.invoice_id) ?? 0) + Number(p.amount));
+  for (const c of creditNotes ?? []) {
+    if (!c.source_invoice_id || c.status === "annule") continue;
+    paidBy.set(c.source_invoice_id, (paidBy.get(c.source_invoice_id) ?? 0) + Math.abs(Number(c.total_ttc ?? 0)));
+  }
   const clientMap = new Map((clients ?? []).map((c) => [c.id, c]));
 
-  return invoices.map((i) => {
+  return invoices.flatMap((i) => {
     const c = i.client_id ? clientMap.get(i.client_id) : null;
     const name = clientDisplayName(c);
     const tokens = Array.from(
       new Set([...clientTokens(c?.company_name), ...clientTokens([c?.first_name, c?.last_name].filter(Boolean).join(" "))]),
     );
-    return {
-      id: i.id,
-      number: i.number,
-      total_ttc: Number(i.total_ttc),
-      remaining: Math.round((Number(i.total_ttc) - (paidBy.get(i.id) ?? 0)) * 100) / 100,
-      issue_date: i.issue_date,
-      due_date: i.due_date,
-      client_name: name,
-      client_tokens: tokens,
-    };
+    const remaining = Math.round((Number(i.total_ttc) - (paidBy.get(i.id) ?? 0)) * 100) / 100;
+    if (remaining <= 0.009) return []; // soldée par encaissements et/ou avoirs
+    return [
+      {
+        id: i.id,
+        number: i.number,
+        total_ttc: Number(i.total_ttc),
+        remaining,
+        issue_date: i.issue_date,
+        due_date: i.due_date,
+        client_name: name,
+        client_tokens: tokens,
+      },
+    ];
   });
 }
 
@@ -265,10 +280,14 @@ export async function linkTransactionToInvoice(
     return { ok: false, error: linkErr.message };
   }
 
-  // Reste dû après cet encaissement
-  const { data: all } = await admin.from("invoice_payments").select("amount").eq("invoice_id", inv.id);
+  // Reste dû après cet encaissement (avoirs non annulés déduits, comme ailleurs)
+  const [{ data: all }, { data: cns }] = await Promise.all([
+    admin.from("invoice_payments").select("amount").eq("invoice_id", inv.id),
+    admin.from("invoices").select("total_ttc,status").eq("is_credit_note", true).eq("source_invoice_id", inv.id),
+  ]);
   const paid = (all ?? []).reduce((s, p) => s + Number(p.amount), 0);
-  const remaining = Math.round((Number(inv.total_ttc) - paid) * 100) / 100;
+  const credited = (cns ?? []).filter((c) => c.status !== "annule").reduce((s, c) => s + Math.abs(Number(c.total_ttc ?? 0)), 0);
+  const remaining = Math.round((Number(inv.total_ttc) - paid - credited) * 100) / 100;
   let nowPaid = false;
   if (remaining <= 0.009 && inv.status !== "paye") {
     const { error } = await admin
