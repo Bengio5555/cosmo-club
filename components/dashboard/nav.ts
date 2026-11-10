@@ -23,6 +23,7 @@ import {
   Star,
   Radar,
   Landmark,
+  BarChart3,
 } from "lucide-react";
 
 export type NavItem = {
@@ -52,6 +53,7 @@ export const DASHBOARD_NAV: NavSection[] = [
       { href: "/dashboard/devis", label: "Devis", icon: FileText },
       { href: "/dashboard/factures", label: "Factures", icon: Receipt },
       { href: "/dashboard/banque", label: "Banque", icon: Landmark },
+      { href: "/dashboard/analyse", label: "Analyse", icon: BarChart3 },
       { href: "/dashboard/events", label: "Événements", icon: CalendarDays },
       { href: "/dashboard/avis", label: "Avis clients", icon: Star },
     ],

@@ -37,6 +37,8 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   "/dashboard/factures": ["owner", "admin", "compta"],
   // Compte Qonto (lecture seule) et rapprochement des virements.
   "/dashboard/banque": ["owner", "admin", "compta"],
+  // Rentabilité, ventes, types d'événements.
+  "/dashboard/analyse": ["owner", "admin", "compta"],
   "/dashboard/clients": ["owner", "admin", "manager", "compta"],
   // Events: the ONLY page staff can reach.
   "/dashboard/events": ["owner", "admin", "manager", "staff"],

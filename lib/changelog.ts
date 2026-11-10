@@ -42,6 +42,14 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
 export const CHANGELOG: ChangeEntry[] = [
   {
     date: "2026-11-10",
+    kind: "nouveau",
+    area: "Tableau de bord",
+    title: "Page Analyse : rentabilité, ventes, types d'événements",
+    detail:
+      "Nouvel onglet Analyse (propriétaire, admin, compta). Rentabilité par événement avec CA net de commission, coût boissons, staff, frais, marge en euros et en pourcentage, base réelle ou estimée, et ce qui manque pour une marge fiable. Ce qui se vend d'après les devis acceptés : classement des prestations par CA et taux de présence, part par famille, cocktails les plus commandés. Lecture par type d'événement : panier moyen, CA par invité, marge, taux d'acceptation des devis. Période au choix et seuil d'alerte de marge.",
+  },
+  {
+    date: "2026-11-10",
     kind: "amelioration",
     area: "Stock & matériel",
     title: "Matériel : où est chaque élément en ce moment",

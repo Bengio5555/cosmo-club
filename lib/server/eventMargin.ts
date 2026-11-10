@@ -210,6 +210,8 @@ export async function computeEventMargin(
 export async function computeEventMarginsBatch(
   supabase: SupabaseClient<Database>,
   events: Array<{ id: string; quote_id: string | null }>,
+  /** Frais annexes par événement (page Analyse) ; absent = 0 comme avant. */
+  extraByEvent?: Map<string, EventExtraCosts>,
 ): Promise<Map<string, EventMargin>> {
   const result = new Map<string, EventMargin>();
   if (events.length === 0) return result;
@@ -372,8 +374,10 @@ export async function computeEventMarginsBatch(
     }
     staffCostHt = Math.round(staffCostHt * 100) / 100;
 
+    const extras = extraByEvent?.get(ev.id);
+    const extraCostHt = extras ? extraCostTotal(extras) : 0;
     const marginHt =
-      Math.round((revenueNetHt - stockCostHt - staffCostHt) * 100) / 100;
+      Math.round((revenueNetHt - stockCostHt - staffCostHt - extraCostHt) * 100) / 100;
     const marginPct =
       revenueNetHt > 0
         ? Math.round((marginHt / revenueNetHt) * 1000) / 10
@@ -392,10 +396,10 @@ export async function computeEventMarginsBatch(
       commissionHt,
       stockCostHt,
       staffCostHt,
-      // The list view doesn't load per-event extra costs (kept light);
-      // only the detail page folds them in.
-      extraCostHt: 0,
-      extraCostLines: [],
+      // La liste des événements ne charge pas les frais annexes (0) ;
+      // la page Analyse les passe via extraByEvent.
+      extraCostHt,
+      extraCostLines: extras ? extraCostLines(extras) : [],
       marginHt,
       marginPct,
       basis,
