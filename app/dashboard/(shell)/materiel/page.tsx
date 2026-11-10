@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { qrSvgForToken, svgToDataUri } from "@/lib/equipment/qr";
+import { progressByEvent, whereaboutsOf, type EventLite } from "@/lib/equipment/whereabouts";
 import { EquipmentManager, type EquipmentRow } from "./EquipmentManager";
+import { EventsProgress } from "./EventsProgress";
 
 /**
  * Matériel identifié par QR code : le bar, les caisses, le kit tech. Un
@@ -18,7 +20,7 @@ export default async function MaterielPage() {
       .order("archived", { ascending: true })
       .order("category", { ascending: true })
       .order("code", { ascending: true }),
-    supabase.from("event_equipment").select("equipment_id,event_id"),
+    supabase.from("event_equipment").select("equipment_id,event_id,depart_at,retour_at"),
   ]);
 
   const usedBy = new Map<string, number>();
@@ -26,14 +28,30 @@ export default async function MaterielPage() {
     usedBy.set(u.equipment_id, (usedBy.get(u.equipment_id) ?? 0) + 1);
   }
 
+  // Où est chaque élément : les événements des affectations (en cours,
+  // à venir, et terminés pour repérer ce qui n'est pas revenu).
+  const eventIds = Array.from(new Set((usage ?? []).map((u) => u.event_id)));
+  const { data: events } = eventIds.length
+    ? await supabase.from("events").select("id,title,date,end_date,status").in("id", eventIds)
+    : { data: [] as EventLite[] };
+  const eventsById = new Map((events ?? []).map((e) => [e.id, e as EventLite]));
+  const assignments = usage ?? [];
+
   const rows: EquipmentRow[] = await Promise.all(
-    (items ?? []).map(async (it) => ({
-      ...it,
-      events: usedBy.get(it.id) ?? 0,
-      qr: svgToDataUri(await qrSvgForToken(it.qr_token)),
-    })),
+    (items ?? []).map(async (it) => {
+      const w = whereaboutsOf(it.id, assignments, eventsById);
+      return {
+        ...it,
+        events: usedBy.get(it.id) ?? 0,
+        qr: svgToDataUri(await qrSvgForToken(it.qr_token)),
+        where: w.kind,
+        whereEvent: w.event ? { id: w.event.id, title: w.event.title, date: w.event.date, status: w.event.status } : null,
+        whereAt: w.at,
+      };
+    }),
   );
   const active = rows.filter((r) => !r.archived).length;
+  const progress = progressByEvent(assignments, eventsById);
 
   return (
     <div className="px-6 py-6 md:px-10 md:py-8">
@@ -63,6 +81,8 @@ export default async function MaterielPage() {
           docs/migrations/2026-10-19_equipment_qr.sql.
         </p>
       )}
+
+      <EventsProgress progress={progress} />
 
       <EquipmentManager rows={rows} activeCount={active} />
     </div>

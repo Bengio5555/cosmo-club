@@ -402,7 +402,7 @@ export default async function EventDetailPage({
         )}
       </div>
 
-      <div className="px-4 pb-6 md:px-8">
+      <div id="materiel" className="scroll-mt-20 px-4 pb-6 md:px-8">
         <EquipmentSection
           eventId={event.id}
           eventStatus={event.status}

@@ -41,6 +41,14 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
 
 export const CHANGELOG: ChangeEntry[] = [
   {
+    date: "2026-11-10",
+    kind: "amelioration",
+    area: "Stock & matériel",
+    title: "Matériel : où est chaque élément en ce moment",
+    detail:
+      "Sur la page Matériel, chaque élément indique s'il est au stock, prévu sur un événement, sur le terrain (chargé, pas encore revenu) ou non revenu d'un événement terminé, avec le nom de l'événement et l'heure du chargement. Un bloc en haut suit l'avancement des scans pour les événements en cours et à venir, et des filtres permettent de ne voir que ce qui est sorti ou manquant.",
+  },
+  {
     date: "2026-11-09",
     kind: "nouveau",
     area: "Factures",

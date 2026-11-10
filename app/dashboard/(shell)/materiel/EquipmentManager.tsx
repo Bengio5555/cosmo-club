@@ -3,12 +3,13 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Archive, ArchiveRestore, Loader2, Pencil, Plus, QrCode, Trash2, X } from "lucide-react";
+import { AlertTriangle, Archive, ArchiveRestore, CalendarClock, Loader2, Pencil, Plus, QrCode, Trash2, Truck, Warehouse, X } from "lucide-react";
 import {
   EQUIPMENT_CATEGORIES,
   EQUIPMENT_CATEGORY_LABEL,
   type EquipmentCategory,
 } from "@/lib/equipment/shared";
+import { WHERE_LABEL, type WhereKind } from "@/lib/equipment/whereabouts";
 import {
   createEquipment,
   deleteEquipment,
@@ -29,7 +30,27 @@ export type EquipmentRow = {
   events: number;
   /** QR as a data URI, rendered server-side. */
   qr: string;
+  /** Où est l'élément en ce moment (voir lib/equipment/whereabouts). */
+  where: WhereKind;
+  whereEvent: { id: string; title: string; date: string; status: string } | null;
+  whereAt: string | null;
 };
+
+type WhereFilter = "tous" | WhereKind;
+
+const WHERE_STYLE: Record<WhereKind, { cls: string; Icon: typeof Truck }> = {
+  sorti: { cls: "border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-200", Icon: Truck },
+  prevu: { cls: "border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300", Icon: CalendarClock },
+  non_revenu: { cls: "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200", Icon: AlertTriangle },
+  stock: { cls: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200", Icon: Warehouse },
+};
+
+function fmtShort(iso: string): string {
+  return new Date(iso).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+}
+function fmtDay(ymd: string): string {
+  return new Date(ymd + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+}
 
 const inputCls =
   "w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-2.5 py-1.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-[color:var(--color-grenat)] focus:outline-none";
@@ -41,8 +62,11 @@ export function EquipmentManager({ rows, activeCount }: { rows: EquipmentRow[]; 
   const [adding, setAdding] = useState(rows.length === 0);
   const [editing, setEditing] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [whereFilter, setWhereFilter] = useState<WhereFilter>("tous");
 
-  const visible = rows.filter((r) => showArchived || !r.archived);
+  const counts: Record<WhereKind, number> = { sorti: 0, prevu: 0, non_revenu: 0, stock: 0 };
+  for (const r of rows) if (!r.archived) counts[r.where] += 1;
+  const visible = rows.filter((r) => (showArchived || !r.archived) && (whereFilter === "tous" || r.where === whereFilter));
   const archivedCount = rows.length - activeCount;
 
   function handleCreate(form: FormData) {
@@ -132,6 +156,38 @@ export function EquipmentManager({ rows, activeCount }: { rows: EquipmentRow[]; 
         </div>
       )}
 
+      {rows.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(
+            [
+              ["tous", "Tous", activeCount],
+              ["sorti", WHERE_LABEL.sorti, counts.sorti],
+              ["prevu", WHERE_LABEL.prevu, counts.prevu],
+              ["stock", WHERE_LABEL.stock, counts.stock],
+              ["non_revenu", WHERE_LABEL.non_revenu, counts.non_revenu],
+            ] as [WhereFilter, string, number][]
+          )
+            .filter(([k, , n]) => k === "tous" || k === "stock" || k === "sorti" || n > 0)
+            .map(([k, label, n]) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setWhereFilter(k)}
+                className={`rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                  whereFilter === k
+                    ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
+                    : k === "non_revenu"
+                      ? "border-rose-300 text-rose-700 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                      : "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                }`}
+              >
+                {label}
+                <span className="ml-1 tabular-nums opacity-70">{n}</span>
+              </button>
+            ))}
+        </div>
+      )}
+
       {adding && (
         <EquipmentForm
           title="Nouvel élément"
@@ -189,6 +245,7 @@ export function EquipmentManager({ rows, activeCount }: { rows: EquipmentRow[]; 
                 {row.contents && (
                   <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-400">{row.contents}</p>
                 )}
+                {!row.archived && <WhereLine row={row} />}
                 <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-500">
                   <span>{row.events} événement{row.events > 1 ? "s" : ""}</span>
                   <span>·</span>
@@ -235,9 +292,30 @@ export function EquipmentManager({ rows, activeCount }: { rows: EquipmentRow[]; 
       {rows.length > 0 && (
         <p className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-500">
           <QrCode className="h-3.5 w-3.5" />
-          Clique un QR pour imprimer son étiquette seule, ou « Imprimer les étiquettes » pour toute la planche.
+          Clique un QR pour télécharger son étiquette seule, ou « Télécharger les étiquettes » pour toute la liste.
         </p>
       )}
+    </div>
+  );
+}
+
+function WhereLine({ row }: { row: EquipmentRow }) {
+  const { cls, Icon } = WHERE_STYLE[row.where];
+  const ev = row.whereEvent;
+  return (
+    <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium ${cls}`}>
+        <Icon className="h-3 w-3" />
+        {WHERE_LABEL[row.where]}
+      </span>
+      {ev && (
+        <Link href={`/dashboard/events/${ev.id}`} className="min-w-0 truncate text-slate-700 hover:underline dark:text-slate-300">
+          {ev.title}
+          <span className="text-slate-500"> · {fmtDay(ev.date)}</span>
+        </Link>
+      )}
+      {row.where === "sorti" && row.whereAt && <span className="text-slate-500">chargé le {fmtShort(row.whereAt)}</span>}
+      {row.where === "non_revenu" && row.whereAt && <span className="text-rose-600 dark:text-rose-300">parti le {fmtShort(row.whereAt)}, retour non pointé</span>}
     </div>
   );
 }
