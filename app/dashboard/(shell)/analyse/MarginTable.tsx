@@ -122,6 +122,8 @@ export function MarginTable({ rows, threshold }: { rows: MarginRow[]; threshold:
                       <span className="rounded-full border border-emerald-300 px-1.5 py-0.5 text-[10px] font-medium uppercase text-emerald-700 dark:border-emerald-800 dark:text-emerald-300">réel</span>
                     ) : r.basis === "projected" ? (
                       <span className="rounded-full border border-amber-300 px-1.5 py-0.5 text-[10px] font-medium uppercase text-amber-700 dark:border-amber-800 dark:text-amber-300">estimé</span>
+                    ) : r.basis === "avant" ? (
+                      <span className="whitespace-nowrap rounded-full border border-slate-300 px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-500 dark:border-slate-700" title="Avant le suivi des sorties de stock : coût boissons inconnu, marge non calculée">avant suivi</span>
                     ) : (
                       <span className="text-slate-400">—</span>
                     )}

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { formatEUR } from "@/lib/format";
-import type { AnalyticsData } from "./data";
+import { formatDateFR, formatEUR } from "@/lib/format";
+import { REAL_MARGIN_SINCE, type AnalyticsData } from "./data";
 import { MarginTable } from "./MarginTable";
-import { Kpi, SalesBlock, TypesBlock } from "./Blocks";
+import { CostsBlock, Kpi, SalesBlock, TypesBlock } from "./Blocks";
 
 const PERIODS = (year: number) => [
   { key: "12m", label: "12 derniers mois" },
@@ -22,8 +22,9 @@ export function AnalyseView({ data, threshold, year }: { data: AnalyticsData; th
             Rentabilité par événement, ce qui se vend, et lecture par type. Chiffres HT, nets de commission d&apos;apporteur.
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Une marge est « réelle » quand les sorties de stock sont enregistrées ; sinon elle est estimée sur les réservations et les heures prévues. Les
-            lignes sous {threshold} % de marge sont surlignées.
+            Marges calculées à partir du {formatDateFR(REAL_MARGIN_SINCE)}, début du suivi des sorties de stock ; avant, les événements comptent dans le CA
+            seulement. Une marge est « réelle » quand les sorties de stock sont enregistrées, sinon estimée sur les réservations et les heures prévues. Les
+            lignes sous {threshold} % sont surlignées.
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -44,11 +45,11 @@ export function AnalyseView({ data, threshold, year }: { data: AnalyticsData; th
       </header>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi label="CA HT net" value={formatEUR(kpi.revenueHt)} hint={`${kpi.withMargin} événement${kpi.withMargin > 1 ? "s" : ""} avec devis sur ${kpi.events}`} />
+        <Kpi label="CA HT net" value={formatEUR(kpi.revenueHt)} hint={`${kpi.events} événement${kpi.events > 1 ? "s" : ""} sur la période`} />
         <Kpi
           label="Marge"
           value={kpi.marginPct !== null ? `${kpi.marginPct} %` : "—"}
-          hint={`${formatEUR(kpi.marginHt)} · réelle sur ${kpi.actualCount}, estimée sur ${kpi.withMargin - kpi.actualCount}`}
+          hint={`${formatEUR(kpi.marginHt)} sur ${kpi.withMargin} événement${kpi.withMargin > 1 ? "s" : ""} · réelle sur ${kpi.actualCount}, estimée sur ${kpi.withMargin - kpi.actualCount}`}
           tone={kpi.marginPct !== null && kpi.marginPct < threshold ? "warn" : "ok"}
         />
         <Kpi label="CA par invité" value={kpi.revenuePerGuest !== null ? formatEUR(kpi.revenuePerGuest) : "—"} hint="Événements avec nombre d'invités" />
@@ -68,8 +69,13 @@ export function AnalyseView({ data, threshold, year }: { data: AnalyticsData; th
         <SalesBlock sales={data.sales} cocktails={data.cocktails} />
       </section>
 
-      <section className="mb-4">
+      <section className="mb-8">
         <TypesBlock types={data.types} />
+      </section>
+
+      <section className="mb-4">
+        <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">Ce qui nous coûte</h2>
+        <CostsBlock costs={data.costs} since={REAL_MARGIN_SINCE} />
       </section>
 
       <p className="text-xs text-slate-500">

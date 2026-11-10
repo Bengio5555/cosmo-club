@@ -2,10 +2,20 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { computeEventMarginsBatch } from "@/lib/server/eventMargin";
-import { parseExtraCosts, type EventExtraCosts } from "@/lib/extraCosts";
+import { extraCostLines, parseExtraCosts, type EventExtraCosts } from "@/lib/extraCosts";
+import { groupDebits, monthsBetween, sumBy, type Merchant, type NamedCost } from "@/lib/analytics/costs";
 import { aggregateSales, summarizeByType, totalsBySection, type SalesItem, type SectionTotal, type TypeSummary } from "@/lib/analytics/sales";
 
 export type Period = { key: string; label: string; from: string | null; to: string | null };
+
+/**
+ * Premier événement avec sorties de stock enregistrées : Thevenin Paris,
+ * 29 août 2026 (premier mouvement saisi le 31). Avant cette date, ni les
+ * sorties ni les retours de stock n'étaient faits : le coût boissons vaut 0
+ * et la marge serait fausse. Ces événements comptent dans le CA, pas dans
+ * les marges.
+ */
+export const REAL_MARGIN_SINCE = "2026-08-29";
 
 /** Périodes proposées : 12 mois glissants, années civiles, tout. */
 export function resolvePeriod(raw: string | undefined, today = new Date()): Period {
@@ -34,12 +44,39 @@ export type MarginRow = {
   extraCostHt: number;
   marginHt: number | null;
   marginPct: number | null;
-  basis: "actual" | "projected" | "none";
-  /** Ce qui manque pour une marge réelle (événement terminé seulement). */
+  basis: "actual" | "projected" | "none" | "avant";
+  /** Ce qui manque pour une marge réelle (événement passé seulement). */
   missing: string[];
 };
 
 export type CocktailStat = { id: string; name: string; events: number; qty: number };
+
+export type CostsData = {
+  /** Coûts portés par les événements suivis (depuis REAL_MARGIN_SINCE) de la période. */
+  events: {
+    count: number;
+    revenueHt: number;
+    stockHt: number;
+    staffHt: number;
+    extraHt: number;
+    stockByCategory: NamedCost[];
+    stockByProduct: NamedCost[];
+    staffByPerson: NamedCost[];
+    extrasByLabel: NamedCost[];
+  };
+  /** Sorties du compte Qonto sur la période (limité à ce qui est importé). */
+  bank: {
+    available: boolean;
+    from: string | null;
+    to: string | null;
+    months: number;
+    total: number;
+    perMonth: number;
+    fixedPerMonth: number;
+    merchants: Merchant[];
+    byMonth: { month: string; total: number }[];
+  };
+};
 
 export type AnalyticsData = {
   period: Period;
@@ -58,6 +95,7 @@ export type AnalyticsData = {
   sales: { items: SalesItem[]; sections: SectionTotal[]; quotes: number };
   cocktails: CocktailStat[];
   types: TypeSummary[];
+  costs: CostsData;
 };
 
 export async function loadAnalytics(supabase: SupabaseClient<Database>, period: Period, today = new Date()): Promise<AnalyticsData> {
@@ -112,15 +150,16 @@ export async function loadAnalytics(supabase: SupabaseClient<Database>, period: 
     const client = c ? c.company_name || [c.first_name, c.last_name].filter(Boolean).join(" ") || null : null;
     const missing: string[] = [];
     const past = (e.end_date ?? e.date) < todayISO;
-    if (past && e.status !== "termine") missing.push("à clôturer");
-    if (past) {
+    const beforeTracking = e.date < REAL_MARGIN_SINCE;
+    if (past && !beforeTracking && e.status !== "termine") missing.push("à clôturer");
+    if (past && !beforeTracking) {
       if (!e.quote_id) missing.push("devis non lié");
       const st = staffByEvent.get(e.id);
       if (!st) missing.push("aucun staff");
       else if (st.done < st.total) missing.push("heures faites");
       if (!movesByEvent.has(e.id)) missing.push("sorties stock");
     }
-    const hasMargin = !!m && m.basis !== "none" && m.revenueNetHt > 0;
+    const hasMargin = !beforeTracking && !!m && m.basis !== "none" && m.revenueNetHt > 0;
     return {
       id: e.id,
       title: e.title,
@@ -135,15 +174,17 @@ export async function loadAnalytics(supabase: SupabaseClient<Database>, period: 
       extraCostHt: m?.extraCostHt ?? 0,
       marginHt: hasMargin ? m.marginHt : null,
       marginPct: hasMargin ? m.marginPct : null,
-      basis: m?.basis ?? "none",
+      basis: beforeTracking ? "avant" : (m?.basis ?? "none"),
       missing,
     };
   });
 
+  const withRevenue = rows.filter((r) => r.revenueNetHt > 0);
   const withMargin = rows.filter((r) => r.marginHt !== null);
-  const revenueHt = withMargin.reduce((s, r) => s + r.revenueNetHt, 0);
+  const revenueHt = withRevenue.reduce((s, r) => s + r.revenueNetHt, 0);
+  const marginRevenueHt = withMargin.reduce((s, r) => s + r.revenueNetHt, 0);
   const marginHt = withMargin.reduce((s, r) => s + (r.marginHt ?? 0), 0);
-  const guestRows = withMargin.filter((r) => r.guests && r.guests > 0);
+  const guestRows = withRevenue.filter((r) => r.guests && r.guests > 0);
   const guests = guestRows.reduce((s, r) => s + (r.guests ?? 0), 0);
   const sortedPct = withMargin.filter((r) => r.marginPct !== null).sort((a, b) => (b.marginPct ?? 0) - (a.marginPct ?? 0));
 
@@ -183,15 +224,89 @@ export async function loadAnalytics(supabase: SupabaseClient<Database>, period: 
     (periodQuotes ?? []).map((q) => ({ type: q.event_type ?? "autre", status: q.status })),
   );
 
+  // 5. Ce qui nous coûte
+  const trackedIds = rows.filter((r) => r.basis === "actual" || r.basis === "projected").map((r) => r.id);
+  const trackedRows = rows.filter((r) => trackedIds.includes(r.id));
+  const [{ data: outMoves }, { data: staffLines }] = await Promise.all([
+    trackedIds.length
+      ? supabase.from("stock_movements").select("event_id,product_id,qty").in("event_id", trackedIds).eq("direction", "out")
+      : Promise.resolve({ data: [] as { event_id: string | null; product_id: string; qty: number }[] }),
+    trackedIds.length
+      ? supabase.from("event_staff").select("event_id,staff_id,hours_planned,hours_done,rate_override").in("event_id", trackedIds)
+      : Promise.resolve({ data: [] as { event_id: string; staff_id: string; hours_planned: number; hours_done: number | null; rate_override: number | null }[] }),
+  ]);
+  const productIds = Array.from(new Set((outMoves ?? []).map((m) => m.product_id)));
+  const staffIds = Array.from(new Set((staffLines ?? []).map((s) => s.staff_id)));
+  const [{ data: products }, { data: staffPeople }] = await Promise.all([
+    productIds.length ? supabase.from("products").select("id,name,category,cost_ht,unit").in("id", productIds) : Promise.resolve({ data: [] as { id: string; name: string; category: string; cost_ht: number | null; unit: string }[] }),
+    staffIds.length ? supabase.from("staff").select("id,full_name,role,hourly_rate").in("id", staffIds) : Promise.resolve({ data: [] as { id: string; full_name: string; role: string; hourly_rate: number | null }[] }),
+  ]);
+  const productById = new Map((products ?? []).map((p) => [p.id, p]));
+  const staffById = new Map((staffPeople ?? []).map((p) => [p.id, p]));
+  const moveRowsCost = (outMoves ?? []).map((m) => {
+    const p = productById.get(m.product_id);
+    return { product: p?.name ?? "Produit", category: p?.category ?? "autre", unit: p?.unit ?? "", qty: Number(m.qty ?? 0), cost: Number(m.qty ?? 0) * Number(p?.cost_ht ?? 0) };
+  });
+  const staffRowsCost = (staffLines ?? []).map((s) => {
+    const p = staffById.get(s.staff_id);
+    const hours = Number(s.hours_done ?? s.hours_planned ?? 0);
+    const rate = s.rate_override ? Number(s.rate_override) : Number(p?.hourly_rate ?? 0);
+    return { id: s.staff_id, name: p?.full_name ?? "Extra", role: p?.role ?? "", hours, cost: hours * rate };
+  });
+  const extraRows = trackedRows.flatMap((r) => extraCostLines(extraByEvent.get(r.id) ?? parseExtraCosts(null)).map((l) => ({ label: l.label.split(" — ")[0], amount: l.amount })));
+
+  const bankAvailable = true;
+  let bq = supabase.from("bank_transactions").select("amount,label,operation_type,settled_at").eq("side", "debit").eq("status", "completed").order("settled_at", { ascending: true }).limit(2000);
+  if (period.from) bq = bq.gte("settled_at", period.from);
+  if (period.to) bq = bq.lte("settled_at", `${period.to}T23:59:59Z`);
+  const { data: debits, error: bankErr } = await bq;
+  const debitRows = bankErr ? [] : (debits ?? []);
+  const bankFrom = debitRows[0]?.settled_at?.slice(0, 10) ?? null;
+  const bankTo = debitRows.at(-1)?.settled_at?.slice(0, 10) ?? null;
+  const bankMonths = bankFrom && bankTo ? monthsBetween(bankFrom, bankTo) : 0;
+  const merchants = groupDebits(debitRows, bankMonths);
+  const byMonthMap = new Map<string, number>();
+  for (const d of debitRows) {
+    const m = (d.settled_at ?? "").slice(0, 7);
+    if (m) byMonthMap.set(m, (byMonthMap.get(m) ?? 0) + Number(d.amount));
+  }
+  const bankTotal = debitRows.reduce((s, d) => s + Number(d.amount), 0);
+
+  const costs: CostsData = {
+    events: {
+      count: trackedRows.length,
+      revenueHt: Math.round(trackedRows.reduce((s, r) => s + r.revenueNetHt, 0)),
+      stockHt: Math.round(trackedRows.reduce((s, r) => s + r.stockCostHt, 0)),
+      staffHt: Math.round(trackedRows.reduce((s, r) => s + r.staffCostHt, 0)),
+      extraHt: Math.round(trackedRows.reduce((s, r) => s + r.extraCostHt, 0)),
+      stockByCategory: sumBy(moveRowsCost, (r) => r.category, (r) => r.category, (r) => r.cost),
+      stockByProduct: sumBy(moveRowsCost, (r) => r.product, (r) => r.product, (r) => r.cost, (rows) => `${Math.round(rows.reduce((s, r) => s + r.qty, 0))} ${rows[0]?.unit ?? ""}`.trim()).slice(0, 10),
+      staffByPerson: sumBy(staffRowsCost, (r) => r.id, (r) => r.name, (r) => r.cost, (rows) => `${Math.round(rows.reduce((s, r) => s + r.hours, 0))} h · ${rows.length} évén.`),
+      extrasByLabel: sumBy(extraRows, (r) => r.label.toLowerCase(), (r) => r.label, (r) => r.amount),
+    },
+    bank: {
+      available: bankAvailable && !bankErr,
+      from: bankFrom,
+      to: bankTo,
+      months: Math.round(bankMonths * 10) / 10,
+      total: Math.round(bankTotal),
+      perMonth: bankMonths ? Math.round(bankTotal / bankMonths) : 0,
+      fixedPerMonth: Math.round(merchants.filter((m) => m.recurring).reduce((s, m) => s + m.perMonth, 0)),
+      merchants: merchants.slice(0, 15),
+      byMonth: Array.from(byMonthMap.entries()).map(([month, total]) => ({ month, total: Math.round(total) })).sort((a, b) => a.month.localeCompare(b.month)),
+    },
+  };
+
   return {
     period,
     rows,
+    costs,
     kpi: {
       events: rows.length,
       withMargin: withMargin.length,
       revenueHt: Math.round(revenueHt),
       marginHt: Math.round(marginHt),
-      marginPct: revenueHt > 0 ? Math.round((marginHt / revenueHt) * 1000) / 10 : null,
+      marginPct: marginRevenueHt > 0 ? Math.round((marginHt / marginRevenueHt) * 1000) / 10 : null,
       revenuePerGuest: guests > 0 ? Math.round(guestRows.reduce((s, r) => s + r.revenueNetHt, 0) / guests) : null,
       best: sortedPct[0] ?? null,
       worst: sortedPct.length > 1 ? sortedPct[sortedPct.length - 1] : null,
