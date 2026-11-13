@@ -15,6 +15,7 @@ export type Database = {
           id: string
           slug: string
           title: string
+          seo_title: string | null
           description: string
           body_md: string
           cover_url: string | null

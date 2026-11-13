@@ -5,6 +5,10 @@ import type { Database } from "@/types/database";
 export type ArticleMeta = {
   slug: string;
   title: string;
+  /** Short title for the <title> tag (≈55 chars max). The editorial
+   *  title stays the H1; Google truncates anything past ~60 chars and
+   *  often rewrites long titles, so this one is what shows in results. */
+  seoTitle?: string;
   description: string;
   date: string;
   /** Real last-edit timestamp, for BlogPosting.dateModified. Freshness
@@ -22,6 +26,7 @@ export type Article = ArticleMeta & { html: string };
 type Row = {
   slug: string;
   title: string;
+  seo_title?: string | null;
   description: string;
   body_md: string;
   cover_url: string | null;
@@ -36,6 +41,7 @@ function rowToMeta(row: Omit<Row, "body_md">): ArticleMeta {
   return {
     slug: row.slug,
     title: row.title,
+    seoTitle: row.seo_title?.trim() || undefined,
     description: row.description,
     date: row.publish_at,
     updatedAt: row.updated_at ?? undefined,
@@ -68,7 +74,7 @@ export async function getAllArticles(): Promise<ArticleMeta[]> {
   const supabase = publicClient();
   const { data, error } = await supabase
     .from("articles")
-    .select("slug,title,description,cover_url,reading_time,keywords,tags,publish_at,updated_at")
+    .select("slug,title,seo_title,description,cover_url,reading_time,keywords,tags,publish_at,updated_at")
     .or(PUBLIC_FILTER)
     .order("publish_at", { ascending: false });
   if (error || !data) return [];
@@ -79,7 +85,7 @@ export async function getArticle(slug: string): Promise<Article | null> {
   const supabase = publicClient();
   const { data, error } = await supabase
     .from("articles")
-    .select("slug,title,description,body_md,cover_url,reading_time,keywords,tags,publish_at,updated_at")
+    .select("slug,title,seo_title,description,body_md,cover_url,reading_time,keywords,tags,publish_at,updated_at")
     .eq("slug", slug)
     .or(PUBLIC_FILTER)
     .maybeSingle();

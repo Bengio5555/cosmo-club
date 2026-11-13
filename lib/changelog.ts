@@ -41,6 +41,14 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
 
 export const CHANGELOG: ChangeEntry[] = [
   {
+    date: "2026-11-13",
+    kind: "amelioration",
+    area: "Avis & visibilité",
+    title: "Articles : titre SEO court pour Google",
+    detail:
+      "Nouveau champ « Titre SEO » dans l'éditeur d'article, limité à 55 caractères, avec aperçu de ce que Google affichera. Quand il est rempli, il remplace le titre éditorial dans l'onglet du navigateur et les résultats de recherche ; le titre long reste le titre de la page et celui des partages sur les réseaux. Google tronquait les titres au-delà d'une soixantaine de caractères, ce qui faisait disparaître le nom Cosmo Club.",
+  },
+  {
     date: "2026-11-10",
     kind: "nouveau",
     area: "Tableau de bord",

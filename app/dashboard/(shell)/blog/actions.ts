@@ -13,7 +13,7 @@ import {
   type ArticleBrief,
   type GeneratedArticle,
 } from "@/lib/blog/ai";
-import type { ArticleStatus } from "./types";
+import { SEO_TITLE_MAX, type ArticleStatus } from "./types";
 
 const STORAGE_BUCKET = "cosmoclub-articles";
 
@@ -43,6 +43,7 @@ async function requireBlogAdmin(): Promise<{ userId: string } | { error: string 
 type ArticlePayload = {
   slug: string;
   title: string;
+  seo_title: string | null;
   description: string;
   body_md: string;
   cover_url: string | null;
@@ -63,6 +64,7 @@ function readPayload(form: FormData): ArticlePayload {
   return {
     slug: raw("slug").trim(),
     title: raw("title").trim(),
+    seo_title: raw("seo_title").trim() || null,
     description: raw("description").trim(),
     body_md: raw("body_md"),
     cover_url: raw("cover_url").trim() || null,
@@ -78,6 +80,8 @@ function validate(p: ArticlePayload): string | null {
   if (!p.title) return "Titre manquant.";
   if (!p.slug) return "Slug manquant.";
   if (!/^[a-z0-9-]+$/.test(p.slug)) return "Slug invalide (a-z, 0-9, tirets uniquement).";
+  if (p.seo_title && p.seo_title.length > SEO_TITLE_MAX)
+    return `Titre SEO trop long (${p.seo_title.length} caractères, maximum ${SEO_TITLE_MAX}).`;
   if (!p.description) return "Description manquante.";
   if (!p.body_md) return "Corps de l'article manquant.";
   if (!["draft", "scheduled", "published"].includes(p.status)) return "Statut invalide.";

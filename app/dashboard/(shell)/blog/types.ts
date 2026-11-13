@@ -4,6 +4,7 @@ export type ArticleRow = {
   id: string;
   slug: string;
   title: string;
+  seo_title: string | null;
   description: string;
   body_md: string;
   cover_url: string | null;
@@ -17,6 +18,10 @@ export type ArticleRow = {
   created_at: string;
   updated_at: string;
 };
+
+/** Google shows ~60 characters of a <title>; the layout appends
+ *  « · Cosmo Club » (13 chars), so the article part stops at 55. */
+export const SEO_TITLE_MAX = 55;
 
 export const STATUS_LABEL: Record<ArticleStatus, string> = {
   draft: "Brouillon",

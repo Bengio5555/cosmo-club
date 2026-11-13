@@ -17,7 +17,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticle(slug);
   if (!article) return {};
   return {
-    title: article.title,
+    // Short SEO title when the author set one; the layout template
+    // appends « · Cosmo Club ». The editorial title stays the H1 and
+    // the social (OG/Twitter) title.
+    title: article.seoTitle ?? article.title,
     description: article.description,
     keywords: article.keywords,
     alternates: { canonical: `/blog/${slug}` },

@@ -10,6 +10,7 @@ import {
   slugify,
   type ArticleRow,
   type ArticleStatus,
+  SEO_TITLE_MAX,
 } from "./types";
 import { saveAndContinue, deleteArticle, uploadCover } from "./actions";
 import { AiPanel } from "./AiPanel";
@@ -45,6 +46,7 @@ export function ArticleEditor({ initial }: Props) {
   const [title, setTitle] = useState(initial.title ?? "");
   const [slug, setSlug] = useState(initial.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(initial.slug));
+  const [seoTitle, setSeoTitle] = useState(initial.seo_title ?? "");
   const [description, setDescription] = useState(initial.description ?? "");
   const [bodyMd, setBodyMd] = useState(initial.body_md ?? "");
   const [coverUrl, setCoverUrl] = useState(initial.cover_url ?? "");
@@ -110,6 +112,7 @@ export function ArticleEditor({ initial }: Props) {
     const fd = new FormData();
     fd.set("title", title);
     fd.set("slug", slug);
+    fd.set("seo_title", seoTitle);
     fd.set("description", description);
     fd.set("body_md", bodyMd);
     fd.set("cover_url", coverUrl);
@@ -195,6 +198,18 @@ export function ArticleEditor({ initial }: Props) {
               placeholder="Le titre éditorial de l'article"
               className="block w-full rounded-md border border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-base font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
             />
+          </Field>
+
+          <Field label="Titre SEO (balise title, optionnel)">
+            <input
+              type="text"
+              value={seoTitle}
+              maxLength={SEO_TITLE_MAX + 20}
+              onChange={(e) => setSeoTitle(e.target.value)}
+              placeholder="Version courte du titre pour Google, sinon le titre éditorial est utilisé"
+              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:shadow-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
+            />
+            <SeoTitleHint seoTitle={seoTitle} title={title} />
           </Field>
 
           <Field label="Description (méta + chapô)">
@@ -380,6 +395,27 @@ export function ArticleEditor({ initial }: Props) {
         </div>
       </div>
     </form>
+  );
+}
+
+/** Live preview of what Google will show: the article part plus the
+ *  « · Cosmo Club » suffix the layout template appends. */
+function SeoTitleHint({ seoTitle, title }: { seoTitle: string; title: string }) {
+  const used = seoTitle.trim() || title.trim();
+  if (!used) return null;
+  const custom = Boolean(seoTitle.trim());
+  const over = used.length > SEO_TITLE_MAX;
+  const tone = over
+    ? "text-amber-700 dark:text-amber-300"
+    : "text-slate-500 dark:text-slate-500";
+  return (
+    <p className={`mt-1 text-[11px] ${tone}`}>
+      {used.length}/{SEO_TITLE_MAX} caractères
+      {custom ? "" : " (titre éditorial utilisé)"}
+      {over ? " · Google coupera la fin" : ""}
+      {" · Aperçu : "}
+      <span className="text-slate-700 dark:text-slate-300">{used} · Cosmo Club</span>
+    </p>
   );
 }
 
