@@ -2,12 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cgvVersion } from "@/lib/cgv";
-import { SignedQuotePdf, type SignedQuoteData } from "@/lib/pdf/SignedQuotePdf";
-import { getCompanyLogoDataUrl } from "@/lib/pdf/logo";
+import { loadQuotePdfData, quotePdfFilename, renderQuotePdf } from "@/lib/server/quotePdf";
 import { cleanRefusalComment, isRefusalReason, refusalReasonLabel } from "@/lib/quoteRefusal";
 
 // Public acceptance / refusal flow. No auth is checked — the plaquette
@@ -380,79 +378,13 @@ async function sendAcceptanceEmails(o: {
   });
 
   // ─── Build the signed PDF (best-effort) ──────────────────────
+  // Same loader as the unsigned PDF (send + download) so both stay in
+  // sync — it also brings discount_global_pct, which this block used to
+  // forget to select (the global-rebate row never showed on signed PDFs).
   let pdfBase64: string | null = null;
   if (quote && items) {
     try {
-      const pdfData: SignedQuoteData = {
-        quote: {
-          number: quote.number,
-          subject: quote.subject,
-          issue_date: quote.issue_date,
-          event_date: quote.event_date,
-          event_location: quote.event_location,
-          guests_count: quote.guests_count,
-          event_end_date:
-            (quote as { event_end_date?: string | null }).event_end_date ??
-            null,
-          tva_rate: Number(quote.tva_rate ?? 20),
-          commission_rate: Number(quote.commission_rate ?? 0),
-          discount_global_pct: Number(
-            (quote as { discount_global_pct?: number | null })
-              .discount_global_pct ?? 0,
-          ),
-          total_ht: Number(quote.total_ht ?? 0),
-          total_tva: Number(quote.total_tva ?? 0),
-          total_ttc: Number(quote.total_ttc ?? 0),
-        },
-        items: (items ?? []).map((it) => {
-          // Apply the gross-up at PDF render time so the signed
-          // document matches what the client saw on the public page.
-          const rate = Number(quote.commission_rate ?? 0);
-          const factor = rate > 0 ? 100 / (100 - rate) : 1;
-          const discount = Number(
-            (it as { discount_ht?: number | null }).discount_ht ?? 0,
-          );
-          return {
-            section: it.section,
-            title: it.title,
-            description: it.description,
-            qty: Number(it.qty ?? 0),
-            unit: it.unit,
-            unit_price_ht: Number(it.unit_price_ht ?? 0) * factor,
-            line_total_ht: Number(it.line_total_ht ?? 0) * factor,
-            discount_ht: discount * factor,
-          };
-        }),
-        client: client
-          ? {
-              company_name: client.company_name,
-              first_name: client.first_name,
-              last_name: client.last_name,
-              email: client.email,
-              phone: (client as { phone?: string | null }).phone ?? null,
-            }
-          : null,
-        company: {
-          name: companyName,
-          address_line1:
-            (settings as { address_line1?: string | null } | null)
-              ?.address_line1 ?? null,
-          address_line2:
-            (settings as { address_line2?: string | null } | null)
-              ?.address_line2 ?? null,
-          postal_code:
-            (settings as { postal_code?: string | null } | null)
-              ?.postal_code ?? null,
-          city:
-            (settings as { city?: string | null } | null)?.city ?? null,
-          siret:
-            (settings as { siret?: string | null } | null)?.siret ?? null,
-          email:
-            (settings as { email?: string | null } | null)?.email ?? null,
-          phone:
-            (settings as { phone?: string | null } | null)?.phone ?? null,
-          logoDataUrl: await getCompanyLogoDataUrl(),
-        },
+      const pdfData = await loadQuotePdfData(supabase, o.quoteId, {
         signature: {
           name: o.signerName,
           signedAt: o.signedAt,
@@ -460,9 +392,8 @@ async function sendAcceptanceEmails(o: {
           cgvVersion: o.cgvVersion,
           pngDataUrl: o.signatureData,
         },
-      };
-      const buffer = await renderToBuffer(<SignedQuotePdf data={pdfData} />);
-      pdfBase64 = buffer.toString("base64");
+      });
+      if (pdfData) pdfBase64 = (await renderQuotePdf(pdfData)).toString("base64");
     } catch (err) {
       console.error("[acceptDevis] PDF generation failed:", err);
     }
@@ -471,7 +402,7 @@ async function sendAcceptanceEmails(o: {
   const baseAttachments = pdfBase64
     ? [
         {
-          filename: `devis-${o.quoteNumber}-signe.pdf`,
+          filename: quotePdfFilename(o.quoteNumber, true),
           content: pdfBase64,
         },
       ]

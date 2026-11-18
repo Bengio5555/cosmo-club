@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
+import { loadQuotePdfData, quotePdfFilename, renderQuotePdf } from "@/lib/server/quotePdf";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
@@ -505,9 +506,27 @@ export async function sendDevis(
       typeof opts?.message === "string" && opts.message.trim()
         ? opts.message.trim().slice(0, 2000)
         : null;
+    // PDF du devis en pièce jointe (best-effort : si la génération
+    // échoue, le mail part quand même avec le lien vers la plaquette).
+    let attachments: { filename: string; content: string }[] | undefined;
+    try {
+      const pdfData = await loadQuotePdfData(supabase, id, { signature: null, acceptUrl: link });
+      if (pdfData) {
+        attachments = [
+          {
+            filename: quotePdfFilename(quote.number, false),
+            content: (await renderQuotePdf(pdfData)).toString("base64"),
+          },
+        ];
+      }
+    } catch (err) {
+      console.error("[sendDevis] PDF generation failed:", err);
+    }
+
     const { data: sent, error: sendErr } = await resend.emails.send({
       from: `${companyName} <${fromEmail}>`,
       to: [client.email],
+      attachments,
       cc: cc.length > 0 ? cc : undefined,
       subject: isEn
         ? `Your Cosmo Club Paris quote — ${quote.number}`
@@ -520,6 +539,7 @@ export async function sendDevis(
         sender: companyName,
         locale: isEn ? "en" : "fr",
         personalMessage,
+        hasPdf: !!attachments,
       }),
       // Lets the Resend webhook tell quote emails apart from the others
       // (invoices, notifications) — see app/api/webhooks/resend.
@@ -592,6 +612,8 @@ function buildEmailHtml(o: {
    *  intro copy and the CTA. Null/empty → the email looks exactly like
    *  it did before this feature. */
   personalMessage?: string | null;
+  /** Le devis est joint en PDF → une ligne le signale sous l'intro. */
+  hasPdf?: boolean;
 }): string {
   const isEn = o.locale === "en";
   const greeting = o.firstName
@@ -607,6 +629,11 @@ function buildEmailHtml(o: {
   const introCopy = isEn
     ? "Your quote is ready. You can review it, accept it or get in touch with us directly from the link below."
     : "Votre devis est prêt. Vous pouvez le consulter, l'accepter ou nous écrire directement depuis le lien ci-dessous.";
+  const pdfCopy = o.hasPdf
+    ? isEn
+      ? "You'll also find the quote attached as a PDF, for your records or your purchasing department."
+      : "Vous trouverez aussi le devis en PDF en pièce jointe, pour vos archives ou votre service achats."
+    : null;
   const ctaCopy = isEn ? "View the quote" : "Voir le devis";
   const fallbackCopy = isEn
     ? "Or paste this link into your browser:"
@@ -647,6 +674,7 @@ function buildEmailHtml(o: {
           <h1 style="font-family:Georgia,serif; font-size:28px; line-height:1.2; margin:0 0 18px; color:#2a1f14;">${escape(subjectLine)}</h1>
           <p style="margin:0 0 12px;">${escape(greeting)}</p>
           <p style="margin:0 0 12px;">${escape(introCopy)}</p>
+          ${pdfCopy ? `<p style="margin:0 0 12px; font-size:13px; color:#3a2a1e; opacity:0.8;">${escape(pdfCopy)}</p>` : ""}
         </td>
       </tr>
       ${messageBlock}

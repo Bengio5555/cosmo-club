@@ -5,6 +5,7 @@ import {
   Text as _Text,
   View as _View,
   Image as _Image,
+  Link as _Link,
   StyleSheet,
 } from "@react-pdf/renderer";
 import { formatEURPdfSafe } from "@/lib/format";
@@ -21,6 +22,8 @@ const Text = _Text as unknown as React.FC<any>;
 const View = _View as unknown as React.FC<any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Image = _Image as unknown as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Link = _Link as unknown as React.FC<any>;
 
 export type SignedQuoteData = {
   quote: {
@@ -39,6 +42,8 @@ export type SignedQuoteData = {
     total_ht: number;
     total_tva: number;
     total_ttc: number;
+    /** Date limite de validité (devis non signé). */
+    valid_until?: string | null;
   };
   items: Array<{
     section: string | null;
@@ -71,13 +76,20 @@ export type SignedQuoteData = {
      *  type. */
     logoDataUrl: string | null;
   };
+  /** Null → devis non signé (PDF joint à l'envoi ou téléchargé depuis
+   *  la plaquette) : cadre « Bon pour accord » vide + lien d'acceptation
+   *  en ligne à la place de l'audit de signature. */
   signature: {
     name: string;
     signedAt: string; // ISO
     ip: string | null;
     cgvVersion: string;
     pngDataUrl: string;
-  };
+  } | null;
+  /** Version des CGV reproduites en page 2 (devis non signé). */
+  cgvVersion?: string;
+  /** Lien vers la plaquette en ligne pour signer (devis non signé). */
+  acceptUrl?: string | null;
 };
 
 const c = {
@@ -405,11 +417,16 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
             )}
           </View>
           <View style={s.doc}>
-            <Text style={s.docLabel}>Devis signé</Text>
+            <Text style={s.docLabel}>{data.signature ? "Devis signé" : "Devis"}</Text>
             <Text style={s.docNumber}>{data.quote.number}</Text>
             <Text style={s.docMeta}>
               Émis le {formatDateFR(data.quote.issue_date)}
             </Text>
+            {!data.signature && data.quote.valid_until && (
+              <Text style={s.docMeta}>
+                Valable jusqu&apos;au {formatDateFR(data.quote.valid_until)}
+              </Text>
+            )}
             {data.quote.event_date && (
               <Text style={s.docMeta}>
                 Événement&nbsp;:{" "}
@@ -547,6 +564,7 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
         </View>
 
         {/* Signature + audit */}
+        {data.signature ? (
         <View style={s.sigSection} wrap={false}>
           <Text style={s.partyLabel}>Acceptation et signature</Text>
           <View style={s.sigGrid}>
@@ -581,6 +599,37 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
             document, telles que présentées au client lors de la signature.
           </Text>
         </View>
+        ) : (
+        <View style={s.sigSection} wrap={false}>
+          <Text style={s.partyLabel}>Bon pour accord</Text>
+          <View style={s.sigGrid}>
+            <View style={s.sigCol}>
+              <Text style={s.sigLabel}>Date, nom et signature du client</Text>
+              <View style={s.sigBox} />
+            </View>
+            <View style={s.sigCol}>
+              <Text style={s.sigLabel}>Accepter en ligne</Text>
+              <Text style={s.audit}>
+                Le plus simple&nbsp;: signez ce devis en ligne en quelques
+                secondes, la date est bloquée dès la signature.
+              </Text>
+              {data.acceptUrl && (
+                <Link src={data.acceptUrl} style={[s.audit, { color: c.grenat, textDecoration: "underline" }]}>
+                  Voir et signer le devis en ligne
+                </Link>
+              )}
+              <Text style={s.audit}>
+                Vous pouvez aussi nous retourner ce document daté et signé,
+                précédé de la mention « Bon pour accord ».
+              </Text>
+            </View>
+          </View>
+          <Text style={s.cgvNote}>
+            La signature de ce devis vaut acceptation des conditions générales
+            de vente reproduites en page 2 du présent document.
+          </Text>
+        </View>
+        )}
 
         <Text
           style={s.pageNum}
@@ -601,7 +650,7 @@ export function SignedQuotePdf({ data }: { data: SignedQuoteData }) {
       <Page size="A4" style={s.page}>
         <Text style={s.cgvTitle}>Conditions générales de vente</Text>
         <Text style={[s.cgvPara, { color: c.muted }]}>
-          Document de référence — version {data.signature.cgvVersion}
+          Document de référence — version {data.signature?.cgvVersion ?? data.cgvVersion ?? "en vigueur"}
         </Text>
         {cgvBlocks.map((b, i) => {
           if (b.kind === "h1") return null; // already shown above as title

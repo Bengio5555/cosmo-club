@@ -165,6 +165,8 @@ export default async function DevisPlaquettePage({
   const sections = [...bySection.entries()];
 
   // ─── Derived display bits ───
+  // Téléchargement PDF : même jeton d'accès que la page.
+  const pdfHref = `/devis/${quote.number}/pdf${providedToken ? `?t=${encodeURIComponent(providedToken)}` : ""}`;
   const companyName = settings?.company_name || "Cosmo Club Paris";
   const senderShortName = "Cosmo Club";
 
@@ -285,6 +287,9 @@ export default async function DevisPlaquettePage({
             <div className="cover-ref">
               <small>{locale === "en" ? "Proposal N°" : "Proposition N°"}</small>
               {quote.number}
+              <a className="pdf-download" href={pdfHref} download>
+                {locale === "en" ? "Download PDF" : "Télécharger en PDF"} ↓
+              </a>
             </div>
           </header>
 
@@ -762,6 +767,12 @@ export default async function DevisPlaquettePage({
                 : "Devis refusé. Nous restons à votre disposition pour ajuster si besoin."}
             </div>
           )}
+
+          <p className="pdf-download-line">
+            <a className="pdf-download" href={pdfHref} download>
+              {locale === "en" ? "Download this quote as a PDF" : "Télécharger ce devis en PDF"} ↓
+            </a>
+          </p>
 
           <footer className="sig-footer">
             <div className="sig-footer-left">

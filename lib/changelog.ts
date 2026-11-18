@@ -41,6 +41,14 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
 
 export const CHANGELOG: ChangeEntry[] = [
   {
+    date: "2026-11-18",
+    kind: "amelioration",
+    area: "Devis",
+    title: "Devis : PDF en pièce jointe et bouton de téléchargement",
+    detail:
+      "À l'envoi, le client reçoit le devis en PDF en pièce jointe, en plus du lien vers la plaquette en ligne. Le PDF reprend les prestations, les totaux, la date de validité et les CGV, avec un cadre « Bon pour accord » et un lien pour signer en ligne. La plaquette a un bouton « Télécharger en PDF » en couverture et en fin de devis ; une fois le devis accepté, il télécharge la version signée. Correction au passage : la remise globale apparaît désormais aussi sur le PDF signé.",
+  },
+  {
     date: "2026-11-13",
     kind: "amelioration",
     area: "Avis & visibilité",
