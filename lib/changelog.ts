@@ -41,6 +41,14 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
 
 export const CHANGELOG: ChangeEntry[] = [
   {
+    date: "2026-11-19",
+    kind: "nouveau",
+    area: "Tableau de bord",
+    title: "Conformité des indépendants : attestations URSSAF",
+    detail:
+      "Nouvelle page Conformité (propriétaire, admin, compta). Pour chaque indépendant : cumul payé sur 12 mois plus les événements planifiés face au seuil légal de 5 000 €, SIRET vérifié dans l'annuaire public des entreprises, dernière attestation de vigilance avec sa validité et un bouton pour noter la vérification du code sur urssaf.fr. Chaque indépendant a un lien personnel pour déposer son attestation, son SIRET et, s'il le souhaite, son assurance RC pro, sans créer de compte. La demande part dès 4 000 € et se renouvelle tous les 3 mois ; les envois automatiques du lundi (une demande, une relance à 10 jours) s'activent depuis la page. Sur la fiche événement, un badge signale au staffing un indépendant dont l'attestation manque ou est expirée.",
+  },
+  {
     date: "2026-11-18",
     kind: "amelioration",
     area: "Devis",

@@ -24,6 +24,7 @@ import {
   Radar,
   Landmark,
   BarChart3,
+  ShieldCheck,
 } from "lucide-react";
 
 export type NavItem = {
@@ -68,6 +69,7 @@ export const DASHBOARD_NAV: NavSection[] = [
       { href: "/dashboard/stock", label: "Stock", icon: Package },
       { href: "/dashboard/materiel", label: "Matériel", icon: QrCode },
       { href: "/dashboard/staff", label: "Équipe", icon: Users },
+      { href: "/dashboard/conformite", label: "Conformité", icon: ShieldCheck },
       { href: "/dashboard/providers", label: "Prestataires", icon: Truck },
       { href: "/dashboard/partners", label: "Partenaires réseau", icon: Network },
     ],

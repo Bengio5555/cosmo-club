@@ -631,6 +631,7 @@ export type Database = {
       }
       settings: {
         Row: {
+          compliance_auto_emails: boolean
           address_line1: string | null
           address_line2: string | null
           bank_updated_at: string | null
@@ -677,6 +678,15 @@ export type Database = {
           phone: string | null
           role: Database["public"]["Enums"]["staff_role"]
           updated_at: string
+          // Conformité URSSAF (docs/migrations/2026-11-19_staff_compliance.sql)
+          legal_status: "micro" | "societe" | "extra_salarie" | null
+          siret: string | null
+          siret_status: "actif" | "cesse" | "introuvable" | null
+          siret_name: string | null
+          siret_checked_at: string | null
+          compliance_token: string
+          compliance_requested_at: string | null
+          compliance_reminded_at: string | null
         }
         Insert: Partial<Database["public"]["Tables"]["staff"]["Row"]> & { full_name: string }
         Update: Partial<Database["public"]["Tables"]["staff"]["Row"]>
@@ -699,6 +709,24 @@ export type Database = {
           direction: Database["public"]["Enums"]["stock_direction"]
         }
         Update: Partial<Database["public"]["Tables"]["stock_movements"]["Row"]>
+        Relationships: []
+      }
+      staff_documents: {
+        Row: {
+          id: string
+          staff_id: string
+          kind: "attestation_vigilance" | "rc_pro"
+          file_path: string
+          file_name: string | null
+          issued_at: string | null
+          valid_until: string | null
+          verified_at: string | null
+          verified_by: string | null
+          uploaded_via: "lien" | "dashboard"
+          created_at: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["staff_documents"]["Row"]> & { staff_id: string; kind: "attestation_vigilance" | "rc_pro"; file_path: string }
+        Update: Partial<Database["public"]["Tables"]["staff_documents"]["Row"]>
         Relationships: []
       }
       event_staff: {

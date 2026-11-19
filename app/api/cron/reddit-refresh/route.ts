@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { refreshRedditFeed } from "@/app/dashboard/(shell)/reddit/actions";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { runStaffCompliance } from "@/lib/server/staffCompliance";
 
 export const runtime = "nodejs";
 // Reddit sweep + Claude drafting peut prendre 60-90 s sur un sweep
@@ -29,5 +31,16 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await refreshRedditFeed({ cron: true });
-  return NextResponse.json(result);
+
+  // Le plan Vercel gratuit limite à 2 crons : la conformité URSSAF des
+  // indépendants (SIRET + demandes/relances) profite de ce passage du
+  // lundi. Indépendante de Reddit : une erreur ici ne casse rien d'autre.
+  let compliance: unknown = null;
+  try {
+    compliance = await runStaffCompliance(createAdminClient());
+  } catch (err) {
+    console.error("[cron] staff compliance failed:", err);
+    compliance = { error: String(err) };
+  }
+  return NextResponse.json({ ...result, compliance });
 }

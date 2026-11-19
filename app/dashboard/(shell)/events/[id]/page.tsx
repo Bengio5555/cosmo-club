@@ -23,6 +23,9 @@ import { EventDocuments } from "./EventDocuments";
 import { autoStartDueEvents } from "../actions";
 import { computeEventMargin } from "@/lib/server/eventMargin";
 import { getCurrentRole } from "@/lib/auth/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { loadComplianceRows } from "@/lib/server/staffCompliance";
+import { STATE_LABEL } from "@/lib/staff/compliance";
 import { rolesForPath } from "@/lib/auth/roles";
 import { parseExtraCosts } from "@/lib/extraCosts";
 
@@ -255,6 +258,25 @@ export default async function EventDetailPage({
   // signature or signed (the current link always stays listed), labelled
   // with client and date; quotes already backing another event are shown
   // disabled so one quote can't drive two events.
+  // Alerte conformité URSSAF au staffing (jamais montrée au rôle staff) :
+  // seulement les indépendants pour qui l'obligation n'est pas couverte.
+  const complianceAlerts: Record<string, { label: string; severity: "warn" | "alert" }> = {};
+  if (!isStaff) {
+    try {
+      for (const r of await loadComplianceRows(createAdminClient())) {
+        if (r.salaried) continue;
+        if (r.status.siretProblem) complianceAlerts[r.staff.id] = { label: "SIRET en défaut", severity: "alert" };
+        else if (r.status.needsRequest)
+          complianceAlerts[r.staff.id] = {
+            label: `Attestation URSSAF ${STATE_LABEL[r.status.state].toLowerCase()}`,
+            severity: r.status.severity === "alert" ? "alert" : "warn",
+          };
+      }
+    } catch (err) {
+      console.error("[event] compliance alerts failed:", err);
+    }
+  }
+
   let quoteOptions: QuoteOption[] = [];
   if (!isStaff) {
     const [{ data: quotesList }, { data: linkedEvents }] = await Promise.all([
@@ -388,6 +410,7 @@ export default async function EventDetailPage({
           eventStatus={event.status}
           staffOptions={allStaff ?? []}
           assignments={assignments ?? []}
+          complianceAlerts={complianceAlerts}
         />
         {/* Stock réservé hidden for staff — operational/cost info they
             don't need; section stays full-width for the other roles. */}

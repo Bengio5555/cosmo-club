@@ -44,11 +44,15 @@ export function StaffSection({
   eventStatus,
   staffOptions,
   assignments,
+  complianceAlerts = {},
 }: {
   eventId: string;
   eventStatus: EventStatus;
   staffOptions: StaffOption[];
   assignments: Assignment[];
+  /** Indépendants dont l'obligation de vigilance URSSAF n'est pas
+   *  couverte (page Conformité). Avertissement seulement, jamais bloquant. */
+  complianceAlerts?: Record<string, { label: string; severity: "warn" | "alert" }>;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -276,6 +280,7 @@ export function StaffSection({
                 {available.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.full_name} · {ROLE_LABEL[s.role]}
+                    {complianceAlerts[s.id] ? ` · ⚠ ${complianceAlerts[s.id].label}` : ""}
                   </option>
                 ))}
               </select>
@@ -350,6 +355,19 @@ export function StaffSection({
                         <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-500">
                           {ROLE_LABEL[staff.role]}
                         </span>
+                      )}
+                      {complianceAlerts[a.staff_id] && (
+                        <Link
+                          href="/dashboard/conformite"
+                          className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                            complianceAlerts[a.staff_id].severity === "alert"
+                              ? "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300"
+                              : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
+                          }`}
+                          title="Voir la page Conformité"
+                        >
+                          {complianceAlerts[a.staff_id].label}
+                        </Link>
                       )}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-slate-500">

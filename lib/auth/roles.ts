@@ -49,6 +49,8 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   "/dashboard/stock": ["owner", "admin", "manager"],
   "/dashboard/materiel": ["owner", "admin", "manager"],
   "/dashboard/staff": ["owner", "admin", "manager"],
+  // Conformité URSSAF des indépendants : documents privés.
+  "/dashboard/conformite": ["owner", "admin", "compta"],
   "/dashboard/providers": ["owner", "admin", "manager"],
   "/dashboard/partners": ["owner", "admin", "manager"],
   // Shared Google Drive (contracts, job sheets, event photos). The
